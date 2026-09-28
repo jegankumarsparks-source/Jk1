@@ -107,8 +107,9 @@ input,select{background:var(--card2);border:1px solid var(--line);color:var(--tx
 let D=null;
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const k=v=>v==null?'—':(v>=1e6?'$'+(v/1e6).toFixed(2)+'M':v>=1e3?'$'+(v/1e3).toFixed(0)+'K':'$'+Number(v).toFixed(0));
-const tsm=ts=>ts?new Date((String(ts).length>13?ts:ts*1000)).toLocaleTimeString():'—';
-const ago=ts=>{if(!ts)return'—';const s=(Date.now()-(String(ts).length>13?ts:ts*1000))/1000;
+const ms=ts=>ts>1e12?ts:ts*1000;
+const tsm=ts=>ts?new Date(ms(ts)).toLocaleTimeString():'—';
+const ago=ts=>{if(!ts)return'—';const s=(Date.now()-ms(ts))/1000;
  if(s<60)return Math.floor(s)+'s ago';if(s<3600)return Math.floor(s/60)+'m ago';return Math.floor(s/3600)+'h ago'};
 const short=a=>a?esc(a.slice(0,4))+'…'+esc(a.slice(-4)):'—';
 const dex=m=>'https://dexscreener.com/solana/'+encodeURIComponent(m);
