@@ -1,29 +1,188 @@
-<!doctype html><html><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1">
-<title>JK AI MEME RADAR</title><style>
-body{background:#0b0e14;color:#e6e9ef;font-family:system-ui;margin:0;padding:12px}
-h1{font-size:20px;margin:4px 0}h2{font-size:15px;color:#8ab4ff;margin:14px 0 6px}
-.card{background:#151a24;border:1px solid #232a38;border-radius:10px;padding:10px;margin:6px 0}
-.pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;margin:2px}
-.g{background:#123d22;color:#7ee2a0}.y{background:#3d3412;color:#e2d27e}.r{background:#3d1212;color:#e27e7e}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}.big{font-size:22px;font-weight:700}
-a{color:#8ab4ff;text-decoration:none}.muted{color:#7a8494;font-size:12px}
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>🛰 JK AI MEME RADAR — Command Center</title>
+<style>
+:root{--bg:#07090f;--card:#10141d;--card2:#151b28;--line:#1f2837;--txt:#e8ecf3;--mut:#7d8798;--acc:#5ea1ff;--grn:#3ddc84;--yel:#ffd54d;--red:#ff5d5d;--pur:#b98bff}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,Roboto,sans-serif;margin:0;padding:10px;font-size:14px}
+h1{font-size:19px;margin:2px 0}
+h2{font-size:14px;color:var(--acc);margin:16px 0 6px;letter-spacing:.4px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px;margin:6px 0}
+.pill{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;margin:2px;border:1px solid var(--line)}
+.g{color:var(--grn)}.y{color:var(--yel)}.r{color:var(--red)}.b{color:var(--acc)}.p{color:var(--pur)}
+.bgg{background:#0e2a1a}.bgy{background:#2a240e}.bgr{background:#2a0e0e}.bgb{background:#0e1c2a}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(105px,1fr));gap:6px}
+.kpi{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:8px;text-align:center}
+.kpi .big{font-size:20px;font-weight:700}
+.kpi .lbl{font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.4px}
+a{color:var(--acc);text-decoration:none}
+.muted{color:var(--mut);font-size:12px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{color:var(--mut);text-align:left;font-weight:600;padding:4px;border-bottom:1px solid var(--line);font-size:11px;text-transform:uppercase}
+td{padding:5px 4px;border-bottom:1px solid #161d29;vertical-align:top}
+tr:last-child td{border-bottom:none}
+.funnel{display:flex;flex-direction:column;gap:3px}
+.fstep{display:flex;justify-content:space-between;background:var(--card2);border:1px solid var(--line);border-radius:8px;padding:7px 10px}
+.bar{height:8px;border-radius:4px;background:var(--card2);overflow:hidden;margin-top:3px}
+.bar>i{display:block;height:100%;background:var(--acc)}
+input,select{background:var(--card2);border:1px solid var(--line);color:var(--txt);border-radius:8px;padding:7px 10px;font-size:13px;width:100%}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.btn{display:inline-block;background:var(--acc);color:#06101f;font-weight:700;border-radius:10px;padding:10px 16px;text-align:center}
+.mono{font-family:ui-monospace,Menlo,monospace;font-size:11px}
+.scrollx{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tiny{font-size:11px}
+#hdr{position:sticky;top:0;background:var(--bg);z-index:5;padding:6px 0;border-bottom:1px solid var(--line)}
+.badge{float:right;font-size:11px;padding:3px 10px;border-radius:20px;border:1px solid var(--line)}
 </style></head><body>
-<h1>🛰 JK AI MEME RADAR</h1><div class=muted id=upd></div>
-<div class=card id=status></div>
-<div class="grid card" id=counters></div>
-<h2>🔥 LIVE SIGNALS</h2><div id=live></div>
-<h2>✅ COMPLETED</h2><div id=done></div>
-<h2>📋 LOG</h2><div id=log class=muted></div>
+<div id="hdr">
+<h1>🛰 JK AI MEME RADAR <span class="badge" id="mode">…</span></h1>
+<div class="muted" id="upd">loading…</div>
+</div>
+
+<div class="card" id="status"></div>
+<div class="card muted tiny" id="meta"></div>
+
+<h2>📊 LIVE COUNTERS</h2>
+<div class="grid" id="kpis"></div>
+
+<h2>🔽 PIPELINE FUNNEL <span class="muted tiny">(last scan)</span></h2>
+<div class="card funnel" id="funnel"></div>
+
+<h2>🚫 REJECTION ANALYTICS <span class="muted tiny">(last 1h)</span></h2>
+<div class="card" id="rej"></div>
+
+<h2>🔥 LIVE SIGNALS</h2>
+<div id="live"></div>
+
+<h2>👀 WATCH CANDIDATES</h2>
+<div id="watch"></div>
+
+<h2>🐋 SMART MONEY COMMAND CENTER</h2>
+<div class="card">
+<div class="row2">
+<div><div class="big b" id="wtotal">–</div><div class="muted tiny">WALLETS TRACKED</div></div>
+<div><div class="big p" id="wscored">–</div><div class="muted tiny">SCORED</div></div>
+</div>
+<div class="muted tiny" id="wclasses" style="margin-top:6px"></div>
+</div>
+<h2>🏆 TOP SMART WALLETS</h2>
+<div class="card scrollx"><table id="wallets"></table></div>
+<h2>🐋 LIVE WALLET FEED</h2>
+<div class="card" id="wfeed"></div>
+<h2>🧩 WALLET CLUSTERS</h2>
+<div id="clusters"></div>
+
+<h2>🎯 TOKEN RADAR <span class="muted tiny">(latest snapshots)</span></h2>
+<div class="row2" style="margin-bottom:6px">
+<input id="q" placeholder="🔎 search coin / CA / wallet…" oninput="renderTokens()">
+<select id="sort" onchange="renderTokens()">
+<option value="ts">Newest</option><option value="mc">Market cap</option>
+<option value="liq">Liquidity</option><option value="v1h">Volume 1h</option></select>
+</div>
+<div class="card scrollx"><table id="tokens"></table></div>
+
+<h2>✅ COMPLETED SIGNALS</h2>
+<div id="done"></div>
+
+<h2>📈 OUTCOMES</h2>
+<div class="card scrollx"><table id="outs"></table></div>
+
+<h2>🤖 TELEGRAM CONTROL</h2>
+<div class="card">
+<a class="btn" href="https://t.me/Jegankumarbot?start=test" target="_blank" rel="noopener">📨 SEND TEST SIGNAL (Bot 3)</a>
+<div class="muted tiny" style="margin-top:6px">Opens Telegram → send <span class="mono">/test</span> to @Jegankumarbot. The bot replies with a live test card. Tokens never touch this page.</div>
+<div id="tglog" style="margin-top:8px"></div>
+</div>
+
+<h2>🚨 ALERT CENTER</h2>
+<div id="alerts"></div>
+
+<h2>📋 LIVE LOG</h2>
+<input id="logq" placeholder="filter log…" oninput="renderLog()" style="margin-bottom:6px">
+<div class="card muted tiny" id="log"></div>
+
+<div class="muted tiny" style="margin:14px 0">JK AI MEME RADAR v1.1 · backend aggregates → this page reads one static feed · no secrets in browser · signals go to Telegram even with this page closed</div>
+
 <script>
-async function go(){try{
-const d=await(await fetch('radar_state.json?ts='+Date.now())).json();
-document.getElementById('upd').textContent='updated '+new Date(d.generated_at*1000).toLocaleTimeString();
-document.getElementById('status').innerHTML=Object.entries(d.status).map(([k,v])=>`<span class="pill g">🟢 ${k}: ${v}</span>`).join(' ');
-document.getElementById('counters').innerHTML=Object.entries(d.counters).map(([k,v])=>`<div><div class=big>${v}</div><div class=muted>${k}</div></div>`).join('');
+let D=null;
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const f=r=>`<div class=card><b><a href="https://dexscreener.com/solana/${encodeURIComponent(r.mint)}">$${esc(r.sym||'?')}</a></b> <span class="pill y">${esc(r.stage)}</span><br>score ${esc(r.score??'-')} · mult <b>${esc(r.mult)}x</b> · entry MC $${((r.entry_mc||0)/1000).toFixed(0)}K</div>`;
-document.getElementById('live').innerHTML=(d.live||[]).map(f).join('')||'<div class=muted>none yet</div>';
-document.getElementById('done').innerHTML=(d.completed||[]).map(f).join('')||'<div class=muted>none yet</div>';
-document.getElementById('log').innerHTML=(d.log||[]).map(l=>`${new Date(l.ts*1000).toLocaleTimeString()} [${esc(l.lane)}] ${esc(l.msg)}`).join('<br>');
-}catch(e){document.getElementById('upd').textContent='load error '+e}}
-go();setInterval(go,30000);</script></body></html>
+const k=v=>v==null?'—':(v>=1e6?'$'+(v/1e6).toFixed(2)+'M':v>=1e3?'$'+(v/1e3).toFixed(0)+'K':'$'+Number(v).toFixed(0));
+const tsm=ts=>ts?new Date((String(ts).length>13?ts:ts*1000)).toLocaleTimeString():'—';
+const ago=ts=>{if(!ts)return'—';const s=(Date.now()-(String(ts).length>13?ts:ts*1000))/1000;
+ if(s<60)return Math.floor(s)+'s ago';if(s<3600)return Math.floor(s/60)+'m ago';return Math.floor(s/3600)+'h ago'};
+const short=a=>a?esc(a.slice(0,4))+'…'+esc(a.slice(-4)):'—';
+const dex=m=>'https://dexscreener.com/solana/'+encodeURIComponent(m);
+function statPill(name,v){const cls=v==='ONLINE'?'g bgg':v==='IDLE'||v==='STARTING'?'y bgy':'r bgr';
+ return `<span class="pill ${cls}">${v==='ONLINE'?'🟢':v==='IDLE'||v==='STARTING'?'🟡':'🔴'} ${esc(name)} ${esc(v)}</span>`}
+async function go(){try{
+ const d=await(await fetch('radar_state.json?ts='+Date.now())).json();D=d;
+ document.getElementById('upd').textContent='updated '+new Date(d.generated_at*1000).toLocaleTimeString()+' · v'+esc(d.version);
+ const m=document.getElementById('mode');
+ m.textContent=d.paper_mode?'🧪 PAPER MODE':'🟢 LIVE MODE';
+ m.className='badge '+(d.paper_mode?'y bgy':'g bgg');
+ document.getElementById('status').innerHTML=Object.entries(d.status).map(([k2,v])=>statPill(k2.replace(/_/g,' '),v)).join(' ');
+ document.getElementById('meta').innerHTML=
+  `last scan ${ago(d.meta.last_scan)} · last signal ${ago(d.meta.last_signal)} · last telegram ${ago(d.meta.last_telegram)} · API issues 1h: ${esc(d.meta.api_fail_1h)}`;
+ document.getElementById('kpis').innerHTML=Object.entries(d.kpis).map(([k2,v])=>
+  `<div class="kpi"><div class="big">${esc(v)}</div><div class="lbl">${esc(k2.replace(/_/g,' '))}</div></div>`).join('');
+ const f=d.funnel;
+ document.getElementById('funnel').innerHTML=f?[
+  ['DISCOVERED',f.discovered],['FILTERED OUT',f.filtered],['SCORED',f.scored],['WATCH',f.watch],
+  ['SMART MONEY WATCH',f.sm_watch],['CLUSTERS',f.clusters],['SIGNALS',f.signals],['TELEGRAM SENT',f.tg_sent]]
+  .map(([n,v])=>`<div class="fstep"><span class="muted">${n}</span><b>${esc(v)}</b></div>`).join('')
+  :'<div class="muted">waiting for first v1.1 scan…</div>';
+ const rj=d.rejections;
+ const mx=Math.max(1,...(rj.by_reason||[]).map(r=>r.n));
+ document.getElementById('rej').innerHTML=(rj.by_reason||[]).map(r=>
+  `<div class="tiny"><b>${esc(r.n)}</b> <span class="muted">${esc(r.reason)}</span><div class="bar"><i style="width:${(r.n/mx*100).toFixed(0)}%"></i></div></div>`).join('')
+  ||'<div class="muted">no rejections recorded yet</div>';
+ const sig=r=>`<div class="card"><b><a href="${dex(r.mint)}">$${esc(r.sym||'?')}</a></b> <span class="pill b bgb">${esc(r.stage)}</span>
+  ${r.mult&&r.mult>=2?`<span class="pill g bgg">${esc(r.mult)}x</span>`:''}<br>
+  <span class="muted tiny">score ${esc(r.score??'—')} · risk ${esc(r.risk??'—')} · entry MC ${k(r.entry_mc)} · ${ago(r.ts)}</span><br>
+  <span class="mono muted">${esc(r.mint)}</span></div>`;
+ document.getElementById('live').innerHTML=(d.live||[]).map(sig).join('')||'<div class="card muted">no live signals — quality gate holding, nothing forced</div>';
+ document.getElementById('watch').innerHTML=(d.watch||[]).map(sig).join('')||'<div class="card muted">no watch candidates right now</div>';
+ const ws=d.wallet_stats;
+ document.getElementById('wtotal').textContent=ws.total;
+ document.getElementById('wscored').textContent=ws.scored+' (avg '+ws.avg_score+')';
+ document.getElementById('wclasses').innerHTML=Object.entries(ws.by_class||{}).map(([k2,v])=>`<span class="pill">${esc(k2)}: ${esc(v)}</span>`).join('')+` <span class="pill">pairs: ${esc(ws.pairs)}</span> <span class="pill">events: ${esc(ws.events)}</span>`;
+ document.getElementById('wallets').innerHTML='<tr><th>Wallet</th><th>Score</th><th>Class</th><th>Trades</th><th>Max</th><th>Win%</th><th>Early✓</th><th>7d</th></tr>'+
+  (d.smart_money.top_wallets||[]).map(w=>`<tr><td class="mono"><a href="https://solscan.io/account/${encodeURIComponent(w.w)}" target="_blank" rel="noopener">${short(w.w)}</a></td>
+  <td><b>${esc(w.score)}</b></td><td class="tiny">${esc(w.cls)}</td><td>${esc(w.trades)}</td><td>${esc(w.maxm)}x</td><td>${esc(w.win)}</td><td>${esc(w.early)}</td><td>${esc(w.act7)}</td></tr>`).join('')
+  ||'<tr><td class="muted">scoring in progress…</td></tr>';
+ document.getElementById('wfeed').innerHTML=(d.smart_money.feed||[]).map(e=>
+  `<div class="tiny">${tsm(e.ts)} · <span class="mono">${short(e.w)}</span> (score ${esc(e.score??'—')}) → <a href="${dex(e.mint)}">${short(e.mint)}</a> ${e.mc?'MC '+k(e.mc):''}</div>`).join('')
+  ||'<div class="muted tiny">no smart wallet events yet — feed populates as wallets move</div>';
+ document.getElementById('clusters').innerHTML=(d.smart_money.clusters||[]).map(cl=>
+  `<div class="card"><b>🧩 Cluster #${esc(cl.id)}</b> <span class="pill p">${esc(cl.status)}</span><br>
+  <span class="tiny muted"><a href="${dex(cl.mint)}">${short(cl.mint)}</a> · ${esc(cl.n)} wallets (${esc(cl.indep)} independent) · window ${esc(cl.win)}s</span><br>
+  <span class="tiny">cluster score <b>${esc(cl.score)}</b> · top wallet ${esc(cl.top)} · avg ${esc(cl.avg)}</span></div>`).join('')
+  ||'<div class="card muted">no clusters detected yet</div>';
+ renderTokens();
+ document.getElementById('done').innerHTML=(d.completed||[]).map(sig).join('')||'<div class="card muted">none yet</div>';
+ document.getElementById('outs').innerHTML='<tr><th>Signal</th><th>Horizon</th><th>Mult</th><th>Drawdown</th></tr>'+
+  (d.outcomes||[]).map(o=>`<tr><td class="mono">${esc(o.id)}</td><td>${esc(o.h)}</td><td>${esc(o.mult)}x</td><td>${esc(o.dd)}%</td></tr>`).join('')
+  ||'<tr><td class="muted">outcomes appear as signals age</td></tr>';
+ document.getElementById('tglog').innerHTML=(d.tg_log||[]).map(t=>
+  `<div class="tiny">${t.ok?'✅':'❌'} ${tsm(t.ts)} · ${esc(t.kind)} ${t.mint?short(t.mint):''}</div>`).join('')
+  ||'<div class="muted tiny">no deliveries logged yet</div>';
+ document.getElementById('alerts').innerHTML=(d.alerts||[]).map(a=>
+  `<div class="card"><span class="pill r bgr">${esc(a.kind)}</span> <span class="tiny">${esc(a.detail)}</span> <span class="muted tiny">${ago(a.ts)}</span></div>`).join('')
+  ||'<div class="card muted">no alerts 🟢</div>';
+ renderLog();
+}catch(e){document.getElementById('upd').textContent='load error: '+e}}
+function renderTokens(){if(!D)return;
+ const q=(document.getElementById('q').value||'').toLowerCase();
+ const so=document.getElementById('sort').value;
+ let rows=(D.tokens||[]).filter(t=>!q||(t.sym||'').toLowerCase().includes(q)||(t.mint||'').toLowerCase().includes(q));
+ rows.sort((a,b)=>(b[so]||0)-(a[so]||0));
+ document.getElementById('tokens').innerHTML='<tr><th>Token</th><th>MC</th><th>Liq</th><th>Vol 1h</th><th>Seen</th></tr>'+
+  rows.map(t=>`<tr><td><a href="${dex(t.mint)}">$${esc(t.sym||'?')}</a><br><span class="mono muted tiny">${short(t.mint)}</span></td>
+  <td>${k(t.mc)}</td><td>${k(t.liq)}</td><td>${k(t.v1h)}</td><td class="tiny muted">${ago(t.ts)}</td></tr>`).join('')
+  ||'<tr><td class="muted">no tokens</td></tr>';}
+function renderLog(){if(!D)return;
+ const q=(document.getElementById('logq').value||'').toLowerCase();
+ document.getElementById('log').innerHTML=(D.log||[]).filter(l=>!q||(l.msg||'').toLowerCase().includes(q)||(l.lane||'').includes(q))
+  .map(l=>`${tsm(l.ts)} <b class="b">[${esc(l.lane)}]</b> ${esc(l.msg)}`).join('<br>')||'—';}
+go();setInterval(go,20000);
+</script></body></html>
