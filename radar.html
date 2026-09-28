@@ -1,0 +1,28 @@
+<!doctype html><html><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1">
+<title>JK AI MEME RADAR</title><style>
+body{background:#0b0e14;color:#e6e9ef;font-family:system-ui;margin:0;padding:12px}
+h1{font-size:20px;margin:4px 0}h2{font-size:15px;color:#8ab4ff;margin:14px 0 6px}
+.card{background:#151a24;border:1px solid #232a38;border-radius:10px;padding:10px;margin:6px 0}
+.pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;margin:2px}
+.g{background:#123d22;color:#7ee2a0}.y{background:#3d3412;color:#e2d27e}.r{background:#3d1212;color:#e27e7e}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}.big{font-size:22px;font-weight:700}
+a{color:#8ab4ff;text-decoration:none}.muted{color:#7a8494;font-size:12px}
+</style></head><body>
+<h1>🛰 JK AI MEME RADAR</h1><div class=muted id=upd></div>
+<div class=card id=status></div>
+<div class="grid card" id=counters></div>
+<h2>🔥 LIVE SIGNALS</h2><div id=live></div>
+<h2>✅ COMPLETED</h2><div id=done></div>
+<h2>📋 LOG</h2><div id=log class=muted></div>
+<script>
+async function go(){try{
+const d=await(await fetch('radar_state.json?ts='+Date.now())).json();
+document.getElementById('upd').textContent='updated '+new Date(d.generated_at*1000).toLocaleTimeString();
+document.getElementById('status').innerHTML=Object.entries(d.status).map(([k,v])=>`<span class="pill g">🟢 ${k}: ${v}</span>`).join(' ');
+document.getElementById('counters').innerHTML=Object.entries(d.counters).map(([k,v])=>`<div><div class=big>${v}</div><div class=muted>${k}</div></div>`).join('');
+const f=r=>`<div class=card><b><a href="https://dexscreener.com/solana/${r.mint}">$${r.sym||'?'}</a></b> <span class="pill y">${r.stage}</span><br>score ${r.score??'-'} · mult <b>${r.mult}x</b> · entry MC $${((r.entry_mc||0)/1000).toFixed(0)}K</div>`;
+document.getElementById('live').innerHTML=(d.live||[]).map(f).join('')||'<div class=muted>none yet</div>';
+document.getElementById('done').innerHTML=(d.completed||[]).map(f).join('')||'<div class=muted>none yet</div>';
+document.getElementById('log').innerHTML=(d.log||[]).map(l=>`${new Date(l.ts*1000).toLocaleTimeString()} [${l.lane}] ${l.msg}`).join('<br>');
+}catch(e){document.getElementById('upd').textContent='load error '+e}}
+go();setInterval(go,30000);</script></body></html>
