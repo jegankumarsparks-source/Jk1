@@ -20,9 +20,10 @@ const d=await(await fetch('radar_state.json?ts='+Date.now())).json();
 document.getElementById('upd').textContent='updated '+new Date(d.generated_at*1000).toLocaleTimeString();
 document.getElementById('status').innerHTML=Object.entries(d.status).map(([k,v])=>`<span class="pill g">🟢 ${k}: ${v}</span>`).join(' ');
 document.getElementById('counters').innerHTML=Object.entries(d.counters).map(([k,v])=>`<div><div class=big>${v}</div><div class=muted>${k}</div></div>`).join('');
-const f=r=>`<div class=card><b><a href="https://dexscreener.com/solana/${r.mint}">$${r.sym||'?'}</a></b> <span class="pill y">${r.stage}</span><br>score ${r.score??'-'} · mult <b>${r.mult}x</b> · entry MC $${((r.entry_mc||0)/1000).toFixed(0)}K</div>`;
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const f=r=>`<div class=card><b><a href="https://dexscreener.com/solana/${encodeURIComponent(r.mint)}">$${esc(r.sym||'?')}</a></b> <span class="pill y">${esc(r.stage)}</span><br>score ${esc(r.score??'-')} · mult <b>${esc(r.mult)}x</b> · entry MC $${((r.entry_mc||0)/1000).toFixed(0)}K</div>`;
 document.getElementById('live').innerHTML=(d.live||[]).map(f).join('')||'<div class=muted>none yet</div>';
 document.getElementById('done').innerHTML=(d.completed||[]).map(f).join('')||'<div class=muted>none yet</div>';
-document.getElementById('log').innerHTML=(d.log||[]).map(l=>`${new Date(l.ts*1000).toLocaleTimeString()} [${l.lane}] ${l.msg}`).join('<br>');
+document.getElementById('log').innerHTML=(d.log||[]).map(l=>`${new Date(l.ts*1000).toLocaleTimeString()} [${esc(l.lane)}] ${esc(l.msg)}`).join('<br>');
 }catch(e){document.getElementById('upd').textContent='load error '+e}}
 go();setInterval(go,30000);</script></body></html>
