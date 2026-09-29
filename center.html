@@ -89,7 +89,7 @@ pre{white-space:pre-wrap;word-break:break-all;font-size:11px;color:var(--dim)}
 </nav>
 <script>
 const B='data/';
-let S={status:null,summary:null,tokens:null,wallets:null,paper:null,sig:null,tc:{},wc:{}};
+let S={status:null,summary:null,tokens:null,wallets:null,paper:null,sig:null,health:null,tc:{},wc:{}};
 let lastTs=0;
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -108,6 +108,7 @@ async function loadAll(){
     lastTs=S.status.ts;
     [S.summary,S.tokens,S.wallets,S.paper]=await Promise.all([j('summary.json'),j('tokens.json'),j('wallets.json'),j('paper.json')]);
     try{S.sig=await j('sig_feed.json');}catch(e){S.sig=S.sig||{signals:[]};}
+    try{S.health=await j('sig_health.json');}catch(e){S.health=S.health||{components:{}};}
   }
   freshness();
 }
@@ -152,6 +153,7 @@ function sigCard(s){
   <div class="hrow" style="margin-top:8px"><b style="font-size:18px">$${esc(s.sym||s.sig_id.slice(4))}</b>
   <span class="sub">score</span><b class="${(s.score||0)>=80?'pos':''}">${(+s.score||0).toFixed(1)}</b>
   <span class="sub" style="margin-left:auto">mc ${k(m.mc)} · liq ${k(m.liq)}</span></div>
+  <div class="sub">⏱ data ${f.data_age_s!=null?dur(f.data_age_s):'?'} old · ${esc(f.source||'helius')}</div>
   <div class="sub" style="margin-top:4px">buy ${k(f.buy_usd)} vs sell ${k(f.sell_usd)} · net ${k(f.net)} · large buys ${f.large_buys||0} · smart ${f.smart_count||0}</div>
   ${blocked?`<div class="neg" style="font-size:12px;margin-top:6px">⚠️ ${esc(s.blocked_reason)}</div>`
            :(s.why||[]).slice(0,2).map(w=>`<div class="why-line pos">✓ ${esc(w)}</div>`).join('')}
@@ -216,7 +218,9 @@ async function vSigDetail(id){
   <div class="counter"><b>${(+(f.buy_accel||1)).toFixed(1)}x</b><span>buy acceleration</span></div>
   <div class="counter"><b>${(+(f.vol_accel||1)).toFixed(1)}x</b><span>volume acceleration</span></div>
   </div>
-  <div class="sub" style="margin-top:8px">price ${px(m.price)} · mc ${k(m.mc)} · liq ${k(m.liq)} · 1h buy/sell ${k(m.b1h)}/${k(m.s1h)}</div></div>`;
+  <div class="sub" style="margin-top:8px">price ${px(m.price)} · mc ${k(m.mc)} · liq ${k(m.liq)} · 1h buy/sell ${k(m.b1h)}/${k(m.s1h)}</div>
+  <div class="sub" style="margin-top:6px">⏱ data age ${f.data_age_s!=null?dur(f.data_age_s):'unknown'} · source ${esc(f.source||'helius')} · updated ${ago(new Date((s.updated_at||0)*1000).toISOString())}</div>
+  ${(d.risks&&d.risks[0]||'').startsWith('DATA INCOMPLETE')?'<div class="neg" style="margin-top:6px;font-size:12px">⚠️ DATA INCOMPLETE - score capped below alert bar until fresh data</div>':''}</div>`;
   if((d.events||[]).length)h+=`<div class="sec">SIGNAL HISTORY (updates, not duplicates)</div><div class="card" style="padding:0 12px">
   ${d.events.map(e=>`<div class="row"><div><div class="sym" style="font-size:13px">${esc(e.kind)}</div><div class="sub">${esc(e.detail||'')}</div></div><div class="val sub">${istd(new Date((e.ts||0)*1000).toISOString())} IST</div></div>`).join('')}</div>`;
   h+=`<div class="warn">⚠️ Monitoring intel from live on-chain data - never buy advice. DYOR · NFA.</div>`;
@@ -412,7 +416,18 @@ async function vPaper(){
 }
 async function vStatus(){
   const tg=S.summary.telegram;
+  const hc=(S.health&&S.health.components)||{};
+  const hicon=st=>st==='ok'?'🟢':st==='degraded'?'🟡':st==='off'?'⚪':'🔴';
+  const hrow=(label,key)=>{const c=hc[key]||{};return`<div class="kv"><span>${hicon(c.status)} ${label}</span><b>${c.last_ok?ago(new Date(c.last_ok*1000).toISOString()):esc(c.note||'no data')}</b></div>`+(c.note?`<div class="sub" style="padding-left:22px">${esc(c.note)}</div>`:'');};
   return`<a class="back" href="#/">← home</a>
+  <div class="sec">SYSTEM HEALTH</div><div class="card">
+    ${hrow('DATA FEED','data_feed')}
+    ${hrow('WEBSOCKET','websocket')}
+    ${hrow('SIGNAL ENGINE','signal_engine')}
+    ${hrow('DATABASE','database')}
+    ${hrow('SECURITY PROVIDER','security_provider')}
+    <div class="kv"><span>${tg.online?'🟢':'🔴'} TELEGRAM</span><b>${ago(tg.last_delivery)}</b></div>
+    <div class="sub" style="margin-top:6px">last successful update shown per component · auto-refresh 10s</div></div>
   <div class="sec">TELEGRAM BOT 3 (PRIMARY)</div><div class="card">
     <div class="kv"><span>state</span><b class="${tg.online?'pos':'neg'}">${tg.online?'ONLINE':'OFFLINE'}</b></div>
     <div class="kv"><span>last delivery</span><b>${istd(tg.last_delivery)} IST (${ago(tg.last_delivery)})</b></div>
