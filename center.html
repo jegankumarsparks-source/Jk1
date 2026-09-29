@@ -418,11 +418,18 @@ async function vStatus(){
   const tg=S.summary.telegram;
   const hc=(S.health&&S.health.components)||{};
   const hicon=st=>st==='ok'?'🟢':st==='degraded'?'🟡':st==='off'?'⚪':'🔴';
+  const wsLabel=()=>{const c=hc['websocket']||{};const st=c.status;
+    if(st==='ok'&&c.last_msg&&(Date.now()/1000-c.last_msg)<180)return'🟢 WebSocket LIVE';
+    if(st==='ok')return'⚪ REST FALLBACK (ws idle)';
+    if(st==='reconnecting')return'🟡 RECONNECTING';
+    if(st==='connecting'||st==='idle')return'⚪ REST FALLBACK';
+    if(st==='down')return'🔴 Feed DOWN';
+    return'⚪ REST FALLBACK';};
   const hrow=(label,key)=>{const c=hc[key]||{};return`<div class="kv"><span>${hicon(c.status)} ${label}</span><b>${c.last_ok?ago(new Date(c.last_ok*1000).toISOString()):esc(c.note||'no data')}</b></div>`+(c.note?`<div class="sub" style="padding-left:22px">${esc(c.note)}</div>`:'');};
   return`<a class="back" href="#/">← home</a>
   <div class="sec">SYSTEM HEALTH</div><div class="card">
     ${hrow('DATA FEED','data_feed')}
-    ${hrow('WEBSOCKET','websocket')}
+    <div class="kv"><span>${wsLabel()}</span><b>${esc((hc['websocket']||{}).note||'')}</b></div>
     ${hrow('SIGNAL ENGINE','signal_engine')}
     ${hrow('DATABASE','database')}
     ${hrow('SECURITY PROVIDER','security_provider')}
