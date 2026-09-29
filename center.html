@@ -466,6 +466,13 @@ async function vPerformance(){
     ${Math.abs(b.accounting_gap||0)>.01?`<div class="warn">⚠️ UNRECONCILED: equity vs realized + unrealized P&L differs by ${money(b.accounting_gap)}. Source state/ledger needs investigation; neither figure has been adjusted.</div>`:''}
     <div class="sub">${b.closed} closed; performance comparisons need at least ${b.sample_min} closed trades. ${b.sample}.</div></div>`;
   }
+  const LL=P.linked_ledger||{trades:[],n:0,completed:0};
+  h+=`<div class="sec">VERIFIED LINKED LEDGER (live-wired)</div>`;
+  h+=`<div class="card"><div class="kv"><span>Live-linked trades / completed</span><b>${LL.n} / ${LL.completed}</b></div>
+  <div class="kv"><span>Integrity</span><b>${LL.integrity_faults?('⚠️ '+LL.integrity_faults+' DATA INTEGRITY ERROR(s) - see logs'):'clean'}</b></div>
+  ${LL.label?`<div class="warn">${esc(LL.label)}</div>`:''}
+  ${(LL.trades||[]).map(t=>`<div class="row"><div><b>${esc(t.signal_id)}</b><div class="sub">${esc(t.strategy)} · ${esc(t.status)} · $${num(t.position_usd)} @ ${t.entry_price}</div></div><div class="val">${t.realized_pnl==null?(t.unrealized_pnl==null?'PENDING':('$'+num(t.unrealized_pnl)+' open')):('$'+num(t.realized_pnl))}<div class="sub">ROI ${num(t.roi_pct)}% · MFE ${num(t.mfe_pct)}% · MAE ${num(t.mae_pct)}%</div></div></div>`).join('')}
+  <div class="sub">Only live-wired entries appear here; historical trades stay UNLINKED/LEGACY. ${esc(LL.sample||'')}</div></div>`;
   h+=`<div class="sec">SIGNAL → OUTCOME (tracked only)</div>`;
   h+=`<div class="card">${(P.signals||[]).map(s=>`<div class="row" onclick="location.hash='#/sig/${esc(s.signal_id)}'"><div><b>$${esc(s.sym)}</b><div class="sub">${esc(s.signal_id)} · ${esc(s.production_state)} · ${s.linked_paper_entries.length?s.linked_paper_entries.length+' source-linked paper entries':'⚠️ SIGNAL OUTCOME PENDING'}</div></div><div class="val">${s.roi_observed_pct==null?'OUTCOME UNAVAILABLE':num(s.roi_observed_pct)+'% sampled'}<div class="sub">MFE ${num(s.mfe_pct)}% · MAE ${num(s.mae_pct)}% · ${s.snapshot_count} snapshots</div></div></div>`).join('')}</div>`;
   return h;
