@@ -466,7 +466,7 @@ async function vPerformance(){
     <div class="sub">${b.closed} closed; performance comparisons need at least ${b.sample_min} closed trades. ${b.sample}.</div></div>`;
   }
   h+=`<div class="sec">SIGNAL → OUTCOME (tracked only)</div>`;
-  h+=`<div class="card">${(P.signals||[]).map(s=>`<div class="row" onclick="location.hash='#/sig/${esc(s.signal_id)}'"><div><b>$${esc(s.sym)}</b><div class="sub">${esc(s.signal_id)} · ${esc(s.production_state)} · ${s.linked_paper_entries.length} matched paper entries</div></div><div class="val">${s.roi_observed_pct==null?'OUTCOME UNAVAILABLE':num(s.roi_observed_pct)+'% sampled'}<div class="sub">MFE ${num(s.mfe_pct)}% · MAE ${num(s.mae_pct)}% · ${s.snapshot_count} snapshots</div></div></div>`).join('')}</div>`;
+  h+=`<div class="card">${(P.signals||[]).map(s=>`<div class="row" onclick="location.hash='#/sig/${esc(s.signal_id)}'"><div><b>$${esc(s.sym)}</b><div class="sub">${esc(s.signal_id)} · ${esc(s.production_state)} · ${s.same_mint_paper_entries_unverified.length} same-token paper entries (NOT linked)</div></div><div class="val">${s.roi_observed_pct==null?'OUTCOME UNAVAILABLE':num(s.roi_observed_pct)+'% sampled'}<div class="sub">MFE ${num(s.mfe_pct)}% · MAE ${num(s.mae_pct)}% · ${s.snapshot_count} snapshots</div></div></div>`).join('')}</div>`;
   return h;
 }
 async function vStatus(){
