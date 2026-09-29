@@ -52,6 +52,16 @@ select.chip{appearance:none}
 .warn{background:#2a1503;border:1px solid #7c4a03;color:#fbbf24;border-radius:10px;padding:10px;font-size:12px;margin:8px 14px}
 .exp{background:#101c2c;border:1px dashed var(--blu);color:#9ec5ff;border-radius:10px;padding:8px 10px;font-size:11.5px;margin:8px 14px}
 .back{display:inline-block;margin:10px 14px 0;color:var(--dim);font-size:14px;padding:6px 0}
+.sigchip{display:inline-block;font-size:10px;font-weight:700;letter-spacing:1px;padding:3px 8px;border-radius:6px;border:1px solid}
+.st-EXTREME{color:#ff5df2;border-color:#ff5df2;background:#ff5df218}
+.st-STRONG{color:var(--gold);border-color:var(--gold);background:#f2c94c18}
+.st-BUILDING{color:var(--blu);border-color:var(--blu);background:#4c9af218}
+.st-WATCHING{color:var(--dim);border-color:var(--line)}
+.st-BLOCKED,.st-INVALIDATED{color:var(--red);border-color:var(--red);background:#f24c4c14}
+.st-EXPIRED{color:var(--dim);border-color:var(--line);opacity:.6}
+.why-line{font-size:13px;line-height:1.7;padding:2px 0}
+.pill{font-size:11px;padding:4px 10px;border-radius:8px;border:1px solid var(--line);color:var(--dim);cursor:pointer;margin:2px 4px 2px 0;display:inline-block}
+.pill.on{color:var(--acc);border-color:var(--acc)}
 pre{white-space:pre-wrap;word-break:break-all;font-size:11px;color:var(--dim)}
 .big{font-size:24px;font-weight:800}
 .center{text-align:center;color:var(--dim);padding:30px;font-size:13px}
@@ -75,10 +85,11 @@ pre{white-space:pre-wrap;word-break:break-all;font-size:11px;color:var(--dim)}
   <a href="#/wallets" data-r="/wallets"><i>👛</i>Wallets</a>
   <a href="#/paper" data-r="/paper"><i>👑</i>Paper</a>
   <a href="#/status" data-r="/status"><i>📡</i>Status</a>
+  <a href="#/signals" data-r="/signals"><i>🚨</i>Signals</a>
 </nav>
 <script>
 const B='data/';
-let S={status:null,summary:null,tokens:null,wallets:null,paper:null,tc:{},wc:{}};
+let S={status:null,summary:null,tokens:null,wallets:null,paper:null,sig:null,tc:{},wc:{}};
 let lastTs=0;
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -96,6 +107,7 @@ async function loadAll(){
   if(S.status.ts!==lastTs){
     lastTs=S.status.ts;
     [S.summary,S.tokens,S.wallets,S.paper]=await Promise.all([j('summary.json'),j('tokens.json'),j('wallets.json'),j('paper.json')]);
+    try{S.sig=await j('sig_feed.json');}catch(e){S.sig=S.sig||{signals:[]};}
   }
   freshness();
 }
@@ -128,6 +140,89 @@ function row(mint,ix,extra){
     <div><div class="sym">$${esc(ix.sym||mint.slice(0,6))}</div><div class="sub">${esc(ix.status||'')}${ix.paper?' · 📄paper':''}${ix.binance?' · 🟡binance':''}</div></div>
     <div class="val">${extra||''}<div class="sub">mc ${k(ix.mc)} · liq ${k(ix.liq)}</div></div></div>`;
 }
+
+/* ---------- LIVE SIGNALS (Phase 4) ---------- */
+let sigStateFilter='ALL',sigSort='score';
+function sigCard(s){
+  const blocked=!!s.blocked_reason,m=s.market||{},f=s.factors||{};
+  const state=blocked?'BLOCKED':s.state;
+  return `<div class="card" onclick="location.hash='#/sig/${s.sig_id}'">
+  <div class="hrow"><span class="sigchip st-${state}">${blocked?'🔴 HIGH RISK — SIGNAL BLOCKED':'🚨 '+s.state}</span>
+  <span class="sub" style="margin-left:auto">${ago(new Date((s.updated_at||0)*1000).toISOString())}</span></div>
+  <div class="hrow" style="margin-top:8px"><b style="font-size:18px">$${esc(s.sym||s.sig_id.slice(4))}</b>
+  <span class="sub">score</span><b class="${(s.score||0)>=80?'pos':''}">${(+s.score||0).toFixed(1)}</b>
+  <span class="sub" style="margin-left:auto">mc ${k(m.mc)} · liq ${k(m.liq)}</span></div>
+  <div class="sub" style="margin-top:4px">buy ${k(f.buy_usd)} vs sell ${k(f.sell_usd)} · net ${k(f.net)} · large buys ${f.large_buys||0} · smart ${f.smart_count||0}</div>
+  ${blocked?`<div class="neg" style="font-size:12px;margin-top:6px">⚠️ ${esc(s.blocked_reason)}</div>`
+           :(s.why||[]).slice(0,2).map(w=>`<div class="why-line pos">✓ ${esc(w)}</div>`).join('')}
+  ${(s.risks||[]).slice(0,1).map(r=>`<div class="why-line" style="color:var(--yel)">⚠️ ${esc(r)}</div>`).join('')}
+  </div>`;
+}
+async function vSignals(){
+  const feed=(S.sig&&S.sig.signals)||[];
+  const states=['ALL','WATCHING','BUILDING','STRONG','EXTREME','BLOCKED','DONE'];
+  const match=s=>{
+    if(sigStateFilter==='ALL')return true;
+    if(sigStateFilter==='BLOCKED')return !!s.blocked_reason;
+    if(sigStateFilter==='DONE')return ['EXPIRED','INVALIDATED'].includes(s.state);
+    return s.state===sigStateFilter&&!s.blocked_reason;};
+  let arr=feed.filter(match);
+  arr.sort(sigSort==='time'?(a,b)=>(b.updated_at||0)-(a.updated_at||0):(a,b)=>(b.score||0)-(a.score||0));
+  let h=`<a class="back" href="#/">← home</a><div class="sec">🚨 LIVE SIGNALS (${feed.length} tracked)</div>
+  <div style="margin:4px 14px">${states.map(st=>`<span class="pill ${st===sigStateFilter?'on':''}" onclick="sigStateFilter='${st}';route()">${st}</span>`).join('')}
+  <span class="pill" onclick="sigSort=sigSort==='score'?'time':'score';route()">sort: ${sigSort==='score'?'score':'newest'}</span></div>`;
+  if(!arr.length)h+=`<div class="card center">no ${sigStateFilter==='ALL'?'':sigStateFilter+' '}signals right now — the engine only surfaces real on-chain evidence. Nothing manufactured.</div>`;
+  h+=arr.map(sigCard).join('');
+  h+=`<div class="warn">⚠️ Signals are monitoring intel from live on-chain data - never buy advice. Score 90+ EXTREME · 80+ STRONG · 70+ BUILDING · below 70 watching only.</div>`;
+  return h;
+}
+async function vSigDetail(id){
+  let d;try{d=await j('sig_'+id+'.json');}catch(e){return `<a class="back" href="#/signals">← signals</a><div class="center">signal not found</div>`;}
+  const s=d.signal,m=s.market||{},f=d.factors_full||{},c=d.components||{};
+  const blocked=!!s.blocked_reason,state=blocked?'BLOCKED':s.state;
+  const ts=(s.top_smart||[])[0];
+  let h=`<a class="back" href="#/signals">← signals</a>
+  <div class="card"><div class="hrow"><span class="sigchip st-${state}">${blocked?'🔴 HIGH RISK — SIGNAL BLOCKED':'🚨 '+s.state}</span>
+  <b style="font-size:20px;margin-left:8px">$${esc(s.sym||'')}</b>
+  <span class="sub" style="margin-left:auto">${s.sig_id}</span></div>
+  <div class="hrow" style="margin-top:8px"><span class="sub">score</span><b class="${(s.score||0)>=80?'pos':''}" style="font-size:22px">${(+s.score||0).toFixed(1)}</b>
+  <span class="sub" style="margin-left:auto">detected ${istd(new Date((s.created_at||0)*1000).toISOString())} IST · updated ${ago(new Date((s.updated_at||0)*1000).toISOString())}</span></div>
+  <div class="hrow" style="margin-top:10px;gap:6px;flex-wrap:wrap">
+    <span class="btn" onclick="copyCA('${s.mint}')">📋 TAP TO COPY CA</span>
+    <a class="btn" href="#/token/${s.mint}">🎯 TOKEN DRILL-DOWN</a>
+    ${ts?`<a class="btn" href="#/wallet/${ts}">👛 TOP SMART WALLET</a>`:''}
+  </div>
+  <div class="hrow" style="margin-top:6px;gap:6px;flex-wrap:wrap">
+    <a class="btn" href="https://gmgn.ai/sol/token/${s.mint}" target="_blank">🟢 GMGN</a>
+    <a class="btn" href="https://dexscreener.com/solana/${s.mint}" target="_blank">📊 DEX</a>
+    <a class="btn" href="https://solscan.io/token/${s.mint}" target="_blank">🔎 SOLSCAN</a>
+  </div></div>`;
+  h+=`<div class="sec">WHY THIS SIGNAL?</div><div class="card">
+  ${(d.why||[]).map(w=>`<div class="why-line pos">✓ ${esc(w)}</div>`).join('')||'<div class="sub">building evidence - no factors crossed their bars yet</div>'}
+  ${(d.risks||[]).map(r=>`<div class="why-line" style="color:var(--yel)">⚠️ Risk: ${esc(r)}</div>`).join('')}
+  ${blocked?`<div class="why-line neg">🔴 ${esc(s.blocked_reason)}</div>`:''}</div>`;
+  h+=`<div class="sec">SCORE BREAKDOWN</div><div class="card"><div class="grid">
+  ${['pressure','smart','cluster','accel','liq_health','whale'].map(kk=>`<div class="counter"><b>${(+(c[kk]||0)).toFixed(1)}</b><span>${kk.replace('_',' ')}</span></div>`).join('')}
+  </div></div>`;
+  h+=`<div class="sec">ON-CHAIN ACTIVITY</div><div class="card"><div class="grid">
+  <div class="counter"><b>${k(f.buy_usd)}</b><span>buy volume</span></div>
+  <div class="counter"><b>${k(f.sell_usd)}</b><span>sell volume</span></div>
+  <div class="counter"><b class="${(f.net||0)>=0?'pos':'neg'}">${k(f.net)}</b><span>net pressure</span></div>
+  <div class="counter"><b>${f.large_buys||0}</b><span>large buys (whale bar $${Math.round((f.whale_min||0)).toLocaleString()})</span></div>
+  <div class="counter"><b>${f.large_sells||0}</b><span>large sells</span></div>
+  <div class="counter"><b>${f.unique_buyers||0}</b><span>unique buyers</span></div>
+  <div class="counter"><b>${f.repeat_buyers||0}</b><span>repeat accumulation</span></div>
+  <div class="counter"><b>${f.smart_count||0}</b><span>smart-money wallets</span></div>
+  <div class="counter"><b>${(+(f.buy_accel||1)).toFixed(1)}x</b><span>buy acceleration</span></div>
+  <div class="counter"><b>${(+(f.vol_accel||1)).toFixed(1)}x</b><span>volume acceleration</span></div>
+  </div>
+  <div class="sub" style="margin-top:8px">price ${px(m.price)} · mc ${k(m.mc)} · liq ${k(m.liq)} · 1h buy/sell ${k(m.b1h)}/${k(m.s1h)}</div></div>`;
+  if((d.events||[]).length)h+=`<div class="sec">SIGNAL HISTORY (updates, not duplicates)</div><div class="card" style="padding:0 12px">
+  ${d.events.map(e=>`<div class="row"><div><div class="sym" style="font-size:13px">${esc(e.kind)}</div><div class="sub">${esc(e.detail||'')}</div></div><div class="val sub">${istd(new Date((e.ts||0)*1000).toISOString())} IST</div></div>`).join('')}</div>`;
+  h+=`<div class="warn">⚠️ Monitoring intel from live on-chain data - never buy advice. DYOR · NFA.</div>`;
+  return h;
+}
+
 /* ---------- VIEWS ---------- */
 async function vHome(){
   const c=S.summary.counters,tg=S.summary.telegram,r=S.summary.race,m=S.summary.main;
@@ -138,6 +233,14 @@ async function vHome(){
     <span style="margin-left:auto;text-align:right"><span class="${m&&m.realised+m.unrealised>=0?'pos':'neg'}">${m?((m.realised+m.unrealised>=0?'+':'')+(m.realised+m.unrealised).toFixed(2)):'N/A'}</span><div class="sub">${m?m.n_open+' open · TP '+m.n_tp+' · SL '+m.n_sl+' · RUG '+m.n_rug:''}</div></span></div>
     <div class="sub" style="margin-top:6px">start $500 · realised ${m?'$'+(+m.realised).toFixed(2):'N/A'} · unrealised ${m?'$'+(+m.unrealised).toFixed(2):'N/A'} · tap Paper tab for positions</div>
   </div>`;
+  if(S.sig&&S.sig.signals&&S.sig.signals.length){
+    const act=S.sig.signals.filter(s=>!['EXPIRED','INVALIDATED'].includes(s.state)&&!s.blocked_reason);
+    if(act.length){const top=act.slice().sort((a,b)=>(b.score||0)-(a.score||0))[0];
+      h+=`<div class="card" style="border-color:#ff5df255" onclick="location.hash='#/sig/${top.sig_id}'">
+      <div class="hrow"><span class="sigchip st-${top.state}">🚨 ${top.state}</span><b style="margin-left:8px">$${esc(top.sym||'')}</b><span class="sub" style="margin-left:auto">score ${(+top.score||0).toFixed(0)} · ${ago(new Date((top.updated_at||0)*1000).toISOString())}</span></div>
+      <div class="sub" style="margin-top:6px">${(top.why||[]).slice(0,2).map(w=>'✓ '+esc(w)).join(' · ')||'building evidence'}</div>
+      <div class="sub" style="margin-top:4px">LIVE SIGNALS · tap for breakdown · ${act.length} active</div></div>`;}
+  }
   if(r){const cols=S.summary.color;
     h+=`<div class="card" onclick="location.hash='#/paper'"><div class="hrow"><span class="tag b">🏁 WALLET RACE · EXPERIMENT</span>
     <span class="sub" style="margin-left:auto">${r.state==='DECIDED'?('🏆 '+r.winner+' WINS'):('leader '+(r.leader||'N/A'))}</span></div>
@@ -363,6 +466,8 @@ async function route(){
     else if(h==='/wallets')html=await vWallets();
     else if(h==='/paper')html=await vPaper();
     else if(h==='/status')html=await vStatus();
+    else if(h==='/signals')html=await vSignals();
+    else if(h.startsWith('/sig/'))html=await vSigDetail(h.split('/')[2]);
     else html=await vHome();
   }catch(e){html=`<div class="center">load error: ${esc(e.message)}<br><br><button class="btn" onclick="hardRefresh()">retry</button></div>`;}
   $('app').innerHTML=html;
