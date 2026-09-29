@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>JK AI MEME RADAR - Command Center</title>
+<style>
+:root{--bg:#0c1117;--card:#141c26;--card2:#1b2634;--line:#24334a;--txt:#e8eef5;--dim:#8fa3bb;--grn:#22c55e;--yel:#eab308;--red:#ef4444;--blu:#3b82f6;--acc:#34d399;--gold:#fbbf24}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,Roboto,sans-serif;font-size:15px;padding-bottom:76px;max-width:720px;margin:0 auto}
+a{color:var(--acc);text-decoration:none}
+header{position:sticky;top:0;z-index:20;background:linear-gradient(180deg,#0c1117 85%,transparent);padding:10px 14px 8px;border-bottom:1px solid var(--line)}
+.hrow{display:flex;align-items:center;gap:8px}
+h1{font-size:17px;letter-spacing:.5px}
+.live{font-size:11px;padding:3px 8px;border-radius:20px;background:#123; border:1px solid var(--line);color:var(--dim)}
+.live.on{color:var(--grn);border-color:var(--grn)}
+.live.stale{color:var(--yel);border-color:var(--yel)}
+.rbtn{margin-left:auto;background:var(--card2);border:1px solid var(--line);color:var(--txt);border-radius:10px;padding:8px 12px;font-size:14px;min-height:40px}
+.fresh{font-size:11px;color:var(--dim);margin-top:4px}
+.search{margin-top:8px;width:100%;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;font-size:15px;color:var(--txt)}
+.pad{padding:12px 14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin:10px 14px}
+.main-card{border:2px solid var(--gold);background:linear-gradient(135deg,#1a1a10,#141c26)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 14px}
+.counter{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 8px;text-align:center;min-height:64px}
+.counter b{display:block;font-size:19px}
+.counter span{font-size:10.5px;color:var(--dim);display:block;margin-top:3px;line-height:1.25}
+.tag{font-size:10px;padding:2px 7px;border-radius:8px;background:var(--card2);color:var(--dim);border:1px solid var(--line)}
+.tag.g{color:var(--grn)} .tag.y{color:var(--yel)} .tag.r{color:var(--red)} .tag.b{color:var(--blu)} .tag.gold{color:var(--gold);border-color:var(--gold)}
+.row{display:flex;align-items:center;gap:8px;padding:12px;border-bottom:1px solid var(--line);min-height:52px}
+.row:last-child{border-bottom:none}
+.row .sym{font-weight:700;min-width:74px}
+.row .sub{font-size:11px;color:var(--dim)}
+.row .val{margin-left:auto;text-align:right;font-size:13px}
+.pos{color:var(--grn)} .neg{color:var(--red)}
+.btn{display:inline-block;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-size:12.5px;margin:3px 4px 0 0;min-height:38px;color:var(--txt)}
+.btn.ca{background:#0d2818;border-color:var(--grn);color:var(--grn)}
+.sec{font-size:12px;color:var(--dim);letter-spacing:1px;margin:14px 14px 4px;text-transform:uppercase}
+.kv{display:flex;justify-content:space-between;font-size:13.5px;padding:7px 0;border-bottom:1px dashed #1c2a3d}
+.kv:last-child{border:none}
+.kv b{font-weight:600}
+.kv span{color:var(--dim)}
+nav{position:fixed;bottom:0;left:0;right:0;z-index:30;background:#0a0e13;border-top:1px solid var(--line);display:flex;max-width:720px;margin:0 auto}
+nav a{flex:1;text-align:center;padding:10px 0 12px;color:var(--dim);font-size:11px}
+nav a.on{color:var(--acc)}
+nav a i{display:block;font-style:normal;font-size:18px;margin-bottom:2px}
+.filters{display:flex;gap:6px;overflow-x:auto;padding:8px 14px;scrollbar-width:none}
+.filters::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:8px 13px;font-size:12.5px;color:var(--dim);min-height:36px}
+.chip.on{color:var(--acc);border-color:var(--acc)}
+select.chip{appearance:none}
+.warn{background:#2a1503;border:1px solid #7c4a03;color:#fbbf24;border-radius:10px;padding:10px;font-size:12px;margin:8px 14px}
+.exp{background:#101c2c;border:1px dashed var(--blu);color:#9ec5ff;border-radius:10px;padding:8px 10px;font-size:11.5px;margin:8px 14px}
+.back{display:inline-block;margin:10px 14px 0;color:var(--dim);font-size:14px;padding:6px 0}
+pre{white-space:pre-wrap;word-break:break-all;font-size:11px;color:var(--dim)}
+.big{font-size:24px;font-weight:800}
+.center{text-align:center;color:var(--dim);padding:30px;font-size:13px}
+.mono{font-family:ui-monospace,monospace;font-size:11px;word-break:break-all}
+</style>
+</head>
+<body>
+<header>
+  <div class="hrow">
+    <h1>⚡ JK AI MEME RADAR</h1>
+    <span id="livechip" class="live">connecting…</span>
+    <button class="rbtn" onclick="hardRefresh()">⟳ Refresh</button>
+  </div>
+  <div class="fresh" id="freshline">loading…</div>
+  <input class="search" id="search" placeholder="🔎 token / symbol / CA / wallet…" oninput="doSearch(this.value)">
+</header>
+<div id="app"><div class="center">loading command center…</div></div>
+<nav>
+  <a href="#/" data-r="/"><i>🏠</i>Home</a>
+  <a href="#/list/watch" data-r="/list"><i>🎯</i>Tokens</a>
+  <a href="#/wallets" data-r="/wallets"><i>👛</i>Wallets</a>
+  <a href="#/paper" data-r="/paper"><i>👑</i>Paper</a>
+  <a href="#/status" data-r="/status"><i>📡</i>Status</a>
+</nav>
+<script>
+const B='data/';
+let S={status:null,summary:null,tokens:null,wallets:null,paper:null,tc:{},wc:{}};
+let lastTs=0;
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const na=v=>(v===null||v===undefined||v==='')?'<span class="sub">N/A</span>':v;
+const k=v=>v==null?'N/A':(v>=1e9?'$'+(v/1e9).toFixed(2)+'B':v>=1e6?'$'+(v/1e6).toFixed(2)+'M':v>=1e3?'$'+(v/1e3).toFixed(1)+'K':'$'+(+v).toFixed(2));
+const px=p=>p==null?'N/A':(p<0.001?p.toExponential(2):(+p).toPrecision(4));
+const x2=m=>m==null?'N/A':'x'+(+m).toFixed(2);
+const ist=iso=>{if(!iso)return'N/A';try{const d=new Date(iso);return d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true,timeZone:'Asia/Kolkata'});}catch(e){return'N/A';}};
+const istd=iso=>{if(!iso)return'N/A';try{const d=new Date(iso);return d.toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',hour12:true,timeZone:'Asia/Kolkata'});}catch(e){return'N/A';}};
+const ago=iso=>{if(!iso)return'N/A';const s=(Date.now()-new Date(iso))/1e3;if(s<60)return Math.round(s)+'s ago';if(s<3600)return Math.round(s/60)+'m ago';return(s/3600).toFixed(1)+'h ago';};
+const dur=s=>{if(s==null)return'N/A';s=+s;if(s<60)return s+'s';if(s<3600)return Math.round(s/60)+'m';if(s<86400)return(s/3600).toFixed(1)+'h';return(s/86400).toFixed(1)+'d';};
+async function j(p){const r=await fetch(B+p+'?v='+(lastTs||Date.now()));if(!r.ok)throw new Error(p+' '+r.status);return r.json();}
+async function loadAll(){
+  S.status=await j('status.json');
+  if(S.status.ts!==lastTs){
+    lastTs=S.status.ts;
+    [S.summary,S.tokens,S.wallets,S.paper]=await Promise.all([j('summary.json'),j('tokens.json'),j('wallets.json'),j('paper.json')]);
+  }
+  freshness();
+}
+function freshness(){
+  const st=S.status;if(!st)return;
+  const ageS=(Date.now()-new Date(st.publish_time))/1e3;
+  const chip=$('livechip');
+  chip.className='live '+(ageS<600?'on':'stale');
+  chip.textContent=ageS<600?'● LIVE':'◌ STALE';
+  $('freshline').textContent='Data updated '+ago(st.publish_time)+' (last engine publish '+ist(st.publish_time)+' IST) · auto-refresh 10s';
+}
+async function hardRefresh(){lastTs=0;try{await loadAll();}catch(e){}route();}
+setInterval(async()=>{try{await loadAll();}catch(e){freshnessOffline();}},10000);
+function freshnessOffline(){const chip=$('livechip');chip.className='live stale';chip.textContent='◌ OFFLINE';}
+async function tchunk(n){if(!S.tc[n])S.tc[n]=await j('tc_'+n+'.json');return S.tc[n];}
+async function wchunk(n){if(!S.wc[n])S.wc[n]=await j('wc_'+n+'.json');return S.wc[n];}
+async function token(mint){const ix=S.tokens[mint];if(!ix)return null;const ch=await tchunk(ix.c);return ch[mint];}
+async function wallet(a){const ix=S.wallets[a];if(!ix)return null;const ch=await wchunk(ix.c);return ch[a];}
+function links(d){
+  const m=d.mint;
+  let h=`<a class="btn" href="https://gmgn.ai/sol/token/${m}" target="_blank">🟢 GMGN</a>`+
+        `<a class="btn" href="https://dexscreener.com/solana/${m}" target="_blank">📊 DEX</a>`+
+        `<a class="btn" href="https://solscan.io/token/${m}" target="_blank">🔎 SOLSCAN</a>`;
+  if(d.binance&&d.sym)h+=`<a class="btn" href="https://www.binance.com/en/trade/${encodeURIComponent(d.sym.toUpperCase())}USDT" target="_blank">🟡 BINANCE</a>`;
+  return h;
+}
+function copyCA(t){navigator.clipboard&&navigator.clipboard.writeText(t);event.target.textContent='✅ COPIED';setTimeout(()=>route(),700);}
+function row(mint,ix,extra){
+  return `<div class="row" onclick="location.hash='#/token/${mint}'">
+    <div><div class="sym">$${esc(ix.sym||mint.slice(0,6))}</div><div class="sub">${esc(ix.status||'')}${ix.paper?' · 📄paper':''}${ix.binance?' · 🟡binance':''}</div></div>
+    <div class="val">${extra||''}<div class="sub">mc ${k(ix.mc)} · liq ${k(ix.liq)}</div></div></div>`;
+}
+/* ---------- VIEWS ---------- */
+async function vHome(){
+  const c=S.summary.counters,tg=S.summary.telegram,r=S.summary.race,m=S.summary.main;
+  const cnt=(label,val,list,color)=>`<div class="counter" onclick="location.hash='#/list/${list}'"><b style="color:${color||'var(--txt)'}">${val}</b><span>${label}</span></div>`;
+  let h=`<div class="card main-card">
+    <div class="hrow"><span class="tag gold">👑 MAIN PORTFOLIO</span><span class="sub" style="margin-left:auto">the book to follow</span></div>
+    <div class="hrow" style="margin-top:8px"><span class="big">${m?'$'+(+m.equity).toFixed(2):'N/A'}</span>
+    <span style="margin-left:auto;text-align:right"><span class="${m&&m.realised+m.unrealised>=0?'pos':'neg'}">${m?((m.realised+m.unrealised>=0?'+':'')+(m.realised+m.unrealised).toFixed(2)):'N/A'}</span><div class="sub">${m?m.n_open+' open · TP '+m.n_tp+' · SL '+m.n_sl+' · RUG '+m.n_rug:''}</div></span></div>
+    <div class="sub" style="margin-top:6px">start $500 · realised ${m?'$'+(+m.realised).toFixed(2):'N/A'} · unrealised ${m?'$'+(+m.unrealised).toFixed(2):'N/A'} · tap Paper tab for positions</div>
+  </div>`;
+  if(r){const cols=S.summary.color;
+    h+=`<div class="card" onclick="location.hash='#/paper'"><div class="hrow"><span class="tag b">🏁 WALLET RACE · EXPERIMENT</span>
+    <span class="sub" style="margin-left:auto">${r.state==='DECIDED'?('🏆 '+r.winner+' WINS'):('leader '+(r.leader||'N/A'))}</span></div>
+    <div class="hrow" style="margin-top:8px;gap:10px;flex-wrap:wrap">${['GREEN','YELLOW','RED','BLUE'].map(c=>cols[c]?`<span class="tag">${({GREEN:'🟢',YELLOW:'🟡',RED:'🔴',BLUE:'🔵'})[c]} $${(+cols[c].equity).toFixed(2)} (${(cols[c].net_pnl>=0?'+':'')+cols[c].net_pnl})</span>`:'').join('')}</div>
+    <div class="sub" style="margin-top:6px">${r.state==='DECIDED'?esc(r.win_reason||''):('win: first +$'+(r.target_pnl||50)+' net (≥2 closes) or best net at '+(r.window_h||24)+'h (≥3 closes)')} · paper only</div></div>`;}
+  h+=`<div class="grid">
+    ${cnt('DISCOVERED (24h)',c.discovered,'discovered')}
+    ${cnt('SCANNED (24h)',c.scanned,'scanned')}
+    ${cnt('SCORED (24h)',c.scored,'scored')}
+    ${cnt('WATCH CANDIDATES',c.watch_candidates,'watch','var(--acc)')}
+    ${cnt('PRE-ENTRY WATCH',c.pre_entry,'preentry','var(--blu)')}
+    ${cnt('SIGNALS TODAY',c.signals_today,'signals','var(--gold)')}
+    ${cnt('2x EVENTS',c['2x'],'2x','var(--grn)')}
+    ${cnt('3x EVENTS',c['3x'],'3x','var(--grn)')}
+    ${cnt('5x EVENTS',c['5x'],'5x','var(--grn)')}
+    ${cnt('10x EVENTS',c['10x']??0,'10x','var(--grn)')}
+    ${cnt('BUY DETECTED (24h)',c.buy_detected_24h,'buydetected')}
+    ${cnt('CONVERGENCE',c.convergence,'convergence','var(--acc)')}
+    ${cnt('RISK ALERTS (24h)',c.risk_alerts,'risk','var(--red)')}
+    ${cnt('LOW-CONF EVENTS',c.low_conf,'lowconf','var(--yel)')}
+    ${cnt('WALLETS TRACKED',c.wallets_tracked,'wallets')}
+  </div>`;
+  h+=`<div class="card"><div class="hrow"><span class="tag ${tg.online?'g':'r'}">📡 TELEGRAM ${tg.online?'ONLINE':'OFFLINE'}</span>
+    <span class="sub" style="margin-left:auto">24h: ${tg.ok_24h} ok · ${tg.errors_24h} err</span></div>
+    <div class="sub" style="margin-top:6px">last delivery ${ist(tg.last_delivery)} IST (${ago(tg.last_delivery)}) · last BUY alert ${ist(tg.last_buy_alert)} IST</div></div>`;
+  h+=`<div class="warn">⚠️ Signals are monitoring intel - never buy advice. Paper trading is hypothetical, no real money. Latency 4.7-13.9 min (poll-bound) - not a sniper bot.</div>`;
+  return h;
+}
+const LISTS={
+  discovered:{t:'DISCOVERED (24h)',f:(m,ix)=>true,s:(a,b)=>(S.tokens[b].last_update||'').localeCompare(S.tokens[a].last_update||'')},
+  scanned:{t:'SCANNED / FILTERED (24h)',f:(m,ix)=>true},
+  scored:{t:'SCORED (24h)',f:(m,ix)=>ix.rank!=null,s:(a,b)=>(S.tokens[b].rank||0)-(S.tokens[a].rank||0)},
+  watch:{t:'WATCH CANDIDATES',f:(m,ix)=>ix.status==='active'||ix.rank!=null,s:(a,b)=>(S.tokens[b].rank||0)-(S.tokens[a].rank||0)},
+  preentry:{t:'PRE-ENTRY WATCH',note:'Fresh tokens (≤6h) matching tracked-wallet entry profiles - from the radar\'s own pre-entry matcher. WATCH ONLY - never a BUY signal.',f:(m,ix)=>ix.pe},
+  signals:{t:'SIGNALS TODAY',f:(m,ix)=>ix.status==='SIGNAL',empty:'0 signals today - no coin passed the LIVE=80 gate. Honest count, nothing manufactured.'},
+  '2x':{t:'2x EVENTS',f:(m,ix)=>ix.mult>=2,s:(a,b)=>(S.tokens[b].mult||0)-(S.tokens[a].mult||0)},
+  '3x':{t:'3x EVENTS',f:(m,ix)=>ix.mult>=3,s:(a,b)=>(S.tokens[b].mult||0)-(S.tokens[a].mult||0)},
+  '5x':{t:'5x EVENTS',f:(m,ix)=>ix.mult>=5,s:(a,b)=>(S.tokens[b].mult||0)-(S.tokens[a].mult||0)},
+  '10x':{t:'10x EVENTS',f:(m,ix)=>ix.mult>=10,s:(a,b)=>(S.tokens[b].mult||0)-(S.tokens[a].mult||0)},
+  buydetected:{t:'BUY DETECTED (tracked-wallet buys, 24h)',f:(m,ix)=>(ix.best_score||0)>0,s:(a,b)=>(S.tokens[b].last_update||'').localeCompare(S.tokens[a].last_update||'')},
+  convergence:{t:'CONVERGENCE (≥2 independent wallets)',f:(m,ix)=>(ix.indep||0)>=2,s:(a,b)=>(S.tokens[b].indep||0)-(S.tokens[a].indep||0)},
+  risk:{t:'RISK ALERTS (24h)',f:(m,ix)=>false,empty:'0 risk events in the last 24h.'},
+  lowconf:{t:'LOW-CONFIDENCE EVENTS',f:(m,ix)=>false,empty:'0 low-confidence flagged events.'},
+  paper:{t:'PAPER POSITIONS (all books)',f:(m,ix)=>ix.paper},
+};
+const FILTERS={NEW:(m,ix)=>ix.age_s!=null&&ix.age_s<=3600,'PRE-ENTRY':(m,ix)=>LISTS.preentry.f(m,ix),'BUY DETECTED':(m,ix)=>(ix.best_score||0)>0,'PAPER OPEN':(m,ix)=>ix.paper,'TP':(m,ix)=>false,'2X+':(m,ix)=>ix.mult>=2,'3X+':(m,ix)=>ix.mult>=3,'HIGH WALLET SCORE':(m,ix)=>(ix.best_score||0)>=70,'HIGH CONVERGENCE':(m,ix)=>(ix.indep||0)>=3,'HIGH LIQUIDITY':(m,ix)=>(ix.liq||0)>=50000,'HIGH VOLUME':(m,ix)=>(ix.v1h||0)>=50000,'LOW RISK':(m,ix)=>true};
+const SORTS={newest:(a,b)=>(S.tokens[b].last_update||'').localeCompare(S.tokens[a].last_update||''),'wallet score':(a,b)=>(S.tokens[b].best_score||0)-(S.tokens[a].best_score||0),'independent wallets':(a,b)=>(S.tokens[b].indep||0)-(S.tokens[a].indep||0),liquidity:(a,b)=>(S.tokens[b].liq||0)-(S.tokens[a].liq||0),volume:(a,b)=>(S.tokens[b].v1h||0)-(S.tokens[a].v1h||0),multiple:(a,b)=>(S.tokens[b].mult||0)-(S.tokens[a].mult||0),freshness:(a,b)=>(S.tokens[a].age_s||9e9)-(S.tokens[b].age_s||9e9)};
+let curFilter=null,curSort='newest';
+async function vList(key){
+  const L=LISTS[key]||LISTS.watch;
+  let mints=Object.keys(S.tokens).filter(m=>L.f(m,S.tokens[m]));
+  if(curFilter&&FILTERS[curFilter])mints=mints.filter(m=>FILTERS[curFilter](m,S.tokens[m]));
+  const sortFn=L.s||SORTS[curSort]||SORTS.newest;
+  mints.sort(sortFn);
+  let h=`<a class="back" href="#/">← home</a><div class="sec">${L.t} (${mints.length})</div>`;
+  if(L.note)h+=`<div class="exp">${L.note}</div>`;
+  h+=`<div class="filters">${Object.keys(FILTERS).map(f=>`<button class="chip ${curFilter===f?'on':''}" onclick="curFilter=curFilter==='${f}'?null:'${f}';route()">${f}</button>`).join('')}
+    <select class="chip" onchange="curSort=this.value;route()">${Object.keys(SORTS).map(s=>`<option ${curSort===s?'selected':''}>${s}</option>`).join('')}</select></div>`;
+  if(!mints.length)return h+`<div class="center">${L.empty||'nothing here right now - honest empty state.'}</div>`;
+  h+=`<div class="card" style="padding:0 12px">${mints.slice(0,60).map(m=>row(m,S.tokens[m],S.tokens[m].mult?'x'+(+S.tokens[m].mult).toFixed(2):'')).join('')}</div>`;
+  if(mints.length>60)h+=`<div class="center">showing 60 of ${mints.length} - use search/filters</div>`;
+  return h;
+}
+async function vToken(mint){
+  const d=await token(mint);
+  if(!d)return`<a class="back" href="#/">← home</a><div class="center">token not found in tracked set</div>`;
+  const mk=d.market,wi=d.wallet_intel,oc=d.outcome;
+  let h=`<a class="back" href="javascript:history.back()">← back</a>
+  <div class="card"><div class="hrow"><span style="font-size:20px;font-weight:800">$${esc(d.sym||'?')}</span>
+    <span class="tag">${esc(d.status||'TRACKED')}</span><span class="sub" style="margin-left:auto">${na(d.name?esc(d.name):null)}</span></div>
+    <div class="sub" style="margin:6px 0">age ${dur(d.age_s)} · first seen ${istd(d.first_seen)} IST · updated ${ago(d.last_update)}</div>
+    <div class="mono" style="background:#0a0e13;padding:8px;border-radius:8px;margin:6px 0">${mint}</div>
+    <button class="btn ca" onclick="copyCA('${mint}')">📋 TAP TO COPY CA</button>
+    <div style="margin-top:6px">${links(d)}</div></div>`;
+  h+=`<div class="sec">MARKET</div><div class="card">
+    <div class="kv"><span>price</span><b>${na(px(mk.price))}</b></div>
+    <div class="kv"><span>market cap</span><b>${na(k(mk.mc))}</b></div>
+    <div class="kv"><span>liquidity</span><b>${na(k(mk.liq))}</b></div>
+    <div class="kv"><span>volume 5m / 1h / 6h / 24h</span><b>${na(k(mk.v5m))} / ${na(k(mk.v1h))} / ${na(k(mk.v6h))} / ${na(k(mk.v24h))}</b></div>
+    <div class="kv"><span>buys/sells 5m</span><b>${mk.b5m??'N/A'} / ${mk.s5m??'N/A'}</b></div>
+    <div class="kv"><span>buys/sells 1h (buy ratio)</span><b>${mk.b1h??'N/A'} / ${mk.s1h??'N/A'}${mk.buy_ratio_1h!=null?' ('+mk.buy_ratio_1h+')':''}</b></div>
+    <div class="kv"><span>price change 5m/1h/6h/24h</span><b>${mk.pc5m??'N/A'}% / ${mk.pc1h??'N/A'}% / ${mk.pc6h??'N/A'}% / ${mk.pc24h??'N/A'}%</b></div>
+    <div class="kv"><span>holders (top10 share)</span><b>${mk.holders??'N/A'}${mk.top10!=null?' ('+mk.top10+'%)':''}</b></div></div>`;
+  h+=`<div class="sec">WALLET INTELLIGENCE</div><div class="card">
+    <div class="kv"><span>tracked wallets buying</span><b>${na(wi.wallet_count)}</b></div>
+    <div class="kv"><span>independent wallets</span><b>${na(wi.independent_count)}</b></div>
+    <div class="kv"><span>best wallet score</span><b>${na(wi.best_wallet_score)}</b></div>
+    <div class="kv"><span>cluster score</span><b>${na(wi.cluster_score)}</b></div>
+    <div class="kv"><span>first / latest wallet entry</span><b>${ist(wi.first_entry)} / ${ist(wi.latest_entry)} IST</b></div>
+    <div class="kv"><span>freshness</span><b>${na(esc(wi.freshness||''))}</b></div>
+    ${(wi.wallets||[]).length?'<div class="sub" style="margin:6px 0 2px">wallets (tap → profile):</div>'+wi.wallets.map(w=>`<div class="kv" style="cursor:pointer" onclick="location.hash='#/wallet/${w.w}'"><span>…${w.w.slice(-6)} · score ${w.score??'N/A'} · ${ist(w.time)} IST</span><b>${w.usd?k(w.usd):''}</b></div>`).join(''):'<div class="sub">no tracked-wallet entries recorded</div>'}
+    </div>`;
+  if(wi.score_components){h+=`<div class="sec">WHY (score components - real evidence)</div><div class="card">`+
+    Object.entries(wi.score_components).map(([a,b])=>`<div class="kv"><span>${esc(a)}</span><b>${typeof b==='number'?(+b).toFixed(1):esc(b)}</b></div>`).join('')+`</div>`;}
+  h+=`<div class="sec">PRICE / OUTCOME</div><div class="card">`+
+    (oc?`<div class="kv"><span>flag/entry price</span><b>${na(px(oc.entry_price))}</b></div>
+    <div class="kv"><span>entry MC / liq</span><b>${na(k(oc.entry_mc))} / ${na(k(oc.entry_liq))}</b></div>
+    <div class="kv"><span>max multiple</span><b class="pos">${na(x2(oc.max_multiple))}</b></div>
+    <div class="kv"><span>max drawdown</span><b>${oc.max_drawdown!=null?x2(oc.max_drawdown):'N/A'}</b></div>
+    <div class="kv"><span>time to peak</span><b>${dur(oc.time_to_peak_s)}</b></div>
+    <div class="kv"><span>1.5x / 2x / 3x / 5x</span><b>${oc.reached_1_5x?'✅':'—'} / ${oc.reached_2x?'✅':'—'} / ${oc.reached_3x?'✅':'—'} / ${oc.reached_5x?'✅':'—'}</b></div>
+    <div class="kv"><span>2x at / 3x at (IST)</span><b>${ist(oc.reached_2x_at)} / ${ist(oc.reached_3x_at)}</b></div>`
+    :'<div class="sub">no outcome tracking record for this token yet</div>')+`</div>`;
+  if(d.paper&&d.paper.length){h+=`<div class="sec">PAPER POSITIONS (hypothetical)</div><div class="card">`+
+    d.paper.map(p=>`<div class="kv"><span>${p.book==='MAIN'?'👑 MAIN':'🧪 '+p.book}${p.stage?' · '+p.stage:''}</span><b>${p.stage?( 'P&L $'+(+p.pnl).toFixed(2)+' · exit x'+(+p.exit_mult).toFixed(2)):( 'x'+(+(p.last_mult||1)).toFixed(2)+' · entry '+ist(p.entry_time)+' IST')}</b></div>`).join('')+`</div>`;}
+  return h;
+}
+async function vWallet(a){
+  const w=await wallet(a);
+  if(!w)return`<a class="back" href="#/wallets">← wallets</a><div class="center">wallet not in tracked set (only wallets with events or scores are exported)</div>`;
+  let h=`<a class="back" href="javascript:history.back()">← back</a>
+  <div class="card"><div class="hrow"><span style="font-size:16px;font-weight:800">👛 …${a.slice(-8)}</span>
+    <span class="tag">${esc(w.classification||'UNKNOWN')}</span>
+    <span class="big" style="margin-left:auto">${na(w.score!=null?(+w.score).toFixed(1):null)}</span></div>
+    <div class="mono" style="background:#0a0e13;padding:8px;border-radius:8px;margin:6px 0">${a}</div>
+    <button class="btn ca" onclick="copyCA('${a}')">📋 COPY ADDRESS</button>
+    <a class="btn" href="https://solscan.io/account/${a}" target="_blank">🔎 SOLSCAN</a>
+    <a class="btn" href="https://gmgn.ai/sol/address/${a}" target="_blank">🟢 GMGN</a></div>`;
+  h+=`<div class="sec">PROFILE</div><div class="card">
+    <div class="kv"><span>trades tracked / tokens</span><b>${na(w.total_trades)} / ${na(w.tokens_traded)}</b></div>
+    <div class="kv"><span>win rate</span><b>${w.win_rate!=null?(+w.win_rate).toFixed(1)+'%':'N/A'}</b></div>
+    <div class="kv"><span>profitable / loss trades</span><b>${na(w.profitable)} / ${na(w.loss)}</b></div>
+    <div class="kv"><span>max / avg / median multiple</span><b>${na(x2(w.max_multiple))} / ${na(x2(w.avg_max_multiple))} / ${na(x2(w.median_max_multiple))}</b></div>
+    <div class="kv"><span>early entries (successful)</span><b>${na(w.early_entries)} (${na(w.successful_early)})</b></div>
+    <div class="kv"><span>rug exposure</span><b>${na(w.rug_exposure)}</b></div>
+    <div class="kv"><span>early-entry / consistency / risk scores</span><b>${na(w.early_entry_score)} / ${na(w.consistency)} / ${na(w.risk_score)}</b></div>
+    <div class="kv"><span>activity 24h / 7d</span><b>${na(w.act_24h)} / ${na(w.act_7d)}</b></div>
+    <div class="kv"><span>first seen / last active</span><b>${istd(w.first_seen)} / ${istd(w.last_active)}</b></div></div>`;
+  if((w.recent_events||[]).length){h+=`<div class="sec">RECENT BUYS (tap → token)</div><div class="card" style="padding:0 12px">`+
+    w.recent_events.map(e=>`<div class="row" onclick="location.hash='#/token/${e.mint}'"><div class="sym">$${esc(e.sym||e.mint.slice(0,6))}</div><div class="sub">${ist(e.time)} IST</div><div class="val">${e.usd?k(e.usd):''}</div></div>`).join('')+`</div>`;}
+  if((w.recent_trades||[]).length){h+=`<div class="sec">TRADE HISTORY (tap → token)</div><div class="card" style="padding:0 12px">`+
+    w.recent_trades.map(t=>`<div class="row" onclick="location.hash='#/token/${t.mint}'"><div class="sym">$${esc(t.sym||t.mint.slice(0,6))}</div><div class="sub">${istd(t.entry_time)} · ${t.early?'early ':''}${esc(t.outcome||'')}</div><div class="val">${t.max_multiple?'x'+(+t.max_multiple).toFixed(2):''}</div></div>`).join('')+`</div>`;}
+  if((w.related||[]).length){h+=`<div class="sec">CLUSTER / RELATED WALLETS</div><div class="card" style="padding:0 12px">`+
+    w.related.map(r=>`<div class="row" onclick="location.hash='#/wallet/${r.w}'"><div class="sym">…${r.w.slice(-6)}</div><div class="val">cluster ${r.cluster_score!=null?(+r.cluster_score).toFixed(2):'N/A'}</div></div>`).join('')+`</div>`;}
+  return h;
+}
+async function vWallets(){
+  const addrs=Object.keys(S.wallets).sort((a,b)=>(S.wallets[b].score||0)-(S.wallets[a].score||0));
+  let h=`<a class="back" href="#/">← home</a><div class="sec">TRACKED WALLETS (${addrs.length} exported of ${S.summary.counters.wallets_tracked})</div>
+  <div class="card" style="padding:0 12px">${addrs.slice(0,80).map(a=>{const w=S.wallets[a];
+    return`<div class="row" onclick="location.hash='#/wallet/${a}'"><div><div class="sym">…${a.slice(-8)}</div><div class="sub">${esc(w.classification||'')} · 24h ${w.act_24h??'N/A'} acts</div></div>
+    <div class="val">${w.score!=null?(+w.score).toFixed(1):'N/A'}<div class="sub">win ${w.win_rate!=null?(+w.win_rate).toFixed(0)+'%':'N/A'} · max ${x2(w.max_multiple)}</div></div></div>`;}).join('')}</div>`;
+  return h;
+}
+async function vPaper(){
+  const P=S.paper,m=P.MAIN,r=P.race;
+  const book=(name,bk,main)=>{
+    if(!bk)return'';
+    const net=(bk.realised||0)+(bk.unrealised||0);
+    return`<div class="card ${main?'main-card':''}">
+    <div class="hrow"><span class="tag ${main?'gold':'b'}">${name}</span><span class="sub" style="margin-left:auto">${bk.open.length} open</span></div>
+    <div class="hrow" style="margin-top:8px"><span class="big">$${(+bk.equity).toFixed(2)}</span>
+    <span style="margin-left:auto;text-align:right"><span class="${net>=0?'pos':'neg'}">net ${net>=0?'+':''}${net.toFixed(2)}</span>
+    <div class="sub">TP ${bk.n_tp} · SL ${bk.n_sl} · RUG ${bk.n_rug}</div></span></div>
+    <div class="sub" style="margin:6px 0">start $${bk.start||500} · available $${(+bk.cash).toFixed(2)} · realised $${(+bk.realised).toFixed(2)} · unrealised $${(+bk.unrealised).toFixed(2)}</div>
+    ${bk.open.map(p=>`<div class="row" style="padding:10px 0" onclick="location.hash='#/token/${p.mint}'"><div><div class="sym">$${esc(p.sym)}</div><div class="sub">entry ${ist(p.entry_time)} IST @ ${px(p.entry)}</div></div>
+      <div class="val"><span class="${(p.last_mult||1)>=1?'pos':'neg'}">x${(+(p.last_mult||1)).toFixed(2)}</span><div class="sub">max x${(+(p.max_mult||1)).toFixed(2)}</div></div></div>`).join('')}
+    ${bk.closed.slice(-6).map(x=>`<div class="row" style="padding:8px 0" onclick="location.hash='#/token/${x.mint}'"><div><div class="sym sub">$${esc(x.sym||x.mint.slice(0,6))}</div><div class="sub">${esc(x.stage)} · entry ${ist(x.entry_time)} → exit ${ist(x.exit_time)} IST</div></div>
+      <div class="val"><span class="${(x.pnl||0)>=0?'pos':'neg'}">$${(+(x.pnl||0)).toFixed(2)}</span></div></div>`).join('')}
+  </div>`;};
+  let h=`<div class="sec">👑 MAIN BOOK - the one to follow</div>`+book('👑 MAIN PORTFOLIO',m,true);
+  if(r){h+=`<div class="sec">🏁 RACE - EXPERIMENT (paper only)</div><div class="card">
+    <div class="kv"><span>state</span><b>${r.state==='DECIDED'?('🏆 '+r.winner+' WINS - '+esc(r.win_reason||'')):'RACING'}</b></div>
+    ${r.state!=='DECIDED'?`<div class="kv"><span>win criterion</span><b>first +$${r.target_pnl||50} net (≥2 closes) or best net @${r.window_h||24}h (≥3 closes)</b></div>`:''}
+    <div class="kv"><span>leader</span><b>${r.last_leader||'N/A'}</b></div></div>`;
+    h+=book('🟢 GREEN',P.wallets.GREEN)+book('🟡 YELLOW',P.wallets.YELLOW)+book('🔴 RED',P.wallets.RED)+book('🔵 BLUE',P.wallets.BLUE);}
+  h+=`<div class="warn">⚠️ PAPER TRADE - NOT REAL MONEY. Locked rules: $20/coin, TP 2x sell 100%, SL -50% full sell, RUG ≤0.1x full loss. Experiment wallets are tier candidates, never qualified BUY signals.</div>`;
+  return h;
+}
+async function vStatus(){
+  const tg=S.summary.telegram;
+  return`<a class="back" href="#/">← home</a>
+  <div class="sec">TELEGRAM BOT 3 (PRIMARY)</div><div class="card">
+    <div class="kv"><span>state</span><b class="${tg.online?'pos':'neg'}">${tg.online?'ONLINE':'OFFLINE'}</b></div>
+    <div class="kv"><span>last delivery</span><b>${istd(tg.last_delivery)} IST (${ago(tg.last_delivery)})</b></div>
+    <div class="kv"><span>last kind</span><b>${esc(tg.last_kind||'N/A')}</b></div>
+    <div class="kv"><span>last BUY alert</span><b>${istd(tg.last_buy_alert)} IST</b></div>
+    <div class="kv"><span>24h deliveries</span><b>${tg.ok_24h} ok · ${tg.errors_24h} errors</b></div></div>
+  <div class="sec">DASHBOARD CONTROLS</div><div class="card">
+    <div class="sub">Send test / portfolio / alerts from this page: <b>NOT AVAILABLE</b> - GitHub Pages is static hosting; the bot token stays server-side for security. Use the Telegram chat commands instead: /status /paper /live /signals /top /wallets /walletradar.</div></div>
+  <div class="sec">WHATSAPP</div><div class="card">
+    <div class="kv"><span>report beats</span><b>ACTIVE via assistant (10-min)</b></div>
+    <div class="kv"><span>dashboard actions</span><b>NOT CONFIGURED (static page)</b></div></div>
+  <div class="sec">ENGINE</div><div class="card">
+    <div class="kv"><span>data publish</span><b>${istd(S.status.publish_time)} IST (${ago(S.status.publish_time)})</b></div>
+    <div class="kv"><span>auto-refresh</span><b>every 10s (re-pulls published JSON)</b></div>
+    <div class="kv"><span>latency honesty</span><b>4.7-13.9 min poll-bound</b></div></div>`;
+}
+let searchT=null;
+async function doSearch(q){
+  clearTimeout(searchT);
+  if(!q||q.length<2)return;
+  searchT=setTimeout(async()=>{
+    q=q.trim();
+    if(S.tokens[q])return location.hash='#/token/'+q;
+    if(S.wallets[q])return location.hash='#/wallet/'+q;
+    const ql=q.toLowerCase();
+    const tm=Object.keys(S.tokens).filter(m=>(S.tokens[m].sym||'').toLowerCase().includes(ql)||m.toLowerCase().startsWith(ql)).slice(0,10);
+    const wm=Object.keys(S.wallets).filter(a=>a.toLowerCase().startsWith(ql)).slice(0,5);
+    let h=`<a class="back" href="#/">← home</a><div class="sec">SEARCH "${esc(q)}"</div>`;
+    if(!tm.length&&!wm.length)h+=`<div class="center">no matches in tracked tokens/wallets</div>`;
+    if(tm.length)h+=`<div class="card" style="padding:0 12px">${tm.map(m=>row(m,S.tokens[m])).join('')}</div>`;
+    if(wm.length)h+=`<div class="card" style="padding:0 12px">${wm.map(a=>`<div class="row" onclick="location.hash='#/wallet/${a}'"><div class="sym">…${a.slice(-8)}</div><div class="val">${S.wallets[a].score!=null?(+S.wallets[a].score).toFixed(1):'N/A'}</div></div>`).join('')}</div>`;
+    $('app').innerHTML=h;
+  },250);
+}
+async function route(){
+  const h=(location.hash||'#/').slice(1);
+  document.querySelectorAll('nav a').forEach(a=>a.classList.toggle('on',h.startsWith(a.dataset.r)));
+  let html;
+  try{
+    if(!S.summary)await loadAll();
+    if(h==='/'||h==='')html=await vHome();
+    else if(h.startsWith('/list/'))html=await vList(h.split('/')[2]);
+    else if(h.startsWith('/token/'))html=await vToken(h.split('/')[2]);
+    else if(h.startsWith('/wallet/'))html=await vWallet(h.split('/')[2]);
+    else if(h==='/wallets')html=await vWallets();
+    else if(h==='/paper')html=await vPaper();
+    else if(h==='/status')html=await vStatus();
+    else html=await vHome();
+  }catch(e){html=`<div class="center">load error: ${esc(e.message)}<br><br><button class="btn" onclick="hardRefresh()">retry</button></div>`;}
+  $('app').innerHTML=html;
+  window.scrollTo(0,0);
+}
+window.addEventListener('hashchange',route);
+(async()=>{try{await loadAll();}catch(e){}$('app').innerHTML='<div class="center">connecting…</div>';route();})();
+</script>
+</body>
+</html>
