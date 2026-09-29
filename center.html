@@ -89,7 +89,7 @@ pre{white-space:pre-wrap;word-break:break-all;font-size:11px;color:var(--dim)}
 </nav>
 <script>
 const B='data/';
-let S={status:null,summary:null,tokens:null,wallets:null,paper:null,sig:null,health:null,tc:{},wc:{}};
+let S={status:null,summary:null,tokens:null,wallets:null,paper:null,sig:null,health:null,v2:null,tc:{},wc:{}};
 let lastTs=0;
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -109,6 +109,7 @@ async function loadAll(){
     [S.summary,S.tokens,S.wallets,S.paper]=await Promise.all([j('summary.json'),j('tokens.json'),j('wallets.json'),j('paper.json')]);
     try{S.sig=await j('sig_feed.json');}catch(e){S.sig=S.sig||{signals:[]};}
     try{S.health=await j('sig_health.json');}catch(e){S.health=S.health||{components:{}};}
+    try{S.v2=await j('sig_v2.json');}catch(e){S.v2=S.v2||{v2:{}};}
   }
   freshness();
 }
@@ -203,6 +204,22 @@ async function vSigDetail(id){
   ${(d.why||[]).map(w=>`<div class="why-line pos">✓ ${esc(w)}</div>`).join('')||'<div class="sub">building evidence - no factors crossed their bars yet</div>'}
   ${(d.risks||[]).map(r=>`<div class="why-line" style="color:var(--yel)">⚠️ Risk: ${esc(r)}</div>`).join('')}
   ${blocked?`<div class="why-line neg">🔴 ${esc(s.blocked_reason)}</div>`:''}</div>`;
+  const v2=(S.v2&&S.v2.v2&&S.v2.v2[id])||null;
+  if(v2){const vc=v2.components||{},vw=v2.why||{};
+    h+=`<div class="sec">V2 SMART MONEY (debug - production score unchanged)</div><div class="card">
+    <div class="hrow"><span class="sub">V2 score</span><b>${(+v2.score_v2||0).toFixed(1)}</b>
+    <span class="sub">vs production</span><b>${(+s.score||0).toFixed(1)}</b>
+    <span class="sub" style="margin-left:auto">${esc(v2.gate||'')}</span></div>
+    <div class="grid" style="margin-top:8px">
+    <div class="counter"><b>${vc.smart_quality||0}</b><span>smart quality</span></div>
+    <div class="counter"><b>${vc.cluster||0}</b><span>cluster</span></div>
+    <div class="counter"><b>${vc.earlyness||0}</b><span>earlyness</span></div>
+    <div class="counter"><b>${vc.net_pressure||0}</b><span>net pressure</span></div>
+    <div class="counter"><b>${vc.whale_flow||0}</b><span>whale flow</span></div>
+    <div class="counter"><b>${vc.liq_quality||0}</b><span>liq quality</span></div></div>
+    ${v2.cluster?`<div class="pos" style="margin-top:6px;font-size:12px">🔥 SMART MONEY CLUSTER: ${v2.cluster.n} quality wallets · $${(+v2.cluster.usd||0).toLocaleString()} · avg quality ${v2.cluster.avg_q}</div>`:''}
+    ${(vw.why||[]).slice(0,3).map(w=>`<div class="why-line" style="font-size:12px">${esc(w)}</div>`).join('')}
+    </div>`;}
   h+=`<div class="sec">SCORE BREAKDOWN</div><div class="card"><div class="grid">
   ${['pressure','smart','cluster','accel','liq_health','whale'].map(kk=>`<div class="counter"><b>${(+(c[kk]||0)).toFixed(1)}</b><span>${kk.replace('_',' ')}</span></div>`).join('')}
   </div></div>`;
