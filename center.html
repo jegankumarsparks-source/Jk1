@@ -316,8 +316,14 @@ async function vStatus(){
     <div class="kv"><span>last kind</span><b>${esc(tg.last_kind||'N/A')}</b></div>
     <div class="kv"><span>last BUY alert</span><b>${istd(tg.last_buy_alert)} IST</b></div>
     <div class="kv"><span>24h deliveries</span><b>${tg.ok_24h} ok · ${tg.errors_24h} errors</b></div></div>
+  <div class="sec">YOUR CONTROLS (read-only - set in Telegram)</div><div class="card">
+    <div class="kv"><span>instant buy alerts</span><b class="${S.status.settings&&S.status.settings.alerts?'pos':'neg'}">${S.status.settings?(S.status.settings.alerts?'ON':'OFF'):'N/A'}</b></div>
+    <div class="kv"><span>wallet-buys summary</span><b>every ${S.status.settings?S.status.settings.interval_min:'?'} min</b></div>
+    <div class="kv"><span>watched wallets</span><b>${S.status.settings?S.status.settings.watched_count:0}</b></div>
+    <div class="sub">${S.status.settings&&S.status.settings.watched_masked.length?esc(S.status.settings.watched_masked.join(' · ')):'No wallets watched yet'}</div>
+    <div class="sub">Telegram commands: <b>/watch &lt;address&gt;</b> alert on every buy from a wallet · <b>/unwatch &lt;address&gt;</b> · <b>/watched</b> list · <b>/interval &lt;min&gt;</b> summary cadence (1-60) · <b>/alerts on|off</b> instant alerts. Replies within a minute.</div></div>
   <div class="sec">DASHBOARD CONTROLS</div><div class="card">
-    <div class="sub">Send test / portfolio / alerts from this page: <b>NOT AVAILABLE</b> - GitHub Pages is static hosting; the bot token stays server-side for security. Use the Telegram chat commands instead: /status /paper /live /signals /top /wallets /walletradar.</div></div>
+    <div class="sub">Send test / portfolio / alerts from this page: <b>NOT AVAILABLE</b> - GitHub Pages is static hosting; the bot token stays server-side for security. Use the Telegram chat commands instead: /status /paper /live /signals /top /wallets /walletradar /watch /unwatch /watched /interval /alerts.</div></div>
   <div class="sec">WHATSAPP</div><div class="card">
     <div class="kv"><span>report beats</span><b>ACTIVE via assistant (10-min)</b></div>
     <div class="kv"><span>dashboard actions</span><b>NOT CONFIGURED (static page)</b></div></div>
