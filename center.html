@@ -454,6 +454,7 @@ async function vPerformance(){
     <div class="kv"><span>Realized / unrealized P&L</span><b>${money(b.realized_pnl)} / ${money(b.unrealized_pnl)}</b></div>
     <div class="kv"><span>Net P&L</span><b>${money(b.net_pnl)}</b></div>
     <div class="kv"><span>Trades / open / closed</span><b>${b.trades} / ${b.open} / ${b.closed}</b></div>
+    <div class="kv"><span>Source-linked / legacy unlinked</span><b>${b.source_linked_n} / ${b.legacy_unlinked_n}</b></div>
     <div class="kv"><span>Wins / losses / win rate</span><b>${b.wins} / ${b.losses} / ${b.win_rate_pct==null?'UNAVAILABLE':num(b.win_rate_pct)+'%'}</b></div>
     <div class="kv"><span>Avg / median realized ROI</span><b>${num(b.average_roi_pct)}% / ${num(b.median_roi_pct)}%</b></div>
     <div class="kv"><span>Profit factor</span><b>${b.profit_factor==null?esc(b.profit_factor_note||'UNAVAILABLE'):num(b.profit_factor)}</b></div>
@@ -466,7 +467,7 @@ async function vPerformance(){
     <div class="sub">${b.closed} closed; performance comparisons need at least ${b.sample_min} closed trades. ${b.sample}.</div></div>`;
   }
   h+=`<div class="sec">SIGNAL → OUTCOME (tracked only)</div>`;
-  h+=`<div class="card">${(P.signals||[]).map(s=>`<div class="row" onclick="location.hash='#/sig/${esc(s.signal_id)}'"><div><b>$${esc(s.sym)}</b><div class="sub">${esc(s.signal_id)} · ${esc(s.production_state)} · ${s.same_mint_paper_entries_unverified.length} same-token paper entries (NOT linked)</div></div><div class="val">${s.roi_observed_pct==null?'OUTCOME UNAVAILABLE':num(s.roi_observed_pct)+'% sampled'}<div class="sub">MFE ${num(s.mfe_pct)}% · MAE ${num(s.mae_pct)}% · ${s.snapshot_count} snapshots</div></div></div>`).join('')}</div>`;
+  h+=`<div class="card">${(P.signals||[]).map(s=>`<div class="row" onclick="location.hash='#/sig/${esc(s.signal_id)}'"><div><b>$${esc(s.sym)}</b><div class="sub">${esc(s.signal_id)} · ${esc(s.production_state)} · ${s.linked_paper_entries.length?s.linked_paper_entries.length+' source-linked paper entries':'⚠️ SIGNAL OUTCOME PENDING'}</div></div><div class="val">${s.roi_observed_pct==null?'OUTCOME UNAVAILABLE':num(s.roi_observed_pct)+'% sampled'}<div class="sub">MFE ${num(s.mfe_pct)}% · MAE ${num(s.mae_pct)}% · ${s.snapshot_count} snapshots</div></div></div>`).join('')}</div>`;
   return h;
 }
 async function vStatus(){
