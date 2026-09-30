@@ -129,7 +129,7 @@
     }
     var b=document.createElement("div"); b.className="bubble";
     var html='<div class="who">'+esc(o.who)+'</div>';
-    if(o.relay) html+='<div class="fwdHdr">Forwarded from '+esc(o.who)+'</div>';
+    if(o.relay) html+='<div class="fwdHdr">Forwarded from '+esc(o.fwdName||o.who)+'</div>';
     if(o.quote) html+='<div class="quote">'+esc(o.quote)+'</div>';
     if(o.text!=null) html+='<div>'+esc(o.text)+'</div>';
     if(o.imgUrl) html+='<a href="'+o.imgUrl+'" target="_blank"><img src="'+o.imgUrl+'" style="max-width:100%;border-radius:8px;margin-top:4px"></a>';
@@ -235,8 +235,10 @@
     var fromName=(m.from && (m.from.first_name||m.from.username||"member"))||"member";
     var isForward=!!(m.forward_origin || m.forward_from || m.forward_from_chat);
     if(!isForward && m.message_id){ if(seenOrig[m.message_id]) return; seenOrig[m.message_id]=1; }
+    var fwdName=null;
     if(isForward && m.forward_origin && m.forward_origin.sender_user)
-      fromName=(m.forward_origin.sender_user.first_name||m.forward_origin.sender_user.username||fromName);
+      fwdName=(m.forward_origin.sender_user.first_name||m.forward_origin.sender_user.username||null);
+    if(isForward && !fwdName && m.forward_from) fwdName=(m.forward_from.first_name||m.forward_from.username||null);
     var quote=(m.reply_to_message && (m.reply_to_message.text||"[voice]"))||null;
     if(m.photo || m.video || (m.document && !m.voice)){
       var fid=null, kind="doc", label="[file]";
@@ -248,7 +250,7 @@
       api(bots[bi].token,"getFile",{file_id:fid}).then(function(d){
         if(d.ok){
           var url="https://api.telegram.org/file/bot"+bots[bi].token+"/"+d.result.file_path;
-          var o={who:fromName, relay:isForward, text:(m.caption||null), ts:(m.date||0)*1000, mid:m.message_id, quote:quote};
+          var o={who:fromName, relay:isForward, fwdName:fwdName, text:(m.caption||null), ts:(m.date||0)*1000, mid:m.message_id, quote:quote};
           if(kind==="img") o.imgUrl=url; else if(kind==="video") o.videoUrl=url; else { o.docUrl=url; o.docName=docName||"file"; if(!o.text) o.text=null; }
           addMsg(o);
         }
@@ -261,14 +263,14 @@
       api(bots[bi].token,"getFile",{file_id:m.voice.file_id}).then(function(d){
         if(d.ok){
           var url="https://api.telegram.org/file/bot"+bots[bi].token+"/"+d.result.file_path;
-          addMsg({who:fromName, relay:isForward, voiceUrl:url, ts:(m.date||0)*1000, mid:m.message_id, quote:quote});
+          addMsg({who:fromName, relay:isForward, fwdName:fwdName, voiceUrl:url, ts:(m.date||0)*1000, mid:m.message_id, quote:quote});
         }
       });
       return;
     }
     var t=m.text||""; if(!t) return;
     if(isForward && (isDupeRelay(t,false) || seenRecentText(t))) return; // mirror: show each real message once
-    addMsg({who:fromName, relay:isForward, text:t, ts:(m.date||0)*1000, mid:m.message_id, quote:quote});
+    addMsg({who:fromName, relay:isForward, fwdName:fwdName, text:t, ts:(m.date||0)*1000, mid:m.message_id, quote:quote});
   }
   function poll(bi){
     var st=streams[bi]; if(!st || !st.on) return;
