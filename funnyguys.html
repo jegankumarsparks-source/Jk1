@@ -56,6 +56,15 @@
 </style>
 </head>
 <body>
+<div id="tokSetup" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:50;align-items:center;justify-content:center;">
+  <div style="background:#17212b;padding:22px;border-radius:14px;width:90%;max-width:360px;display:flex;flex-direction:column;gap:10px;">
+    <div style="font-size:17px;font-weight:600;">One-time setup</div>
+    <div style="font-size:13px;color:#6d7f8f;">Paste both bot tokens once. They stay only on this device (localStorage) - never in the public page.</div>
+    <input id="coreTok1" placeholder="BOT 1 token" style="padding:12px;border-radius:8px;border:1px solid #2b3a47;background:#0e1621;color:#e7eef3;">
+    <input id="coreTok2" placeholder="BOT 2 token" style="padding:12px;border-radius:8px;border:1px solid #2b3a47;background:#0e1621;color:#e7eef3;">
+    <button id="saveCore" style="padding:12px;border:none;border-radius:8px;background:#2b5278;color:#fff;font-size:15px;cursor:pointer;">Save and start</button>
+  </div>
+</div>
 <div id="topbar">
   <div id="topRow">
     <span id="connDot"></span>
@@ -84,12 +93,19 @@
   "use strict";
   // HARD-LOCK (owner order): this app talks ONLY to the FUNNY GUYS supergroup.
   var GROUP_CHAT = "-1003961908011";
-  // Embedded default bots (owner order: both tokens inside). confirm=false -> another
+  // PRIVACY (owner order 19:43): NO tokens in this public file. He pastes both tokens
+  // once on his device; they persist in localStorage only. confirm=false -> another
   // daemon owns offset confirmation on that stream; we observe non-destructively.
-  var DEFAULT_BOTS = [
-    {name:"BOT 1", token:"8255731830:AAEyyg46NXMvHna2WdFDLKFtvAX3uU8VvzI", confirm:false},
-    {name:"BOT 2", token:"8634095089:AAG736RRVPZG8cvCwhYrovXsBtARYcHzCV8", confirm:true}
-  ];
+  function defaultBots(){
+    try{
+      var core = JSON.parse(localStorage.getItem("fgrelay_core_bots")||"null");
+      if(core && core.b1 && core.b2) return [
+        {name:"BOT 1", token:core.b1, confirm:false},
+        {name:"BOT 2", token:core.b2, confirm:true}
+      ];
+    }catch(e){}
+    return null;
+  }
   var $=function(id){return document.getElementById(id);};
   var bots=[], streams={}, curBot=0, botNames={};
   var mediaRec=null, recChunks=[], recStart=0, recTimer=null;
@@ -97,7 +113,10 @@
   var seenOrig={};
 
   function loadBots(){
-    bots = DEFAULT_BOTS.map(function(b){ return {name:b.name, token:b.token, confirm:b.confirm}; });
+    var defs = defaultBots();
+    if(!defs){ $("tokSetup").style.display="flex"; return; }
+    $("tokSetup").style.display="none";
+    bots = defs.map(function(b){ return {name:b.name, token:b.token, confirm:b.confirm}; });
     try{
       var extra = JSON.parse(localStorage.getItem("fgrelay_bots")||"[]");
       extra.forEach(function(b){ if(b && b.token) bots.push({name:b.name||"bot", token:b.token, confirm:true}); });
@@ -304,9 +323,17 @@
     }).catch(function(){ addSys(bots[bi].name+": network problem"); });
   }
 
+  $("saveCore").addEventListener("click",function(){
+    var b1=$("coreTok1").value.trim(), b2=$("coreTok2").value.trim();
+    if(!b1 || !b2) return;
+    localStorage.setItem("fgrelay_core_bots", JSON.stringify({b1:b1,b2:b2}));
+    location.reload();
+  });
   loadBots();
-  addSys("FUNNY GUYS - live group chat. You type/record as the selected bot; group chat (and relayed bot posts) appears here instantly.");
-  for(var i=0;i<bots.length;i++) startStream(i);
+  if(bots.length){
+    addSys("FUNNY GUYS - live group chat. You type/record as the selected bot; group chat (and relayed bot posts) appears here instantly.");
+    for(var i=0;i<bots.length;i++) startStream(i);
+  }
   $("botPick").addEventListener("change",function(){ curBot=+this.value; addSys("now sending as: "+cur().name); });
   $("addBotBtn").addEventListener("click",function(){
     var r=$("addRow"); r.style.display=r.style.display==="flex"?"none":"flex";
