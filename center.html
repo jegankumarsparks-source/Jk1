@@ -311,7 +311,7 @@ async function vHome(){
   const c=S.summary.counters,tg=S.summary.telegram,r=S.summary.race,m=S.summary.main;
   const cnt=(label,val,list,color)=>`<div class="counter" onclick="location.hash='#/list/${list}'"><b style="color:${color||'var(--txt)'}">${val}</b><span>${label}</span></div>`;
   let h=vFw();h+=`<div class="card main-card">
-    <div class="hrow"><span class="tag gold">👑 MAIN PORTFOLIO</span><span class="sub" style="margin-left:auto">the book to follow</span></div>
+    <div class="hrow"><span class="tag gold">📁 LEGACY · OLD PAPER PORTFOLIO</span><span class="sub" style="margin-left:auto">not the fresh test</span></div>
     <div class="hrow" style="margin-top:8px"><span class="big">${m?'$'+(+m.equity).toFixed(2):'N/A'}</span>
     <span style="margin-left:auto;text-align:right"><span class="${m&&m.realised+m.unrealised>=0?'pos':'neg'}">${m?((m.realised+m.unrealised>=0?'+':'')+(m.realised+m.unrealised).toFixed(2)):'N/A'}</span><div class="sub">${m?m.n_open+' open · TP '+m.n_tp+' · SL '+m.n_sl+' · RUG '+m.n_rug:''}</div></span></div>
     <div class="sub" style="margin-top:6px">start $500 · realised ${m?'$'+(+m.realised).toFixed(2):'N/A'} · unrealised ${m?'$'+(+m.unrealised).toFixed(2):'N/A'} · tap Paper tab for positions</div>
@@ -484,7 +484,7 @@ async function vPaper(){
     ${bk.closed.slice(-6).map(x=>`<div class="row" style="padding:8px 0" onclick="location.hash='#/token/${x.mint}'"><div><div class="sym sub">$${esc(x.sym||x.mint.slice(0,6))}</div><div class="sub">${esc(x.stage)} · entry ${ist(x.entry_time)} → exit ${ist(x.exit_time)} IST</div></div>
       <div class="val"><span class="${(x.pnl||0)>=0?'pos':'neg'}">$${(+(x.pnl||0)).toFixed(2)}</span></div></div>`).join('')}
   </div>`;};
-  let h=`<div class="sec">👑 MAIN BOOK - the one to follow</div>`+book('👑 MAIN PORTFOLIO',m,true);
+  let h=`<div class="card" style="border-color:#3b82f6"><b>🧪 FIVE-WALLET FRESH TEST is a separate cohort (FWT-20261001-0049).</b><div class="sub">The book below is the LEGACY / OLD PAPER PORTFOLIO. History kept as-is, never mixed into the fresh test. <a href="#/">Open fresh test on Home →</a></div></div><div class="sec">📁 LEGACY · OLD PAPER PORTFOLIO (MAIN BOOK)</div>`+book('📁 LEGACY MAIN BOOK',m,true);
   h+=`<div class="card"><a href="#/performance">📊 Measured paper outcomes by strategy: P&L, win rate, MFE/MAE, sample size →</a></div>`;
   if(r){h+=`<div class="sec">🏁 RACE - EXPERIMENT (paper only)</div><div class="card">
     <div class="kv"><span>state</span><b>${r.state==='DECIDED'?('🏆 '+r.winner+' WINS - '+esc(r.win_reason||'')):'RACING'}</b></div>
