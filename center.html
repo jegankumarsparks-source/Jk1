@@ -66,6 +66,31 @@ pre{white-space:pre-wrap;word-break:break-all;font-size:11px;color:var(--dim)}
 .big{font-size:24px;font-weight:800}
 .center{text-align:center;color:var(--dim);padding:30px;font-size:13px}
 .mono{font-family:ui-monospace,monospace;font-size:11px;word-break:break-all}
+
+/* 🔥 FIVE-WALLET FRESH TEST */
+.fw-sec{margin:12px 0 4px}
+.fw-head{display:flex;align-items:center;gap:8px;margin:2px 16px 8px;flex-wrap:wrap}
+.fw-head b{font-size:14px;letter-spacing:.5px}
+.fw-grid{display:grid;grid-template-columns:1fr;gap:10px;margin:0 14px}
+@media(min-width:560px){.fw-grid{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}}
+.fw-card{background:linear-gradient(160deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:16px;padding:14px;cursor:pointer;transition:border-color .4s,transform .15s;position:relative;overflow:hidden}
+.fw-card:active{transform:scale(.98)}
+.fw-card.leader{border-color:var(--gold);box-shadow:0 0 18px #fbbf2422}
+.fw-rank{font-size:11px;color:var(--dim)}
+.fw-badge{font-size:10px;padding:2px 8px;border-radius:8px;border:1px solid var(--gold);color:var(--gold)}
+.fw-name{font-size:16px;font-weight:800;margin:6px 0 2px}
+.fw-eq{font-size:24px;font-weight:800;transition:color .3s}
+.fw-eq.up{color:var(--grn)}.fw-eq.dn{color:var(--red)}
+.fw-pl{font-size:12.5px}
+.fw-bar{height:8px;border-radius:6px;background:#0a0e13;border:1px solid var(--line);margin:8px 0 4px;overflow:hidden}
+.fw-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--blu),var(--acc));transition:width .8s ease}
+.fw-fill.done{background:linear-gradient(90deg,var(--grn),var(--gold))}
+.fw-meta{display:flex;justify-content:space-between;font-size:11px;color:var(--dim);margin-top:6px}
+.fw-sum{background:linear-gradient(135deg,#12202e,var(--card));border:1px solid var(--line);border-radius:16px;padding:14px;margin:10px 14px}
+.fw-sumgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
+.fw-sumgrid>div{text-align:center;background:#0a0e1366;border:1px solid var(--line);border-radius:10px;padding:8px 4px}
+.fw-sumgrid b{display:block;font-size:15px}
+.fw-sumgrid span{font-size:9.5px;color:var(--dim);display:block;margin-top:2px}
 </style>
 </head>
 <body>
@@ -90,7 +115,7 @@ pre{white-space:pre-wrap;word-break:break-all;font-size:11px;color:var(--dim)}
 </nav>
 <script>
 const B='data/';
-let S={status:null,summary:null,tokens:null,wallets:null,paper:null,sig:null,health:null,v2:null,performance:null,tc:{},wc:{}};
+let S={status:null,summary:null,tokens:null,wallets:null,paper:null,sig:null,health:null,v2:null,performance:null,fw:null,tc:{},wc:{}};
 let lastTs=0;
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -112,6 +137,7 @@ async function loadAll(){
     try{S.health=await j('sig_health.json');}catch(e){S.health=S.health||{components:{}};}
     try{S.v2=await j('sig_v2.json');}catch(e){S.v2=S.v2||{v2:{}};}
     try{S.performance=await j('performance.json');}catch(e){S.performance={error:'UNAVAILABLE'};}
+    try{S.fw=await j('fwtest.json');}catch(e){S.fw=S.fw||null;}
   }
   freshness();
 }
@@ -246,11 +272,45 @@ async function vSigDetail(id){
   return h;
 }
 
+function vFw(){
+  const fw=S.fw;
+  if(!fw||fw.error||!fw.wallets){
+    return `<div class="fw-sec"><div class="fw-head"><b>🔥 FIVE-WALLET FRESH TEST</b><span class="tag y">PAPER-ONLY</span><span class="sub" style="margin-left:auto">UNAVAILABLE</span></div>
+    <div class="card" style="margin:0 14px"><div class="sub">fresh-test data UNAVAILABLE - tracker starting or not yet published</div></div></div>`;
+  }
+  const ws=fw.wallets.slice().sort((a,b)=>a.rank-b.rank);
+  const cards=ws.map(w=>{
+    const plCls=w.net>=0?'pos':'neg';
+    const pct=Math.max(0,Math.min(100,w.progress_pct||0));
+    const done=w.equity>=600;
+    return `<div class="fw-card ${w.is_main?'leader':''}" onclick="location.hash='#/paper'">
+      <div class="hrow"><span class="fw-rank">#${w.rank}</span>${w.is_main?'<span class="fw-badge">👑 MAIN</span>':''}<span class="tag ${done?'g':''}" style="margin-left:auto">${done?'🎯 TARGET REACHED':'IN PROGRESS'}</span></div>
+      <div class="fw-name">${esc(w.name)}</div>
+      <div class="fw-eq ${w.net>0?'up':w.net<0?'dn':''}">$${(+w.equity).toFixed(2)}</div>
+      <div class="fw-pl ${plCls}">${w.net>=0?'+':''}$${(+w.net).toFixed(2)} (${w.net>=0?'+':''}${(+w.progress_pct).toFixed(1)}%) <span class="sub">· start $500</span></div>
+      <div class="fw-bar"><div class="fw-fill ${done?'done':''}" style="width:${pct}%"></div></div>
+      <div class="fw-meta"><span>$500 → $600</span><span>${pct.toFixed(1)}%</span></div>
+      <div class="fw-meta"><span>open ${w.open}/${w.max_open}</span><span>W${w.wins} L${w.losses} RUG${w.rugs}</span><span>DD ${w.cur_dd}%</span></div>
+    </div>`;}).join('');
+  const sm=fw.summary||{};
+  return `<div class="fw-sec"><div class="fw-head"><b>🔥 FIVE-WALLET FRESH TEST</b><span class="tag y">PAPER-ONLY</span><span class="sub" style="margin-left:auto">cohort ${esc(fw.cohort||'N/A')} · ${fw.elapsed_m!=null?fw.elapsed_m+'m':'N/A'}</span></div>
+  <div class="fw-grid">${cards}</div>
+  <div class="fw-sum"><div class="hrow"><b style="font-size:13px">OVERALL FIVE-WALLET SUMMARY</b><span class="sub" style="margin-left:auto">targets ${fw.targets_reached!=null?fw.targets_reached:'UNAVAILABLE'}/5 · MAIN ${esc(fw.leader||'N/A')}</span></div>
+  <div class="fw-sumgrid">
+    <div><b>$${sm.start_total!=null?sm.start_total:'UNAVAILABLE'}</b><span>START</span></div>
+    <div><b class="${(sm.pnl??0)>=0?'pos':'neg'}">$${sm.equity_total!=null?(+sm.equity_total).toFixed(2):'UNAVAILABLE'}</b><span>CURRENT</span></div>
+    <div><b class="${(sm.pnl??0)>=0?'pos':'neg'}">${sm.pnl!=null?((sm.pnl>=0?'+':'')+'$'+(+sm.pnl).toFixed(2)):'UNAVAILABLE'}</b><span>P&L</span></div>
+    <div><b>${fw.targets_reached!=null?fw.targets_reached:'UNAVAILABLE'}/5</b><span>AT $600</span></div>
+    <div><b>${esc(fw.leader||'N/A')}</b><span>MAIN = top equity</span></div>
+    <div><b>${sm.open_total!=null?sm.open_total:'UNAVAILABLE'}/${sm.max_open_total!=null?sm.max_open_total:'UNAVAILABLE'}</b><span>OPEN</span></div>
+  </div>
+  <div class="sub" style="margin-top:8px">$500×5 fresh baseline · $20/trade · max 12 open · TP +1.5x full · SL -50% full · rug -$20 · 5h review · 6h hard exit · no backfill · honest evidence · FINAL OUTPUT locked until 5/5</div></div></div>`;
+}
 /* ---------- VIEWS ---------- */
 async function vHome(){
   const c=S.summary.counters,tg=S.summary.telegram,r=S.summary.race,m=S.summary.main;
   const cnt=(label,val,list,color)=>`<div class="counter" onclick="location.hash='#/list/${list}'"><b style="color:${color||'var(--txt)'}">${val}</b><span>${label}</span></div>`;
-  let h=`<div class="card main-card">
+  let h=vFw();h+=`<div class="card main-card">
     <div class="hrow"><span class="tag gold">👑 MAIN PORTFOLIO</span><span class="sub" style="margin-left:auto">the book to follow</span></div>
     <div class="hrow" style="margin-top:8px"><span class="big">${m?'$'+(+m.equity).toFixed(2):'N/A'}</span>
     <span style="margin-left:auto;text-align:right"><span class="${m&&m.realised+m.unrealised>=0?'pos':'neg'}">${m?((m.realised+m.unrealised>=0?'+':'')+(m.realised+m.unrealised).toFixed(2)):'N/A'}</span><div class="sub">${m?m.n_open+' open · TP '+m.n_tp+' · SL '+m.n_sl+' · RUG '+m.n_rug:''}</div></span></div>
