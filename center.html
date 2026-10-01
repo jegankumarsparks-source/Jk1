@@ -138,6 +138,7 @@ async function loadAll(){
     try{S.v2=await j('sig_v2.json');}catch(e){S.v2=S.v2||{v2:{}};}
     try{S.performance=await j('performance.json');}catch(e){S.performance={error:'UNAVAILABLE'};}
     try{S.fw=await j('fwtest.json');}catch(e){S.fw=S.fw||null;}
+    try{S.fwa=await j('fwt_archive_view.json');}catch(e){S.fwa=null;}
   }
   freshness();
 }
@@ -293,6 +294,12 @@ function vFw(){
       <div class="fw-meta"><span>open ${w.open}/${w.max_open}</span><span>W${w.wins} L${w.losses} RUG${w.rugs}</span><span>DD ${w.cur_dd}%</span></div>
     </div>`;}).join('');
   const sm=fw.summary||{};
+  const fmtP=x=>x==null?'N/A':(x<0.001?(+x).toExponential(2):(+x).toPrecision(4));
+  const rows=[];ws.forEach(w=>(w.positions||[]).forEach(p=>rows.push({w:w.name,...p})));
+  rows.sort((a,b)=>(b.mult||0)-(a.mult||0));
+  const openTbl=`<div class="fw-sum" style="margin-top:10px"><div class="hrow"><b style="font-size:13px">📍 OPEN POSITIONS · CURRENT COHORT</b><span class="sub" style="margin-left:auto">${rows.length} open · marks may be stale · open ≠ outcome</span></div>`+(rows.length?`<div style="overflow-x:auto"><table style="width:100%;font-size:12px;border-collapse:collapse"><tr class="sub"><td>Wallet</td><td>Coin</td><td>Entry</td><td>Mult</td><td>Age</td><td>6h exit</td></tr>${rows.map(p=>`<tr><td>${esc(p.w)}</td><td><b>${esc(p.sym||'?')}</b>${p.feed_lost?' ⚠feed':''}</td><td>${fmtP(p.entry)}</td><td class="${(p.mult||1)>=1?'pos':'neg'}">${(+p.mult).toFixed(3)}x</td><td>${p.age_h!=null?p.age_h+'h':'N/A'}</td><td>${p.exit_due?new Date(p.exit_due).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}):'N/A'}</td></tr>`).join('')}</table></div>`:`<div class="sub" style="margin-top:6px">No open positions yet. Low intake is evidence, not a fault. Nothing is backfilled.</div>`)+`</div>`;
+  const fa=S.fwa;
+  const arch=fa&&fa.cohort?`<details class="fw-sum" style="margin-top:10px"><summary><b>🧊 ARCHIVE / HISTORY · ${esc(fa.cohort)} · FROZEN</b></summary><div class="sub" style="margin-top:6px">Frozen ${esc((fa.archived_at||'').slice(0,19))}Z · ledger ${fa.ledger_lines} lines · results are NOT combined with the current cohort. ${fa.open_at_freeze_count} position(s) were OPEN-AT-FREEZE: not tracked after freeze, never counted as outcomes.</div><div class="sub" style="margin-top:6px">${(fa.wallets||[]).map(w=>esc(w.name)+' $'+(+w.equity).toFixed(2)+' (R '+(+w.realized).toFixed(2)+', closed '+w.closed_n+')').join(' · ')}</div><div class="sub" style="margin-top:6px">MANIFEST SHA-256 (state): ${esc((fa.sha256&&fa.sha256['fwtest_state.json']||'N/A').slice(0,16))}…</div></details>`:'';
   return `<div class="fw-sec"><div class="fw-head"><b>🔥 FIVE-WALLET FRESH TEST</b><span class="tag y">PAPER-ONLY</span><span class="sub" style="margin-left:auto">cohort ${esc(fw.cohort||'N/A')} · ${fw.elapsed_m!=null?fw.elapsed_m+'m':'N/A'}</span></div>
   <div class="fw-grid">${cards}</div>
   <div class="fw-sum"><div class="hrow"><b style="font-size:13px">OVERALL FIVE-WALLET SUMMARY</b><span class="sub" style="margin-left:auto">targets ${fw.targets_reached!=null?fw.targets_reached:'UNAVAILABLE'}/5 · MAIN ${esc(fw.leader||'N/A')}</span></div>
@@ -304,7 +311,7 @@ function vFw(){
     <div><b>${esc(fw.leader||'N/A')}</b><span>MAIN = top equity</span></div>
     <div><b>${sm.open_total!=null?sm.open_total:'UNAVAILABLE'}/${sm.max_open_total!=null?sm.max_open_total:'UNAVAILABLE'}</b><span>OPEN</span></div>
   </div>
-  <div class="sub" style="margin-top:8px">$500×5 fresh baseline · $20/trade · max 12 open · TP +1.5x full · SL -50% full · rug -$20 · 5h review · 6h hard exit · no backfill · honest evidence · FINAL OUTPUT locked until 5/5</div></div></div>`;
+  <div class="sub" style="margin-top:8px">$500×5 fresh baseline · $20/trade · max 12 open · TP +1.5x price (+50%) full · SL -50% full · rug ≤0.1x full loss · 5h review · 6h hard exit · no backfill · honest evidence · FINAL OUTPUT locked until 5/5 in THIS cohort</div></div>${openTbl}${arch}</div>`;
 }
 /* ---------- VIEWS ---------- */
 async function vHome(){
