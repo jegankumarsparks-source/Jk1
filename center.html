@@ -115,7 +115,7 @@ pre{white-space:pre-wrap;word-break:break-all;font-size:11px;color:var(--dim)}
 </nav>
 <script>
 const B='data/';
-let S={status:null,summary:null,tokens:null,wallets:null,paper:null,sig:null,health:null,v2:null,performance:null,fw:null,tc:{},wc:{}};
+let S={status:null,summary:null,tokens:null,wallets:null,paper:null,sig:null,health:null,v2:null,performance:null,fw:null,pe:null,tc:{},wc:{}};
 let lastTs=0;
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -139,6 +139,7 @@ async function loadAll(){
     try{S.performance=await j('performance.json');}catch(e){S.performance={error:'UNAVAILABLE'};}
     try{S.fw=await j('fwtest.json');}catch(e){S.fw=S.fw||null;}
     try{S.fwa=await j('fwt_archive_view.json');}catch(e){S.fwa=null;}
+    try{S.pe=await j('pewallet.json');}catch(e){S.pe=S.pe||null;}
   }
   freshness();
 }
@@ -605,13 +606,26 @@ async function doSearch(q){
     $('app').innerHTML=h;
   },250);
 }
+function peSection(){
+  const d=S.pe;
+  if(!d||d.error)return `<div class="card" style="border:2px solid #f0b90b"><b>🎯 PRE-ENTRY WALLET</b><div class="sub">UNAVAILABLE (no data yet)</div></div>`;
+  const a=d.account||{},c=d.counters||{},r=d.rules||{};
+  const pos=(d.positions||[]).map(p=>`<div class="row"><div class="sym">$${esc(p.sym||'?')}</div><div class="val">${x2(p.mult)} · $${(+p.value).toFixed(2)}<div class="sub">in ${ago(p.entry_time)}${p.feed_lost?' · ⚠ price feed lost (mark stale '+p.mark_age_s+'s)':''}</div></div></div>`).join('')||'<div class="sub" style="padding:8px 0">no open positions yet - waiting for the next pre-entry card</div>';
+  const cl=(d.closed||[]).slice(0,10).map(x=>`<div class="row"><div class="sym">$${esc(x.sym||'?')}</div><div class="val">${esc(x.stage)} · ${(x.pnl>=0?'+':'')}$${(+x.pnl).toFixed(2)}</div></div>`).join('')||'<div class="sub" style="padding:8px 0">no closed trades yet</div>';
+  return `<div class="card" style="border:2px solid #f0b90b"><div class="sec" style="margin-top:0">🎯 PRE-ENTRY WALLET · buys every pre-entry card coin</div>
+  <div class="sub">PAPER ONLY · $${r.bet}/coin · max ${r.max_open} open · TP ${r.tp}x · SL -50% · RUG = -$${r.bet}</div>
+  <div style="font-size:20px;font-weight:700;margin:6px 0">Equity $${(+a.equity).toFixed(2)} <span class="sub">(realized ${(+a.realized).toFixed(2)} · unrealized ${(+a.unreal).toFixed(2)} · cash ${(+a.cash).toFixed(2)})</span></div>
+  <div class="sub">open ${a.open}/${r.max_open} · closed ${a.closed} (TP ${a.tp} · SL ${a.sl} · RUG ${a.rug}) · cards seen ${c.cards} · repeat cards ${c.dup_cards} · skipped (full) ${c.skipped_full} · skipped (no price) ${c.skipped_noprice}</div>
+  <div class="sec">OPEN</div>${pos}<div class="sec">LAST CLOSED</div>${cl}
+  <div class="sub" style="margin-top:8px">${esc(d.label)} Started ${istd(d.start_ts)} IST · updated ${ago(d.publish_time)}.</div></div>`;
+}
 async function route(){
   const h=(location.hash||'#/').slice(1);
   document.querySelectorAll('nav a').forEach(a=>a.classList.toggle('on',h.startsWith(a.dataset.r)));
   let html;
   try{
     if(!S.summary)await loadAll();
-    if(h==='/'||h==='')html=await vHome();
+    if(h==='/'||h==='')html=peSection()+await vHome();
     else if(h.startsWith('/list/'))html=await vList(h.split('/')[2]);
     else if(h.startsWith('/token/'))html=await vToken(h.split('/')[2]);
     else if(h.startsWith('/wallet/'))html=await vWallet(h.split('/')[2]);
