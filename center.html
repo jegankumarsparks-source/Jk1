@@ -357,7 +357,7 @@ async function vHome(){
   h+=`<div class="card"><div class="hrow"><span class="tag ${tg.online?'g':'r'}">📡 TELEGRAM ${tg.online?'ONLINE':'OFFLINE'}</span>
     <span class="sub" style="margin-left:auto">24h: ${tg.ok_24h} ok · ${tg.errors_24h} err</span></div>
     <div class="sub" style="margin-top:6px">last delivery ${ist(tg.last_delivery)} IST (${ago(tg.last_delivery)}) · last BUY alert ${ist(tg.last_buy_alert)} IST</div></div>`;
-  h+=`<div class="warn">⚠️ Signals are monitoring intel - never buy advice. Paper trading is hypothetical, no real money. Latency 4.7-13.9 min (poll-bound) - not a sniper bot.</div>`;
+  h+=`<div class="warn">⚠️ Signals are monitoring intel - never buy advice. Paper trading is hypothetical, no real money. Latency: measured evidence INSUFFICIENT SAMPLE (n=5 VERIFIED, signal-event to PE paper-entry only) - see backend evidence.</div>`;
   return h;
 }
 const LISTS={
@@ -492,7 +492,7 @@ async function vPaper(){
     ${bk.closed.slice(-6).map(x=>`<div class="row" style="padding:8px 0" onclick="location.hash='#/token/${x.mint}'"><div><div class="sym sub">$${esc(x.sym||x.mint.slice(0,6))}</div><div class="sub">${esc(x.stage)} · entry ${ist(x.entry_time)} → exit ${ist(x.exit_time)} IST</div></div>
       <div class="val"><span class="${(x.pnl||0)>=0?'pos':'neg'}">$${(+(x.pnl||0)).toFixed(2)}</span></div></div>`).join('')}
   </div>`;};
-  let h=`<div class="card" style="border-color:#3b82f6"><b>🧪 FIVE-WALLET FRESH TEST is a separate cohort (FWT-20261001-0049).</b><div class="sub">The book below is the LEGACY / OLD PAPER PORTFOLIO. History kept as-is, never mixed into the fresh test. <a href="#/">Open fresh test on Home →</a></div></div><div class="sec">📁 LEGACY · OLD PAPER PORTFOLIO (MAIN BOOK)</div>`+book('📁 LEGACY MAIN BOOK',m,true);
+  let h=`<div class="card" style="border-color:#3b82f6"><b>🧪 FIVE-WALLET FRESH TEST is a separate cohort (${esc((S.fw&&S.fw.cohort)||'N/A')}).</b><div class="sub">The book below is the LEGACY / OLD PAPER PORTFOLIO. History kept as-is, never mixed into the fresh test. <a href="#/">Open fresh test on Home →</a></div></div><div class="sec">📁 LEGACY · OLD PAPER PORTFOLIO (MAIN BOOK)</div>`+book('📁 LEGACY MAIN BOOK',m,true);
   h+=`<div class="card"><a href="#/performance">📊 Measured paper outcomes by strategy: P&L, win rate, MFE/MAE, sample size →</a></div>`;
   if(r){h+=`<div class="sec">🏁 RACE - EXPERIMENT (paper only)</div><div class="card">
     <div class="kv"><span>state</span><b>${r.state==='DECIDED'?('🏆 '+r.winner+' WINS - '+esc(r.win_reason||'')):'RACING'}</b></div>
@@ -586,7 +586,7 @@ async function vStatus(){
   <div class="sec">ENGINE</div><div class="card">
     <div class="kv"><span>data publish</span><b>${istd(S.status.publish_time)} IST (${ago(S.status.publish_time)})</b></div>
     <div class="kv"><span>auto-refresh</span><b>every 10s (re-pulls published JSON)</b></div>
-    <div class="kv"><span>latency honesty</span><b>4.7-13.9 min poll-bound</b></div></div>`;
+    <div class="kv"><span>latency honesty</span><b>measured evidence INSUFFICIENT SAMPLE (n=5 VERIFIED) - see backend evidence</b></div></div>`;
 }
 let searchT=null;
 async function doSearch(q){
