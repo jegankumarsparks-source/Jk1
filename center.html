@@ -140,7 +140,19 @@ async function fetchData(){
  try{const r=await fetch('https://raw.githubusercontent.com/jegankumarsparks-source/Jk1/live/data/main500.json?t='+t,{cache:'no-store'});return await r.json()}catch(e){}
  try{const r=await fetch('data/main500.json?t='+t,{cache:'no-store'});return await r.json()}catch(e){}
  return null}
-async function load(){const x=await fetchData();if(x&&(!D||(x.state_epoch||x.publish_epoch)>=(D.state_epoch||D.publish_epoch))){D=x;const s=JSON.stringify(D);if(s!==last){last=s;render()}}
- if(D){const age=Date.now()/1000-(D.state_epoch||D.publish_epoch);const p=$('pill');p.className='pill '+(age<300?'on':'stale');p.innerHTML=age<300?'<i>●</i> LIVE · '+Math.round(age)+'s ago':'⚠ data '+Math.round(age/60)+'m old'}}
-load();setInterval(load,8000);setInterval(()=>{if(D){const age=Date.now()/1000-(D.state_epoch||D.publish_epoch);const p=$('pill');p.className='pill '+(age<300?'on':'stale');p.innerHTML=age<300?'<i>●</i> LIVE · '+Math.round(age)+'s ago':'⚠ data '+Math.round(age/60)+'m old'}},1000);
+
+let LIVE={},liveAt=0;
+function pillUpd(){const p=$('pill');if(!D||!p)return;const sa=Date.now()/1000-(D.state_epoch||D.publish_epoch);const la=(Date.now()-liveAt)/1000;
+ if(sa>=300){p.className='pill stale';p.innerHTML='⚠ arena stalled '+Math.round(sa/60)+'m';return}
+ p.className='pill on';p.innerHTML=(liveAt&&la<40)?'<i>●</i> LIVE · '+Math.round(la)+'s ago':'<i>●</i> LIVE · '+Math.round(sa)+'s ago'}
+function applyLive(){if(!D)return;const F=D.friction||0.03;let v=0;D.open.forEach(c=>{const p=LIVE[c.mint];if(p&&c.entry_price){c.mult=Math.round(p/c.entry_price*(1-F)/(1+F)*1000)/1000;c.value=+(c.invested*c.mult).toFixed(2);c.pnl=+(c.value-c.invested).toFixed(2)}v+=c.value});
+ D.open_value=+v.toFixed(2);D.equity=+(D.cash+v).toFixed(2);D.pnl=+(D.equity-D.start).toFixed(2);D.progress_pct=Math.round(Math.max(Math.min(D.pnl/(D.target-D.start)*100,100),0)*10)/10;
+ const s=JSON.stringify(D);if(s!==last){last=s;render()}}
+async function liveMarks(){if(!D||!D.open||!D.open.length)return;try{const r=await fetch('https://api.dexscreener.com/tokens/v1/solana/'+D.open.map(c=>c.mint).join(','),{cache:'no-store'});const a=await r.json();const best={};
+ a.forEach(x=>{const m=x.baseToken&&x.baseToken.address;const p=parseFloat(x.priceUsd);if(!m||!p)return;const l=(x.liquidity&&x.liquidity.usd)||0;if(!best[m]||l>best[m].l)best[m]={l,p}});
+ let n=0;Object.keys(best).forEach(m=>{LIVE[m]=best[m].p;n++});if(n){liveAt=Date.now();applyLive()}}catch(e){}}
+setInterval(liveMarks,10000);
+async function load(){const x=await fetchData();if(x&&(!D||(x.state_epoch||x.publish_epoch)>=(D.state_epoch||D.publish_epoch))){D=x;applyLive()}
+ if(D){pillUpd()}}
+load();setTimeout(liveMarks,2500);setInterval(load,8000);setInterval(()=>{if(D){pillUpd()}},1000);
 </script></body></html>
