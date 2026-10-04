@@ -132,7 +132,15 @@ function openX(m){const c=D.closed.find(x=>x.mint===m);if(!c)return;
 function hide(){$('sheet').classList.remove('show')}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')hide()});
 let last='';
-async function load(){try{const r=await fetch('https://raw.githubusercontent.com/jegankumarsparks-source/Jk1/live/data/main500.json?t='+Date.now(),{cache:'no-store'}).catch(()=>fetch('data/main500.json?t='+Date.now(),{cache:'no-store'}));D=await r.json();const s=JSON.stringify(D);if(s!==last){last=s;render()}}catch(e){}
+let lastApi=0;
+async function fetchData(){
+ const t=Date.now();
+ if(t-lastApi>=70000){lastApi=t;try{const r=await fetch('https://api.github.com/repos/jegankumarsparks-source/Jk1/contents/data/main500.json?ref=live',{headers:{'Accept':'application/vnd.github.raw'},cache:'no-cache'});if(r.ok)return await r.json()}catch(e){}}
+ else if(D)return null;
+ try{const r=await fetch('https://raw.githubusercontent.com/jegankumarsparks-source/Jk1/live/data/main500.json?t='+t,{cache:'no-store'});return await r.json()}catch(e){}
+ try{const r=await fetch('data/main500.json?t='+t,{cache:'no-store'});return await r.json()}catch(e){}
+ return null}
+async function load(){const x=await fetchData();if(x&&(!D||(x.state_epoch||x.publish_epoch)>=(D.state_epoch||D.publish_epoch))){D=x;const s=JSON.stringify(D);if(s!==last){last=s;render()}}
  if(D){const age=Date.now()/1000-(D.state_epoch||D.publish_epoch);const p=$('pill');p.className='pill '+(age<300?'on':'stale');p.innerHTML=age<300?'<i>●</i> LIVE · '+Math.round(age)+'s ago':'⚠ data '+Math.round(age/60)+'m old'}}
 load();setInterval(load,8000);setInterval(()=>{if(D){const age=Date.now()/1000-(D.state_epoch||D.publish_epoch);const p=$('pill');p.className='pill '+(age<300?'on':'stale');p.innerHTML=age<300?'<i>●</i> LIVE · '+Math.round(age)+'s ago':'⚠ data '+Math.round(age/60)+'m old'}},1000);
 </script></body></html>
