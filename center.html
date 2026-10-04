@@ -132,7 +132,7 @@ function openX(m){const c=D.closed.find(x=>x.mint===m);if(!c)return;
 function hide(){$('sheet').classList.remove('show')}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')hide()});
 let last='';
-async function load(){try{const r=await fetch('data/main500.json?t='+Date.now(),{cache:'no-store'});D=await r.json();const s=JSON.stringify(D);if(s!==last){last=s;render()}}catch(e){}
+async function load(){try{const r=await fetch('https://raw.githubusercontent.com/jegankumarsparks-source/Jk1/live/data/main500.json?t='+Date.now(),{cache:'no-store'}).catch(()=>fetch('data/main500.json?t='+Date.now(),{cache:'no-store'}));D=await r.json();const s=JSON.stringify(D);if(s!==last){last=s;render()}}catch(e){}
  if(D){const age=Date.now()/1000-D.publish_epoch;const p=$('pill');p.className='pill '+(age<240?'on':'stale');p.innerHTML=age<240?'<i>●</i> LIVE · '+Math.round(age)+'s ago':'⚠ data '+Math.round(age/60)+'m old'}}
 load();setInterval(load,8000);setInterval(()=>{if(D){const age=Date.now()/1000-D.publish_epoch;const p=$('pill');p.className='pill '+(age<240?'on':'stale');p.innerHTML=age<240?'<i>●</i> LIVE · '+Math.round(age)+'s ago':'⚠ data '+Math.round(age/60)+'m old'}},1000);
 </script></body></html>
