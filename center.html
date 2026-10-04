@@ -161,6 +161,7 @@ nav a i svg{vertical-align:middle}
   <div class="tick" id="tick"></div>
   <input class="search" id="search" placeholder="🔎 token / symbol / CA / wallet…" oninput="doSearch(this.value)">
 </header>
+<div id="sigpanel" style="max-width:1200px;margin:12px auto;padding:0 12px"></div>
 <div id="app"><div class="center">loading command center…</div></div>
 <nav>
   <a href="#/" data-r="/"><i><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg></i>Home</a>
@@ -198,6 +199,7 @@ async function loadAll(){
     try{S.fw=await j('fwtest.json');}catch(e){S.fw=S.fw||null;}
     try{S.fwa=await j('fwt_archive_view.json');}catch(e){S.fwa=null;}
     try{S.pe=await j('pewallet.json');}catch(e){S.pe=S.pe||null;}
+    try{S.arena=await j('arena_signals.json');}catch(e){S.arena=S.arena||null;}
   }
   freshness();
 }
@@ -215,13 +217,24 @@ function ticker(){
   el.innerHTML=h;
 }
 function freshness(){
-  ticker();
+  ticker();try{renderSig();}catch(e){}
   const st=S.status;if(!st)return;
   const ageS=(Date.now()-new Date(st.publish_time))/1e3;
   const chip=$('livechip');
   chip.className='live '+(ageS<600?'on':'stale');
   chip.textContent=ageS<600?'● LIVE':'◌ STALE';
   $('freshline').textContent='Data updated '+ago(st.publish_time)+' (last engine publish '+ist(st.publish_time)+' IST) · auto-refresh 10s';
+}
+
+function renderSig(){
+  const el=$('sigpanel');if(!el)return;const A=S.arena;
+  if(!A||!A.signals){el.innerHTML='';return;}
+  const rows=A.signals.slice(0,60).map(s=>{
+    const bk=Object.entries(s.books||{}).map(([b,v])=>{const o=v.status==='OPEN';const c=o?'#8ab4ff':((v.pnl||0)>=0?'#4ade80':'#f87171');
+      return `<span style="color:${c};white-space:nowrap">${b} ${o?('open '+(v.mult!=null?(+v.mult).toFixed(2)+'x':'')):(v.status+' '+(v.pnl!=null?((v.pnl>=0?'+':'')+(+v.pnl).toFixed(2)):''))}</span>`;}).join(' · ')||'<span class="sub">not entered (watch only)</span>';
+    const L=s.links||{};const pe=s.pe?` <span class="sub">wallet …${s.pe.wallet||'?'} score ${s.pe.score??'N/A'} match ${s.pe.match??'N/A'}%</span>`:'';
+    return `<tr><td>${istd(s.entry_time||s.signal_time)}</td><td><b>$${s.sym||'?'}</b>${pe}<br><span class="sub" style="font-size:10px">${s.mint}</span></td><td>${s.src==='PE'?'PRE-ENTRY':'MOM'}</td><td>${k(s.mc)} / ${k(s.liq)}</td><td>${s.pc5m!=null?(+s.pc5m).toFixed(0)+'% / '+(+s.pc1h).toFixed(0)+'%':'N/A'}</td><td>${bk}</td><td><a href="${L.dexscreener}" target="_blank">DEX</a> · <a href="${L.gmgn}" target="_blank">GMGN</a> · <a href="${L.solscan}" target="_blank">SOL</a></td></tr>`;}).join('');
+  el.innerHTML=`<div style="background:#12161f;border:1px solid #232a38;border-radius:10px;padding:12px;overflow-x:auto"><div style="font-weight:700;margin-bottom:6px">SIGNALS (paper) <span class="sub">${A.signals.length} total · live, updates with every refresh · ${A.note||''}</span></div><table style="width:100%;font-size:12px;border-collapse:collapse"><tr class="sub" style="text-align:left"><th>Time IST</th><th>Coin / CA</th><th>Source</th><th>MC / Liq</th><th>5m / 1h</th><th>Books</th><th>Links</th></tr>${rows}</table></div>`;
 }
 async function hardRefresh(){lastTs=0;try{await loadAll();}catch(e){}route();}
 setInterval(async()=>{try{await loadAll();}catch(e){freshnessOffline();}},10000);
