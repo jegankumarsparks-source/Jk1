@@ -100,6 +100,11 @@ summary{cursor:pointer;padding:10px 0;color:var(--dim);font-size:13px}
 .coin.done{cursor:pointer;animation:in .5s both}
 .sec{margin-top:6px}
 #eq,#eq *,#eq.up,#eq.dn{color:#19f59b!important;text-shadow:0 0 28px #19f59b55,0 0 6px #19f59b33;font-variant-numeric:tabular-nums}
+.dc{margin:8px 0 0;max-height:300px;overflow:auto}
+.dc details{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:0 12px;margin:6px 0}
+.dc summary{display:flex;justify-content:space-between;gap:8px;padding:10px 0;font-size:13px;color:var(--txt);cursor:pointer}
+.dc .tr{display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:4px 8px;padding:8px 0;border-top:1px solid var(--line);font-size:12px;color:var(--dim)}
+.dc .tr b{color:var(--txt)}.dc .rl{font-size:11px;color:var(--dim);padding:0 0 8px}
 </style></head><body><div class="wrap">
 <div class="top"><b>🎯 $500 → $800</b><span>paper challenge</span><span class="pill" id="pill">loading…</span></div>
 <div class="scan"></div>
@@ -112,6 +117,7 @@ summary{cursor:pointer;padding:10px 0;color:var(--dim);font-size:13px}
  <div class="bl"><span>$500 start</span><span id="pct">0%</span><span>$800 goal</span></div>
 </div>
 <div class="cyc" id="cyc" style="display:none"></div>
+<h2 class="sec" id="dch" style="display:none"><span>Completed cycles</span><span id="dcn"></span></h2><div class="dc" id="dc"></div>
 <div class="stats">
  <div class="st"><b id="s_open">–</b><span>open</span></div>
  <div class="st"><b id="s_cash">–</b><span>cash</span></div>
@@ -164,6 +170,15 @@ function coinUpd(el,c){const w=c.mult>=1;
  roll(el.querySelector('.pkv'),fmt(pk)+'x');roll(el.querySelector('.lwv'),fmt(lw)+'x');el.querySelector('.ex').textContent=left(c.exit_by_epoch);
  el.className='coin '+(c.mult>=1.2?'win':c.mult<0.85?'loss':'')}
 function doneHTML(c){const w=c.pnl>=0,m=c.exit_mult;return '<div class="coin done '+(w?'win':'loss')+'" onclick="openX(\''+c.mint+'\')"><div class="row"><div><span class="sym">$'+c.sym+'</span><span class="badge '+(c.stage==='TP'?'tp':c.stage==='SL'?'sl':'o')+'">'+c.stage+'</span></div><div class="mult '+(w?'pos':'neg')+'">'+fmt(m)+'x</div></div>'+pathHTML().replace('class="mk"','class="mk '+(w?'pos':'neg')+'" style="left:'+pp(m)+'%"').replace('<div class="z"></div>','<div class="z" style="left:'+Math.min(pp(m),20)+'%;width:'+Math.abs(pp(m)-20)+'%;background:'+(w?'linear-gradient(90deg,#22d3ee,#10d98a)':'linear-gradient(90deg,#ff4d6d,#fb923c)')+'"></div>').replace('<span class="pkm">','<span class="pkm" style="display:'+((c.peak||0)>1.001?'':'none')+';left:'+pp(c.peak||1)+'%">')+'<div class="togo">closed at <b>'+fmt(m)+'x</b>'+(m>3?' (fill above the 3x target: gap/pump print)':m<0.5?' (fill below the -50% stop: gap)':'')+'</div><div class="meta"><span>Opened <b>'+ist(c.entry_time)+'</b></span><span>Closed <b>'+ist(c.exit_time)+'</b> IST</span></div><div class="meta" style="margin-top:3px"><span>result</span><span class="'+(w?'pos':'neg')+'" style="font-weight:800">'+sg(c.pnl)+'</span></div><div class="meta" style="margin-top:3px"><span>peak '+fmt(c.peak||1)+'x</span><span>tap for details</span></div></div>'}
+
+function why(s,m){return s==='TP'?(m>=3?'3x TP':'TP '+fmt(m)+'x (old 1.5x rule)'):s==='SL'?(m<0.5?'SL -50% (gap fill)':'SL stop'):s==='CYCLE'?'Cycle-end sellout':s==='RUG'?'Rug (full loss)':s==='TIME'?'6h time exit':s}
+function dcRender(d){const A=d.cycles_done||[];const box=$('dc');$('dch').style.display=A.length?'':'none';$('dcn').textContent=A.length+' done';
+ const sig=A.map(x=>x.n+':'+x.trades.length+':'+x.end_equity).join('|');if(box._s===sig)return;box._s=sig;
+ const open=new Set([...box.querySelectorAll('details[open]')].map(n=>n.dataset.n));
+ box.innerHTML=A.slice().reverse().map(x=>{const t=x.trades.slice().sort((a,b)=>a.exit_time<b.exit_time?-1:1);const p=x.pnl||0;
+  const win=x.start_epoch?new Date(x.start_epoch*1000).toLocaleTimeString('en-IN',{timeZone:'Asia/Kolkata',hour:'2-digit',minute:'2-digit',hour12:true})+' → '+new Date((x.end_epoch||x.closed_at)*1000).toLocaleTimeString('en-IN',{timeZone:'Asia/Kolkata',hour:'2-digit',minute:'2-digit',hour12:true}):'';
+  return '<details data-n="'+x.n+'"'+(open.has(String(x.n))?' open':'')+'><summary><span><b>'+(x.retro?'Cycle 1 (retro)':x.label)+'</b> <span style="color:var(--dim)">'+win+'</span></span><span class="'+(p>=0?'pos':'neg')+'">'+sg(p)+' · $'+(x.end_equity==null?'–':x.end_equity.toFixed(2))+' · '+x.wins+'W/'+x.losses+'L</span></summary><div class="rl">Rules then: '+x.rules+(x.manual?' · manual reset':'')+'</div>'+
+  (t.length?t.map(c=>'<div class="tr"><span><b>$'+c.sym+'</b></span><span>in <b>'+ist(c.entry_time)+'</b> · out <b>'+ist(c.exit_time)+'</b></span><span class="'+(c.pnl>=0?'pos':'neg')+'" style="text-align:right"><b>'+sg(c.pnl)+'</b> · '+fmt(c.exit_mult)+'x</span><span style="grid-column:1/-1">'+why(c.stage,c.exit_mult)+' · <a href="'+c.links.dexscreener+'" target="_blank" rel="noopener" style="color:var(--acc)">DexScreener</a></span></div>').join(''):'<div class="tr">No trades recorded.</div>')+'</details>'}).join('')}
 function render(){
  const d=D;cycUpd();const up=d.pnl>=0;
  const e=$('eq');e.className='big '+(up?'up':'dn');
@@ -174,7 +189,7 @@ function render(){
  $('fill').style.width=Math.max(d.progress_pct,d.pnl>0?2:0)+'%';$('pct').textContent=fmt(d.progress_pct,1)+'% of the way';
  roll($('s_open'),d.open.length+'/'+d.max_open);roll($('s_cash'),usd(d.cash),true);
  roll($('s_wl'),d.wins+' / '+(d.n_closed-d.wins));roll($('s_real'),sg(d.realised),true);$('s_real').className=d.realised>=0?'pos':'neg';
- $('cnt').textContent=d.open.length+' open';
+ $('cnt').textContent=d.open.length+' open';try{dcRender(d)}catch(e){}
  const g=$('grid');
  if(!d.open.length){if(g.dataset.k!=='e'){g.dataset.k='x';g.dataset.k='e';g.innerHTML='<div class="empty"><span class="dot"></span>Scanning for the next signal…</div>'}}
  else{g.dataset.k='';const e0=g.querySelector('.empty');if(e0)e0.remove();const keep=new Set(d.open.map(c=>c.mint));
