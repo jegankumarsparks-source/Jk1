@@ -126,12 +126,12 @@ function render(){
 function cycUpd(){const d=D;const el=$('cyc');if(!d||!d.cycle){if(el)el.style.display='none';return}
  const c=d.cycle,len=c.end_epoch-c.start_epoch,now=Date.now()/1000,rem=Math.max(c.end_epoch-now,0),pp=Math.min(Math.max((now-c.start_epoch)/len*100,0),100);
  const p=+(d.equity-c.start_equity).toFixed(2),cl=p>=0?'pos':'neg';
- const hh=(c.history||[]).map(h=>'<span>C'+h.cycle+' '+(h.pnl>=0?'+':'-')+'$'+fmt(Math.abs(h.pnl))+(h.retroactive?' (retro)':'')+'</span>').join('');
+ const hh=(c.history||[]).map(h=>'<span>'+(h.label||('C'+h.cycle))+' '+(h.pnl>=0?'+':'-')+'$'+fmt(Math.abs(h.pnl))+(h.retroactive?' (retro)':'')+(h.pnl_vs_500!=null?' · ended '+usd(h.end_equity):'')+'</span>').join('');
  el.style.display='block';
  el.innerHTML='<div class="r1"><span class="cn">🔁 Cycle '+c.current+'</span><span class="cp '+cl+'">'+sg(p)+' this cycle</span></div>'+
  '<div class="cb"><i style="width:'+pp+'%"></i></div>'+
  '<div class="r2"><span>'+ist(c.start_epoch*1000)+' → '+ist(c.end_epoch*1000)+' IST</span><span>closes in <b style="color:var(--txt)">'+left(c.end_epoch)+'</b></span><span>started at '+usd(c.start_equity)+'</span></div>'+
- '<div class="r2"><span>6h cycles: all open coins auto-sell at cycle end, balance carries over (no reset)</span></div>'+(hh?'<div class="hist">Closed: '+hh+'</div>':'')}
+ '<div class="r2"><span>Every 6h cycle: all open coins auto-sell at cycle end, then the next cycle restarts fresh at $500 paper</span></div>'+(hh?'<div class="hist">Closed: '+hh+'</div>':'')}
 function links(l){return '<div class="lk"><a href="'+l.dexscreener+'" target="_blank" rel="noopener">DexScreener</a><a href="'+l.gmgn+'" target="_blank" rel="noopener">GMGN</a><a href="'+l.solscan+'" target="_blank" rel="noopener">Solscan</a></div>'}
 function openC(m){const c=D.open.find(x=>x.mint===m);if(!c)return;
  $('sb').innerHTML='<button class="x" onclick="hide()">✕</button><div class="lab">'+c.src+' signal · open</div><div class="big '+(c.mult>=1?'up':'')+'" style="font-size:40px">$'+c.sym+' <span class="'+(c.mult>=1?'pos':'neg')+'">'+fmt(c.mult)+'x</span></div>'+
