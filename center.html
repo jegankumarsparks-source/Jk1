@@ -65,13 +65,32 @@ summary{cursor:pointer;padding:10px 0;color:var(--dim);font-size:13px}
 .cyc .cp{font-weight:900;font-size:20px}.cyc .r2{display:flex;justify-content:space-between;font-size:12px;color:var(--dim);margin-top:6px;gap:8px;flex-wrap:wrap}
 .cyc .cb{height:7px;background:#0a1226;border-radius:6px;margin-top:8px;overflow:hidden}.cyc .cb i{display:block;height:100%;background:linear-gradient(90deg,#8b5cf6,#22d3ee);transition:width 1s}
 .cyc .hist{margin-top:8px;font-size:12px;color:var(--dim)}.cyc .hist span{display:inline-block;margin:2px 6px 0 0;padding:2px 8px;border:1px solid var(--line);border-radius:10px;background:#0c1528}
+.odo{display:inline-flex;align-items:flex-start;vertical-align:bottom;height:1.14em;line-height:1.14em;overflow:hidden}
+.odo .dg{display:inline-block;height:1.14em;overflow:hidden}.odo .dg i{display:block;font-style:normal;transition:transform 1s cubic-bezier(.16,.9,.2,1)}
+.odo .dg i b{display:block;height:1.14em;font-weight:inherit}.odo .sp{display:inline-block;white-space:pre}
+.tkup{animation:tku 1.1s}.tkdn{animation:tkd 1.1s}
+@keyframes tku{0%{text-shadow:0 0 0 #10d98a}30%{text-shadow:0 0 18px #10d98a}100%{text-shadow:0 0 0 #10d98a}}
+@keyframes tkd{0%{text-shadow:0 0 0 #ff4d6d}30%{text-shadow:0 0 18px #ff4d6d}100%{text-shadow:0 0 0 #ff4d6d}}
+.hero{animation:br 5s ease-in-out infinite alternate}@keyframes br{from{box-shadow:0 10px 40px #0008,0 0 0 #22d3ee00}to{box-shadow:0 10px 40px #0008,0 0 34px #22d3ee33}}
+.scan{height:2px;margin:8px 0 0;border-radius:2px;background:linear-gradient(90deg,transparent,#22d3ee,#8b5cf6,transparent);background-size:200% 100%;animation:scn 2.6s linear infinite;opacity:.7}
+@keyframes scn{from{background-position:200% 0}to{background-position:-200% 0}}
+#spark{height:38px;margin-top:10px;position:relative}#spark svg{width:100%;height:100%;display:block}
+.rng{position:relative;height:12px;margin:10px 0 4px;background:#0a1226;border-radius:7px;overflow:visible}
+.rng .f{position:absolute;left:0;top:0;bottom:0;border-radius:7px;transition:width .9s cubic-bezier(.16,.9,.2,1),background .4s}
+.rng u{position:absolute;top:-3px;bottom:-3px;width:2px;background:#fff9;text-decoration:none}
+.rng .pk,.rng .lw{position:absolute;top:-6px;font-size:9px;line-height:1;transform:translateX(-50%);transition:left .9s cubic-bezier(.16,.9,.2,1)}
+.rng .pk{color:var(--grn)}.rng .lw{top:auto;bottom:-7px;color:var(--red)}
+.coin.win{animation:in .5s both,gw 2.4s ease-in-out infinite alternate}@keyframes gw{from{box-shadow:0 0 10px #10d98a18}to{box-shadow:0 0 26px #10d98a44}}
+.dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--grn);margin-right:5px;animation:pu 1.2s infinite}
 @media(max-width:380px){.stats{grid-template-columns:repeat(2,1fr)}}
 </style></head><body><div class="wrap">
 <div class="top"><b>🎯 $500 → $800</b><span>paper challenge</span><span class="pill" id="pill">loading…</span></div>
+<div class="scan"></div>
 <div class="hero">
  <div class="lab">Equity (paper)</div>
  <div class="big" id="eq">$—</div>
- <div class="sub"><span id="pnl">P&amp;L —</span><span id="real" class="pos"></span><span id="togo" style="color:var(--dim)"></span></div>
+ <div class="sub"><span>P&amp;L <b id="pnlv">—</b></span><span id="real" class="pos"></span><span id="togo" style="color:var(--dim)"></span></div>
+ <div id="spark"></div>
  <div class="bar"><div class="fill" id="fill"></div></div>
  <div class="bl"><span>$500 start</span><span id="pct">0%</span><span>$800 goal</span></div>
 </div>
@@ -97,41 +116,59 @@ function ist(iso){const d=new Date(iso);return d.toLocaleTimeString('en-IN',{tim
 function left(ep){let s=Math.max(ep-Date.now()/1000,0);return Math.floor(s/3600)+'h '+String(Math.floor(s%3600/60)).padStart(2,'0')+'m'}
 function k(v){v=Number(v||0);return v>=1e6?'$'+(v/1e6).toFixed(2)+'M':v>=1e3?'$'+(v/1e3).toFixed(1)+'K':'$'+v.toFixed(0)}
 function anim(el,from,to){const t0=performance.now();(function f(t){let p=Math.min((t-t0)/700,1);el.textContent=usd(from+(to-from)*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(f)})(t0)}
+
+const SH=[0,1,2,3,4,5,6,7,8,9].map(d=>'<b>'+d+'</b>').join('');
+function roll(el,text,flash){if(!el)return;text=String(text);if(el._t===text)return;const old=el._t;const sig=[...text].map(c=>/\d/.test(c)?'#':c).join('');
+ if(el._sig!==sig){el.innerHTML=[...text].map(c=>/\d/.test(c)?'<span class="dg"><i>'+SH+'</i></span>':'<span class="sp">'+c+'</span>').join('');el.classList.add('odo');el._sig=sig;
+  const is=el.querySelectorAll('.dg i');let j=0;[...text].forEach(c=>{if(/\d/.test(c)){is[j].style.transform='translateY(0)';j++}});void el.offsetWidth}
+ const is=el.querySelectorAll('.dg i');let j=0;requestAnimationFrame(()=>{[...text].forEach(c=>{if(/\d/.test(c)){is[j].style.transform='translateY(-'+(+c*1.14)+'em)';j++}})});
+ el._t=text;if(flash&&old!=null){const num=v=>parseFloat(String(v).replace(/[^0-9.\-]/g,'').replace(/^-?\./,'0.'))*(/^-|\-\$/.test(String(v))?-1:1)||0;const up=num(text)>=num(old);el.classList.remove('tkup','tkdn');void el.offsetWidth;el.classList.add(up?'tkup':'tkdn')}}
+const SP=[];let spAt=0;
+function sparkUpd(){const el=$('spark');if(!el||!D)return;const t=Date.now();if(t-spAt<2000&&SP.length)return;spAt=t;SP.push(D.equity);if(SP.length>240)SP.shift();if(SP.length<2)return;
+ const mn=Math.min(...SP),mx=Math.max(...SP),r=(mx-mn)||1,w=300,h=38;const pts=SP.map((v,i)=>[(i/(SP.length-1))*w,h-3-((v-mn)/r)*(h-8)]);const d='M'+pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' L');const up=SP[SP.length-1]>=SP[0];const c=up?'#10d98a':'#ff4d6d';const l=pts[pts.length-1];
+ el.innerHTML='<svg viewBox="0 0 300 38" preserveAspectRatio="none"><defs><linearGradient id="sg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="'+c+'" stop-opacity=".35"/><stop offset="1" stop-color="'+c+'" stop-opacity="0"/></linearGradient></defs><path d="'+d+' L300,38 L0,38 Z" fill="url(#sg)"/><path d="'+d+'" fill="none" stroke="'+c+'" stroke-width="1.6" vector-effect="non-scaling-stroke"/></svg><span style="position:absolute;right:0;top:'+(l[1]/38*100)+'%;width:8px;height:8px;margin:-4px -2px 0 0;border-radius:50%;background:'+c+';box-shadow:0 0 10px '+c+'"></span>'}
+function coinHTML(c){return '<div class="row"><div><span class="sym">$'+c.sym+'</span><span class="tag">'+c.src+'</span></div><div class="mult"><span class="mv"></span></div></div>'+
+ '<div class="rng"><div class="f"></div><u style="left:0"></u><u style="left:50%"></u><span class="lw">▼</span><span class="pk">▲</span></div>'+
+ '<div class="meta"><span>bought '+ist(c.entry_time)+' IST</span><span class="pv"></span></div>'+
+ '<div class="meta" style="margin-top:3px"><span>peak <b class="pkv"></b> · low <b class="lwv"></b></span><span>exit in <span class="ex"></span></span></div>'}
+function coinUpd(el,c){const w=c.mult>=1;const rp=v=>Math.min(Math.max((v-0.7)/(0.8),0),1)*100;
+ const raw=c._raw||c.mult*(1+(D.friction||0.03))/(1-(D.friction||0.03));const pk=Math.max(c.peak||1,raw),lw=Math.min(c.low==null?1:c.low,raw);
+ roll(el.querySelector('.mv'),fmt(c.mult)+'x',true);el.querySelector('.mult').className='mult '+(w?'pos':'neg');
+ const f=el.querySelector('.f');f.style.width=rp(c.mult)+'%';f.style.background=w?'linear-gradient(90deg,#22d3ee,#10d98a)':'linear-gradient(90deg,#ff4d6d,#fb923c)';
+ el.querySelector('.pk').style.left=rp(pk)+'%';el.querySelector('.lw').style.left=rp(lw)+'%';
+ const pv=el.querySelector('.pv');roll(pv,sg(c.pnl),true);pv.className='pv '+(c.pnl>=0?'pos':'neg');
+ roll(el.querySelector('.pkv'),fmt(pk)+'x');roll(el.querySelector('.lwv'),fmt(lw)+'x');el.querySelector('.ex').textContent=left(c.exit_by_epoch);
+ el.className='coin '+(c.mult>=1.2?'win':c.mult<0.85?'loss':'')}
 function render(){
  const d=D;cycUpd();const up=d.pnl>=0;
  const e=$('eq');e.className='big '+(up?'up':'dn');
- if(eqShown==null)e.textContent=usd(d.equity);else if(eqShown!==d.equity)anim(e,eqShown,d.equity);eqShown=d.equity;
- $('pnl').innerHTML='P&amp;L <b class="'+(up?'pos':'neg')+'">'+sg(d.pnl)+' ('+(d.pnl/d.start*100>=0?'+':'')+fmt(d.pnl/d.start*100,1)+'%)</b>';
+ roll(e,usd(d.equity),true);eqShown=d.equity;sparkUpd();
+ if(!$('pnlv')){$('pnl').innerHTML='P&amp;L <b id="pnlv"></b>'}const pv_=$('pnlv');pv_.className=up?'pos':'neg';roll(pv_,sg(d.pnl)+' ('+(d.pnl/d.start*100>=0?'+':'')+fmt(d.pnl/d.start*100,1)+'%)',true);
  $('real').textContent='realised '+sg(d.realised);$('real').className=d.realised>=0?'pos':'neg';
  const need=d.target-d.equity;$('togo').textContent=need>0?usd(need)+' to go':'🎉 goal reached (paper)';
  $('fill').style.width=Math.max(d.progress_pct,d.pnl>0?2:0)+'%';$('pct').textContent=fmt(d.progress_pct,1)+'% of the way';
- $('s_open').textContent=d.open.length+'/'+d.max_open;$('s_cash').textContent=usd(d.cash);
- $('s_wl').textContent=d.wins+' / '+(d.n_closed-d.wins);$('s_real').textContent=sg(d.realised);$('s_real').className=d.realised>=0?'pos':'neg';
+ roll($('s_open'),d.open.length+'/'+d.max_open);roll($('s_cash'),usd(d.cash),true);
+ roll($('s_wl'),d.wins+' / '+(d.n_closed-d.wins));roll($('s_real'),sg(d.realised),true);$('s_real').className=d.realised>=0?'pos':'neg';
  $('cnt').textContent=d.open.length+' open';
  const g=$('grid');
- if(!d.open.length){g.innerHTML='<div class="empty">No open coins right now. Waiting for the next signal.</div>'}
- else g.innerHTML=d.open.map((c,i)=>{const w=c.mult>=1;const pos=Math.min(Math.max((c.mult-0.7)/(1.5-0.7),0),1)*100;
-  const fl=prev[c.mint]!=null&&prev[c.mint]!==c.mult?(c.mult>prev[c.mint]?'flash':'flashd'):'';
-  return '<div class="coin '+(c.mult>=1.2?'win':c.mult<0.85?'loss':'')+' '+fl+'" style="animation-delay:'+(i*40)+'ms" onclick="openC(\''+c.mint+'\')">'+
-  '<div class="row"><div><span class="sym">$'+c.sym+'</span><span class="tag">'+c.src+'</span></div><div class="mult '+(w?'pos':'neg')+'">'+fmt(c.mult)+'x</div></div>'+
-  '<div class="mini"><i style="width:'+pos+'%;background:'+(w?'linear-gradient(90deg,#22d3ee,#10d98a)':'linear-gradient(90deg,#ff4d6d,#fb923c)')+'"></i><u style="left:'+((1-0.7)/(0.8)*100)+'%"></u></div>'+
-  '<div class="meta"><span>bought '+ist(c.entry_time)+' IST</span><span class="'+(c.pnl>=0?'pos':'neg')+'">'+sg(c.pnl)+'</span></div>'+
-  '<div class="meta" style="margin-top:3px"><span>peak '+fmt(c.peak)+'x</span><span>exit in '+left(c.exit_by_epoch)+'</span></div></div>'}).join('');
- d.open.forEach(c=>prev[c.mint]=c.mult);
+ if(!d.open.length){if(!g.querySelector('.empty')){g.innerHTML='<div class="empty"><span class="dot"></span>Scanning for the next signal…</div>'}}
+ else{const e0=g.querySelector('.empty');if(e0)e0.remove();const keep=new Set(d.open.map(c=>c.mint));
+  [...g.querySelectorAll('.coin')].forEach(n=>{if(!keep.has(n.dataset.m))n.remove()});
+  d.open.forEach((c,i)=>{let n=g.querySelector('.coin[data-m="'+c.mint+'"]');if(!n){n=document.createElement('div');n.className='coin';n.dataset.m=c.mint;n.style.animationDelay=(i*40)+'ms';n.onclick=()=>openC(c.mint);n.innerHTML=coinHTML(c);g.appendChild(n)}coinUpd(n,c)})}
+
  $('csum').textContent='Closed trades ('+d.n_closed+')';
  $('cl').innerHTML=d.closed.map(c=>'<div class="cl" onclick="openX(\''+c.mint+'\')"><span><b>$'+c.sym+'</b> <span style="color:var(--dim)">'+c.stage+' · '+ist(c.exit_time)+'</span></span><span class="'+(c.pnl>=0?'pos':'neg')+'">'+fmt(c.exit_mult)+'x · '+sg(c.pnl)+'</span></div>').join('')||'<div class="cl" style="color:var(--dim)">none yet</div>';
  $('foot').innerHTML=(d.rug_restatement_usd?'<div style="color:#f5b942;margin-bottom:6px">'+d.rug_restatement_label+'</div>':'')+'PAPER ONLY, no real money. $'+d.bet+' per coin, max '+d.max_open+' open. Sell rules: -30% stop, full sell at '+d.rules.tp_mult+'x, '+d.rules.max_hold_h+'h max hold, rug = full loss. Marks include 3% modelled friction.<br>A paper result is not proof of an edge and not advice. $800 is a goal, not a prediction.';
 }
 
 function cycUpd(){const d=D;const el=$('cyc');if(!d||!d.cycle){if(el)el.style.display='none';return}
- const c=d.cycle,len=c.end_epoch-c.start_epoch,now=Date.now()/1000,rem=Math.max(c.end_epoch-now,0),pp=Math.min(Math.max((now-c.start_epoch)/len*100,0),100);
+ const c=d.cycle,len=c.end_epoch-c.start_epoch,now=Date.now()/1000,pp=Math.min(Math.max((now-c.start_epoch)/len*100,0),100);
  const p=+(d.equity-c.start_equity).toFixed(2),cl=p>=0?'pos':'neg';
+ if(!el._sk){el.innerHTML='<div class="r1"><span class="cn">🔁 Cycle <span id="cy_n"></span></span><span class="cp" id="cy_p"></span></div><div class="cb"><i id="cy_b"></i></div><div class="r2"><span id="cy_w"></span><span>closes in <b id="cy_r" style="color:var(--txt)"></b></span><span id="cy_s"></span></div><div class="r2"><span>Every 6h cycle: all open coins auto-sell at cycle end, then the next cycle restarts fresh at $500 paper</span></div><div class="hist" id="cy_h"></div>';el._sk=1}
+ el.style.display='block';roll($('cy_n'),String(c.current));const cp=$('cy_p');cp.className='cp '+cl;roll(cp,sg(p)+' this cycle',true);$('cy_b').style.width=pp+'%';
+ $('cy_w').textContent=ist(c.start_epoch*1000)+' → '+ist(c.end_epoch*1000)+' IST';$('cy_r').textContent=left(c.end_epoch);$('cy_s').textContent='started at '+usd(c.start_equity);
  const hh=(c.history||[]).map(h=>'<span>'+(h.label||('C'+h.cycle))+' '+(h.pnl>=0?'+':'-')+'$'+fmt(Math.abs(h.pnl))+(h.retroactive?' (retro)':'')+(h.pnl_vs_500!=null?' · ended '+usd(h.end_equity):'')+'</span>').join('');
- el.style.display='block';
- el.innerHTML='<div class="r1"><span class="cn">🔁 Cycle '+c.current+'</span><span class="cp '+cl+'">'+sg(p)+' this cycle</span></div>'+
- '<div class="cb"><i style="width:'+pp+'%"></i></div>'+
- '<div class="r2"><span>'+ist(c.start_epoch*1000)+' → '+ist(c.end_epoch*1000)+' IST</span><span>closes in <b style="color:var(--txt)">'+left(c.end_epoch)+'</b></span><span>started at '+usd(c.start_equity)+'</span></div>'+
- '<div class="r2"><span>Every 6h cycle: all open coins auto-sell at cycle end, then the next cycle restarts fresh at $500 paper</span></div>'+(hh?'<div class="hist">Closed: '+hh+'</div>':'')}
+ const H=$('cy_h');if(H._h!==hh){H._h=hh;H.innerHTML=hh?'Closed: '+hh:''}}
 function links(l){return '<div class="lk"><a href="'+l.dexscreener+'" target="_blank" rel="noopener">DexScreener</a><a href="'+l.gmgn+'" target="_blank" rel="noopener">GMGN</a><a href="'+l.solscan+'" target="_blank" rel="noopener">Solscan</a></div>'}
 function openC(m){const c=D.open.find(x=>x.mint===m);if(!c)return;
  $('sb').innerHTML='<button class="x" onclick="hide()">✕</button><div class="lab">'+c.src+' signal · open</div><div class="big '+(c.mult>=1?'up':'')+'" style="font-size:40px">$'+c.sym+' <span class="'+(c.mult>=1?'pos':'neg')+'">'+fmt(c.mult)+'x</span></div>'+
@@ -168,7 +205,7 @@ let LIVE={},liveAt=0;
 function pillUpd(){const p=$('pill');if(!D||!p)return;const sa=Date.now()/1000-(D.state_epoch||D.publish_epoch);const la=(Date.now()-liveAt)/1000;
  if(sa>=300){p.className='pill stale';p.innerHTML='⚠ arena stalled '+Math.round(sa/60)+'m';return}
  p.className='pill on';p.innerHTML=(liveAt&&la<40)?'<i>●</i> LIVE · '+Math.round(la)+'s ago':'<i>●</i> LIVE · '+Math.round(sa)+'s ago'}
-function applyLive(){if(!D)return;const F=D.friction||0.03;let v=0;D.open.forEach(c=>{const p=LIVE[c.mint];if(p&&c.entry_price){c.mult=Math.round(p/c.entry_price*(1-F)/(1+F)*1000)/1000;c.value=+(c.invested*c.mult).toFixed(2);c.pnl=+(c.value-c.invested).toFixed(2)}v+=c.value});
+function applyLive(){if(!D)return;const F=D.friction||0.03;let v=0;D.open.forEach(c=>{const p=LIVE[c.mint];if(p&&c.entry_price){c._raw=p/c.entry_price;c.mult=Math.round(p/c.entry_price*(1-F)/(1+F)*1000)/1000;c.value=+(c.invested*c.mult).toFixed(2);c.pnl=+(c.value-c.invested).toFixed(2)}v+=c.value});
  D.open_value=+v.toFixed(2);D.equity=+(D.cash+v+(D.rug_restatement_usd||0)).toFixed(2);D.pnl=+(D.equity-D.start).toFixed(2);D.progress_pct=Math.round(Math.max(Math.min(D.pnl/(D.target-D.start)*100,100),0)*10)/10;
  const s=JSON.stringify(D);if(s!==last){last=s;render()}}
 async function liveMarks(){if(!D||!D.open||!D.open.length)return;try{const r=await fetch('https://api.dexscreener.com/tokens/v1/solana/'+D.open.map(c=>c.mint).join(','),{cache:'no-store'});const a=await r.json();const best={};
