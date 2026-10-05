@@ -187,7 +187,7 @@ function pp(v){return Math.min(Math.max((v-0.5)/2.5,0),1)*100}
 function pathSet(el,m,pk){const x=pp(m),e=20,z=el.querySelector('.z'),mk=el.querySelector('.mk');
  z.style.left=Math.min(x,e)+'%';z.style.width=Math.abs(x-e)+'%';z.style.background=m>=1?'linear-gradient(90deg,#22d3ee,#10d98a)':'linear-gradient(90deg,#ff4d6d,#fb923c)';
  mk.style.left=x+'%';mk.className='mk '+(m>=1?'pos':'neg');const p=el.querySelector('.pkm');if(pk!=null&&pk>1.001){p.style.left=pp(pk)+'%';p.style.display=''}else p.style.display='none'}
-function coinHTML(c){return '<div class="row"><div><span class="sym">$'+c.sym+'</span><span class="tag">'+c.src+'</span><span class="badge o">OPEN</span><span class="tmr" title="time left on this coin's own 1-hour hold">--:--</span></div><div class="mult"><span class="mv"></span></div></div>'+
+function coinHTML(c){return '<div class="row"><div><span class="sym">$'+c.sym+'</span><span class="tag">'+c.src+'</span><span class="badge o">OPEN</span><span class="tmr" title="time left on its own 1-hour hold">--:--</span></div><div class="mult"><span class="mv"></span></div></div>'+
  pathHTML()+'<div class="togo"></div>'+
  '<div class="meta"><span>bought '+ist(c.entry_time)+' IST</span><span class="pv"></span></div>'+
  '<div class="meta" style="margin-top:3px"><span>peak <b class="pkv"></b> · low <b class="lwv"></b></span><span>exit in <span class="ex"></span></span></div>'}
