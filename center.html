@@ -2,7 +2,7 @@
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#070b14"><link rel="icon" href="data:,">
-<title>JK Wallet Tracker</title>
+<title>JK Wallet Tracker 2</title>
 <style>
 :root{--bg:#070b14;--card:#0f1729;--card2:#16203a;--line:#222f4d;--txt:#eaf0ff;--dim:#8b9bc0;--grn:#10d98a;--red:#ff4d6d;--yel:#fbbf24;--acc:#22d3ee;--vio:#8b5cf6}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -173,8 +173,11 @@ summary{cursor:pointer;padding:10px 0;color:var(--dim);font-size:13px}
 #eq .sp.pnt{padding:0}
 #eq.up,#eq.up *,#eq.dn,#eq.dn *{text-shadow:none!important}
 .pt .hero .big{font-weight:900;letter-spacing:-1px;margin:6px 0 10px}
+.top2{margin:6px 2px 10px}.top2 .ttl{font-size:26px;font-weight:900;letter-spacing:.2px;color:#e8eefc}.top2 .gold{background:linear-gradient(90deg,#fcd34d,#f59e0b);-webkit-background-clip:text;background-clip:text;color:transparent}.top2 .stat{display:flex;align-items:center;gap:10px;margin-top:6px;flex-wrap:wrap}.top2 .pill{margin-left:0;border:0;background:none;padding:0;font-size:14px;font-weight:600;color:var(--dim)}.top2 .pill.on{color:var(--dim);border:0;background:none}.top2 .pill i{color:var(--grn);font-style:normal;margin-right:6px}.top2 .chip2{padding:5px 12px;border-radius:999px;border:1px solid #3a4a7a;background:#0c1528;color:#a9b8de;font-size:12px;font-weight:700;letter-spacing:.8px}
+.pt .hero{position:relative}.bank{position:absolute;top:14px;right:16px;text-align:right;line-height:1.15}.bank .bl1{font-size:12px;color:var(--dim);letter-spacing:.4px}.bank .bv{font-size:22px;font-weight:900;color:var(--grn)}.bank .bs{font-size:11px;color:var(--dim)}.bank .bs b{color:var(--grn)}
+.cyc .cd b{font-size:22px !important;letter-spacing:.3px}.cyc .cdl{font-size:14px !important}
 </style></head><body><div class="wrap">
-<div class="top"><b>JK Wallet Tracker</b><span>paper arena</span><span class="pill" id="pill">loading…</span></div>
+<div class="top2"><div class="ttl">JK <span class="gold">Wallet Tracker 2</span></div><div class="stat"><span class="pill" id="pill">loading…</span><span class="chip2">SOL · PAPER ONLY</span></div></div>
 <div class="scan"></div>
 <section class="pt">
 <div class="hero">
@@ -182,8 +185,7 @@ summary{cursor:pointer;padding:10px 0;color:var(--dim);font-size:13px}
  <div class="big" id="eq">$—</div>
  <div class="sub2"><span class="chip" id="pchip">P&amp;L <b id="pnlv">—</b></span><span class="vs">vs $500 start</span></div>
  <div class="ln">Cash <b id="h_cash">–</b> · <b id="h_open">–</b> open · <span id="real" class="pos"></span> · <span id="togo" style="color:var(--dim)"></span></div>
- <div class="ln" id="resln" style="margin-top:6px"><span class="chip" style="font-size:13px;padding:4px 12px;border-color:#fbbf2488;background:#2a2310">💰 Profit reserve <b id="resv">$0.00</b></span> <span class="chip" style="font-size:13px;padding:4px 12px" id="tpchip">True P&amp;L <b id="tpv">$0.00</b></span></div>
- <div class="togo" id="reshint">Equity above $500 is moved into the reserve at each hourly roll; below $500 is topped up from it.</div>
+ <div class="bank"><div class="bl1">PROFIT BANK</div><div class="bv" id="resv">$0.00</div><div class="bs">true P&amp;L <b id="tpv">$0.00</b></div></div>
  <div id="spark"></div>
 </div>
 </section>
@@ -341,7 +343,7 @@ async function fetchData(){
 let LIVE={},liveAt=0;
 function pillUpd(){const p=$('pill');if(!D||!p)return;const sa=Date.now()/1000-(D.state_epoch||D.publish_epoch);const la=(Date.now()-liveAt)/1000;
  if(sa>=300){p.className='pill stale';p.innerHTML='⚠ arena stalled '+Math.round(sa/60)+'m';return}
- p.className='pill on';p.innerHTML=(liveAt&&la<40)?'<i>●</i> LIVE · '+Math.round(la)+'s ago':'<i>●</i> LIVE · '+Math.round(sa)+'s ago'}
+ p.className='pill on';p.innerHTML=(liveAt&&la<40)?'<i>●</i>live · engine '+Math.round(la)+'s ago':'<i>●</i>live · engine '+Math.round(sa)+'s ago'}
 function applyLive(){if(!D)return;const F=D.friction||0.03;let v=0;D.open.forEach(c=>{const p=LIVE[c.mint];if(p&&c.entry_price){c._raw=p/c.entry_price;c.mult=Math.round(p/c.entry_price*(1-F)/(1+F)*1000)/1000;c.value=+(c.invested*c.mult).toFixed(2);c.pnl=+(c.value-c.invested).toFixed(2)}v+=c.value});
  D.open_value=+v.toFixed(2);D.equity=+(D.cash+v+(D.rug_restatement_usd||0)).toFixed(2);D.pnl=+(D.equity-D.start).toFixed(2);D.progress_pct=Math.round(Math.max(Math.min((D.pnl+(D.reserve_balance||0))/(D.target-D.start)*100,100),0)*10)/10;
  const s=JSON.stringify(D);if(s!==last){last=s;render()}}
