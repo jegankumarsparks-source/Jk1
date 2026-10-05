@@ -114,7 +114,7 @@ function render(){
  d.open.forEach(c=>prev[c.mint]=c.mult);
  $('csum').textContent='Closed trades ('+d.n_closed+')';
  $('cl').innerHTML=d.closed.map(c=>'<div class="cl" onclick="openX(\''+c.mint+'\')"><span><b>$'+c.sym+'</b> <span style="color:var(--dim)">'+c.stage+' · '+ist(c.exit_time)+'</span></span><span class="'+(c.pnl>=0?'pos':'neg')+'">'+fmt(c.exit_mult)+'x · '+sg(c.pnl)+'</span></div>').join('')||'<div class="cl" style="color:var(--dim)">none yet</div>';
- $('foot').innerHTML='PAPER ONLY, no real money. $'+d.bet+' per coin, max '+d.max_open+' open. Sell rules: -30% stop, full sell at '+d.rules.tp_mult+'x, '+d.rules.max_hold_h+'h max hold, rug = full loss. Marks include 3% modelled friction.<br>A paper result is not proof of an edge and not advice. $800 is a goal, not a prediction.';
+ $('foot').innerHTML=(d.rug_restatement_usd?'<div style="color:#f5b942;margin-bottom:6px">'+d.rug_restatement_label+'</div>':'')+'PAPER ONLY, no real money. $'+d.bet+' per coin, max '+d.max_open+' open. Sell rules: -30% stop, full sell at '+d.rules.tp_mult+'x, '+d.rules.max_hold_h+'h max hold, rug = full loss. Marks include 3% modelled friction.<br>A paper result is not proof of an edge and not advice. $800 is a goal, not a prediction.';
 }
 function links(l){return '<div class="lk"><a href="'+l.dexscreener+'" target="_blank" rel="noopener">DexScreener</a><a href="'+l.gmgn+'" target="_blank" rel="noopener">GMGN</a><a href="'+l.solscan+'" target="_blank" rel="noopener">Solscan</a></div>'}
 function openC(m){const c=D.open.find(x=>x.mint===m);if(!c)return;
@@ -146,7 +146,7 @@ function pillUpd(){const p=$('pill');if(!D||!p)return;const sa=Date.now()/1000-(
  if(sa>=300){p.className='pill stale';p.innerHTML='⚠ arena stalled '+Math.round(sa/60)+'m';return}
  p.className='pill on';p.innerHTML=(liveAt&&la<40)?'<i>●</i> LIVE · '+Math.round(la)+'s ago':'<i>●</i> LIVE · '+Math.round(sa)+'s ago'}
 function applyLive(){if(!D)return;const F=D.friction||0.03;let v=0;D.open.forEach(c=>{const p=LIVE[c.mint];if(p&&c.entry_price){c.mult=Math.round(p/c.entry_price*(1-F)/(1+F)*1000)/1000;c.value=+(c.invested*c.mult).toFixed(2);c.pnl=+(c.value-c.invested).toFixed(2)}v+=c.value});
- D.open_value=+v.toFixed(2);D.equity=+(D.cash+v).toFixed(2);D.pnl=+(D.equity-D.start).toFixed(2);D.progress_pct=Math.round(Math.max(Math.min(D.pnl/(D.target-D.start)*100,100),0)*10)/10;
+ D.open_value=+v.toFixed(2);D.equity=+(D.cash+v+(D.rug_restatement_usd||0)).toFixed(2);D.pnl=+(D.equity-D.start).toFixed(2);D.progress_pct=Math.round(Math.max(Math.min(D.pnl/(D.target-D.start)*100,100),0)*10)/10;
  const s=JSON.stringify(D);if(s!==last){last=s;render()}}
 async function liveMarks(){if(!D||!D.open||!D.open.length)return;try{const r=await fetch('https://api.dexscreener.com/tokens/v1/solana/'+D.open.map(c=>c.mint).join(','),{cache:'no-store'});const a=await r.json();const best={};
  a.forEach(x=>{const m=x.baseToken&&x.baseToken.address;const p=parseFloat(x.priceUsd);if(!m||!p)return;const l=(x.liquidity&&x.liquidity.usd)||0;if(!best[m]||l>best[m].l)best[m]={l,p}});
