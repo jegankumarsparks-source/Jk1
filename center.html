@@ -200,6 +200,7 @@ summary{cursor:pointer;padding:10px 0;color:var(--dim);font-size:13px}
 </div>
 <h2><span>Open positions</span><span id="cnt"></span></h2>
 <div class="grid" id="grid"><div class="empty">Loading…</div></div>
+<h2 class="sec" id="wh"><span>Watchlist · limit triggers (not signals)</span><span id="wcn"></span></h2><div id="wl" style="font-size:12px;color:var(--dim)"></div>
 <h2 class="sec" id="dch" style="display:none"><span>Completed cycles</span><span id="dcn"></span></h2><div class="dc" id="dc"></div>
 <div id="cgcur"></div><div id="cgrp"></div>
 <details id="cd2" style="display:none"><summary id="csum2">Earlier cycles</summary><div id="cl2"></div></details>
@@ -346,7 +347,8 @@ async function liveMarks(){if(!D||!D.open||!D.open.length)return;try{const r=awa
  a.forEach(x=>{const m=x.baseToken&&x.baseToken.address;const p=parseFloat(x.priceUsd);if(!m||!p)return;const l=(x.liquidity&&x.liquidity.usd)||0;if(!best[m]||l>best[m].l)best[m]={l,p}});
  let n=0;Object.keys(best).forEach(m=>{LIVE[m]=best[m].p;n++});if(n){liveAt=Date.now();applyLive()}}catch(e){}}
 setInterval(liveMarks,10000);
-async function load(){const x=await fetchData();if(x&&(!D||(x.state_epoch||x.publish_epoch)>=(D.state_epoch||D.publish_epoch))){D=x;applyLive()}
+function renderWatch(){try{const W=(D&&D.watch||[]).filter(w=>w.status==='WATCH');const e=document.getElementById('wl');document.getElementById('wcn').textContent=W.length+' watching';if(!W.length){e.innerHTML='<div class="empty">No coins on the watchlist</div>';return}W.sort((a,b)=>b.score-a.score);e.innerHTML=W.slice(0,15).map(w=>{const gap=w.last&&w.trigger?((w.last/w.trigger-1)*100).toFixed(1):'?';return '<div style="display:flex;justify-content:space-between;padding:6px 4px;border-bottom:1px solid rgba(255,255,255,.07)"><span><b style="color:#e8eefc">'+w.sym+'</b> buy '+Math.round(w.buy_pct)+'%</span><span>price '+gap+'% above trigger</span></div>'}).join('')+'<div style="padding:6px 4px;font-size:11px">Paper limit orders only. A coin becomes a signal only after its trigger fills. Fills UNVERIFIED.</div>'}catch(_){}}
+async function load(){const x=await fetchData();if(x&&(!D||(x.state_epoch||x.publish_epoch)>=(D.state_epoch||D.publish_epoch))){D=x;applyLive();renderWatch()}
  if(D){pillUpd()}}
 load();setTimeout(liveMarks,2500);setInterval(load,10000);setInterval(()=>{if(D){pillUpd();cycUpd();document.querySelectorAll('.tmr[data-x]').forEach(tmrUpd)}},1000);
 </script></body></html>
