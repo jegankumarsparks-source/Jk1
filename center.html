@@ -85,6 +85,20 @@ summary{cursor:pointer;padding:10px 0;color:var(--dim);font-size:13px}
 .coin.win{animation:in .5s both,gw 2.4s ease-in-out infinite alternate}@keyframes gw{from{box-shadow:0 0 10px #10d98a18}to{box-shadow:0 0 26px #10d98a44}}
 .dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--grn);margin-right:5px;animation:pu 1.2s infinite}
 @media(max-width:380px){.stats{grid-template-columns:repeat(2,1fr)}}
+
+.path{position:relative;height:14px;margin:16px 0 22px;background:#0a1226;border-radius:8px}
+.path .z{position:absolute;top:0;bottom:0;border-radius:8px;transition:left .9s cubic-bezier(.16,.9,.2,1),width .9s cubic-bezier(.16,.9,.2,1),background .4s}
+.path .tk{position:absolute;top:-4px;bottom:-4px;width:2px;background:#ffffff66}
+.path .tl{position:absolute;top:19px;font-size:9px;color:var(--dim);transform:translateX(-50%);white-space:nowrap}
+.path .tl.a{transform:none;left:0!important}.path .tl.b{transform:translateX(-100%);left:100%!important}
+.path .mk{position:absolute;top:50%;width:20px;height:20px;margin:-10px 0 0 -10px;border-radius:50%;background:#fff;border:3px solid var(--acc);box-shadow:0 0 12px var(--acc);transition:left .9s cubic-bezier(.16,.9,.2,1),border-color .4s,box-shadow .4s;z-index:2}
+.path .mk.pos{border-color:var(--grn);box-shadow:0 0 14px var(--grn);animation:pls 1.8s infinite}.path .mk.neg{border-color:var(--red);box-shadow:0 0 14px var(--red)}
+@keyframes pls{50%{box-shadow:0 0 22px var(--grn)}}
+.path .pkm{position:absolute;top:-9px;font-size:9px;color:var(--grn);transform:translateX(-50%);transition:left .9s}
+.togo{font-size:12px;color:var(--dim);text-align:center;margin-bottom:6px}.togo b{color:var(--txt)}
+.badge{font-size:10px;font-weight:800;border-radius:8px;padding:2px 7px;margin-left:6px}.badge.tp{background:#10d98a22;color:var(--grn)}.badge.sl{background:#ff4d6d22;color:var(--red)}.badge.o{background:#fbbf2422;color:var(--yel)}
+.coin.done{cursor:pointer;animation:in .5s both}
+.sec{margin-top:6px}
 </style></head><body><div class="wrap">
 <div class="top"><b>🎯 $500 → $800</b><span>paper challenge</span><span class="pill" id="pill">loading…</span></div>
 <div class="scan"></div>
@@ -103,9 +117,10 @@ summary{cursor:pointer;padding:10px 0;color:var(--dim);font-size:13px}
  <div class="st"><b id="s_wl">–</b><span>wins / losses</span></div>
  <div class="st"><b id="s_real">–</b><span>realised</span></div>
 </div>
-<h2><span>Coins bought</span><span id="cnt"></span></h2>
+<h2><span>Open positions</span><span id="cnt"></span></h2>
 <div class="grid" id="grid"><div class="empty">Loading…</div></div>
-<details id="cd"><summary id="csum">Closed trades</summary><div id="cl"></div></details>
+<h2 class="sec"><span>Closed this cycle</span><span id="ccnt"></span></h2>
+<div class="grid" id="clg"></div>
 <details id="cd2" style="display:none"><summary id="csum2">Earlier cycles</summary><div id="cl2"></div></details>
 <div class="foot" id="foot"></div>
 </div>
@@ -130,18 +145,24 @@ const SP=[];let spAt=0;
 function sparkUpd(){const el=$('spark');if(!el||!D)return;const t=Date.now();if(t-spAt<2000&&SP.length)return;spAt=t;SP.push(D.equity);if(SP.length>240)SP.shift();if(SP.length<2)return;
  const mn=Math.min(...SP),mx=Math.max(...SP),r=(mx-mn)||1,w=300,h=38;const pts=SP.map((v,i)=>[(i/(SP.length-1))*w,h-3-((v-mn)/r)*(h-8)]);const d='M'+pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' L');const up=SP[SP.length-1]>=SP[0];const c=up?'#10d98a':'#ff4d6d';const l=pts[pts.length-1];
  el.innerHTML='<svg viewBox="0 0 300 38" preserveAspectRatio="none"><defs><linearGradient id="sg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="'+c+'" stop-opacity=".35"/><stop offset="1" stop-color="'+c+'" stop-opacity="0"/></linearGradient></defs><path d="'+d+' L300,38 L0,38 Z" fill="url(#sg)"/><path d="'+d+'" fill="none" stroke="'+c+'" stroke-width="1.6" vector-effect="non-scaling-stroke"/></svg><span style="position:absolute;right:0;top:'+(l[1]/38*100)+'%;width:8px;height:8px;margin:-4px -2px 0 0;border-radius:50%;background:'+c+';box-shadow:0 0 10px '+c+'"></span>'}
-function coinHTML(c){return '<div class="row"><div><span class="sym">$'+c.sym+'</span><span class="tag">'+c.src+'</span></div><div class="mult"><span class="mv"></span></div></div>'+
- '<div class="rng"><div class="f"></div><u style="left:0"></u><u style="left:50%"></u><span class="lw">▼</span><span class="pk">▲</span></div>'+
+function pathHTML(){return '<div class="path"><div class="z"></div><span class="tk" style="left:0"></span><span class="tk" style="left:37.5%"></span><span class="tk" style="left:100%;transform:translateX(-2px)"></span><span class="tl a">SL 0.70x</span><span class="tl" style="left:37.5%">Entry 1.00x</span><span class="tl b">TP 1.50x</span><span class="pkm">▲</span><div class="mk"></div></div>'}
+function pp(v){return Math.min(Math.max((v-0.7)/0.8,0),1)*100}
+function pathSet(el,m,pk){const x=pp(m),e=37.5,z=el.querySelector('.z'),mk=el.querySelector('.mk');
+ z.style.left=Math.min(x,e)+'%';z.style.width=Math.abs(x-e)+'%';z.style.background=m>=1?'linear-gradient(90deg,#22d3ee,#10d98a)':'linear-gradient(90deg,#ff4d6d,#fb923c)';
+ mk.style.left=x+'%';mk.className='mk '+(m>=1?'pos':'neg');const p=el.querySelector('.pkm');if(pk!=null&&pk>1.001){p.style.left=pp(pk)+'%';p.style.display=''}else p.style.display='none'}
+function coinHTML(c){return '<div class="row"><div><span class="sym">$'+c.sym+'</span><span class="tag">'+c.src+'</span><span class="badge o">OPEN</span></div><div class="mult"><span class="mv"></span></div></div>'+
+ pathHTML()+'<div class="togo"></div>'+
  '<div class="meta"><span>bought '+ist(c.entry_time)+' IST</span><span class="pv"></span></div>'+
  '<div class="meta" style="margin-top:3px"><span>peak <b class="pkv"></b> · low <b class="lwv"></b></span><span>exit in <span class="ex"></span></span></div>'}
-function coinUpd(el,c){const w=c.mult>=1;const rp=v=>Math.min(Math.max((v-0.7)/(0.8),0),1)*100;
+function coinUpd(el,c){const w=c.mult>=1;
  const raw=c._raw||c.mult*(1+(D.friction||0.03))/(1-(D.friction||0.03));const pk=Math.max(c.peak||1,raw),lw=Math.min(c.low==null?1:c.low,raw);
  roll(el.querySelector('.mv'),fmt(c.mult)+'x',true);el.querySelector('.mult').className='mult '+(w?'pos':'neg');
- const f=el.querySelector('.f');f.style.width=rp(c.mult)+'%';f.style.background=w?'linear-gradient(90deg,#22d3ee,#10d98a)':'linear-gradient(90deg,#ff4d6d,#fb923c)';
- el.querySelector('.pk').style.left=rp(pk)+'%';el.querySelector('.lw').style.left=rp(lw)+'%';
+ pathSet(el,c.mult,pk);
+ const tg=(1.5-c.mult)/(1.5-1)*100,sl=(c.mult-0.7)/0.3*100;el.querySelector('.togo').innerHTML=w?('<b>'+Math.max(Math.round((c.mult-1)/0.5*100),0)+'%</b> of the way to TP · '+fmt(Math.max(1.5-c.mult,0))+'x to go'):('<b>'+Math.round(Math.max(sl,0))+'%</b> cushion left above stop · '+fmt(Math.max(c.mult-0.7,0))+'x to SL');
  const pv=el.querySelector('.pv');roll(pv,sg(c.pnl),true);pv.className='pv '+(c.pnl>=0?'pos':'neg');
  roll(el.querySelector('.pkv'),fmt(pk)+'x');roll(el.querySelector('.lwv'),fmt(lw)+'x');el.querySelector('.ex').textContent=left(c.exit_by_epoch);
  el.className='coin '+(c.mult>=1.2?'win':c.mult<0.85?'loss':'')}
+function doneHTML(c){const w=c.pnl>=0,m=c.exit_mult;return '<div class="coin done '+(w?'win':'loss')+'" onclick="openX(\''+c.mint+'\')"><div class="row"><div><span class="sym">$'+c.sym+'</span><span class="badge '+(c.stage==='TP'?'tp':c.stage==='SL'?'sl':'o')+'">'+c.stage+'</span></div><div class="mult '+(w?'pos':'neg')+'">'+fmt(m)+'x</div></div>'+pathHTML().replace('class="mk"','class="mk '+(w?'pos':'neg')+'" style="left:'+pp(m)+'%"').replace('<div class="z"></div>','<div class="z" style="left:'+Math.min(pp(m),37.5)+'%;width:'+Math.abs(pp(m)-37.5)+'%;background:'+(w?'linear-gradient(90deg,#22d3ee,#10d98a)':'linear-gradient(90deg,#ff4d6d,#fb923c)')+'"></div>').replace('<span class="pkm">','<span class="pkm" style="display:'+((c.peak||0)>1.001?'':'none')+';left:'+pp(c.peak||1)+'%">')+'<div class="togo">closed at <b>'+fmt(m)+'x</b>'+(m>1.5?' (fill above the 1.5x target: gap/pump print)':m<0.7?' (fill below the -30% stop: gap)':'')+'</div><div class="meta"><span>'+ist(c.entry_time)+' → '+ist(c.exit_time)+' IST</span><span class="'+(w?'pos':'neg')+'" style="font-weight:800">'+sg(c.pnl)+'</span></div><div class="meta" style="margin-top:3px"><span>peak '+fmt(c.peak||1)+'x</span><span>tap for details</span></div></div>'}
 function render(){
  const d=D;cycUpd();const up=d.pnl>=0;
  const e=$('eq');e.className='big '+(up?'up':'dn');
@@ -159,8 +180,8 @@ function render(){
   [...g.querySelectorAll('.coin')].forEach(n=>{if(!keep.has(n.dataset.m))n.remove()});
   d.open.forEach((c,i)=>{let n=g.querySelector('.coin[data-m="'+c.mint+'"]');if(!n){n=document.createElement('div');n.className='coin';n.dataset.m=c.mint;n.style.animationDelay=(i*40)+'ms';n.onclick=()=>openC(c.mint);n.innerHTML=coinHTML(c);g.appendChild(n)}coinUpd(n,c)})}
 
- $('csum').textContent='Closed trades ('+d.n_closed+')';
- $('cl').innerHTML=d.closed.map(c=>'<div class="cl" onclick="openX(\''+c.mint+'\')"><span><b>$'+c.sym+'</b> <span style="color:var(--dim)">'+c.stage+' · '+ist(c.exit_time)+'</span></span><span class="'+(c.pnl>=0?'pos':'neg')+'">'+fmt(c.exit_mult)+'x · '+sg(c.pnl)+'</span></div>').join('')||'<div class="cl" style="color:var(--dim)">none yet</div>';
+ $('ccnt').textContent=d.closed.length+' closed';
+ {const cg=$('clg');const sig=d.closed.map(c=>c.mint+c.exit_time).join('|');if(cg._sig!==sig){cg._sig=sig;cg.innerHTML=d.closed.length?d.closed.slice().reverse().map(doneHTML).join(''):'<div class="empty">No coins closed yet this cycle.</div>'}}
  $('cl2').innerHTML=(d.closed_prev||[]).map(c=>'<div class="cl" onclick="openX(\''+c.mint+'\')"><span><b>$'+c.sym+'</b> <span style="color:var(--dim)">'+c.stage+' · '+ist(c.exit_time)+'</span></span><span class="'+(c.pnl>=0?'pos':'neg')+'">'+fmt(c.exit_mult)+'x · '+sg(c.pnl)+'</span></div>').join('')||'<div class="cl" style="color:var(--dim)">none yet</div>';
  if((d.closed_prev||[]).length){$('cd2').style.display='block';$('csum2').textContent='Earlier cycles ('+d.closed_prev.length+' most recent trades)'}
  $('foot').innerHTML=(d.rug_restatement_usd?'<div style="color:#f5b942;margin-bottom:6px">'+d.rug_restatement_label+'</div>':'')+'PAPER ONLY, no real money. $'+d.bet+' per coin, max '+d.max_open+' open. Sell rules: -30% stop, full sell at '+d.rules.tp_mult+'x, '+d.rules.max_hold_h+'h max hold, rug = full loss. Marks include 3% modelled friction.<br>A paper result is not proof of an edge and not advice. $800 is a goal, not a prediction.';
