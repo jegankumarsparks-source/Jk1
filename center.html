@@ -169,10 +169,10 @@ function render(){
 function cycUpd(){const d=D;const el=$('cyc');if(!d||!d.cycle){if(el)el.style.display='none';return}
  const c=d.cycle,len=c.end_epoch-c.start_epoch,now=Date.now()/1000,pp=Math.min(Math.max((now-c.start_epoch)/len*100,0),100);
  const p=+(d.equity-c.start_equity).toFixed(2),cl=p>=0?'pos':'neg';
- if(!el._sk){el.innerHTML='<div class="r1"><span class="cn">🔁 Cycle <span id="cy_n"></span></span><span class="cp" id="cy_p"></span></div><div class="cb"><i id="cy_b"></i></div><div class="r2"><span id="cy_w"></span><span>closes in <b id="cy_r" style="color:var(--txt)"></b></span><span id="cy_s"></span></div><div class="r2"><span>Every 6h cycle: all open coins auto-sell at cycle end, then the next cycle restarts fresh at $500 paper</span></div><div class="hist" id="cy_h"></div>';el._sk=1}
+ if(!el._sk){el.innerHTML='<div class="r1"><span class="cn">🔁 Cycle <span id="cy_n"></span></span><span class="cp" id="cy_p"></span></div><div class="cb"><i id="cy_b"></i></div><div class="r2"><span id="cy_w"></span><span>closes in <b id="cy_r" style="color:var(--txt)"></b></span><span id="cy_s"></span></div><div class="r2"><span>Hourly cycles (on the hour): all open coins auto-sell at cycle end, then the next cycle restarts fresh at $500 paper</span></div><div class="hist" id="cy_h"></div>';el._sk=1}
  el.style.display='block';roll($('cy_n'),String(c.current));const cp=$('cy_p');cp.className='cp '+cl;roll(cp,sg(p)+' this cycle',true);$('cy_b').style.width=pp+'%';
  $('cy_w').textContent=ist(c.start_epoch*1000)+' → '+ist(c.end_epoch*1000)+' IST';$('cy_r').textContent=left(c.end_epoch);$('cy_s').textContent='started at '+usd(c.start_equity);
- const hh=(c.history||[]).map(h=>'<span>'+(h.label||('C'+h.cycle))+' '+(h.pnl>=0?'+':'-')+'$'+fmt(Math.abs(h.pnl))+(h.retroactive?' (retro)':'')+(h.pnl_vs_500!=null?' · ended '+usd(h.end_equity):'')+'</span>').join('');
+ const hh=(c.history||[]).slice(-6).map(h=>'<span>'+(h.label||('C'+h.cycle))+' '+(h.pnl>=0?'+':'-')+'$'+fmt(Math.abs(h.pnl))+(h.retroactive?' (retro)':'')+(h.pnl_vs_500!=null?' · ended '+usd(h.end_equity):'')+'</span>').join('');
  const H=$('cy_h');if(H._h!==hh){H._h=hh;H.innerHTML=hh?'Closed: '+hh:''}}
 
 function cpy(t,b){const done=()=>{const o=b.textContent;b.textContent='Copied ✓';setTimeout(()=>b.textContent=o,1400)};
