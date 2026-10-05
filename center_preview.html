@@ -130,6 +130,7 @@ summary{cursor:pointer;padding:10px 0;color:var(--dim);font-size:13px}
 .cyc .hc{border:1px solid #10d98a88;background:linear-gradient(160deg,#0c2a22,#0c1528);border-radius:12px;padding:8px 8px 9px;text-align:center;box-shadow:0 0 12px #10d98a14}
 .cyc .hc b{display:block;font-size:12px;color:#10d98a;letter-spacing:.3px}.cyc .hc u{display:block;text-decoration:none;font-size:17px;font-weight:900;margin-top:3px}.cyc .hc s{display:block;text-decoration:none;font-size:11px;color:var(--dim);margin-top:2px}
 @media(max-width:380px){.cyc .hg{grid-template-columns:repeat(2,1fr)}.cyc .cd b{font-size:32px}}
+.tmr{display:inline-block;margin-left:8px;padding:2px 8px;border-radius:10px;border:1px solid #22d3ee66;background:#0b2230;color:#22d3ee;font-size:12px;font-weight:800;font-variant-numeric:tabular-nums;vertical-align:middle}.tmr.soon{border-color:#fbbf2488;color:#fbbf24;background:#2a2110}.tmr.due{border-color:#ff4d6d88;color:#ff4d6d;background:#2a1018}
 .stats{grid-template-columns:repeat(3,1fr)}#s_real{display:block;font-size:11px;font-weight:700;margin-top:2px}#s_real:before{content:"realised ";color:var(--dim);font-weight:400}
 </style></head><body><div class="wrap">
 <div class="top"><b>JK AI Meme Radar</b><span>paper arena</span><span class="pill" id="pill">loading…</span></div>
@@ -186,15 +187,16 @@ function pp(v){return Math.min(Math.max((v-0.5)/2.5,0),1)*100}
 function pathSet(el,m,pk){const x=pp(m),e=20,z=el.querySelector('.z'),mk=el.querySelector('.mk');
  z.style.left=Math.min(x,e)+'%';z.style.width=Math.abs(x-e)+'%';z.style.background=m>=1?'linear-gradient(90deg,#22d3ee,#10d98a)':'linear-gradient(90deg,#ff4d6d,#fb923c)';
  mk.style.left=x+'%';mk.className='mk '+(m>=1?'pos':'neg');const p=el.querySelector('.pkm');if(pk!=null&&pk>1.001){p.style.left=pp(pk)+'%';p.style.display=''}else p.style.display='none'}
-function coinHTML(c){return '<div class="row"><div><span class="sym">$'+c.sym+'</span><span class="tag">'+c.src+'</span><span class="badge o">OPEN</span></div><div class="mult"><span class="mv"></span></div></div>'+
+function coinHTML(c){return '<div class="row"><div><span class="sym">$'+c.sym+'</span><span class="tag">'+c.src+'</span><span class="badge o">OPEN</span><span class="tmr" title="time left on this coin's own 1-hour hold">--:--</span></div><div class="mult"><span class="mv"></span></div></div>'+
  pathHTML()+'<div class="togo"></div>'+
  '<div class="meta"><span>bought '+ist(c.entry_time)+' IST</span><span class="pv"></span></div>'+
  '<div class="meta" style="margin-top:3px"><span>peak <b class="pkv"></b> · low <b class="lwv"></b></span><span>exit in <span class="ex"></span></span></div>'}
+function tmrUpd(t){const x=+t.dataset.x;if(!x)return;const r=Math.floor(x-Date.now()/1000);if(r<=0){t.textContent='exit due';t.className='tmr due';return}const m=Math.floor(r/60),sec=r%60;t.textContent='⏱ '+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');t.className='tmr'+(r<300?' soon':'')}
 function coinUpd(el,c){const w=c.mult>=1;
  const raw=c._raw||c.mult*(1+(D.friction||0.03))/(1-(D.friction||0.03));const pk=Math.max(c.peak||1,raw),lw=Math.min(c.low==null?1:c.low,raw);
  roll(el.querySelector('.mv'),fmt(c.mult)+'x',true);el.querySelector('.mult').className='mult '+(w?'pos':'neg');
  pathSet(el,c.mult,pk);
- const left=Math.max(Math.round(((c.exit_by_epoch||0)-Date.now()/1000)/60),0);el.querySelector('.togo').innerHTML='<b>'+left+' min</b> until the 1-hour time exit (no stop, no target)';
+ const mins=Math.max(Math.round(((c.exit_by_epoch||0)-Date.now()/1000)/60),0);el.querySelector('.togo').innerHTML='<b>'+mins+' min</b> until the 1-hour time exit (no stop, no target)';const tm=el.querySelector('.tmr');tm.dataset.x=c.exit_by_epoch||0;tmrUpd(tm);
  const pv=el.querySelector('.pv');roll(pv,sg(c.pnl),true);pv.className='pv '+(c.pnl>=0?'pos':'neg');
  roll(el.querySelector('.pkv'),fmt(pk)+'x');roll(el.querySelector('.lwv'),fmt(lw)+'x');el.querySelector('.ex').textContent=left(c.exit_by_epoch);
  el.className='coin '+(c.mult>=1.2?'win':c.mult<0.85?'loss':'')}
@@ -302,5 +304,5 @@ async function liveMarks(){if(!D||!D.open||!D.open.length)return;try{const r=awa
 setInterval(liveMarks,10000);
 async function load(){const x=await fetchData();if(x&&(!D||(x.state_epoch||x.publish_epoch)>=(D.state_epoch||D.publish_epoch))){D=x;applyLive()}
  if(D){pillUpd()}}
-load();setTimeout(liveMarks,2500);setInterval(load,10000);setInterval(()=>{if(D){pillUpd();cycUpd()}},1000);
+load();setTimeout(liveMarks,2500);setInterval(load,10000);setInterval(()=>{if(D){pillUpd();cycUpd();document.querySelectorAll('.tmr[data-x]').forEach(tmrUpd)}},1000);
 </script></body></html>
