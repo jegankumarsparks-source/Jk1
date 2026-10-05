@@ -105,6 +105,20 @@ summary{cursor:pointer;padding:10px 0;color:var(--dim);font-size:13px}
 .dc summary{display:flex;justify-content:space-between;gap:8px;padding:10px 0;font-size:13px;color:var(--txt);cursor:pointer}
 .dc .tr{display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:4px 8px;padding:8px 0;border-top:1px solid var(--line);font-size:12px;color:var(--dim)}
 .dc .tr b{color:var(--txt)}.dc .rl{font-size:11px;color:var(--dim);padding:0 0 8px}
+
+.stack{display:flex;flex-direction:column;gap:10px}
+.cc{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;background:linear-gradient(160deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:16px;padding:14px;cursor:pointer;animation:in .5s both}
+.cc.win{border-color:#10d98a55}.cc.loss{border-color:#ff4d6d44}
+.cc .l{min-width:0;flex:1}.cc .nm{font-weight:800;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.cc .nm i{font-style:normal;font-weight:600;font-size:13px;color:var(--dim);margin-left:6px}
+.cc .sb{font-size:12.5px;color:var(--dim);margin-top:5px}.cc .r{text-align:right;white-space:nowrap}
+.cc .pn{font-weight:900;font-size:19px;color:var(--grn)}.cc .pn.neg{color:var(--red)}.cc .mx{font-size:13px;color:var(--dim);margin-top:3px}
+.cc .mt{height:5px;background:#0a1226;border-radius:4px;margin-top:9px;position:relative}.cc .mt i{position:absolute;top:0;bottom:0;border-radius:4px}.cc .mt u{position:absolute;top:-3px;bottom:-3px;width:2px;background:#fff7}
+.gh{display:flex;justify-content:space-between;align-items:center;margin:22px 2px 10px;font-size:13px;letter-spacing:1px;text-transform:uppercase;color:var(--dim);font-weight:700}.gh:before{content:"";width:3px;height:16px;background:linear-gradient(var(--acc),var(--vio));border-radius:2px;margin-right:9px}.gh span:first-of-type{flex:1}
+.hc{background:linear-gradient(160deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:16px;margin:0 0 10px;overflow:hidden}
+.hc>summary{display:flex;justify-content:space-between;gap:10px;padding:14px;list-style:none;cursor:pointer;color:var(--txt)}.hc>summary::-webkit-details-marker{display:none}
+.hc .t1{font-weight:800;font-size:18px}.hc .t1 s{text-decoration:none;color:var(--dim);font-size:11px;margin-left:4px}.hc .t2{font-size:12.5px;color:var(--dim);margin-top:5px;line-height:1.4}
+.hc .rr{text-align:right;white-space:nowrap}.hc .rr b{font-size:19px;display:block}.hc .rr span{font-size:12px;color:var(--dim)}
+.hc[open]>summary{border-bottom:1px solid var(--line)}.hc .bd{padding:10px;display:flex;flex-direction:column;gap:8px}.hc .rl{font-size:11px;color:var(--dim);padding:0 4px 2px}
 </style></head><body><div class="wrap">
 <div class="top"><b>🎯 $500 → $800</b><span>paper challenge</span><span class="pill" id="pill">loading…</span></div>
 <div class="scan"></div>
@@ -126,8 +140,7 @@ summary{cursor:pointer;padding:10px 0;color:var(--dim);font-size:13px}
 </div>
 <h2><span>Open positions</span><span id="cnt"></span></h2>
 <div class="grid" id="grid"><div class="empty">Loading…</div></div>
-<h2 class="sec"><span>Closed this cycle</span><span id="ccnt"></span></h2>
-<div class="grid" id="clg"></div>
+<div id="cgcur"></div><div id="cgrp"></div>
 <details id="cd2" style="display:none"><summary id="csum2">Earlier cycles</summary><div id="cl2"></div></details>
 <div class="foot" id="foot"></div>
 </div>
@@ -171,14 +184,23 @@ function coinUpd(el,c){const w=c.mult>=1;
  el.className='coin '+(c.mult>=1.2?'win':c.mult<0.85?'loss':'')}
 function doneHTML(c){const w=c.pnl>=0,m=c.exit_mult;return '<div class="coin done '+(w?'win':'loss')+'" onclick="openX(\''+c.mint+'\')"><div class="row"><div><span class="sym">$'+c.sym+'</span><span class="badge '+(c.stage==='TP'?'tp':c.stage==='SL'?'sl':'o')+'">'+c.stage+'</span></div><div class="mult '+(w?'pos':'neg')+'">'+fmt(m)+'x</div></div>'+pathHTML().replace('class="mk"','class="mk '+(w?'pos':'neg')+'" style="left:'+pp(m)+'%"').replace('<div class="z"></div>','<div class="z" style="left:'+Math.min(pp(m),20)+'%;width:'+Math.abs(pp(m)-20)+'%;background:'+(w?'linear-gradient(90deg,#22d3ee,#10d98a)':'linear-gradient(90deg,#ff4d6d,#fb923c)')+'"></div>').replace('<span class="pkm">','<span class="pkm" style="display:'+((c.peak||0)>1.001?'':'none')+';left:'+pp(c.peak||1)+'%">')+'<div class="togo">closed at <b>'+fmt(m)+'x</b>'+(m>3?' (fill above the 3x target: gap/pump print)':m<0.5?' (fill below the -50% stop: gap)':'')+'</div><div class="meta"><span>Opened <b>'+ist(c.entry_time)+'</b></span><span>Closed <b>'+ist(c.exit_time)+'</b> IST</span></div><div class="meta" style="margin-top:3px"><span>result</span><span class="'+(w?'pos':'neg')+'" style="font-weight:800">'+sg(c.pnl)+'</span></div><div class="meta" style="margin-top:3px"><span>peak '+fmt(c.peak||1)+'x</span><span>tap for details</span></div></div>'}
 
+
+function wy(s,m){return s==='TP'?'take profit':s==='SL'?'stop loss':s==='CYCLE'?'cycle end':s==='RUG'?'rug (full loss)':s==='TIME'?'6h time exit':String(s).toLowerCase()}
+function usdp(v){return (v>=0?'+':'-')+Math.abs(v).toFixed(2)+' USD'}
+function ccHTML(c){const w=c.pnl>=0,m=c.exit_mult,x=pp(m);const pk=c.peak&&c.peak>1.001?'<u style="left:'+pp(c.peak)+'%"></u>':'';
+ return '<div class="cc '+(w?'win':'loss')+'" onclick="openX(\''+c.mint+'\')"><div class="l"><div class="nm">'+c.sym+'<i>$'+c.sym+'</i></div><div class="sb">in '+ist(c.entry_time).replace(' ','\u00a0')+' → out '+ist(c.exit_time).replace(' ','\u00a0')+' · '+wy(c.stage,m)+'</div><div class="mt"><i style="left:'+Math.min(x,20)+'%;width:'+Math.abs(x-20)+'%;background:'+(w?'linear-gradient(90deg,#22d3ee,#10d98a)':'linear-gradient(90deg,#ff4d6d,#fb923c)')+'"></i><u style="left:20%"></u></div></div><div class="r"><div class="pn '+(w?'':'neg')+'">'+usdp(c.pnl)+'</div><div class="mx">'+fmt(m)+'x</div></div></div>'}
+function grpHTML(n,list,pnl){return '<div class="gh"><span>Closed positions · Cycle '+n+' ('+list.length+')</span><span class="'+(pnl>=0?'pos':'neg')+'" style="letter-spacing:0">'+(pnl>=0?'+':'-')+Math.abs(pnl).toFixed(2)+'</span></div><div class="stack">'+(list.length?list.map(ccHTML).join(''):'<div class="empty">None closed yet this cycle.</div>')+'</div>'}
 function why(s,m){return s==='TP'?(m>=3?'3x TP':'TP '+fmt(m)+'x (old 1.5x rule)'):s==='SL'?(m<0.5?'SL -50% (gap fill)':'SL stop'):s==='CYCLE'?'Cycle-end sellout':s==='RUG'?'Rug (full loss)':s==='TIME'?'6h time exit':s}
 function dcRender(d){const A=d.cycles_done||[];const box=$('dc');$('dch').style.display=A.length?'':'none';$('dcn').textContent=A.length+' done';
  const sig=A.map(x=>x.n+':'+x.trades.length+':'+x.end_equity).join('|');if(box._s===sig)return;box._s=sig;
  const open=new Set([...box.querySelectorAll('details[open]')].map(n=>n.dataset.n));
+ const T=e=>new Date(e*1000).toLocaleString('en-IN',{timeZone:'Asia/Kolkata',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',hour12:true});
  box.innerHTML=A.slice().reverse().map(x=>{const t=x.trades.slice().sort((a,b)=>a.exit_time<b.exit_time?-1:1);const p=x.pnl||0;
-  const win=x.start_epoch?new Date(x.start_epoch*1000).toLocaleTimeString('en-IN',{timeZone:'Asia/Kolkata',hour:'2-digit',minute:'2-digit',hour12:true})+' → '+new Date((x.end_epoch||x.closed_at)*1000).toLocaleTimeString('en-IN',{timeZone:'Asia/Kolkata',hour:'2-digit',minute:'2-digit',hour12:true}):'';
-  return '<details data-n="'+x.n+'"'+(open.has(String(x.n))?' open':'')+'><summary><span><b>'+(x.retro?'Cycle 1 (retro)':x.label)+'</b> <span style="color:var(--dim)">'+win+'</span></span><span class="'+(p>=0?'pos':'neg')+'">'+sg(p)+' · $'+(x.end_equity==null?'–':x.end_equity.toFixed(2))+' · '+x.wins+'W/'+x.losses+'L</span></summary><div class="rl">Rules then: '+x.rules+(x.manual?' · manual reset':'')+'</div>'+
-  (t.length?t.map(c=>'<div class="tr"><span><b>$'+c.sym+'</b></span><span>in <b>'+ist(c.entry_time)+'</b> · out <b>'+ist(c.exit_time)+'</b></span><span class="'+(c.pnl>=0?'pos':'neg')+'" style="text-align:right"><b>'+sg(c.pnl)+'</b> · '+fmt(c.exit_mult)+'x</span><span style="grid-column:1/-1">'+why(c.stage,c.exit_mult)+' · <a href="'+c.links.dexscreener+'" target="_blank" rel="noopener" style="color:var(--acc)">DexScreener</a></span></div>').join(''):'<div class="tr">No trades recorded.</div>')+'</details>'}).join('')}
+  const nm=x.retro?'Cycle 1 (retro)':(x.label&&x.label.indexOf('pre-reset')>=0?'Cycle '+x.cycle+' (until reset)':'Cycle '+x.cycle);
+  const wn=x.start_epoch?T(x.start_epoch)+' → '+T(x.end_epoch||x.closed_at):'';
+  return '<details class="hc" data-n="'+x.n+'"'+(open.has(String(x.n))?' open':'')+'><summary><div><div class="t1">'+nm+' <s>▸</s></div><div class="t2">'+wn+'<br>'+(x.manual?'manual reset':'cycle end')+' · '+t.length+' entries · W'+x.wins+'/L'+x.losses+'</div></div><div class="rr"><b class="'+(p>=0?'pos':'neg')+'">'+usdp(p)+'</b><span>end $'+(x.end_equity==null?'–':x.end_equity.toFixed(2))+'</span></div></summary><div class="bd"><div class="rl">Rules then: '+x.rules+'</div>'+
+  (t.length?t.map(ccHTML).join(''):'<div class="empty">No trades recorded.</div>')+'</div></details>'}).join('');
+ const g=$('cgrp');if(g){const last=A.filter(x=>!x.retro&&x.trades.length).slice(-3).reverse();g.innerHTML=last.map(x=>grpHTML(x.cycle,x.trades.slice().sort((a,b)=>a.exit_time<b.exit_time?1:-1),x.pnl||0)).join('')}}
 function render(){
  const d=D;cycUpd();const up=d.pnl>=0;
  const e=$('eq');e.className='big '+(up?'up':'dn');
@@ -196,8 +218,7 @@ function render(){
   [...g.querySelectorAll('.coin')].forEach(n=>{if(!keep.has(n.dataset.m))n.remove()});
   d.open.forEach((c,i)=>{let n=g.querySelector('.coin[data-m="'+c.mint+'"]');if(!n){n=document.createElement('div');n.className='coin';n.dataset.m=c.mint;n.style.animationDelay=(i*40)+'ms';n.onclick=()=>openC(c.mint);n.innerHTML=coinHTML(c);g.appendChild(n)}coinUpd(n,c)})}
 
- $('ccnt').textContent=d.closed.length+' closed';
- {const cg=$('clg');const sig=d.closed.map(c=>c.mint+c.exit_time).join('|');if(cg._sig!==sig){cg._sig=sig;cg.innerHTML=d.closed.length?d.closed.slice().reverse().map(doneHTML).join(''):'<div class="empty">No coins closed yet this cycle.</div>'}}
+ {const cur=(d.cycle&&d.cycle.current)||'';const sum=d.closed.reduce((s,c)=>s+c.pnl,0);const sig=cur+'|'+d.closed.map(c=>c.mint+c.exit_time).join('|');const cg=$('cgcur');if(cg._sig!==sig){cg._sig=sig;cg.innerHTML=grpHTML(cur,d.closed.slice().reverse(),sum)}}
  $('cl2').innerHTML=(d.closed_prev||[]).map(c=>'<div class="cl" onclick="openX(\''+c.mint+'\')"><span><b>$'+c.sym+'</b> <span style="color:var(--dim)">'+c.stage+' · '+ist(c.exit_time)+'</span></span><span class="'+(c.pnl>=0?'pos':'neg')+'">'+fmt(c.exit_mult)+'x · '+sg(c.pnl)+'</span></div>').join('')||'<div class="cl" style="color:var(--dim)">none yet</div>';
  if((d.closed_prev||[]).length){$('cd2').style.display='block';$('csum2').textContent='Earlier cycles ('+d.closed_prev.length+' most recent trades)'}
  $('foot').innerHTML=(d.rug_restatement_usd?'<div style="color:#f5b942;margin-bottom:6px">'+d.rug_restatement_label+'</div>':'')+'PAPER ONLY, no real money. $'+d.bet+' per coin, max '+d.max_open+' open. Sell rules: -50% stop, full sell at '+d.rules.tp_mult+'x only, all coins sold at the mark at cycle end, rug = pool liquidity under $5,000 (full loss). Marks include 3% modelled friction.<br>A paper result is not proof of an edge and not advice. $800 is a goal, not a prediction.';
@@ -230,7 +251,7 @@ function openC(m){const c=D.open.find(x=>x.mint===m);if(!c)return;
  '<div><span>Time exit in</span><b>'+left(c.exit_by_epoch)+'</b></div><div><span>Milestones hit</span><b>'+(c.milestones&&c.milestones.length?c.milestones.join('x, ')+'x':'none yet')+'</b></div>'+
  '<div><span>MC / Liq at entry</span><b>'+k(c.mc)+' / '+k(c.liq)+'</b></div><div><span>1h vol · age</span><b>'+k(c.v1h)+' · '+(c.age_h!=null?fmt(c.age_h,1)+'h':'—')+'</b></div></div>'+
  links(c.links,c)+'<div class="ca">'+c.mint+'</div><div class="ca">Paper position. Marks net of 3% modelled friction.</div>';$('sheet').classList.add('show')}
-function openX(m){const c=D.closed.find(x=>x.mint===m)||(D.closed_prev||[]).find(x=>x.mint===m);if(!c)return;
+function openX(m){const c=D.closed.find(x=>x.mint===m)||(D.closed_prev||[]).find(x=>x.mint===m)||(D.cycles_done||[]).flatMap(x=>x.trades).find(x=>x.mint===m);if(!c)return;
  $('sb').innerHTML='<button class="x" onclick="hide()">✕</button><div class="lab">closed · '+c.stage+'</div><div class="big" style="font-size:36px">$'+c.sym+' <span class="'+(c.pnl>=0?'pos':'neg')+'">'+fmt(c.exit_mult)+'x</span></div>'+
  '<div class="kv"><div><span>P&amp;L</span><b class="'+(c.pnl>=0?'pos':'neg')+'">'+sg(c.pnl)+'</b></div><div><span>Peak</span><b>'+fmt(c.peak)+'x</b></div><div><span>Bought</span><b>'+ist(c.entry_time)+' IST</b></div><div><span>Sold</span><b>'+ist(c.exit_time)+' IST</b></div><div><span>Entry price</span><b>'+px(c.entry_price)+'</b></div><div><span>Exit reason</span><b>'+c.stage+'</b></div></div>'+links(c.links,c)+'<div class="ca">'+c.mint+'</div>';$('sheet').classList.add('show')}
 function hide(){$('sheet').classList.remove('show')}
