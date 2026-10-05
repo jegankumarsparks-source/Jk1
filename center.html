@@ -222,6 +222,7 @@ const fmt=(n,d=2)=>n==null?'—':Number(n).toLocaleString('en-US',{minimumFracti
 const usd=n=>(n<0?'-':'')+'$'+fmt(Math.abs(n));const sg=n=>(n>=0?'+':'-')+'$'+fmt(Math.abs(n));
 function px(v){if(v==null)return'—';v=Number(v);if(v>=1)return '$'+v.toFixed(4);if(v>=0.01)return '$'+v.toFixed(5);return '$'+v.toFixed(9).replace(/0+$/,'')}
 function ist(iso){const d=new Date(iso);return d.toLocaleTimeString('en-IN',{timeZone:'Asia/Kolkata',hour:'2-digit',minute:'2-digit',hour12:true})}
+function istd(iso){const d=new Date(iso);return d.toLocaleString('en-IN',{timeZone:'Asia/Kolkata',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',hour12:true})}
 function left(ep){let s=Math.max(ep-Date.now()/1000,0);return Math.floor(s/3600)+'h '+String(Math.floor(s%3600/60)).padStart(2,'0')+'m'}
 function k(v){v=Number(v||0);return v>=1e6?'$'+(v/1e6).toFixed(2)+'M':v>=1e3?'$'+(v/1e3).toFixed(1)+'K':'$'+v.toFixed(0)}
 function anim(el,from,to){const t0=performance.now();(function f(t){let p=Math.min((t-t0)/700,1);el.textContent=usd(from+(to-from)*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(f)})(t0)}
@@ -337,16 +338,25 @@ function links(l,c){const w=c&&c.wallet;const bn='https://app.binance.com/uni-qr
  (c?(w?'<a href="https://gmgn.ai/sol/address/'+w+'" target="_blank" rel="noopener" style="border-color:#8b5cf666;color:#c4b5fd">👛 Wallet</a>':'<a style="opacity:.4;pointer-events:none" title="No buyer wallet recorded for this entry">👛 No wallet</a>'):'')+'</div>'}
 function openC(m){const c=D.open.find(x=>x.mint===m);if(!c)return;
  $('sb').innerHTML='<button class="x" onclick="hide()">✕</button><div class="lab">'+c.src+' signal · open</div><div class="big '+(c.mult>=1?'up':'')+'" style="font-size:40px">$'+c.sym+' <span class="'+(c.mult>=1?'pos':'neg')+'">'+fmt(c.mult)+'x</span></div>'+
- '<div class="kv"><div><span>Bought</span><b>'+ist(c.entry_time)+' IST</b></div><div><span>Entry price (raw)</span><b>'+px(c.entry_price)+'</b></div>'+
+ '<div class="kv"><div><span>Bought</span><b>'+istd(c.entry_time)+' IST</b></div><div><span>Entry price (raw)</span><b>'+px(c.entry_price)+'</b></div>'+
  '<div><span>Invested</span><b>'+usd(c.invested)+'</b></div><div><span>Value now</span><b>'+usd(c.value)+'</b></div>'+
  '<div><span>P&amp;L</span><b class="'+(c.pnl>=0?'pos':'neg')+'">'+sg(c.pnl)+'</b></div><div><span>Peak</span><b>'+fmt(c.peak)+'x</b></div>'+
- '<div><span>Stop (-50%)</span><b>'+px(c.sl_price)+'</b></div><div><span>Take profit (1.5x, full)</span><b>'+px(c.entry_price*1.5)+'</b></div>'+
+ '<div><span>Stop (-50%)</span><b>'+px(c.entry_price*0.5)+'</b></div><div><span>Take profit (1.5x, full)</span><b>'+px(c.entry_price*1.5)+'</b></div>'+
  '<div><span>Time exit in</span><b>'+left(c.exit_by_epoch)+'</b></div><div><span>Milestones hit</span><b>'+(c.milestones&&c.milestones.length?c.milestones.join('x, ')+'x':'none yet')+'</b></div>'+
- '<div><span>MC / Liq at entry</span><b>'+k(c.mc)+' / '+k(c.liq)+'</b></div><div><span>1h vol · age</span><b>'+k(c.v1h)+' · '+(c.age_h!=null?fmt(c.age_h,1)+'h':'—')+'</b></div></div>'+
- links(c.links,c)+'<div class="ca">'+c.mint+'</div><div class="ca">Paper position. Marks net of 3% modelled friction.</div>';$('sheet').classList.add('show')}
+ '<div><span>MC / Liq at entry</span><b>'+(c.mc!=null?k(c.mc):'n/a')+' / '+(c.liq_entry!=null?k(c.liq_entry):(c.liq!=null?k(c.liq):'n/a'))+'</b></div><div><span>Exit due</span><b>'+(c.exit_by_epoch?istd(new Date(c.exit_by_epoch*1000).toISOString())+' IST':'n/a')+'</b></div></div>'+
+ links(c.links,c)+'<div class="ca">'+c.mint+'</div><div class="ca">Paper position, fill UNVERIFIED. Marks net of 3% modelled friction. Rules: 1.5x take-profit, -50% stop, 1h exit, rug under $5k.</div>';$('sheet').classList.add('show')}
+function nz(v,f){return (v===null||v===undefined||v===''||(typeof v==='number'&&isNaN(v)))?'n/a':(f?f(v):v)}
+function durm(a,b){const x=Date.parse(a),y=Date.parse(b);if(!x||!y)return 'n/a';const m=Math.round((y-x)/60000);return m<60?m+' min':Math.floor(m/60)+'h '+(m%60)+'m'}
+function ruleTxt(c){const s=c.stage,m=c.exit_mult;return s==='TP'?(m>=2.9?'Take-profit 3x (old rule)':'Take-profit 1.5x rule'+(m>1.6?' (price gapped past target, booked at the mark seen)':'')):s==='SL'?'Stop loss -50%'+(m<0.5?' (gap below stop, booked at the mark seen)':''):s==='HOLD1H'?'1-hour time exit':s==='RUG'?'Rug exit: liquidity under $5k, booked as full loss':s==='CYCLE'?'Cycle-end sellout (old rule)':s==='TIME'?'6h time exit (old rule)':nz(s)}
 function openX(m){const c=D.closed.find(x=>x.mint===m)||(D.closed_prev||[]).find(x=>x.mint===m)||(D.cycles_done||[]).flatMap(x=>x.trades).find(x=>x.mint===m);if(!c)return;
- $('sb').innerHTML='<button class="x" onclick="hide()">✕</button><div class="lab">closed · '+c.stage+'</div><div class="big" style="font-size:36px">$'+c.sym+' <span class="'+(c.pnl>=0?'pos':'neg')+'">'+fmt(c.exit_mult)+'x</span></div>'+
- '<div class="kv"><div><span>P&amp;L</span><b class="'+(c.pnl>=0?'pos':'neg')+'">'+sg(c.pnl)+'</b></div><div><span>Peak</span><b>'+fmt(c.peak)+'x</b></div><div><span>Bought</span><b>'+ist(c.entry_time)+' IST</b></div><div><span>Sold</span><b>'+ist(c.exit_time)+' IST</b></div><div><span>Entry price</span><b>'+px(c.entry_price)+'</b></div><div><span>Exit reason</span><b>'+c.stage+'</b></div></div>'+links(c.links,c)+'<div class="ca">'+c.mint+'</div>';$('sheet').classList.add('show')}
+ const xp=(c.entry_price&&c.exit_mult!=null&&c.stage!=='RUG')?c.entry_price*c.exit_mult:null;
+ $('sb').innerHTML='<button class="x" onclick="hide()">✕</button><div class="lab">closed · '+nz(c.stage)+'</div><div class="big" style="font-size:36px">$'+c.sym+' <span class="'+(c.pnl>=0?'pos':'neg')+'">'+nz(c.exit_mult,fmt)+'x</span></div>'+
+ '<div class="kv"><div><span>P&amp;L (after 3% friction)</span><b class="'+(c.pnl>=0?'pos':'neg')+'">'+nz(c.pnl,sg)+'</b></div><div><span>Position size</span><b>$20.00</b></div>'+
+ '<div><span>Bought</span><b>'+(c.entry_time?istd(c.entry_time)+' IST':'n/a')+'</b></div><div><span>Sold</span><b>'+(c.exit_time?istd(c.exit_time)+' IST':'n/a')+'</b></div>'+
+ '<div><span>Held</span><b>'+durm(c.entry_time,c.exit_time)+'</b></div><div><span>Peak</span><b>'+nz(c.peak,v=>fmt(v)+'x')+'</b></div>'+
+ '<div><span>Entry price</span><b>'+nz(c.entry_price,px)+'</b></div><div><span>Exit price</span><b>'+(xp!=null?px(xp):(c.stage==='RUG'?'not recorded (rug)':'n/a'))+'</b></div>'+
+ '<div><span>Closed by</span><b>'+ruleTxt(c)+'</b></div><div><span>MC / Liq at entry</span><b>'+(c.mc!=null?k(c.mc):'n/a')+' / '+(c.liq_entry!=null?k(c.liq_entry):(c.liq!=null?k(c.liq):'n/a'))+'</b></div></div>'+
+ links(c.links,c)+'<div class="ca">'+c.mint+'</div><div class="ca">Paper trade, fill UNVERIFIED.'+(c.entry_price_src?' Entry price '+c.entry_price_src+'.':'')+' Exit price = entry price x exit multiple.</div>';$('sheet').classList.add('show')}
 function hide(){$('sheet').classList.remove('show')}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')hide()});
 let last='';
