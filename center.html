@@ -106,6 +106,7 @@ summary{cursor:pointer;padding:10px 0;color:var(--dim);font-size:13px}
 <h2><span>Coins bought</span><span id="cnt"></span></h2>
 <div class="grid" id="grid"><div class="empty">Loading…</div></div>
 <details id="cd"><summary id="csum">Closed trades</summary><div id="cl"></div></details>
+<details id="cd2" style="display:none"><summary id="csum2">Earlier cycles</summary><div id="cl2"></div></details>
 <div class="foot" id="foot"></div>
 </div>
 <div class="sheet" id="sheet" onclick="if(event.target===this)hide()"><div id="sb"></div></div>
@@ -160,6 +161,8 @@ function render(){
 
  $('csum').textContent='Closed trades ('+d.n_closed+')';
  $('cl').innerHTML=d.closed.map(c=>'<div class="cl" onclick="openX(\''+c.mint+'\')"><span><b>$'+c.sym+'</b> <span style="color:var(--dim)">'+c.stage+' · '+ist(c.exit_time)+'</span></span><span class="'+(c.pnl>=0?'pos':'neg')+'">'+fmt(c.exit_mult)+'x · '+sg(c.pnl)+'</span></div>').join('')||'<div class="cl" style="color:var(--dim)">none yet</div>';
+ $('cl2').innerHTML=(d.closed_prev||[]).map(c=>'<div class="cl" onclick="openX(\''+c.mint+'\')"><span><b>$'+c.sym+'</b> <span style="color:var(--dim)">'+c.stage+' · '+ist(c.exit_time)+'</span></span><span class="'+(c.pnl>=0?'pos':'neg')+'">'+fmt(c.exit_mult)+'x · '+sg(c.pnl)+'</span></div>').join('')||'<div class="cl" style="color:var(--dim)">none yet</div>';
+ if((d.closed_prev||[]).length){$('cd2').style.display='block';$('csum2').textContent='Earlier cycles ('+d.closed_prev.length+' most recent trades)'}
  $('foot').innerHTML=(d.rug_restatement_usd?'<div style="color:#f5b942;margin-bottom:6px">'+d.rug_restatement_label+'</div>':'')+'PAPER ONLY, no real money. $'+d.bet+' per coin, max '+d.max_open+' open. Sell rules: -30% stop, full sell at '+d.rules.tp_mult+'x, '+d.rules.max_hold_h+'h max hold, rug = full loss. Marks include 3% modelled friction.<br>A paper result is not proof of an edge and not advice. $800 is a goal, not a prediction.';
 }
 
@@ -171,6 +174,14 @@ function cycUpd(){const d=D;const el=$('cyc');if(!d||!d.cycle){if(el)el.style.di
  $('cy_w').textContent=ist(c.start_epoch*1000)+' → '+ist(c.end_epoch*1000)+' IST';$('cy_r').textContent=left(c.end_epoch);$('cy_s').textContent='started at '+usd(c.start_equity);
  const hh=(c.history||[]).map(h=>'<span>'+(h.label||('C'+h.cycle))+' '+(h.pnl>=0?'+':'-')+'$'+fmt(Math.abs(h.pnl))+(h.retroactive?' (retro)':'')+(h.pnl_vs_500!=null?' · ended '+usd(h.end_equity):'')+'</span>').join('');
  const H=$('cy_h');if(H._h!==hh){H._h=hh;H.innerHTML=hh?'Closed: '+hh:''}}
+
+function cpy(t,b){const done=()=>{const o=b.textContent;b.textContent='Copied ✓';setTimeout(()=>b.textContent=o,1400)};
+ try{navigator.clipboard.writeText(t).then(done,()=>{fb()})}catch(e){fb()}
+ function fb(){const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();try{document.execCommand('copy')}catch(e){}a.remove();done()}}
+function walHTML(c){if(!c.wallet)return '<div class="lab" style="margin-top:14px">Buyer wallet</div><div class="ca">'+(c.wallet_label||'No wallet recorded')+'</div>';
+ const w=c.wallet;return '<div class="lab" style="margin-top:14px">Buyer wallet (smart wallet)</div><div class="ca walw" style="user-select:all;-webkit-user-select:all;color:var(--txt);font-size:12px">'+w+'</div>'+
+ '<div class="lk"><a href="javascript:void(0)" onclick="cpy(\''+w+'\',this)">Copy wallet</a><a href="https://solscan.io/account/'+w+'" target="_blank" rel="noopener">Solscan</a><a href="https://gmgn.ai/sol/address/'+w+'" target="_blank" rel="noopener">GMGN</a></div>'+
+ '<div class="ca">'+(c.wallet_label||'')+(c.wallet_score!=null?' · score '+fmt(c.wallet_score,1):'')+(c.wallet_others&&c.wallet_others.length?' · '+c.wallet_others.length+' other wallet(s) also signalled this coin':'')+'</div>'}
 function links(l){return '<div class="lk"><a href="'+l.dexscreener+'" target="_blank" rel="noopener">DexScreener</a><a href="'+l.gmgn+'" target="_blank" rel="noopener">GMGN</a><a href="'+l.solscan+'" target="_blank" rel="noopener">Solscan</a></div>'}
 function openC(m){const c=D.open.find(x=>x.mint===m);if(!c)return;
  $('sb').innerHTML='<button class="x" onclick="hide()">✕</button><div class="lab">'+c.src+' signal · open</div><div class="big '+(c.mult>=1?'up':'')+'" style="font-size:40px">$'+c.sym+' <span class="'+(c.mult>=1?'pos':'neg')+'">'+fmt(c.mult)+'x</span></div>'+
@@ -180,10 +191,10 @@ function openC(m){const c=D.open.find(x=>x.mint===m);if(!c)return;
  '<div><span>Stop (-30%)</span><b>'+px(c.sl_price)+'</b></div><div><span>Take profit (1.5x, full)</span><b>'+px(c.tp_price)+'</b></div>'+
  '<div><span>Time exit in</span><b>'+left(c.exit_by_epoch)+'</b></div><div><span>Milestones hit</span><b>'+(c.milestones&&c.milestones.length?c.milestones.join('x, ')+'x':'none yet')+'</b></div>'+
  '<div><span>MC / Liq at entry</span><b>'+k(c.mc)+' / '+k(c.liq)+'</b></div><div><span>1h vol · age</span><b>'+k(c.v1h)+' · '+(c.age_h!=null?fmt(c.age_h,1)+'h':'—')+'</b></div></div>'+
- links(c.links)+'<div class="ca">'+c.mint+'</div><div class="ca">Paper position. Marks net of 3% modelled friction.</div>';$('sheet').classList.add('show')}
-function openX(m){const c=D.closed.find(x=>x.mint===m);if(!c)return;
+ walHTML(c)+links(c.links)+'<div class="ca">'+c.mint+'</div><div class="ca">Paper position. Marks net of 3% modelled friction.</div>';$('sheet').classList.add('show')}
+function openX(m){const c=D.closed.find(x=>x.mint===m)||(D.closed_prev||[]).find(x=>x.mint===m);if(!c)return;
  $('sb').innerHTML='<button class="x" onclick="hide()">✕</button><div class="lab">closed · '+c.stage+'</div><div class="big" style="font-size:36px">$'+c.sym+' <span class="'+(c.pnl>=0?'pos':'neg')+'">'+fmt(c.exit_mult)+'x</span></div>'+
- '<div class="kv"><div><span>P&amp;L</span><b class="'+(c.pnl>=0?'pos':'neg')+'">'+sg(c.pnl)+'</b></div><div><span>Peak</span><b>'+fmt(c.peak)+'x</b></div><div><span>Bought</span><b>'+ist(c.entry_time)+' IST</b></div><div><span>Sold</span><b>'+ist(c.exit_time)+' IST</b></div><div><span>Entry price</span><b>'+px(c.entry_price)+'</b></div><div><span>Exit reason</span><b>'+c.stage+'</b></div></div>'+links(c.links)+'<div class="ca">'+c.mint+'</div>';$('sheet').classList.add('show')}
+ '<div class="kv"><div><span>P&amp;L</span><b class="'+(c.pnl>=0?'pos':'neg')+'">'+sg(c.pnl)+'</b></div><div><span>Peak</span><b>'+fmt(c.peak)+'x</b></div><div><span>Bought</span><b>'+ist(c.entry_time)+' IST</b></div><div><span>Sold</span><b>'+ist(c.exit_time)+' IST</b></div><div><span>Entry price</span><b>'+px(c.entry_price)+'</b></div><div><span>Exit reason</span><b>'+c.stage+'</b></div></div>'+walHTML(c)+links(c.links)+'<div class="ca">'+c.mint+'</div>';$('sheet').classList.add('show')}
 function hide(){$('sheet').classList.remove('show')}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')hide()});
 let last='';
