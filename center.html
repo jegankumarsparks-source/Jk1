@@ -143,20 +143,48 @@ summary{cursor:pointer;padding:10px 0;color:var(--dim);font-size:13px}
 .cyc .hg{gap:6px}.cyc .hc{padding:6px 6px 7px;border-radius:10px}.cyc .hc b{font-size:11px}.cyc .hc u{font-size:15px;margin-top:2px}.cyc .hc s{font-size:10px}
 .stats{gap:6px;margin-top:8px}.st{padding:6px 6px;border-radius:12px}.st b{font-size:14px}.st span{font-size:10px}#s_real{font-size:10px;margin-top:0}
 .gp{margin-top:8px;padding:8px 12px;border-radius:12px}.gp .bar{height:9px;margin-top:6px}.gph{font-size:11px}.bl{font-size:11px;margin-top:4px}
+
+.sl{display:flex;align-items:center;gap:10px;margin:18px 2px 8px;font-size:14px;font-weight:800;letter-spacing:2.2px;text-transform:uppercase;color:#a9b8de}.sl:before{content:"";width:4px;height:18px;border-radius:2px;background:#3b82f6}
+.pt{margin-top:12px}.pt .hero{padding:16px 14px 12px;border-radius:22px}
+.pt .hero .lab{letter-spacing:4px;font-size:12px}
+.pt .hero .big{font-size:clamp(36px,11.5vw,66px);letter-spacing:0;margin:8px 0 10px;filter:none}
+#eq .odo{height:auto;overflow:visible;align-items:center;gap:.07em}
+#eq .dg,#eq .sp:not(.pnt){border:1px solid #ffffff2a;border-radius:.2em;padding:0 .1em;background:linear-gradient(180deg,#ffffff14,#ffffff05);box-shadow:inset 0 0 .3em #0007}
+#eq .dg{height:1.14em}#eq .sp{line-height:1.14em}#eq .sp.pnt{padding:0 .02em}
+#eq.dn .dg,#eq.dn .sp:not(.pnt){background:#ff4d6d22;border-color:#ff4d6d77;box-shadow:0 0 .3em #ff4d6d44,inset 0 0 .3em #ff4d6d33}
+#eq.up .dg,#eq.up .sp:not(.pnt){background:#19f59b1c;border-color:#19f59b77;box-shadow:0 0 .3em #19f59b44,inset 0 0 .3em #19f59b33}
+.sub2{display:flex;justify-content:center;align-items:center;gap:12px;flex-wrap:wrap}
+.chip{padding:6px 14px;border-radius:999px;font-weight:800;font-size:15px;border:1px solid var(--line);background:#0c1528}.chip.up{border-color:#19f59b88;background:#0c2a22}.chip.dn{border-color:#ff4d6d88;background:#2a1018}
+.vs{font-size:14px;color:var(--dim);font-weight:700}
+.ln{margin-top:10px;font-size:14px;color:var(--dim);text-align:center}.ln b{color:var(--txt)}
+.pt .hero #spark{height:46px;margin-top:10px}
+.cyc{margin-top:0;padding:14px 16px;border-radius:20px}
+.cyc .cd{display:block;margin-top:10px}.cyc .cdl{display:block;font-size:15px;color:var(--dim);font-weight:600;text-transform:none;letter-spacing:0}
+.cyc .cd b{display:block;font-size:clamp(30px,9.5vw,44px);color:#22d3ee;text-shadow:0 0 18px #22d3ee55;margin-top:2px}
+.cyc .hg{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;align-items:center}.cyc .hl{margin:0;font-size:14px;font-weight:800;color:var(--dim);text-transform:none;letter-spacing:0}
+.cyc .pl{padding:6px 12px;border:1px solid #10d98a99;border-radius:999px;background:#0c2a22aa;font-size:14px;font-weight:800;color:#c9f7e6}
+.stats.t4{grid-template-columns:repeat(2,1fr);gap:8px;margin-top:0}.stats.t4 .st{padding:12px 10px;border-radius:16px}.stats.t4 .st b{font-size:22px}.stats.t4 .st span{font-size:12px}
+.st b.up,#s_eq.up{color:#19f59b}.st #s_eq.dn,#s_eq.dn{color:#ff6b86}
+@media(min-width:700px){.stats.t4{grid-template-columns:repeat(4,1fr)}}
+.gp{margin-top:8px}
+#spark:empty{display:none}
 </style></head><body><div class="wrap">
 <div class="top"><b>JK AI Meme Radar</b><span>paper arena</span><span class="pill" id="pill">loading…</span></div>
 <div class="scan"></div>
 <section class="pt">
-<h1 class="pth">Paper Trading</h1><div class="ptsub">$500 to $800</div>
 <div class="hero">
- <div class="lab">Equity</div>
+ <div class="lab">Equity · Paper</div>
  <div class="big" id="eq">$—</div>
- <div class="sub"><span>P&amp;L <b id="pnlv">—</b></span><span id="real" class="pos"></span><span id="togo" style="color:var(--dim)"></span></div>
+ <div class="sub2"><span class="chip" id="pchip">P&amp;L <b id="pnlv">—</b></span><span class="vs">vs $500 start</span></div>
+ <div class="ln">Cash <b id="h_cash">–</b> · <b id="h_open">–</b> open · <span id="real" class="pos"></span> · <span id="togo" style="color:var(--dim)"></span></div>
  <div id="spark"></div>
 </div>
 </section>
+<div class="sl">Cycle <span id="cy_n2">–</span> · 1 Hour Rotation</div>
 <div class="cyc" id="cyc" style="display:none"></div>
-<div class="stats">
+<div class="sl">Paper Trading · $500 → $800</div>
+<div class="stats t4">
+ <div class="st"><b id="s_eq">–</b><span>Equity</span></div>
  <div class="st"><b id="s_cash">–</b><span>Cash</span></div>
  <div class="st"><b id="s_open">–</b><span>Open</span></div>
  <div class="st"><b id="s_wl">–</b><span>Closed (W / L)</span><em id="s_real"></em></div>
@@ -185,14 +213,14 @@ function anim(el,from,to){const t0=performance.now();(function f(t){let p=Math.m
 
 const SH=[0,1,2,3,4,5,6,7,8,9].map(d=>'<b>'+d+'</b>').join('');
 function roll(el,text,flash){if(!el)return;text=String(text);if(el._t===text)return;const old=el._t;const sig=[...text].map(c=>/\d/.test(c)?'#':c).join('');
- if(el._sig!==sig){el.innerHTML='<span class="odo">'+[...text].map(c=>/\d/.test(c)?'<span class="dg"><i>'+SH+'</i></span>':'<span class="sp">'+c+'</span>').join('')+'</span>';el._sig=sig;
+ if(el._sig!==sig){el.innerHTML='<span class="odo">'+[...text].map(c=>/\d/.test(c)?'<span class="dg"><i>'+SH+'</i></span>':'<span class="sp'+((c==='.'||c===',')?' pnt':'')+'">'+c+'</span>').join('')+'</span>';el._sig=sig;
   const is=el.querySelectorAll('.dg i');let j=0;[...text].forEach(c=>{if(/\d/.test(c)){is[j].style.transform='translateY(0)';j++}});void el.offsetWidth}
  const is=el.querySelectorAll('.dg i');let j=0;requestAnimationFrame(()=>{[...text].forEach(c=>{if(/\d/.test(c)){is[j].style.transform='translateY(-'+(+c*1.14)+'em)';j++}})});
  el._t=text;if(flash&&old!=null){const num=v=>parseFloat(String(v).replace(/[^0-9.\-]/g,'').replace(/^-?\./,'0.'))*(/^-|\-\$/.test(String(v))?-1:1)||0;const up=num(text)>=num(old);el.classList.remove('tkup','tkdn');void el.offsetWidth;el.classList.add(up?'tkup':'tkdn')}}
 const SP=[];let spAt=0;
 function sparkUpd(){const el=$('spark');if(!el||!D)return;const t=Date.now();if(t-spAt<2000&&SP.length)return;spAt=t;if(SP.length>=2&&SP[SP.length-1]===D.equity)return;SP.push(D.equity);if(SP.length>240)SP.shift();if(SP.length<2)return;
- const mn=Math.min(...SP),mx=Math.max(...SP),r=(mx-mn)||1,w=300,h=38;const pts=SP.map((v,i)=>[(i/(SP.length-1))*w,h-3-((v-mn)/r)*(h-8)]);const d='M'+pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' L');const up=SP[SP.length-1]>=SP[0];const c=up?'#10d98a':'#ff4d6d';const l=pts[pts.length-1];
- el.innerHTML='<svg viewBox="0 0 300 38" preserveAspectRatio="none"><defs><linearGradient id="sg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="'+c+'" stop-opacity=".35"/><stop offset="1" stop-color="'+c+'" stop-opacity="0"/></linearGradient></defs><path d="'+d+' L300,38 L0,38 Z" fill="url(#sg)"/><path d="'+d+'" fill="none" stroke="'+c+'" stroke-width="1.6" vector-effect="non-scaling-stroke"/></svg><span style="position:absolute;right:0;top:'+(l[1]/38*100)+'%;width:8px;height:8px;margin:-4px -2px 0 0;border-radius:50%;background:'+c+';box-shadow:0 0 10px '+c+'"></span>'}
+ const mn=Math.min(...SP),mx=Math.max(...SP),r=(mx-mn)||1,w=300,h=38;const pts=SP.map((v,i)=>[(i/(SP.length-1))*w,h-3-((v-mn)/r)*(h-8)]);const d='M'+pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' L');const up=SP[SP.length-1]>=500;const c=up?'#10d98a':'#ff4d6d';const l=pts[pts.length-1];
+ el.innerHTML='<svg viewBox="0 0 300 38" preserveAspectRatio="none"><defs><linearGradient id="sg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="'+c+'" stop-opacity=".35"/><stop offset="1" stop-color="'+c+'" stop-opacity="0"/></linearGradient></defs><path d="'+d+' L300,38 L0,38 Z" fill="url(#sg)"/>'+(mn<=500&&500<=mx?'<line x1="0" x2="300" y1="'+(h-3-((500-mn)/r)*(h-8)).toFixed(1)+'" y2="'+(h-3-((500-mn)/r)*(h-8)).toFixed(1)+'" stroke="#8b9bc0" stroke-opacity=".55" stroke-dasharray="3 3" vector-effect="non-scaling-stroke"/>':'')+'<path d="'+d+'" fill="none" stroke="'+c+'" stroke-width="1.6" vector-effect="non-scaling-stroke"/></svg><span style="position:absolute;right:0;top:'+(l[1]/38*100)+'%;width:8px;height:8px;margin:-4px -2px 0 0;border-radius:50%;background:'+c+';box-shadow:0 0 10px '+c+'"></span>'}
 function pathHTML(){return '<div class="path"><div class="z"></div><span class="tk" style="left:0"></span><span class="tk" style="left:20%"></span><span class="tk" style="left:100%;transform:translateX(-2px)"></span><span class="tl a"></span><span class="tl" style="left:calc(20% + 6px);transform:none">Entry 1.00x</span><span class="tl b"></span><span class="pkm">▲</span><div class="mk"></div></div>'}
 function pp(v){return Math.min(Math.max((v-0.5)/2.5,0),1)*100}
 function pathSet(el,m,pk){const x=pp(m),e=20,z=el.querySelector('.z'),mk=el.querySelector('.mk');
@@ -237,6 +265,7 @@ function render(){
  if(!$('pnlv')){$('pnl').innerHTML='P&amp;L <b id="pnlv"></b>'}const pv_=$('pnlv');pv_.className=up?'pos':'neg';roll(pv_,sg(d.pnl)+' ('+(d.pnl/d.start*100>=0?'+':'')+fmt(d.pnl/d.start*100,1)+'%)',true);
  $('real').textContent='realised '+sg(d.realised);$('real').className=d.realised>=0?'pos':'neg';
  const need=d.target-d.equity;$('togo').textContent=need>0?usd(need)+' to go':'🎉 goal reached (paper)';
+ {const zc=up?'up':'dn';$('pchip').className='chip '+zc;const se=$('s_eq');roll(se,usd(d.equity),true);se.className=zc;$('h_cash').textContent=usd(d.cash);$('h_open').textContent=d.open.length+'/'+d.max_open}
  $('fill').style.width=Math.max(d.progress_pct,d.pnl>0?2:0)+'%';$('pct').textContent=fmt(d.progress_pct,1)+'% of the way';
  roll($('s_open'),d.open.length+'/'+d.max_open);roll($('s_cash'),usd(d.cash),true);
  roll($('s_wl'),d.wins+' / '+(d.n_closed-d.wins));roll($('s_real'),sg(d.realised),true);$('s_real').className=d.realised>=0?'pos':'neg';
@@ -256,11 +285,10 @@ function render(){
 function cycUpd(){const d=D;const el=$('cyc');if(!d||!d.cycle){if(el)el.style.display='none';return}
  const c=d.cycle,len=c.end_epoch-c.start_epoch,now=Date.now()/1000,pp=Math.min(Math.max((now-c.start_epoch)/len*100,0),100);
  const p=+(d.equity-c.start_equity).toFixed(2),cl=p>=0?'pos':'neg';
- if(!el._sk){el.innerHTML='<div class="r1"><span class="cn">1 Hour Rotation <em>Cycle <span id="cy_n"></span></em></span><span class="cp" id="cy_p"></span></div><div class="cd"><span class="cdl">closes in</span><b id="cy_r"></b></div><div class="cb"><i id="cy_b"></i></div><div class="r2"><span id="cy_w"></span><span id="cy_s"></span></div><div class="r2"><span>Hourly cycles (on the hour). Each coin is sold at market exactly 1 hour after its own entry; open coins carry across cycles. Cycle P&amp;L is book equity, no reset.</span></div><div class="hist" id="cy_h"></div>';el._sk=1}
+ if(!el._sk){el.innerHTML='<div class="r1"><span class="cn">1 Hour Rotation <em>Cycle <span id="cy_n"></span></em></span><span class="cp" id="cy_p"></span></div><div class="cd"><span class="cdl">Closes in</span><b id="cy_r"></b></div><div class="cb"><i id="cy_b"></i></div><div class="r2"><span id="cy_w"></span><span id="cy_s"></span></div><div class="r2"><span>Hourly cycles (on the hour). Each coin is sold at market exactly 1 hour after its own entry; open coins carry across cycles. Cycle P&amp;L is book equity, no reset.</span></div><div class="hist" id="cy_h"></div>';el._sk=1}
  el.style.display='block';roll($('cy_n'),String(c.current));const cp=$('cy_p');cp.className='cp '+cl;roll(cp,sg(p)+' this cycle',true);$('cy_b').style.width=pp+'%';
- $('cy_w').textContent=ist(c.start_epoch*1000)+' → '+ist(c.end_epoch*1000)+' IST';$('cy_r').textContent=left(c.end_epoch);$('cy_s').textContent='started at '+usd(c.start_equity);
- const hh=(c.history||[]).slice(-6).map(h=>'<div class="hc"><b>Cycle '+h.cycle+(h.retroactive?' (retro)':'')+'</b><u class="'+(h.pnl>=0?'pos':'neg')+'">'+(h.pnl>=0?'+':'-')+'$'+fmt(Math.abs(h.pnl))+'</u>'+(h.end_equity!=null?'<s>ended '+usd(h.end_equity)+'</s>':'')+'</div>').join('');
- const H=$('cy_h');if(H._h!==hh){H._h=hh;H.innerHTML=hh?'<div class="hl">Closed cycles</div><div class="hg">'+hh+'</div>':''}}
+ $('cy_w').textContent=ist(c.start_epoch*1000)+' → '+ist(c.end_epoch*1000)+' IST';{const rs=Math.max(Math.floor(c.end_epoch-Date.now()/1000),0);$('cy_r').textContent=Math.floor(rs/3600)+'h '+String(Math.floor(rs%3600/60)).padStart(2,'0')+'m '+String(rs%60).padStart(2,'0')+'s';const n2=$('cy_n2');if(n2)n2.textContent=c.current}$('cy_s').textContent='started at '+usd(c.start_equity);
+ const hh=(c.history||[]).slice(-6).map(h=>'<span class="pl" title="ended '+(h.end_equity!=null?usd(h.end_equity):'')+'">C'+h.cycle+' <b class="'+(h.pnl>=0?'pos':'neg')+'">'+(h.pnl>=0?'+':'-')+'$'+fmt(Math.abs(h.pnl))+'</b></span>').join('');const H=$('cy_h');if(H._h!==hh){H._h=hh;H.innerHTML=hh?'<div class="hg"><span class="hl">Closed:</span>'+hh+'</div>':''}}
 
 function cpy(t,b){const done=()=>{const o=b.textContent;b.textContent='Copied ✓';setTimeout(()=>b.textContent=o,1400)};
  try{navigator.clipboard.writeText(t).then(done,()=>{fb()})}catch(e){fb()}
