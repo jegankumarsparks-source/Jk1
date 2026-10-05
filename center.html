@@ -60,6 +60,11 @@ summary{cursor:pointer;padding:10px 0;color:var(--dim);font-size:13px}
 .kv div{background:#0b1226;border:1px solid var(--line);border-radius:12px;padding:8px 10px}.kv span{display:block;font-size:11px;color:var(--dim)}.kv b{font-size:14px;word-break:break-all}
 .lk{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}.lk a{padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:#0c1528;font-size:13px;font-weight:700}
 .ca{font:11px monospace;color:var(--dim);word-break:break-all;margin-top:10px}
+.cyc{margin-top:12px;padding:12px 14px;border-radius:16px;background:linear-gradient(145deg,#1a1450,#0f1729);border:1px solid #4b3a99}
+.cyc .r1{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}.cyc .cn{font-weight:900;font-size:18px}
+.cyc .cp{font-weight:900;font-size:20px}.cyc .r2{display:flex;justify-content:space-between;font-size:12px;color:var(--dim);margin-top:6px;gap:8px;flex-wrap:wrap}
+.cyc .cb{height:7px;background:#0a1226;border-radius:6px;margin-top:8px;overflow:hidden}.cyc .cb i{display:block;height:100%;background:linear-gradient(90deg,#8b5cf6,#22d3ee);transition:width 1s}
+.cyc .hist{margin-top:8px;font-size:12px;color:var(--dim)}.cyc .hist span{display:inline-block;margin:2px 6px 0 0;padding:2px 8px;border:1px solid var(--line);border-radius:10px;background:#0c1528}
 @media(max-width:380px){.stats{grid-template-columns:repeat(2,1fr)}}
 </style></head><body><div class="wrap">
 <div class="top"><b>🎯 $500 → $800</b><span>paper challenge</span><span class="pill" id="pill">loading…</span></div>
@@ -70,6 +75,7 @@ summary{cursor:pointer;padding:10px 0;color:var(--dim);font-size:13px}
  <div class="bar"><div class="fill" id="fill"></div></div>
  <div class="bl"><span>$500 start</span><span id="pct">0%</span><span>$800 goal</span></div>
 </div>
+<div class="cyc" id="cyc" style="display:none"></div>
 <div class="stats">
  <div class="st"><b id="s_open">–</b><span>open</span></div>
  <div class="st"><b id="s_cash">–</b><span>cash</span></div>
@@ -92,7 +98,7 @@ function left(ep){let s=Math.max(ep-Date.now()/1000,0);return Math.floor(s/3600)
 function k(v){v=Number(v||0);return v>=1e6?'$'+(v/1e6).toFixed(2)+'M':v>=1e3?'$'+(v/1e3).toFixed(1)+'K':'$'+v.toFixed(0)}
 function anim(el,from,to){const t0=performance.now();(function f(t){let p=Math.min((t-t0)/700,1);el.textContent=usd(from+(to-from)*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(f)})(t0)}
 function render(){
- const d=D;const up=d.pnl>=0;
+ const d=D;cycUpd();const up=d.pnl>=0;
  const e=$('eq');e.className='big '+(up?'up':'dn');
  if(eqShown==null)e.textContent=usd(d.equity);else if(eqShown!==d.equity)anim(e,eqShown,d.equity);eqShown=d.equity;
  $('pnl').innerHTML='P&amp;L <b class="'+(up?'pos':'neg')+'">'+sg(d.pnl)+' ('+(d.pnl/d.start*100>=0?'+':'')+fmt(d.pnl/d.start*100,1)+'%)</b>';
@@ -116,6 +122,16 @@ function render(){
  $('cl').innerHTML=d.closed.map(c=>'<div class="cl" onclick="openX(\''+c.mint+'\')"><span><b>$'+c.sym+'</b> <span style="color:var(--dim)">'+c.stage+' · '+ist(c.exit_time)+'</span></span><span class="'+(c.pnl>=0?'pos':'neg')+'">'+fmt(c.exit_mult)+'x · '+sg(c.pnl)+'</span></div>').join('')||'<div class="cl" style="color:var(--dim)">none yet</div>';
  $('foot').innerHTML=(d.rug_restatement_usd?'<div style="color:#f5b942;margin-bottom:6px">'+d.rug_restatement_label+'</div>':'')+'PAPER ONLY, no real money. $'+d.bet+' per coin, max '+d.max_open+' open. Sell rules: -30% stop, full sell at '+d.rules.tp_mult+'x, '+d.rules.max_hold_h+'h max hold, rug = full loss. Marks include 3% modelled friction.<br>A paper result is not proof of an edge and not advice. $800 is a goal, not a prediction.';
 }
+
+function cycUpd(){const d=D;const el=$('cyc');if(!d||!d.cycle){if(el)el.style.display='none';return}
+ const c=d.cycle,len=c.end_epoch-c.start_epoch,now=Date.now()/1000,rem=Math.max(c.end_epoch-now,0),pp=Math.min(Math.max((now-c.start_epoch)/len*100,0),100);
+ const p=+(d.equity-c.start_equity).toFixed(2),cl=p>=0?'pos':'neg';
+ const hh=(c.history||[]).map(h=>'<span>C'+h.cycle+' '+(h.pnl>=0?'+':'-')+'$'+fmt(Math.abs(h.pnl))+(h.retroactive?' (retro)':'')+'</span>').join('');
+ el.style.display='block';
+ el.innerHTML='<div class="r1"><span class="cn">🔁 Cycle '+c.current+'</span><span class="cp '+cl+'">'+sg(p)+' this cycle</span></div>'+
+ '<div class="cb"><i style="width:'+pp+'%"></i></div>'+
+ '<div class="r2"><span>'+ist(c.start_epoch*1000)+' → '+ist(c.end_epoch*1000)+' IST</span><span>closes in <b style="color:var(--txt)">'+left(c.end_epoch)+'</b></span><span>started at '+usd(c.start_equity)+'</span></div>'+
+ '<div class="r2"><span>6h cycles: all open coins auto-sell at cycle end, balance carries over (no reset)</span></div>'+(hh?'<div class="hist">Closed: '+hh+'</div>':'')}
 function links(l){return '<div class="lk"><a href="'+l.dexscreener+'" target="_blank" rel="noopener">DexScreener</a><a href="'+l.gmgn+'" target="_blank" rel="noopener">GMGN</a><a href="'+l.solscan+'" target="_blank" rel="noopener">Solscan</a></div>'}
 function openC(m){const c=D.open.find(x=>x.mint===m);if(!c)return;
  $('sb').innerHTML='<button class="x" onclick="hide()">✕</button><div class="lab">'+c.src+' signal · open</div><div class="big '+(c.mult>=1?'up':'')+'" style="font-size:40px">$'+c.sym+' <span class="'+(c.mult>=1?'pos':'neg')+'">'+fmt(c.mult)+'x</span></div>'+
@@ -132,9 +148,16 @@ function openX(m){const c=D.closed.find(x=>x.mint===m);if(!c)return;
 function hide(){$('sheet').classList.remove('show')}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')hide()});
 let last='';
-let lastApi=0;
+let lastApi=0,EP=null,epAt=0,src='api';
+async function getEP(){const t=Date.now();if(t-epAt<60000)return;epAt=t;
+ try{const r=await fetch('https://api.github.com/repos/jegankumarsparks-source/Jk1/contents/data/endpoint.json?ref=live',{headers:{'Accept':'application/vnd.github.raw'},cache:'no-cache'});if(r.ok){const j=await r.json();if(j&&j.url)EP=j.url}}catch(e){}
+ if(!EP){try{const r=await fetch('https://raw.githubusercontent.com/jegankumarsparks-source/Jk1/live/data/endpoint.json?t='+t,{cache:'no-store'});const j=await r.json();if(j&&j.url)EP=j.url}catch(e){}}}
 async function fetchData(){
  const t=Date.now();
+ if(!EP)await getEP();
+ if(EP){try{const c=new AbortController();const to=setTimeout(()=>c.abort(),4000);const r=await fetch(EP+'/?t='+t,{cache:'no-store',signal:c.signal});clearTimeout(to);if(r.ok){const j=await r.json();if(j&&j.equity!=null){src='direct';return j}}}catch(e){}
+  EP=null;epAt=0}
+ src='api';
  if(t-lastApi>=70000){lastApi=t;try{const r=await fetch('https://api.github.com/repos/jegankumarsparks-source/Jk1/contents/data/main500.json?ref=live',{headers:{'Accept':'application/vnd.github.raw'},cache:'no-cache'});if(r.ok)return await r.json()}catch(e){}}
  else if(D)return null;
  try{const r=await fetch('https://raw.githubusercontent.com/jegankumarsparks-source/Jk1/live/data/main500.json?t='+t,{cache:'no-store'});return await r.json()}catch(e){}
@@ -154,5 +177,5 @@ async function liveMarks(){if(!D||!D.open||!D.open.length)return;try{const r=awa
 setInterval(liveMarks,10000);
 async function load(){const x=await fetchData();if(x&&(!D||(x.state_epoch||x.publish_epoch)>=(D.state_epoch||D.publish_epoch))){D=x;applyLive()}
  if(D){pillUpd()}}
-load();setTimeout(liveMarks,2500);setInterval(load,8000);setInterval(()=>{if(D){pillUpd()}},1000);
+load();setTimeout(liveMarks,2500);setInterval(load,3000);setInterval(()=>{if(D){pillUpd();cycUpd()}},1000);
 </script></body></html>
