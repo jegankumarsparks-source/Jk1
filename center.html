@@ -119,7 +119,7 @@ function anim(el,from,to){const t0=performance.now();(function f(t){let p=Math.m
 
 const SH=[0,1,2,3,4,5,6,7,8,9].map(d=>'<b>'+d+'</b>').join('');
 function roll(el,text,flash){if(!el)return;text=String(text);if(el._t===text)return;const old=el._t;const sig=[...text].map(c=>/\d/.test(c)?'#':c).join('');
- if(el._sig!==sig){el.innerHTML=[...text].map(c=>/\d/.test(c)?'<span class="dg"><i>'+SH+'</i></span>':'<span class="sp">'+c+'</span>').join('');el.classList.add('odo');el._sig=sig;
+ if(el._sig!==sig){el.innerHTML='<span class="odo">'+[...text].map(c=>/\d/.test(c)?'<span class="dg"><i>'+SH+'</i></span>':'<span class="sp">'+c+'</span>').join('')+'</span>';el._sig=sig;
   const is=el.querySelectorAll('.dg i');let j=0;[...text].forEach(c=>{if(/\d/.test(c)){is[j].style.transform='translateY(0)';j++}});void el.offsetWidth}
  const is=el.querySelectorAll('.dg i');let j=0;requestAnimationFrame(()=>{[...text].forEach(c=>{if(/\d/.test(c)){is[j].style.transform='translateY(-'+(+c*1.14)+'em)';j++}})});
  el._t=text;if(flash&&old!=null){const num=v=>parseFloat(String(v).replace(/[^0-9.\-]/g,'').replace(/^-?\./,'0.'))*(/^-|\-\$/.test(String(v))?-1:1)||0;const up=num(text)>=num(old);el.classList.remove('tkup','tkdn');void el.offsetWidth;el.classList.add(up?'tkup':'tkdn')}}
