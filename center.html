@@ -326,7 +326,7 @@ function hide(){$('sheet').classList.remove('show')}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')hide()});
 let last='';
 let lastApi=0,EP=null,epAt=0,src='api';
-async function getEP(){const t=Date.now();if(t-epAt<60000)return;epAt=t;
+async function getEP(){return;const t=Date.now();if(t-epAt<60000)return;epAt=t;
  try{const r=await fetch('https://api.github.com/repos/jegankumarsparks-source/Jk1/contents/data/endpoint.json?ref=live',{headers:{'Accept':'application/vnd.github.raw'},cache:'no-cache'});if(r.ok){const j=await r.json();if(j&&j.url)EP=j.url}}catch(e){}
  if(!EP){try{const r=await fetch('https://raw.githubusercontent.com/jegankumarsparks-source/Jk1/live/data/endpoint.json?t='+t,{cache:'no-store'});const j=await r.json();if(j&&j.url)EP=j.url}catch(e){}}}
 async function fetchData(){
@@ -335,15 +335,19 @@ async function fetchData(){
  if(EP){try{const c=new AbortController();const to=setTimeout(()=>c.abort(),4000);const r=await fetch(EP+'/?t='+t,{cache:'no-store',signal:c.signal});clearTimeout(to);if(r.ok){const j=await r.json();if(j&&j.equity!=null){src='direct';return j}}}catch(e){}
   EP=null;epAt=0}
  src='api';
- if(t-lastApi>=70000){lastApi=t;try{const r=await fetch('https://api.github.com/repos/jegankumarsparks-source/Jk1/contents/data/main500.json?ref=live',{headers:{'Accept':'application/vnd.github.raw'},cache:'no-cache'});if(r.ok)return await r.json()}catch(e){}}
- else if(D)return null;
- try{const r=await fetch('https://raw.githubusercontent.com/jegankumarsparks-source/Jk1/live/data/main500.json?t='+t,{cache:'no-store'});return await r.json()}catch(e){}
- try{const r=await fetch('data/main500.json?t='+t,{cache:'no-store'});return await r.json()}catch(e){}
+ const ep=j=>j&&(j.state_epoch||j.publish_epoch||0);
+ const tasks=[];
+ tasks.push(fetch('https://raw.githubusercontent.com/jegankumarsparks-source/Jk1/live/data/main500.json?t='+t,{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null));
+ if(t-lastApi>=90000){lastApi=t;tasks.push(fetch('https://api.github.com/repos/jegankumarsparks-source/Jk1/contents/data/main500.json?ref=live',{headers:{'Accept':'application/vnd.github.raw'},cache:'no-cache'}).then(r=>r.ok?r.json():null).catch(()=>null))}
+ if(!D||t-lastPg>=30000){lastPg=t;tasks.push(fetch('data/main500.json?t='+t,{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null))}
+ const rs=(await Promise.all(tasks)).filter(x=>x&&x.equity!=null);
+ if(!rs.length)return null;
+ rs.sort((x,y)=>ep(y)-ep(x));return rs[0]
  return null}
 
-let LIVE={},liveAt=0;
+let LIVE={},liveAt=0,lastPg=0;
 function pillUpd(){const p=$('pill');if(!D||!p)return;const sa=Date.now()/1000-(D.state_epoch||D.publish_epoch);const la=(Date.now()-liveAt)/1000;
- if(sa>=300){p.className='pill stale';p.innerHTML='⚠ arena stalled '+Math.round(sa/60)+'m';return}
+ if(sa>=900){p.className='pill stale';p.innerHTML='⚠ no new data for '+Math.round(sa/60)+'m';return}
  p.className='pill on';p.innerHTML=(liveAt&&la<40)?'<i>●</i>live · engine '+Math.round(la)+'s ago':'<i>●</i>live · engine '+Math.round(sa)+'s ago'}
 function applyLive(){if(!D)return;const F=D.friction||0.03;let v=0;D.open.forEach(c=>{const p=LIVE[c.mint];if(p&&c.entry_price){c._raw=p/c.entry_price;c.mult=Math.round(p/c.entry_price*(1-F)/(1+F)*1000)/1000;c.value=+(c.invested*c.mult).toFixed(2);c.pnl=+(c.value-c.invested).toFixed(2)}v+=c.value});
  D.open_value=+v.toFixed(2);D.equity=+(D.cash+v+(D.rug_restatement_usd||0)).toFixed(2);D.pnl=+(D.equity-D.start).toFixed(2);D.progress_pct=Math.round(Math.max(Math.min((D.pnl+(D.reserve_balance||0))/(D.target-D.start)*100,100),0)*10)/10;
