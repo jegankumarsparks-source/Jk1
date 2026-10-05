@@ -132,6 +132,17 @@ summary{cursor:pointer;padding:10px 0;color:var(--dim);font-size:13px}
 @media(max-width:380px){.cyc .hg{grid-template-columns:repeat(2,1fr)}.cyc .cd b{font-size:32px}}
 .tmr{display:inline-block;margin-left:8px;padding:2px 8px;border-radius:10px;border:1px solid #22d3ee66;background:#0b2230;color:#22d3ee;font-size:12px;font-weight:800;font-variant-numeric:tabular-nums;vertical-align:middle}.tmr.soon{border-color:#fbbf2488;color:#fbbf24;background:#2a2110}.tmr.due{border-color:#ff4d6d88;color:#ff4d6d;background:#2a1018}
 .stats{grid-template-columns:repeat(3,1fr)}#s_real{display:block;font-size:11px;font-weight:700;margin-top:2px}#s_real:before{content:"realised ";color:var(--dim);font-weight:400}
+
+.pt .hero{text-align:center;padding:16px 14px 12px;border:1px solid #3d5fbf;background:radial-gradient(120% 150% at 50% 0%,#1d3678,#0d1630 64%)}
+.pt .hero .lab{letter-spacing:2.2px;font-size:11px}
+.pt .hero .big{font-size:clamp(46px,13.5vw,74px);font-weight:900;letter-spacing:-1.5px;filter:brightness(1.12)}
+#eq.up,#eq.up *{text-shadow:0 0 38px #19f59b88,0 0 12px #19f59b66,0 0 2px #19f59baa!important}
+#eq.dn,#eq.dn *{text-shadow:0 0 38px #ff4d6d88,0 0 12px #ff4d6d66,0 0 2px #ff4d6daa!important}
+.pt .hero .sub{justify-content:center}.pt .hero #spark{height:28px;margin-top:6px}
+.cyc{margin-top:10px;padding:10px 12px}.cyc .cd b{font-size:32px}.cyc .cn{font-size:18px}.cyc .cp{font-size:17px}
+.cyc .hg{gap:6px}.cyc .hc{padding:6px 6px 7px;border-radius:10px}.cyc .hc b{font-size:11px}.cyc .hc u{font-size:15px;margin-top:2px}.cyc .hc s{font-size:10px}
+.stats{gap:6px;margin-top:8px}.st{padding:6px 6px;border-radius:12px}.st b{font-size:14px}.st span{font-size:10px}#s_real{font-size:10px;margin-top:0}
+.gp{margin-top:8px;padding:8px 12px;border-radius:12px}.gp .bar{height:9px;margin-top:6px}.gph{font-size:11px}.bl{font-size:11px;margin-top:4px}
 </style></head><body><div class="wrap">
 <div class="top"><b>JK AI Meme Radar</b><span>paper arena</span><span class="pill" id="pill">loading…</span></div>
 <div class="scan"></div>
@@ -143,6 +154,8 @@ summary{cursor:pointer;padding:10px 0;color:var(--dim);font-size:13px}
  <div class="sub"><span>P&amp;L <b id="pnlv">—</b></span><span id="real" class="pos"></span><span id="togo" style="color:var(--dim)"></span></div>
  <div id="spark"></div>
 </div>
+</section>
+<div class="cyc" id="cyc" style="display:none"></div>
 <div class="stats">
  <div class="st"><b id="s_cash">–</b><span>Cash</span></div>
  <div class="st"><b id="s_open">–</b><span>Open</span></div>
@@ -152,8 +165,6 @@ summary{cursor:pointer;padding:10px 0;color:var(--dim);font-size:13px}
  <div class="bar"><div class="fill" id="fill"></div></div>
  <div class="bl"><span>$500 start</span><span id="pct">0%</span><span>$800 goal</span></div>
 </div>
-</section>
-<div class="cyc" id="cyc" style="display:none"></div>
 <h2><span>Open positions</span><span id="cnt"></span></h2>
 <div class="grid" id="grid"><div class="empty">Loading…</div></div>
 <h2 class="sec" id="dch" style="display:none"><span>Completed cycles</span><span id="dcn"></span></h2><div class="dc" id="dc"></div>
