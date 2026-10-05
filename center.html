@@ -154,8 +154,8 @@ function render(){
  roll($('s_wl'),d.wins+' / '+(d.n_closed-d.wins));roll($('s_real'),sg(d.realised),true);$('s_real').className=d.realised>=0?'pos':'neg';
  $('cnt').textContent=d.open.length+' open';
  const g=$('grid');
- if(!d.open.length){if(!g.querySelector('.empty')){g.innerHTML='<div class="empty"><span class="dot"></span>Scanning for the next signal…</div>'}}
- else{const e0=g.querySelector('.empty');if(e0)e0.remove();const keep=new Set(d.open.map(c=>c.mint));
+ if(!d.open.length){if(g.dataset.k!=='e'){g.dataset.k='x';g.dataset.k='e';g.innerHTML='<div class="empty"><span class="dot"></span>Scanning for the next signal…</div>'}}
+ else{g.dataset.k='';const e0=g.querySelector('.empty');if(e0)e0.remove();const keep=new Set(d.open.map(c=>c.mint));
   [...g.querySelectorAll('.coin')].forEach(n=>{if(!keep.has(n.dataset.m))n.remove()});
   d.open.forEach((c,i)=>{let n=g.querySelector('.coin[data-m="'+c.mint+'"]');if(!n){n=document.createElement('div');n.className='coin';n.dataset.m=c.mint;n.style.animationDelay=(i*40)+'ms';n.onclick=()=>openC(c.mint);n.innerHTML=coinHTML(c);g.appendChild(n)}coinUpd(n,c)})}
 
