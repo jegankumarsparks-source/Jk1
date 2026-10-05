@@ -177,6 +177,7 @@ summary{cursor:pointer;padding:10px 0;color:var(--dim);font-size:13px}
 .pt .hero{position:relative}.bank{position:absolute;top:14px;right:16px;text-align:right;line-height:1.15}.bank .bl1{font-size:12px;color:var(--dim);letter-spacing:.4px}.bank .bv{font-size:22px;font-weight:900;color:var(--grn)}.bank .bs{font-size:11px;color:var(--dim)}.bank .bs b{color:var(--grn)}
 .cyc .cd b{font-size:22px !important;letter-spacing:.3px}.cyc .cdl{font-size:14px !important}
 @media(max-width:600px){.bank{position:static;text-align:center;margin:0 0 6px}.bank .bl1{display:inline;margin-right:8px}.bank .bv{display:inline;font-size:20px}.bank .bs{display:block}.pt .hero .lab{margin-top:2px}}
+.dsm{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 10px}.dsm div{background:linear-gradient(160deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:14px;padding:10px 12px}.dsm span{display:block;font-size:11.5px;color:var(--dim)}.dsm b{display:block;font-size:19px;margin-top:3px}.dsm i{font-style:normal;font-size:11px;color:var(--dim);display:block;margin-top:2px}.dd2{font-size:11.5px;color:var(--dim);padding:4px 4px 8px}
 </style></head><body><div class="wrap">
 <div class="top2"><div class="ttl">JK <span class="gold">Wallet Tracker 2</span></div><div class="stat"><span class="pill" id="pill">loading…</span><span class="chip2">SOL · PAPER ONLY</span></div></div>
 <div class="scan"></div>
@@ -207,6 +208,7 @@ summary{cursor:pointer;padding:10px 0;color:var(--dim);font-size:13px}
 <div class="grid" id="grid"><div class="empty">Loading…</div></div>
 <h2 class="sec" id="wh"><span>Watchlist · limit triggers (not signals)</span><span id="wcn"></span></h2><div id="wl" style="font-size:12px;color:var(--dim)"></div>
 <h2 class="sec" id="dch" style="display:none"><span>Completed cycles</span><span id="dcn"></span></h2><div class="dc" id="dc"></div>
+<h2 class="sec" id="ddh"><span>Days &amp; months (paper)</span><span id="ddn"></span></h2><div id="dsum"></div><div id="dd"></div>
 <div id="cgcur"></div><div id="cgrp"></div>
 <details id="cd2" style="display:none"><summary id="csum2">Earlier cycles</summary><div id="cl2"></div></details>
 <div class="foot" id="foot"></div>
@@ -259,6 +261,14 @@ function ccHTML(c){const w=c.pnl>=0,m=c.exit_mult,x=pp(m);const pk=c.peak&&c.pea
  return '<div class="cc '+(w?'win':'loss')+'" onclick="openX(\''+c.mint+'\')"><div class="l"><div class="nm">'+c.sym+'<i>$'+c.sym+'</i></div><div class="sb">in '+ist(c.entry_time).replace(' ','\u00a0')+' → out '+ist(c.exit_time).replace(' ','\u00a0')+' · '+wy(c.stage,m)+'</div><div class="mt"><i style="left:'+Math.min(x,20)+'%;width:'+Math.abs(x-20)+'%;background:'+(w?'linear-gradient(90deg,#22d3ee,#10d98a)':'linear-gradient(90deg,#ff4d6d,#fb923c)')+'"></i><u style="left:20%"></u></div></div><div class="r"><div class="pn '+(w?'':'neg')+'">'+usdp(c.pnl)+'</div><div class="mx">'+fmt(m)+'x</div></div></div>'}
 function grpHTML(n,list,pnl){return '<div class="gh"><span>Closed positions · Cycle '+n+' ('+list.length+')</span><span class="'+(pnl>=0?'pos':'neg')+'" style="letter-spacing:0">'+(pnl>=0?'+':'-')+Math.abs(pnl).toFixed(2)+'</span></div><div class="stack">'+(list.length?list.map(ccHTML).join(''):'<div class="empty">None closed yet this cycle.</div>')+'</div>'}
 function why(s,m){return s==='TP'?(m>=3?'3x TP':'TP '+fmt(m)+'x (old 1.5x rule)'):s==='SL'?(m<0.5?'SL -50% (gap fill)':'SL stop'):s==='CYCLE'?'Cycle-end sellout':s==='RUG'?'Rug (full loss)':s==='TIME'?'6h time exit':s==='HOLD1H'?'1-hour time exit':s}
+function dayRender(d){const S=d.day_summary;if(!S)return;const D2=d.days_done||[];const P=x=>(x>=0?'+':'-')+'$'+Math.abs(x).toFixed(2),C=x=>x>=0?'pos':'neg';
+ const ms=S.months||{};const mk=Object.keys(ms).sort().reverse();
+ let h='<div class="dsm"><div><span>Day '+S.day+' so far</span><b class="'+C(S.today_profit)+'">'+P(S.today_profit)+'</b></div><div><span>All days total</span><b class="'+C(S.total_profit)+'">'+P(S.total_profit)+'</b></div>';
+ h+=mk.map(k=>{const m=ms[k];return '<div><span>'+m.label+(m.live?' (this month)':'')+'</span><b class="'+C(m.profit)+'">'+P(m.profit)+'</b><i>'+m.days+' full day'+(m.days==1?'':'s')+(m.live?' + today':'')+'</i></div>'}).join('')+'</div>';
+ h+='<div class="dd2">Day = IST calendar day (12 AM to 12 AM). Day profit = sum of that day\'s cycle P&amp;L (skims to the reserve are not losses). Paper only, fills UNVERIFIED.</div>';
+ const sg=h+D2.map(x=>x.day+x.pnl).join('|');const box=$('dsum');if(box._s===sg)return;box._s=sg;box.innerHTML=h;
+ $('ddn').textContent=D2.length+' done';
+ $('dd').innerHTML=D2.length?D2.slice().reverse().map(x=>'<details class="hc"><summary><div><div class="t1">Day '+x.day+' · '+x.date+' <s>▸</s></div><div class="t2">'+x.cycles+' cycles · W'+x.wins+'/L'+x.losses+(x.best?' · best '+x.best:'')+'<br>running total '+P(x.cum_pnl==null?x.pnl:x.cum_pnl)+' · reserve $'+(x.reserve||0).toFixed(2)+'</div></div><div class="rr"><b class="'+C(x.pnl)+'">'+P(x.pnl)+'</b><span>end $'+x.end_equity.toFixed(2)+'</span></div></summary><div class="bd">'+(x.cycle_list||[]).map(c=>'<div class="rl">Cycle '+c.cycle+': <b class="'+C(c.pnl)+'">'+P(c.pnl)+'</b> · end $'+c.end_equity.toFixed(2)+'</div>').join('')+'</div></details>').join(''):'<div class="empty">No completed day yet. Day 1 closes at 12:00 AM IST.</div>'}
 function dcRender(d){const A=d.cycles_done||[];const box=$('dc');$('dch').style.display=A.length?'':'none';$('dcn').textContent=A.length+' done';
  const sig=A.map(x=>x.n+':'+x.trades.length+':'+x.end_equity).join('|');if(box._s===sig)return;box._s=sig;
  const open=new Set([...box.querySelectorAll('details[open]')].map(n=>n.dataset.n));
@@ -280,7 +290,7 @@ function render(){
  $('fill').style.width=Math.max(d.progress_pct,d.pnl>0?2:0)+'%';$('pct').textContent=fmt(d.progress_pct,1)+'% of the way';
  roll($('s_open'),d.open.length+'/'+d.max_open);roll($('s_cash'),usd(d.cash),true);
  roll($('s_wl'),d.wins+' / '+(d.n_closed-d.wins));roll($('s_real'),sg(d.realised),true);$('s_real').className=d.realised>=0?'pos':'neg';
- $('cnt').textContent=d.open.length+' open';try{dcRender(d)}catch(e){}
+ $('cnt').textContent=d.open.length+' open';try{dcRender(d)}catch(e){}try{dayRender(d)}catch(e){}
  const g=$('grid');
  if(!d.open.length){if(g.dataset.k!=='e'){g.dataset.k='x';g.dataset.k='e';g.innerHTML='<div class="empty"><span class="dot"></span>Scanning for the next signal…</div>'}}
  else{g.dataset.k='';const e0=g.querySelector('.empty');if(e0)e0.remove();const keep=new Set(d.open.map(c=>c.mint));
@@ -296,8 +306,8 @@ function render(){
 function cycUpd(){const d=D;const el=$('cyc');if(!d||!d.cycle){if(el)el.style.display='none';return}
  const c=d.cycle,len=c.end_epoch-c.start_epoch,now=Date.now()/1000,pp=Math.min(Math.max((now-c.start_epoch)/len*100,0),100);
  const p=+(d.equity-c.start_equity).toFixed(2),cl=p>=0?'pos':'neg';
- if(!el._sk){el.innerHTML='<div class="r1"><span class="cn">1 Hour Rotation <em>Cycle <span id="cy_n"></span></em></span><span class="cp" id="cy_p"></span></div><div class="cd"><span class="cdl">Closes in</span><b id="cy_r"></b></div><div class="cb"><i id="cy_b"></i></div><div class="r2"><span id="cy_w"></span><span id="cy_s"></span></div><div class="r2"><span>Hourly cycles (on the hour). Each coin sells at 3x (take-profit), -50% (stop), or at market 1 hour after its own entry; open coins carry across cycles. Cycle P&amp;L is book equity, no reset.</span></div><div class="hist" id="cy_h"></div>';el._sk=1}
- el.style.display='block';roll($('cy_n'),String(c.current));const cp=$('cy_p');cp.className='cp '+cl;roll(cp,sg(p)+' this cycle',true);$('cy_b').style.width=pp+'%';
+ if(!el._sk){el.innerHTML='<div class="r1"><span class="cn">1 Hour Rotation <em>Day <span id="cy_d"></span> · Cycle <span id="cy_n"></span></em></span><span class="cp" id="cy_p"></span></div><div class="cd"><span class="cdl">Closes in</span><b id="cy_r"></b></div><div class="cb"><i id="cy_b"></i></div><div class="r2"><span id="cy_w"></span><span id="cy_s"></span></div><div class="r2"><span>Hourly cycles (on the hour). Each coin sells at 3x (take-profit), -50% (stop), or at market 1 hour after its own entry; open coins carry across cycles. Cycle P&amp;L is book equity, no reset.</span></div><div class="hist" id="cy_h"></div>';el._sk=1}
+ el.style.display='block';roll($('cy_n'),String(c.current));{const q=$('cy_d');if(q)q.textContent=c.day||1}const cp=$('cy_p');cp.className='cp '+cl;roll(cp,sg(p)+' this cycle',true);$('cy_b').style.width=pp+'%';
  $('cy_w').textContent=ist(c.start_epoch*1000)+' → '+ist(c.end_epoch*1000)+' IST';{const rs=Math.max(Math.floor(c.end_epoch-Date.now()/1000),0);$('cy_r').textContent=Math.floor(rs/3600)+'h '+String(Math.floor(rs%3600/60)).padStart(2,'0')+'m '+String(rs%60).padStart(2,'0')+'s';const n2=$('cy_n2');if(n2)n2.textContent=c.current}$('cy_s').textContent='started at '+usd(c.start_equity);
  const hh=(c.history||[]).slice(-6).map(h=>'<span class="pl" title="ended '+(h.end_equity!=null?usd(h.end_equity):'')+'">C'+h.cycle+' <b class="'+(h.pnl>=0?'pos':'neg')+'">'+(h.pnl>=0?'+':'-')+'$'+fmt(Math.abs(h.pnl))+'</b></span>').join('');const H=$('cy_h');if(H._h!==hh){H._h=hh;H.innerHTML=hh?'<div class="hg"><span class="hl">Closed:</span>'+hh+'</div>':''}}
 
