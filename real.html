@@ -185,7 +185,7 @@ summary{cursor:pointer;padding:10px 0;color:var(--dim);font-size:13px}
 <div class="scan"></div>
 <section class="pt">
 <div class="hero">
- <div class="bank"><div class="bl1">NET DEPOSITS</div><div class="bv" id="tpv">$0.00</div><div class="bs">live · reserved <b id="resv">$0.00</b></div></div>
+ <div class="bank"><div class="bl1">NET DEPOSITS</div><div class="bv" id="tpv">$0.00</div><div class="bs">wallet view · reserve <b id="resv">$0.00</b></div></div>
  <div class="lab">Equity · Real wallet</div>
  <div class="big" id="eq">$—</div>
  <div class="sub2"><span class="chip" id="pchip">P&amp;L <b id="pnlv">—</b></span><span class="vs">vs wallet baseline</span></div>
@@ -320,14 +320,14 @@ function render(){
  roll(e,usd(d.equity),true);eqShown=d.equity;sparkUpd();
  if(!$('pnlv')){$('pnl').innerHTML='P&amp;L <b id="pnlv"></b>'}const pv_=$('pnlv');pv_.className=up?'pos':'neg';roll(pv_,sg(d.pnl)+' ('+(d.pnl/d.start*100>=0?'+':'')+fmt(d.pnl/d.start*100,1)+'%)',true);
  $('real').textContent='realised '+sg(d.realised);$('real').className=d.realised>=0?'pos':'neg';
- const RS=+(d.reserve_balance||0);const TP=+(d.equity+RS-d.start).toFixed(2);if($('resv')){$('resv').textContent=usd(RS);$('tpv').textContent=(TP>=0?'+':'-')+usd(Math.abs(TP));$('tpv').style.color=TP>=0?'var(--grn)':'var(--red)'}const need=d.target-d.equity-RS;$('togo').textContent=need>0?usd(need)+' to go (equity + reserve)':'🎉 goal reached (paper)';
+ const RS=+(d.reserve_balance||0);const TP=+(d.equity+RS-d.start).toFixed(2);if($('resv')){$('resv').textContent=usd(RS);$('tpv').textContent=(TP>=0?'+':'-')+usd(Math.abs(TP));$('tpv').style.color=TP>=0?'var(--grn)':'var(--red)'}const need=d.target-d.equity-RS;$('togo').textContent=need>0?'':'';
  {const zc=up?'up':'dn';$('pchip').className='chip '+zc;const se=$('s_eq');roll(se,usd(d.equity),true);se.className=zc;$('h_cash').textContent=usd(d.cash);$('h_open').textContent=d.open.length+'/'+d.max_open}
  $('fill').style.width=Math.max(d.progress_pct,d.pnl>0?2:0)+'%';$('pct').textContent=fmt(d.progress_pct,1)+'% of the way';
  roll($('s_open'),d.open.length+'/'+d.max_open);roll($('s_cash'),usd(d.cash),true);
  roll($('s_wl'),d.wins+' / '+(d.n_closed-d.wins));roll($('s_real'),sg(d.realised),true);$('s_real').className=d.realised>=0?'pos':'neg';
  $('cnt').textContent=d.open.length+' open';try{dcRender(d)}catch(e){}try{dayRender(d)}catch(e){}
  const g=$('grid');
- if(!d.open.length){if(g.dataset.k!=='e'){g.dataset.k='x';g.dataset.k='e';g.innerHTML='<div class="empty"><span class="dot"></span>Scanning for the next signal…</div>'}}
+ if(!d.open.length){if(g.dataset.k!=='e'){g.dataset.k='x';g.dataset.k='e';g.innerHTML='<div class="empty"><span class="dot"></span>No real positions. This page never trades.</div>'}}
  else{g.dataset.k='';const e0=g.querySelector('.empty');if(e0)e0.remove();const keep=new Set(d.open.map(c=>c.mint));
   [...g.querySelectorAll('.coin')].forEach(n=>{if(!keep.has(n.dataset.m))n.remove()});
   d.open.forEach((c,i)=>{let n=g.querySelector('.coin[data-m="'+c.mint+'"]');if(!n){n=document.createElement('div');n.className='coin';n.dataset.m=c.mint;n.style.animationDelay=(i*40)+'ms';n.onclick=()=>openC(c.mint);n.innerHTML=coinHTML(c);g.appendChild(n)}coinUpd(n,c)})}
