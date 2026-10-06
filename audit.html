@@ -1,0 +1,28 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Paper / Live audit</title>
+<style>body{font:14px system-ui,sans-serif;background:#0b1020;color:#e8ecf5;margin:0;padding:14px;max-width:760px;margin:auto}h1{font-size:18px;margin:6px 0}.c{background:#141b33;border-radius:12px;padding:12px;margin:10px 0}.k{color:#8fa0c8;font-size:12px}b{color:#fff}.r{display:flex;justify-content:space-between;border-top:1px solid #222c4d;padding:5px 0}.t{font-weight:600;margin-bottom:4px}</style></head><body>
+<h1>Paper / Live audit</h1><div class="k">Read-only. Visibility only. No order, size, strategy, exit or cutover control exists on this page. Paper numbers are simulated.</div>
+<div class="c" id="cut">Loading...</div><div class="c" id="pnl"></div>
+<div class="c"><div class="t">PAPER (open paper positions)</div><div id="p1"></div></div>
+<div class="c"><div class="t">LIVE (real positions)</div><div id="p2"></div></div>
+<div class="c"><div class="t">PRE-CUTOVER PAPER</div><div id="p3"></div></div>
+<div class="c"><div class="t">POST-CUTOVER LIVE</div><div id="p4"></div></div>
+<script>
+const B='https://raw.githubusercontent.com/jegankumarsparks-source/Jk1/live/data/';
+const esc=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const rows=(a)=>a.length?a.map(x=>'<div class="r"><span>'+esc(x[0])+'</span><span class="k">'+esc(x[1])+'</span></div>').join(''):'<span class="k">none</span>';
+async function go(){
+ try{
+  const [s,l]=await Promise.all([fetch(B+'main500.json?t='+Date.now()).then(r=>r.json()),fetch(B+'live_audit.json?t='+Date.now()).then(r=>r.json())]);
+  const open=s.open||[], live=l.live_positions||[];
+  const pre=open.filter(p=>p.position_class==='PRE_CUTOVER_PAPER'||p.source_signal_id==='UNKNOWN');
+  const paper=(s.closed||[]).reduce((a,t)=>a+(t.pnl||0),0);
+  document.getElementById('cut').innerHTML='Cutover: <b>'+esc(l.cutover)+'</b> &middot; LIVE_MODE: <b>'+esc(l.live_mode)+'</b><div class="k">cutover state as of '+esc(l.generated)+'</div>';
+  document.getElementById('pnl').innerHTML='PAPER_PNL (paper, trades closed this cycle): <b>'+(paper>=0?'+':'')+paper.toFixed(2)+'</b><br>LIVE_PNL (real): <b>'+(l.live_pnl===null?'n/a (no live trades)':l.live_pnl)+'</b><div class="k">Never combined into one total.</div>';
+  document.getElementById('p1').innerHTML=rows(open.map(p=>[p.sym,p.source_signal_id||'no id']));
+  document.getElementById('p2').innerHTML=rows(live.map(p=>[p.token_mint.slice(0,8),p.mode]));
+  document.getElementById('p3').innerHTML=rows(pre.map(p=>[p.sym,p.unlinked_reason||p.position_class]));
+  document.getElementById('p4').innerHTML=rows(live.map(p=>[p.token_mint.slice(0,8),p.source_signal_id]));
+ }catch(e){document.getElementById('cut').innerHTML='Data unavailable: '+esc(e.message)}
+}
+go();setInterval(go,15000);
+</script></body></html>
