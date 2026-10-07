@@ -362,7 +362,7 @@ function hide(){$('sheet').classList.remove('show')}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')hide()});
 let last='';
 let lastApi=0,EP=null,epAt=0,src='api';
-async function getEP(){return;const t=Date.now();if(t-epAt<60000)return;epAt=t;
+async function getEP(){const t=Date.now();if(t-epAt<60000)return;epAt=t;
  try{const r=await fetch('https://api.github.com/repos/jegankumarsparks-source/Jk1/contents/data/endpoint.json?ref=live',{headers:{'Accept':'application/vnd.github.raw'},cache:'no-cache'});if(r.ok){const j=await r.json();if(j&&j.url)EP=j.url}}catch(e){}
  if(!EP){try{const r=await fetch('https://raw.githubusercontent.com/jegankumarsparks-source/Jk1/live/data/endpoint.json?t='+t,{cache:'no-store'});const j=await r.json();if(j&&j.url)EP=j.url}catch(e){}}}
 async function fetchData(){
