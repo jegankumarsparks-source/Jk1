@@ -186,7 +186,7 @@ summary{cursor:pointer;padding:10px 0;color:var(--dim);font-size:13px}
 <div class="scan"></div>
 <section class="pt">
 <div class="hero">
- <div class="bank"><div class="bl1">PROFIT BANK</div><div class="bv" id="tpv">$0.00</div><div class="bs">live · reserved <b id="resv">$0.00</b></div></div>
+ <div class="bank"><div class="bl1">BOOK P&L</div><div class="bv" id="tpv">$0.00</div><div class="bs">paper · reserved <b id="resv">$0.00</b></div></div>
  <div class="lab">Equity · Paper</div>
  <div class="big" id="eq">$—</div>
  <div class="sub2"><span class="chip" id="pchip">P&amp;L <b id="pnlv">—</b></span><span class="vs">vs $500 start</span></div>
@@ -382,13 +382,9 @@ async function fetchData(){
  return null}
 
 let LIVE={},liveAt=0,lastPg=0;
-function pillUpd(){const p=$('pill');if(!D||!p)return;const sa=Date.now()/1000-(D.state_epoch||D.publish_epoch);const la=(Date.now()-liveAt)/1000;
- if(sa>=900){p.className='pill stale';p.innerHTML='⚠ no new data for '+Math.round(sa/60)+'m';return}
- p.className='pill on';p.innerHTML=(liveAt&&la<40)?'<i>●</i>live · engine '+Math.round(la)+'s ago':'<i>●</i>live · engine '+Math.round(sa)+'s ago'}
-function applyLive(){if(!D)return;const F=D.friction||0.03;let v=0;D.open.forEach(c=>{const p=LIVE[c.mint];if(p&&c.entry_price){c._raw=p/c.entry_price;c.mult=Math.round(p/c.entry_price*(1-F)/(1+F)*1000)/1000;c.value=+(c.invested*c.mult).toFixed(2);c.pnl=+(c.value-c.invested).toFixed(2)}v+=c.value});
- D.open_value=+v.toFixed(2);D.equity=+(D.cash+v+(D.rug_restatement_usd||0)).toFixed(2);D.pnl=+(D.equity-D.start).toFixed(2);D.progress_pct=Math.round(Math.max(Math.min((D.pnl+(D.reserve_balance||0))/(D.target-D.start)*100,100),0)*10)/10;
- const s=JSON.stringify(D);if(s!==last){last=s;render()}}
-async function liveMarks(){if(!D||!D.open||!D.open.length)return;try{const r=await fetch('https://api.dexscreener.com/tokens/v1/solana/'+D.open.map(c=>c.mint).join(','),{cache:'no-store'});const a=await r.json();const best={};
+function pillUpd(){const p=$('pill');if(!D||!p)return;const sa=Math.max(0,Date.now()/1000-(D.state_epoch||D.publish_epoch));p.className='pill '+(sa>=180?'stale':'on');p.textContent='Hourly paper snapshot · engine data '+Math.floor(sa/60)+'m '+Math.floor(sa%60)+'s old';}
+function applyLive(){if(!D)return;const s=JSON.stringify(D);if(s!==last){last=s;render()}}
+async function liveMarks(){return;if(!D||!D.open||!D.open.length)return;try{const r=await fetch('https://api.dexscreener.com/tokens/v1/solana/'+D.open.map(c=>c.mint).join(','),{cache:'no-store'});const a=await r.json();const best={};
  a.forEach(x=>{const m=x.baseToken&&x.baseToken.address;const p=parseFloat(x.priceUsd);if(!m||!p)return;const l=(x.liquidity&&x.liquidity.usd)||0;if(!best[m]||l>best[m].l)best[m]={l,p}});
  let n=0;Object.keys(best).forEach(m=>{LIVE[m]=best[m].p;n++});if(n){liveAt=Date.now();applyLive()}}catch(e){}}
 setInterval(liveMarks,10000);
