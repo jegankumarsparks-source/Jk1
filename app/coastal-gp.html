@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>JK COASTAL GP 2040</title>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@600;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;touch-action:none}
+html,body{width:100%;height:100%;overflow:hidden;background:#0B3C5D}
+#game{position:fixed;inset:0}
+canvas{display:block;width:100%;height:100%}
+#hud{position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;padding:10px 14px;z-index:5;font-family:'Rubik',sans-serif;pointer-events:none;color:#fff;text-shadow:0 2px 4px rgba(0,0,0,.5)}
+#pos{font-size:26px;font-weight:800}
+#lap{font-size:16px;font-weight:600}
+#speed{font-size:16px;font-weight:600}
+.ctl{position:fixed;bottom:14px;z-index:5;display:flex;gap:12px;font-family:'Rubik',sans-serif}
+#steer{left:14px}
+#pedals{right:14px}
+.cbtn{width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,.18);border:2px solid rgba(255,255,255,.5);color:#fff;font-size:24px;display:flex;align-items:center;justify-content:center;font-weight:800;backdrop-filter:blur(4px)}
+.cbtn.on{background:rgba(255,255,255,.45)}
+.overlay{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(180deg,rgba(11,60,93,.96),rgba(28,110,140,.96));font-family:'Rubik',sans-serif;text-align:center;padding:20px;color:#fff}
+.overlay.hidden{display:none}
+h1{font-size:34px;font-weight:800}
+.sub{color:#B8DCE8;font-size:16px;margin-top:10px;max-width:330px;line-height:1.6}
+.btn{margin-top:22px;padding:12px 36px;background:#F26430;color:#fff;font-family:'Rubik';font-size:22px;font-weight:800;border:none;border-radius:14px;cursor:pointer;box-shadow:0 5px 0 #A63D14}
+.circ{display:flex;gap:10px;margin-top:16px}
+.copt{padding:10px 16px;border-radius:12px;border:2px solid rgba(255,255,255,.4);background:rgba(255,255,255,.1);color:#fff;font-family:'Rubik';font-size:15px;font-weight:600;cursor:pointer}
+.copt.sel{background:#F26430;border-color:#F26430}
+#finalPos{font-size:52px;color:#FFD23F;margin-top:8px;font-weight:800}
+</style>
+</head>
+<body>
+<div id="game"></div>
+<div id="hud"><div id="pos">P1</div><div id="lap">LAP 1/3</div><div id="speed">0 km/h</div></div>
+<div class="ctl" id="steer"><div class="cbtn" id="leftBtn">◀</div><div class="cbtn" id="rightBtn">▶</div></div>
+<div class="ctl" id="pedals"><div class="cbtn" id="brakeBtn">🛑</div><div class="cbtn" id="gasBtn">⛽</div></div>
+<div class="overlay" id="start">
+<h1>🏁 JK COASTAL GP 2040 🏁</h1>
+<p class="sub">Sunset seaside circuits! Hold ⛽ to accelerate, 🛑 to brake, ◀ ▶ to steer. 3 laps vs 3 AI rivals. Grass slows you down. Pick your circuit!</p>
+<div class="circ">
+<div class="copt sel" data-c="0">🌅 Sunset Bay</div>
+<div class="copt" data-c="1">🌊 Coral Loop</div>
+<div class="copt" data-c="2">🏝️ Island 8</div>
+</div>
+<button class="btn" id="startBtn">RACE!</button>
+</div>
+<div class="overlay hidden" id="over">
+<h1>🏆 RACE DONE! 🏆</h1>
+<div id="finalPos">P1</div>
+<p class="sub" id="overSub"></p>
+<button class="btn" id="overBtn">RACE AGAIN</button>
+</div>
+<script>
+"use strict";
+const TAU=Math.PI*2;
+const container=document.getElementById('game');
+const cv=document.createElement('canvas');container.appendChild(cv);
+const g=cv.getContext('2d');
+let W=0,H=0;
+function resize(){const dpr=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*dpr;cv.height=H*dpr;g.setTransform(dpr,0,0,dpr,0,0);}
+addEventListener('resize',resize);resize();
+const CIRCUITS=[
+[[0,-160],[120,-140],[190,-60],[170,60],[90,140],[-40,150],[-150,110],[-190,-20],[-120,-120]],
+[[0,-180],[150,-150],[210,-30],[140,30],[180,130],[60,170],[-80,150],[-120,40],[-200,-30],[-140,-150]],
+[[-140,-140],[60,-170],[170,-110],[110,-10],[180,80],[60,150],[-60,110],[-170,150],[-190,20],[-80,-60]]
+];
+const LAPS=3,NPTS=600;
+let path=[],cars=[],player=null,circuit=0,playing=false,over=false,cam={x:0,y:0},raceT=0,finishOrder=[];
+const rand=(a,b)=>a+Math.random()*(b-a);
+function catmull(pts){const r=[];const n=pts.length;
+for(let i=0;i<n;i++){const p0=pts[(i-1+n)%n],p1=pts[i],p2=pts[(i+1)%n],p3=pts[(i+2)%n];
+for(let t=0;t<1;t+=1/60){const t2=t*t,t3=t2*t;
+r.push({x:.5*((2*p1[0])+(-p0[0]+p2[0])*t+(2*p0[0]-5*p1[0]+4*p2[0]-p3[0])*t2+(-p0[0]+3*p1[0]-3*p2[0]+p3[0])*t3),
+y:.5*((2*p1[1])+(-p0[1]+p2[1])*t+(2*p0[1]-5*p1[1]+4*p2[1]-p3[1])*t2+(-p0[1]+3*p1[1]-3*p2[1]+p3[1])*t3)});}}
+return r;}
+function nearest(px,py,from){let best=0,bd=1e9;
+for(let k=0;k<80;k++){const i=(from+k)%path.length;const dx=path[i].x-px,dy=path[i].y-py;const d=dx*dx+dy*dy;if(d<bd){bd=d;best=i;}}
+for(let k=1;k<40;k++){const i=(from-k+path.length)%path.length;const dx=path[i].x-px,dy=path[i].y-py;const d=dx*dx+dy*dy;if(d<bd){bd=d;best=i;}}
+return{i:best,d:Math.sqrt(bd)};}
+function mkCar(color,isPlayer,lane){const i0=lane*14;const p=path[i0];
+return{x:p.x+(isPlayer?0:rand(-8,8)),y:p.y-lane*0+ (isPlayer?26:26+lane*22),a:Math.atan2(path[(i0+5)%path.length].y-p.y,path[(i0+5)%path.length].x-p.x),
+v:0,color,isPlayer,ni:i0,prog:isPlayer?0:-lane*10,lap:1,passed:1,ai:rand(.80,.93),done:false,finishT:0};}
+function setup(ci){circuit=ci;path=catmull(CIRCUITS[ci]);
+player=mkCar('#F26430',true,0);
+cars=[player,mkCar('#FFD23F',false,1),mkCar('#48CAE4',false,2),mkCar('#9B5DE5',false,3)];
+raceT=0;finishOrder=[];}
+const input={gas:false,brake:false,steer:0};
+function stepCar(c,dt){
+const ahead=path[(c.ni+8)%path.length];
+if(c.isPlayer){
+const maxV=input.gas?230:0;
+if(input.gas)c.v=Math.min(230,c.v+180*dt);
+else c.v=Math.max(0,c.v-60*dt);
+if(input.brake)c.v=Math.max(0,c.v-320*dt);
+c.a+=input.steer*dt*(c.v>5?2.6*(1-Math.min(1,c.v/400)):0);
+}else{
+const want=Math.atan2(ahead.y-c.y,ahead.x-c.x);
+let da=want-c.a;while(da>Math.PI)da-=TAU;while(da<-Math.PI)da+=TAU;
+c.a+=Math.max(-2.4*dt,Math.min(2.4*dt,da));
+const curv=Math.abs(da);
+const target=230*c.ai*(curv>0.6?0.55:1);
+c.v+=Math.max(-300*dt,Math.min(150*dt,target-c.v));}
+const near=nearest(c.x,c.y,c.ni);c.ni=near.i;
+const offroad=near.d>34;
+if(offroad)c.v=Math.max(0,c.v-260*dt);
+c.x+=Math.cos(c.a)*c.v*dt;c.y+=Math.sin(c.a)*c.v*dt;
+const idx=Math.round(c.ni);
+if(idx<60&&c.lastIdx>path.length-60){c.lap++;if(c.lap>LAPS&&!c.done){c.done=true;c.finishT=raceT;finishOrder.push(c);}}
+c.lastIdx=idx;
+c.prog=(c.lap-1)*path.length+c.ni;}
+function simStep(dt){if(!playing)return;
+raceT+=dt;
+for(const c of cars)if(!c.done)stepCar(c,dt);
+cam.x=player.x;cam.y=player.y;
+if(player.done){playing=false;over=true;
+const pos=finishOrder.indexOf(player)+1;
+document.getElementById('finalPos').textContent='P'+pos;
+document.getElementById('overSub').textContent=pos===1?'CHAMPION OF THE COAST! 🏆':(pos===2?'So close - P2!':(pos===3?'P3 - podium!':'P4 - the sea wins this time.'));
+document.getElementById('over').classList.remove('hidden');}}
+let last=performance.now();
+function frame(now){requestAnimationFrame(frame);const dt=Math.min((now-last)/1000,.05);last=now;
+simStep(dt);
+// sky-sea bg
+const bg=g.createLinearGradient(0,0,0,H);bg.addColorStop(0,'#F4A261');bg.addColorStop(.35,'#E9C46A');bg.addColorStop(.55,'#2A9D8F');bg.addColorStop(1,'#0B3C5D');
+g.fillStyle=bg;g.fillRect(0,0,W,H);
+g.save();g.translate(W/2-cam.x*1.6,H/2-cam.y*1.6);g.scale(1.6,1.6);
+// sand
+g.fillStyle='#E8C98A';g.beginPath();
+for(let i=0;i<=path.length;i++){const p=path[i%path.length];i?g.lineTo(p.x,p.y):g.moveTo(p.x,p.y);}
+g.closePath();g.lineWidth=110;g.strokeStyle='#E8C98A';g.stroke();
+// asphalt
+g.lineWidth=64;g.strokeStyle='#3D4451';g.stroke();
+// kerb dashes
+g.lineWidth=64;g.strokeStyle='rgba(230,57,70,.85)';g.setLineDash([14,22]);g.stroke();
+g.setLineDash([]);
+// center line
+g.lineWidth=2.5;g.strokeStyle='rgba(255,255,255,.6)';g.setLineDash([10,16]);g.stroke();g.setLineDash([]);
+// start line
+const s0=path[0],s1=path[4];
+g.save();g.translate(s0.x,s0.y);g.rotate(Math.atan2(s1.y-s0.y,s1.x-s0.x)+Math.PI/2);
+for(let i=0;i<8;i++)for(let j=0;j<2;j++){g.fillStyle=(i+j)%2?'#fff':'#111';g.fillRect(-32+i*8,-8+j*8,8,8);}
+g.restore();
+// cars
+for(const c of cars){g.save();g.translate(c.x,c.y);g.rotate(c.a);
+g.fillStyle=c.color;g.strokeStyle='rgba(0,0,0,.4)';g.lineWidth=1.5;
+g.beginPath();g.roundRect(-11,-6,22,12,4);g.fill();g.stroke();
+g.fillStyle='rgba(255,255,255,.75)';g.fillRect(2,-4,5,8);
+g.fillStyle='#111';g.fillRect(-8,-8,5,3);g.fillRect(-8,5,5,3);g.fillRect(4,-8,5,3);g.fillRect(4,5,5,3);
+g.restore();}
+g.restore();
+// minimap
+g.save();g.translate(W-86,86);g.scale(0.26,0.26);
+g.lineWidth=26;g.strokeStyle='rgba(255,255,255,.35)';g.beginPath();
+for(let i=0;i<=path.length;i+=4){const p=path[i%path.length];i?g.lineTo(p.x,p.y):g.moveTo(p.x,p.y);}
+g.closePath();g.stroke();
+for(const c of cars){g.fillStyle=c.color;g.beginPath();g.arc(c.x,c.y,14,0,TAU);g.fill();}
+g.restore();
+// HUD
+const posn=[...cars].sort((a,b)=>b.prog-a.prog).indexOf(player)+1;
+document.getElementById('pos').textContent='P'+(player.done?(finishOrder.indexOf(player)+1):posn);
+document.getElementById('lap').textContent='LAP '+Math.min(LAPS,player.lap)+'/'+LAPS;
+document.getElementById('speed').textContent=Math.round(player.v*1.3)+' km/h';}
+requestAnimationFrame(frame);
+setup(0);
+let selCircuit=0;
+document.querySelectorAll('.copt').forEach(o=>o.addEventListener('click',()=>{
+document.querySelectorAll('.copt').forEach(x=>x.classList.remove('sel'));o.classList.add('sel');selCircuit=parseInt(o.dataset.c);setup(selCircuit);}));
+function tog(){setup(selCircuit);playing=true;over=false;
+document.getElementById('start').classList.add('hidden');document.getElementById('over').classList.add('hidden');}
+document.getElementById('startBtn').addEventListener('click',tog);
+document.getElementById('overBtn').addEventListener('click',()=>{document.getElementById('start').classList.remove('hidden');document.getElementById('over').classList.add('hidden');});
+function bindHold(id,on,off){const el=document.getElementById(id);
+el.addEventListener('pointerdown',e=>{e.preventDefault();el.classList.add('on');on();});
+const up=()=>{el.classList.remove('on');off();};
+el.addEventListener('pointerup',up);el.addEventListener('pointercancel',up);el.addEventListener('pointerleave',up);}
+bindHold('gasBtn',()=>input.gas=true,()=>input.gas=false);
+bindHold('brakeBtn',()=>input.brake=true,()=>input.brake=false);
+bindHold('leftBtn',()=>input.steer=-1,()=>input.steer=0);
+bindHold('rightBtn',()=>input.steer=1,()=>input.steer=0);
+window.__GP={G:()=>({playing,over,lap:player.lap,v:Math.round(player.v),pos:[...cars].sort((a,b)=>b.prog-a.prog).indexOf(player)+1,done:player.done,circuit,aiV:cars.slice(1).map(c=>Math.round(c.v)),px:Math.round(player.x),py:Math.round(player.y)}),
+start:(c)=>{selCircuit=c||0;setup(selCircuit);playing=true;over=false;document.getElementById('start').classList.add('hidden');document.getElementById('over').classList.add('hidden');},
+sim:(dt)=>simStep(dt),
+setInput:(o)=>{Object.assign(input,o);},
+playerRef:()=>player,
+pathLen:()=>path.length,
+warpNearFinish:()=>{player.lap=LAPS;player.ni=path.length-30;const p=path[player.ni];player.x=p.x;player.y=p.y;player.lastIdx=player.ni;}};
+</script>
+</body>
+</html>
