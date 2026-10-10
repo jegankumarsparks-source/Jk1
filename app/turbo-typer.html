@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>JK TURBO TYPER 2036</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#070714;color:#e8e8f5;min-height:100vh;overflow-x:hidden}
+#stars{position:fixed;inset:0;z-index:0;pointer-events:none}
+.wrap{position:relative;z-index:1;max-width:480px;margin:0 auto;padding:14px 14px 40px}
+h1{text-align:center;font-size:30px;font-weight:900;letter-spacing:2px;background:linear-gradient(90deg,#00e5ff,#ff2ea6,#ffd60a);-webkit-background-clip:text;background-clip:text;color:transparent;margin-top:8px}
+.sub{text-align:center;color:#8a8ab0;font-size:11px;letter-spacing:3px;margin:4px 0 16px}
+.card{background:linear-gradient(145deg,#12122b,#0d0d20);border:1px solid #26264a;border-radius:16px;padding:16px;margin-bottom:12px;box-shadow:0 4px 24px rgba(0,229,255,.06)}
+.modeBtn{display:block;width:100%;text-align:left;background:linear-gradient(145deg,#181836,#101024);border:1px solid #2e2e5a;border-radius:14px;padding:14px;margin:10px 0;color:#e8e8f5;cursor:pointer;transition:.15s}
+.modeBtn:active{transform:scale(.98);border-color:#00e5ff}
+.modeBtn b{font-size:17px;display:block}
+.modeBtn span{font-size:12px;color:#9a9ac0}
+.diffRow{display:flex;gap:8px;margin-top:10px}
+.diff{flex:1;text-align:center;padding:10px 4px;border-radius:12px;border:1px solid #2e2e5a;background:#101024;cursor:pointer;font-size:12px;color:#9a9ac0}
+.diff.on{border-color:#ffd60a;color:#ffd60a;background:#1c1c10;box-shadow:0 0 12px rgba(255,214,10,.25)}
+.passage{background:#0b0b1c;border-radius:12px;padding:16px;font-size:21px;line-height:1.9;font-family:'Noto Sans Tamil','Segoe UI',monospace;min-height:110px;word-break:break-word}
+.ch{transition:.1s}
+.ch.cur{border-bottom:3px solid #00e5ff;background:rgba(0,229,255,.12)}
+.ch.ok{color:#3ddc84}
+.ch.bad{color:#ff4d6d;background:rgba(255,77,109,.15)}
+.raceTrack{margin:14px 0 6px}
+.lane{display:flex;align-items:center;gap:8px;margin:8px 0}
+.lane .who{width:56px;font-size:12px;color:#9a9ac0;text-align:right}
+.bar{flex:1;height:22px;background:#101024;border-radius:11px;border:1px solid #26264a;position:relative;overflow:hidden}
+.fill{position:absolute;left:0;top:0;bottom:0;border-radius:11px;transition:width .25s}
+.fill.me{background:linear-gradient(90deg,#00e5ff,#3ddc84)}
+.fill.bot{background:linear-gradient(90deg,#ff2ea6,#ff7b4d)}
+.racer{position:absolute;top:-4px;font-size:18px;transition:left .25s}
+.stats{display:flex;gap:8px;margin:12px 0}
+.stat{flex:1;background:#101024;border:1px solid #26264a;border-radius:12px;padding:8px 4px;text-align:center}
+.stat b{display:block;font-size:18px;color:#00e5ff}
+.stat span{font-size:9px;color:#8a8ab0;letter-spacing:1px}
+#engInput{width:100%;background:#0b0b1c;border:2px solid #2e2e5a;border-radius:12px;padding:14px;font-size:17px;color:#e8e8f5;outline:none}
+#engInput:focus{border-color:#00e5ff}
+.kbd{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin-top:10px}
+.key{min-width:44px;padding:12px 8px;text-align:center;background:linear-gradient(145deg,#1a1a3e,#12122b);border:1px solid #34346a;border-radius:10px;font-size:19px;cursor:pointer;color:#e8e8f5}
+.key:active{background:#00e5ff;color:#000;transform:scale(.92)}
+.key.wide{min-width:70px;font-size:14px;color:#ff9db1}
+.hintBar{text-align:center;font-size:12px;color:#ffd60a;margin:8px 0;min-height:16px}
+.ov{position:fixed;inset:0;background:rgba(4,4,14,.92);z-index:20;display:flex;align-items:center;justify-content:center;padding:20px}
+.ov.hide{display:none}
+.ovCard{background:linear-gradient(145deg,#161634,#0d0d20);border:1px solid #34346a;border-radius:20px;padding:26px 20px;max-width:400px;width:100%;text-align:center}
+.ovCard h2{font-size:26px;margin-bottom:10px}
+.ovCard p{color:#b8b8d8;font-size:14px;line-height:1.7;margin-bottom:8px}
+.big{font-size:40px;font-weight:900;color:#ffd60a}
+.btn{display:inline-block;margin-top:14px;padding:13px 30px;border:none;border-radius:14px;font-size:16px;font-weight:800;cursor:pointer;background:linear-gradient(90deg,#00e5ff,#3ddc84);color:#04222a}
+.btn.ghost{background:#1a1a3e;color:#e8e8f5;margin-left:8px}
+.backRow{text-align:left;margin-bottom:8px}
+.backBtn{background:none;border:1px solid #2e2e5a;color:#9a9ac0;border-radius:10px;padding:6px 14px;font-size:12px;cursor:pointer}
+.footer{text-align:center;color:#55557a;font-size:10px;margin-top:18px;letter-spacing:1px}
+.streakPop{position:fixed;top:70px;left:50%;transform:translateX(-50%);font-size:22px;font-weight:900;color:#ffd60a;text-shadow:0 0 18px rgba(255,214,10,.7);opacity:0;transition:.3s;pointer-events:none;z-index:15}
+</style>
+</head>
+<body>
+<canvas id="stars"></canvas>
+<div class="streakPop" id="streakPop"></div>
+<div class="wrap">
+<h1>JK TURBO TYPER</h1>
+<div class="sub">2036 SPEED DUEL • நீ vs ரோபோ • OFFLINE</div>
+
+<div id="menu">
+<div class="card">
+<b style="font-size:15px">⚔️ MODE தேர்ந்தெடு</b>
+<button class="modeBtn" onclick="startGame('eng')"><b>⌨️ ENGLISH SPRINT</b><span>60-second passage • full speed vs bot • WPM + accuracy</span></button>
+<button class="modeBtn" onclick="startGame('tam')"><b>🇮🇳 தமிழ் TAP RACE</b><span>ஸ்க்ரீன் கீபோர்டு • tap correct Tamil letters • bot-ஐ வெல்லு</span></button>
+<button class="modeBtn" onclick="startGame('boss')"><b>👑 BOSS MARATHON</b><span>Long passage • brutal bot • only legends finish first</span></button>
+</div>
+<div class="card">
+<b style="font-size:15px">🤖 BOT LEVEL</b>
+<div class="diffRow">
+<div class="diff on" data-d="0" onclick="setDiff(0,this)">😴 MOKKA<br><small>22 wpm</small></div>
+<div class="diff" data-d="1" onclick="setDiff(1,this)">😤 STREET<br><small>45 wpm</small></div>
+<div class="diff" data-d="2" onclick="setDiff(2,this)">🔥 GOD<br><small>80 wpm</small></div>
+</div>
+</div>
+<div class="footer">JK TURBO TYPER 2036 • single offline HTML • ராமு racing league</div>
+</div>
+
+<div id="game" style="display:none">
+<div class="backRow"><button class="backBtn" onclick="toMenu()">← MENU</button></div>
+<div class="card">
+<div class="passage" id="passage"></div>
+<div class="raceTrack">
+<div class="lane"><div class="who">நீ 🏎️</div><div class="bar"><div class="fill me" id="meFill" style="width:0%"></div><div class="racer" id="meRacer" style="left:0%">🏎️</div></div></div>
+<div class="lane"><div class="who" id="botName">BOT 🤖</div><div class="bar"><div class="fill bot" id="botFill" style="width:0%"></div><div class="racer" id="botRacer" style="left:0%">🤖</div></div></div>
+</div>
+<div class="stats">
+<div class="stat"><b id="wpm">0</b><span>WPM</span></div>
+<div class="stat"><b id="acc">100%</b><span>ACCURACY</span></div>
+<div class="stat"><b id="streak">0</b><span>STREAK</span></div>
+<div class="stat"><b id="timer">0s</b><span>TIME</span></div>
+</div>
+<input id="engInput" placeholder="இங்க type பண்ணு..." autocomplete="off" autocapitalize="off" spellcheck="false">
+<div class="hintBar" id="hint"></div>
+<div class="kbd" id="kbd" style="display:none"></div>
+</div>
+</div>
+</div>
+
+<div class="ov hide" id="ov"><div class="ovCard">
+<h2 id="ovTitle">🏆</h2>
+<div class="big" id="ovWpm">0 WPM</div>
+<p id="ovText"></p>
+<p id="ovTaunt" style="color:#ffd60a"></p>
+<button class="btn" onclick="rematch()">REMATCH 🔄</button>
+<button class="btn ghost" onclick="toMenu()">MENU</button>
+</div></div>
+
+<script>
+/* ============ DATA ============ */
+var ENG=[
+"The neon streets of 2036 hum with flying autos and chai drones delivering hot filter coffee to every rooftop in the city.",
+"Speed is nothing without accuracy. A racer who crashes at two hundred words per minute still loses the cup.",
+"Ramu tuned his keyboard like a race engine, every key a piston firing letters faster than thunder over Marina Beach.",
+"In the future, typing duels replaced sword fights. Champions are crowned by words per minute and ice cold nerves.",
+"The robot practiced all night in the server room, but it never learned the rhythm of a human heart on fire.",
+"Monsoon rain hammered the glass dome while the typists raced, fingers blurring like hummingbird wings.",
+"Every champion was once a beginner who refused to quit after the hundredth typo and the thousandth defeat.",
+"The grand finale lights blinded the crowd as two racers sat down for the fastest duel ever recorded.",
+"Do not count the words. Make every word count, and let the keyboard sing its electric song.",
+"Gravity is optional in the sky arena, but typos still hurt twice as much at altitude.",
+"The crowd went silent. Only the soft clatter of keys remained, like rain on a tin roof at midnight.",
+"Legends say the golden keyboard appears only for those who type with courage, honor, and perfect spelling."
+];
+var BOSS_ENG="In the year 2036, the Great Typing Championship of Tamil Nadu drew ten thousand racers to the floating arena above Chennai. Ramu arrived with nothing but an old keyboard, a bottle of boost juice, and a smile that scared the robots. The reigning champion, a machine called Kuyil-9000, had never lost a race in four hundred duels. The horn sounded. Fingers became lightning. Words became thunder. And somewhere between the third paragraph and glory, the crowd witnessed the impossible: a human heartbeat outlasting a billion calculations per second.";
+var TAM=[
+"வணக்கம் உலகமே",
+"ராமு சூப்பர் ஸ்டார்",
+"வேகம் தான் வாழ்க்கை",
+"சென்னை சூப்பர் கிங்ஸ்",
+"காற்று வேகத்தில் ஓடு",
+"முயற்சி திருவினையாக்கும்",
+"இதயம் தோல்வி அறியாது",
+"விண்ணை தொடும் வேகம்",
+"ஜெயம் நம்மிடமே",
+"தமிழ் வாழ்க என்றும்",
+"பயம் என்பது மனசு மட்டுமே",
+"சாதனை புரிவோம் இன்றே"
+];
+var BOTS=[{n:"MOKKA BOT",e:"😴",wpm:22},{n:"STREET BOT",e:"😤",wpm:45},{n:"KUYIL-9000",e:"🤖",wpm:80}];
+var TAUNTS_W=["குயில்-9000-வே நீ dust-அ தின்னுட்டு! 🏆","Speed-ku nee dhaan king! 👑","ரோபோ service centre-ku அனுப்பு! 🤖😂","அடுத்த முறை bot-ஆ turbo ரீமோட்-ல போடு!"];
+var TAUNTS_L=["Bot-கிட்ட தோத்துட்டியே! ரீமாட்ச் போடு 💪","Slow-ஆ இருந்தா race கிடைக்காது! 🐢","Bot சிரிச்சிட்டு இருக்கு... பழி வாங்கு! 😤"];
+/* ============ STATE ============ */
+var mode=null,diff=0,target="",typed="",errors=0,correctChars=0,streak=0,bestStreak=0,startT=0,over=false,won=false,botProg=0,raf=null,modeUsed='eng',passageIdx=0;
+var cvs=document.getElementById('stars'),cx2=cvs.getContext('2d'),starArr=[];
+function sizeC(){cvs.width=innerWidth;cvs.height=innerHeight;starArr=[];for(var i=0;i<70;i++)starArr.push({x:Math.random()*cvs.width,y:Math.random()*cvs.height,r:Math.random()*1.5+.3,s:Math.random()*.4+.1});}
+sizeC();addEventListener('resize',sizeC);
+(function bg(){cx2.fillStyle='#070714';cx2.fillRect(0,0,cvs.width,cvs.height);cx2.fillStyle='#fff';starArr.forEach(function(s){s.y+=s.s;if(s.y>cvs.height)s.y=0;cx2.globalAlpha=.4+.6*Math.abs(Math.sin(s.y*.01));cx2.fillRect(s.x,s.y,s.r,s.r)});cx2.globalAlpha=1;requestAnimationFrame(bg)})();
+function setDiff(d,el){diff=d;document.querySelectorAll('.diff').forEach(function(e){e.classList.remove('on')});el.classList.add('on');}
+function toMenu(){over=true;cancelAnimationFrame(raf);document.getElementById('game').style.display='none';document.getElementById('menu').style.display='block';document.getElementById('ov').classList.add('hide');}
+function rematch(){document.getElementById('ov').classList.add('hide');startGame(modeUsed);}
+function startGame(m){
+ modeUsed=m;mode=m;
+ if(m==='eng')target=ENG[Math.floor(Math.random()*ENG.length)];
+ else if(m==='boss')target=BOSS_ENG;
+ else target=TAM[Math.floor(Math.random()*TAM.length)];
+ typed="";errors=0;correctChars=0;streak=0;bestStreak=0;botProg=0;over=false;won=false;startT=Date.now();
+ document.getElementById('menu').style.display='none';document.getElementById('game').style.display='block';document.getElementById('ov').classList.add('hide');
+ document.getElementById('botName').textContent=BOTS[diff].n+" "+BOTS[diff].e;
+ renderPassage();
+ var inp=document.getElementById('engInput'),kbd=document.getElementById('kbd'),hint=document.getElementById('hint');
+ if(m==='tam'){inp.style.display='none';kbd.style.display='flex';buildKbd();hint.textContent='அடுத்த எழுத்து: '+target[0];}
+ else{inp.style.display='block';kbd.style.display='none';inp.value='';hint.textContent='';setTimeout(function(){inp.focus()},100);}
+ cancelAnimationFrame(raf);loop();
+}
+function renderPassage(){
+ var p=document.getElementById('passage'),h='';
+ for(var i=0;i<target.length;i++){
+  var cls='ch';if(i<typed.length)cls+=typed[i]===target[i]?' ok':' bad';else if(i===typed.length)cls+=' cur';
+  var ch=target[i]===' '?'&nbsp;':target[i].replace('<','&lt;');
+  h+='<span class="'+cls+'">'+ch+'</span>';
+ }
+ p.innerHTML=h;
+}
+function buildKbd(){
+ var kbd=document.getElementById('kbd');kbd.innerHTML='';
+ var seen={},chars=[];
+ for(var i=0;i<target.length;i++){var c=target[i];if(!seen[c]){seen[c]=1;chars.push(c);}}
+ chars.sort(function(){return Math.random()-.5});
+ chars.forEach(function(c){
+  var k=document.createElement('div');k.className='key';k.textContent=c===' '?'␣':c;
+  k.onclick=function(){tapChar(c)};kbd.appendChild(k);
+ });
+ var bs=document.createElement('div');bs.className='key wide';bs.textContent='⌫ DEL';
+ bs.onclick=function(){if(typed.length>0&&!over){typed=typed.slice(0,-1);renderPassage();updateStats();}};
+ kbd.appendChild(bs);
+}
+function tapChar(c){
+ if(over)return;
+ if(typed.length>=target.length)return;
+ feedChar(c);
+ if(mode==='tam'){var nx=target[typed.length];document.getElementById('hint').textContent=nx?('அடுத்த எழுத்து: '+(nx===' '?'␣ space':nx)):'முடிஞ்சுது! 🎉';}
+}
+function feedChar(c){
+ if(over)return;
+ typed+=c;
+ if(c===target[typed.length-1]){correctChars++;streak++;if(streak>bestStreak)bestStreak=streak;
+  if(streak>0&&streak%15===0){var sp=document.getElementById('streakPop');sp.textContent='🔥 STREAK x'+streak;sp.style.opacity=1;setTimeout(function(){sp.style.opacity=0},900);}
+ }else{errors++;streak=0;}
+ renderPassage();updateStats();
+ if(typed.length>=target.length){endGame(botProg<target.length);}
+}
+function updateStats(){
+ var el=(Date.now()-startT)/1000;
+ var wpm=el>2?Math.round((correctChars/5)/(el/60)):0;
+ var acc=typed.length>0?Math.round(correctChars/typed.length*100):100;
+ document.getElementById('wpm').textContent=wpm;
+ document.getElementById('acc').textContent=acc+'%';
+ document.getElementById('streak').textContent=streak;
+ document.getElementById('timer').textContent=Math.floor(el)+'s';
+ var pct=Math.min(100,typed.length/target.length*100);
+ document.getElementById('meFill').style.width=pct+'%';
+ document.getElementById('meRacer').style.left='calc('+pct+'% - 10px)';
+}
+document.getElementById('engInput').addEventListener('input',function(e){
+ if(over||mode==='tam')return;
+ var v=e.target.value;
+ var need=v.length-typed.length;
+ if(need>0){var add=v.slice(typed.length);for(var i=0;i<add.length;i++){feedChar(add[i]);if(over)break;}}
+ else if(need<0){typed=typed.slice(0,v.length);renderPassage();updateStats();}
+});
+function loop(){
+ if(over)return;
+ var el=(Date.now()-startT)/1000;
+ var b=BOTS[diff];
+ var jitter=1+.15*Math.sin(el*2.7)+.08*Math.sin(el*7.3);
+ botProg=Math.min(target.length,(b.wpm*5/60)*el*jitter);
+ var bp=botProg/target.length*100;
+ document.getElementById('botFill').style.width=bp+'%';
+ document.getElementById('botRacer').style.left='calc('+bp+'% - 10px)';
+ updateStats();
+ if(botProg>=target.length&&typed.length<target.length){endGame(false);return;}
+ raf=requestAnimationFrame(loop);
+}
+function endGame(w){
+ over=true;won=w;cancelAnimationFrame(raf);
+ var el=(Date.now()-startT)/1000;
+ var wpm=Math.round((correctChars/5)/(el/60));
+ var acc=typed.length>0?Math.round(correctChars/typed.length*100):100;
+ var key='jktt_best_'+modeUsed;
+ var prev=parseInt(localStorage.getItem(key)||'0');
+ var rec=wpm>prev;if(rec)localStorage.setItem(key,wpm);
+ document.getElementById('ovTitle').textContent=w?'🏆 வெற்றி!':'💀 TOUGH LUCK';
+ document.getElementById('ovWpm').textContent=wpm+' WPM';
+ document.getElementById('ovText').innerHTML='Accuracy: <b style="color:#3ddc84">'+acc+'%</b> • Best streak: <b>'+bestStreak+'</b> • Time: '+Math.floor(el)+'s<br>'+(rec?'🎉 NEW '+modeUsed.toUpperCase()+' RECORD! (old: '+prev+')':'Record: '+Math.max(prev,wpm)+' WPM');
+ document.getElementById('ovTaunt').textContent=w?TAUNTS_W[Math.floor(Math.random()*TAUNTS_W.length)]:TAUNTS_L[Math.floor(Math.random()*TAUNTS_L.length)];
+ document.getElementById('ov').classList.remove('hide');
+}
+window.__TT={G:function(){return {mode:modeUsed,typedLen:typed.length,targetLen:target.length,correct:correctChars,errors:errors,botProg:Math.round(botProg),over:over,won:won,streak:streak}},start:function(m,d){if(typeof d==='number'){diff=d}startGame(m)},type:function(s){for(var i=0;i<s.length;i++){feedChar(s[i]);if(over)break;}},tap:tapChar,target:function(){return target},rematch:rematch};
+</script>
+</body>
+</html>
