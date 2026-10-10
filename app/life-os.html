@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>JK LIFE OS · 2030</title>
+<style>
+:root{ --bg:#05070d; --glass:rgba(255,255,255,.045); --glass2:rgba(255,255,255,.08); --line:rgba(255,255,255,.09); --txt:#eaf0fb; --mut:#8a90a6; --acc:#7ee787; --neon:#22d3ee; --pink:#f472b6; --warn:#fbbf24; --red:#f87171; --vio:#a78bfa; }
+*{ margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html,body{ height:100%; }
+body{ background:var(--bg); color:var(--txt); font-family:-apple-system,'Segoe UI',Roboto,sans-serif; max-width:480px; margin:0 auto; min-height:100vh; position:relative; overflow-x:hidden; }
+.aurora{ position:fixed; inset:0; z-index:0; overflow:hidden; }
+.aurora i{ position:absolute; border-radius:50%; filter:blur(70px); opacity:.35; animation:drift 16s ease-in-out infinite alternate; }
+.aurora i:nth-child(1){ width:320px; height:320px; background:#22d3ee; top:-90px; left:-80px; }
+.aurora i:nth-child(2){ width:280px; height:280px; background:#f472b6; top:20%; right:-100px; animation-delay:-5s; }
+.aurora i:nth-child(3){ width:300px; height:300px; background:#a78bfa; bottom:-90px; left:15%; animation-delay:-10s; }
+@keyframes drift{ 0%{ transform:translate(0,0) scale(1);} 100%{ transform:translate(40px,30px) scale(1.15);} }
+.screen{ position:relative; z-index:1; min-height:100vh; padding:14px; display:none; }
+.screen.on{ display:block; animation:fadein .35s ease; }
+@keyframes fadein{ from{ opacity:0; transform:translateY(10px);} to{ opacity:1; transform:none;} }
+/* BOOT */
+#boot{ display:flex; flex-direction:column; align-items:center; justify-content:center; }
+#boot.on{ display:flex; }
+.bootlogo{ font-size:34px; font-weight:900; letter-spacing:2px; background:linear-gradient(90deg,var(--neon),var(--pink),var(--vio)); -webkit-background-clip:text; background-clip:text; color:transparent; animation:glowp 1.6s ease-in-out infinite; }
+@keyframes glowp{ 0%,100%{ filter:drop-shadow(0 0 6px rgba(34,211,238,.6));} 50%{ filter:drop-shadow(0 0 22px rgba(244,114,182,.8));} }
+.bootsub{ color:var(--mut); font-size:12px; margin-top:8px; letter-spacing:3px; }
+.bootbar{ width:210px; height:5px; background:var(--glass2); border-radius:99px; margin-top:26px; overflow:hidden; }
+.bootbar i{ display:block; height:100%; width:0; background:linear-gradient(90deg,var(--neon),var(--pink)); border-radius:99px; transition:width .3s; }
+.bootmsg{ margin-top:12px; font-size:11px; color:var(--mut); font-family:monospace; min-height:14px; }
+/* STATUS BAR */
+.statusbar{ display:flex; justify-content:space-between; align-items:center; font-size:11.5px; color:var(--mut); padding:2px 6px 12px; }
+.statusbar b{ color:var(--txt); letter-spacing:1px; }
+/* HOME */
+.greet{ padding:8px 4px 14px; }
+.greet .h{ font-size:24px; font-weight:900; }
+.greet .d{ font-size:12.5px; color:var(--mut); margin-top:3px; }
+.clock{ font-size:52px; font-weight:900; letter-spacing:1px; background:linear-gradient(90deg,var(--neon),var(--acc)); -webkit-background-clip:text; background-clip:text; color:transparent; text-align:center; margin:6px 0 16px; font-variant-numeric:tabular-nums; }
+.widgets{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:18px; }
+.widget{ background:var(--glass); border:1px solid var(--line); border-radius:18px; padding:13px; backdrop-filter:blur(8px); cursor:pointer; }
+.widget .v{ font-size:19px; font-weight:900; }
+.widget .l{ font-size:10px; color:var(--mut); text-transform:uppercase; letter-spacing:.5px; margin-top:3px; }
+.widget .e{ font-size:17px; }
+.grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+.appicon{ text-align:center; cursor:pointer; }
+.appicon .ic{ width:62px; height:62px; margin:0 auto; border-radius:19px; background:var(--glass); border:1px solid var(--line); display:flex; align-items:center; justify-content:center; font-size:26px; backdrop-filter:blur(8px); transition:transform .15s; }
+.appicon:active .ic{ transform:scale(.88); }
+.appicon .nm{ font-size:10.5px; color:var(--mut); margin-top:6px; }
+.osfooter{ text-align:center; color:var(--mut); font-size:10px; margin-top:22px; letter-spacing:2px; }
+/* MODULE */
+.modhead{ display:flex; align-items:center; gap:10px; padding:4px 2px 14px; }
+.backbtn{ width:38px; height:38px; border-radius:12px; background:var(--glass2); border:1px solid var(--line); color:var(--txt); font-size:17px; cursor:pointer; }
+.modhead .t{ font-size:19px; font-weight:900; }
+.modhead .s{ font-size:11px; color:var(--mut); }
+.card{ background:var(--glass); border:1px solid var(--line); border-radius:18px; padding:14px; margin-bottom:12px; backdrop-filter:blur(8px); }
+.big{ font-size:30px; font-weight:900; font-variant-numeric:tabular-nums; }
+.row{ display:flex; gap:8px; margin-bottom:8px; }
+input,select,textarea{ background:rgba(0,0,0,.3); border:1px solid var(--line); color:var(--txt); border-radius:12px; padding:11px; font-size:15px; outline:none; font-family:inherit; }
+input:focus,select:focus,textarea:focus{ border-color:var(--neon); }
+input[type=text]{ flex:1; min-width:0; }
+input[type=number]{ width:96px; }
+select{ width:auto; }
+.btn{ border:0; border-radius:12px; padding:12px 18px; font-size:14px; font-weight:900; cursor:pointer; }
+.btn:active{ transform:scale(.96); }
+.btn-p{ background:linear-gradient(90deg,var(--neon),var(--vio)); color:#06121a; }
+.btn-g{ background:linear-gradient(90deg,var(--acc),var(--neon)); color:#04120a; }
+.btn-w{ background:linear-gradient(90deg,var(--warn),var(--pink)); color:#1a0a00; }
+.btn-o{ background:var(--glass2); border:1px solid var(--line); color:var(--txt); }
+.full{ width:100%; }
+.lrow{ display:flex; align-items:center; gap:9px; padding:9px 2px; border-bottom:1px solid var(--line); font-size:14px; }
+.lrow:last-child{ border-bottom:0; }
+.lrow .grow{ flex:1; min-width:0; }
+.lrow .x{ color:var(--mut); padding:2px 8px; cursor:pointer; font-size:16px; }
+.lrow .x:active{ color:var(--red); }
+.mut{ color:var(--mut); font-size:12px; }
+.chipset{ display:flex; flex-wrap:wrap; gap:7px; }
+.chip{ background:var(--glass2); border:1px solid var(--line); border-radius:99px; padding:8px 13px; font-size:12.5px; cursor:pointer; }
+.badge{ display:inline-block; font-size:10.5px; font-weight:800; border-radius:99px; padding:3px 9px; }
+.b-red{ background:rgba(248,113,113,.15); color:var(--red); }
+.b-amb{ background:rgba(251,191,36,.15); color:var(--warn); }
+.b-grn{ background:rgba(126,231,135,.15); color:var(--acc); }
+.b-neo{ background:rgba(34,211,238,.15); color:var(--neon); }
+.glasses{ display:grid; grid-template-columns:repeat(4,1fr); gap:9px; margin:12px 0; }
+.glass{ height:64px; border-radius:12px 12px 16px 16px; border:2px solid var(--line); position:relative; overflow:hidden; cursor:pointer; background:rgba(0,0,0,.25); }
+.glass i{ position:absolute; bottom:0; left:0; right:0; background:linear-gradient(180deg,var(--neon),#0e7490); transition:height .4s; }
+.glass .n{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:13px; z-index:1; text-shadow:0 1px 4px #000; }
+.timerdisp{ font-size:64px; font-weight:900; text-align:center; font-variant-numeric:tabular-nums; margin:14px 0; background:linear-gradient(90deg,var(--warn),var(--pink)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.habchk{ width:34px; height:34px; border-radius:50%; border:2px solid var(--line); display:flex; align-items:center; justify-content:center; font-size:15px; cursor:pointer; flex:0 0 auto; }
+.habchk.done{ background:var(--acc); border-color:var(--acc); color:#04120a; font-weight:900; }
+.streak{ font-size:11px; color:var(--warn); font-weight:800; }
+canvas#spincv{ width:min(80vw,310px); display:block; margin:10px auto; filter:drop-shadow(0 0 20px rgba(34,211,238,.2)); }
+.confetti{ position:fixed; top:-10px; width:9px; height:14px; z-index:50; pointer-events:none; border-radius:2px; animation:cfall 2.4s ease-in forwards; }
+@keyframes cfall{ to{ transform:translateY(110vh) rotate(720deg); opacity:0; } }
+</style>
+</head>
+<body>
+<div class="aurora"><i></i><i></i><i></i></div>
+<div class="screen on" id="boot">
+ <div class="bootlogo">JK LIFE OS</div>
+ <div class="bootsub">E D I T I O N &nbsp; 2 0 3 0</div>
+ <div class="bootbar"><i id="bootfill"></i></div>
+ <div class="bootmsg" id="bootmsg">initializing…</div>
+</div>
+<div class="screen" id="home">
+ <div class="statusbar"><span id="sbtime">--:--</span><b>JK LIFE OS</b><span>🛰️ offline-core</span></div>
+ <div class="greet"><div class="h" id="greetH">Hello 👋</div><div class="d" id="greetD"></div></div>
+ <div class="clock" id="clock">--:--:--</div>
+ <div class="widgets" id="widgets"></div>
+ <div class="grid" id="appgrid"></div>
+ <div class="osfooter">JK LIFE OS · built for 2030 · 100% offline · your data never leaves this phone</div>
+</div>
+<div class="screen" id="app"><div id="appbody"></div></div>
+<script>
+/* ============ CORE ============ */
+const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const LS={get(k,d){try{const v=JSON.parse(localStorage.getItem('jkos_'+k));return v==null?d:v;}catch(e){return d;}},set(k,v){localStorage.setItem('jkos_'+k,JSON.stringify(v));}};
+const dayKey=d=>{d=d||new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
+const inr=n=>'₹'+(+n).toLocaleString('en-IN');
+const CF=['#22d3ee','#f472b6','#7ee787','#fbbf24','#a78bfa'];
+function confetti(){ for(let i=0;i<24;i++){ const d=document.createElement('div'); d.className='confetti'; d.style.left=Math.random()*100+'vw'; d.style.background=CF[i%5]; d.style.animationDelay=(Math.random()*0.4)+'s'; document.body.appendChild(d); setTimeout(()=>d.remove(),3000); } }
+function vib(p){ if(navigator.vibrate) try{ navigator.vibrate(p); }catch(e){} }
+
+/* ============ BOOT + HOME ============ */
+const bootMsgs=['initializing neural core…','loading family modules…','syncing offline vault…','polishing neon…','ready.'];
+let bootI=0;
+const bootTimer=setInterval(()=>{
+ bootI++;
+ $('#bootfill').style.width=Math.min(100,bootI*22)+'%';
+ $('#bootmsg').textContent=bootMsgs[Math.min(bootI-1,bootMsgs.length-1)];
+ if(bootI>=5){ clearInterval(bootTimer); $('#boot').classList.remove('on'); $('#home').classList.add('on'); renderHome(); }
+},430);
+setInterval(()=>{ const t=new Date(); const p=n=>String(n).padStart(2,'0');
+ $('#sbtime').textContent=p(t.getHours())+':'+p(t.getMinutes());
+ $('#clock').textContent=p(t.getHours())+':'+p(t.getMinutes())+':'+p(t.getSeconds());
+},1000);
+const APPS=[
+ {id:'expense',e:'💸',n:'Expenses'},
+ {id:'bills',e:'🛡️',n:'Bill Guard'},
+ {id:'spin',e:'🎡',n:'Spin Lab'},
+ {id:'habits',e:'🔥',n:'Habits'},
+ {id:'water',e:'💧',n:'Water'},
+ {id:'focus',e:'⏳',n:'Focus'},
+ {id:'notes',e:'📝',n:'Notes'},
+ {id:'vault',e:'🗄️',n:'Data Vault'}
+];
+function renderHome(){
+ const h=new Date().getHours();
+ $('#greetH').textContent=(h<12?'Good morning':h<17?'Good afternoon':h<21?'Good evening':'Good night')+' 👋';
+ $('#greetD').textContent=new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+ const exp=LS.get('exp',[]), today=dayKey();
+ const todaySum=exp.filter(e=>dayKey(new Date(e.ts))===today).reduce((s,e)=>s+e.amt,0);
+ const nb=nextBill();
+ const w=LS.get('water',{day:today,n:0}); const wn=w.day===today?w.n:0;
+ const habits=LS.get('habits',[]), hd=LS.get('habitDays',{});
+ const doneToday=(hd[today]||[]).length;
+ $('#widgets').innerHTML=
+  '<div class="widget" onclick="openApp(\'expense\')"><div class="e">💸</div><div class="v">'+inr(todaySum)+'</div><div class="l">spent today</div></div>'+
+  '<div class="widget" onclick="openApp(\'bills\')"><div class="e">🛡️</div><div class="v" style="color:'+(nb?nb.c:'var(--acc)')+'">'+(nb?nb.t:'ALL CLEAR')+'</div><div class="l">next bill</div></div>'+
+  '<div class="widget" onclick="openApp(\'water\')"><div class="e">💧</div><div class="v">'+wn+' / 8</div><div class="l">water glasses</div></div>'+
+  '<div class="widget" onclick="openApp(\'habits\')"><div class="e">🔥</div><div class="v">'+doneToday+' / '+habits.length+'</div><div class="l">habits today</div></div>';
+ $('#appgrid').innerHTML=APPS.map(a=>'<div class="appicon" onclick="openApp(\''+a.id+'\')"><div class="ic">'+a.e+'</div><div class="nm">'+a.n+'</div></div>').join('');
+}
+function goHome(){ $('#app').classList.remove('on'); $('#home').classList.add('on'); renderHome(); }
+function openApp(id){ $('#home').classList.remove('on'); $('#app').classList.add('on'); ({expense:renderExpense,bills:renderBills,spin:renderSpin,habits:renderHabits,water:renderWater,focus:renderFocus,notes:renderNotes,vault:renderVault})[id](); window.scrollTo(0,0); }
+function modHead(t,s){ return '<div class="modhead"><button class="backbtn" onclick="goHome()">←</button><div><div class="t">'+t+'</div><div class="s">'+s+'</div></div></div>'; }
+
+/* ============ EXPENSES ============ */
+const CATS=['🍜 Food','🛒 Grocery','⛽ Fuel','🎬 Fun','💊 Health','👕 Shopping','🏠 Home','📦 Other'];
+function renderExpense(){
+ const exp=LS.get('exp',[]);
+ const today=dayKey(), mk=today.slice(0,7);
+ const tSum=exp.filter(e=>dayKey(new Date(e.ts))===today).reduce((s,e)=>s+e.amt,0);
+ const mExp=exp.filter(e=>dayKey(new Date(e.ts)).slice(0,7)===mk);
+ const mSum=mExp.reduce((s,e)=>s+e.amt,0);
+ const days=new Date().getDate(), avg=Math.round(mSum/days);
+ const j=mExp.filter(e=>e.who==='Jegan').reduce((s,e)=>s+e.amt,0), dv=mSum-j;
+ const settle=j===dv?null:(j>dv?{who:'Divya',to:'Jegan',amt:Math.round((j-dv)/2)}:{who:'Jegan',to:'Divya',amt:Math.round((dv-j)/2)});
+ const tList=exp.filter(e=>dayKey(new Date(e.ts))===today).sort((a,b)=>b.ts-a.ts);
+ const days14=Array.from({length:14},(_,k)=>{ const d=new Date(); d.setDate(d.getDate()-(13-k)); const key=dayKey(d); return {key,sum:exp.filter(e=>dayKey(new Date(e.ts))===key).reduce((s,e)=>s+e.amt,0)}; });
+ const mx=Math.max(1,...days14.map(d=>d.sum));
+ $('#appbody').innerHTML=modHead('💸 Expenses','split for two · auto settle-up')+
+ '<div class="card"><div class="mut" style="margin-bottom:8px">14-DAY PULSE</div><div style="display:flex;align-items:flex-end;gap:4px;height:64px">'+days14.map(d=>'<div title="'+d.key+': '+inr(d.sum)+'" style="flex:1;background:linear-gradient(180deg,var(--neon),var(--vio));border-radius:4px 4px 0 0;height:'+Math.max(4,Math.round(d.sum/mx*60))+'px;opacity:'+(d.sum?1:.25)+'"></div>').join('')+'</div></div>'+
+ '<div class="card"><div class="mut">TODAY</div><div class="big">'+inr(tSum)+'</div><div class="mut" style="margin-top:6px">This month: <b style="color:var(--txt)">'+inr(mSum)+'</b> · avg '+inr(avg)+'/day</div>'+
+ (settle?'<div style="margin-top:9px"><span class="badge b-neo">'+settle.who+' owes '+settle.to+' '+inr(settle.amt)+'</span></div>':'<div style="margin-top:9px"><span class="badge b-grn">all square ✓</span></div>')+'</div>'+
+ '<div class="card"><div class="row"><input type="number" id="eAmt" placeholder="₹ amount" min="1"><select id="eWho"><option>Jegan</option><option>Divya</option></select></div>'+
+ '<div class="row"><input type="text" id="eNote" placeholder="what for?" maxlength="30"></div>'+
+ '<div class="chipset" id="eCats" style="margin-bottom:10px">'+CATS.map((c,i)=>'<div class="chip" data-i="'+i+'" onclick="pickCat('+i+')">'+c+'</div>').join('')+'</div>'+
+ '<button class="btn btn-g full" onclick="addExp()">ADD EXPENSE</button></div>'+
+ '<div class="card"><div class="mut" style="margin-bottom:4px">TODAY\'S LIST</div>'+(tList.length?tList.map(e=>'<div class="lrow"><span>'+e.cat+'</span><span class="grow">'+esc(e.note||'')+' <span class="mut">· '+e.who+'</span></span><b>'+inr(e.amt)+'</b><span class="x" onclick="delExp('+e.id+')">×</span></div>').join(''):'<div class="mut">nothing yet - first chai of the day? ☕</div>')+'</div>';
+ pickCat(0);
+}
+let curCat=0;
+function pickCat(i){ curCat=i; $$('#eCats .chip').forEach((c,j)=>c.style.borderColor=j===i?'var(--neon)':'var(--line)'); }
+function addExp(){
+ const amt=+$('#eAmt').value; if(!amt){ alert('Enter an amount'); return; }
+ const exp=LS.get('exp',[]);
+ exp.push({id:Date.now(),amt,cat:CATS[curCat],note:$('#eNote').value.trim(),who:$('#eWho').value,ts:Date.now()});
+ LS.set('exp',exp); vib(30); renderExpense();
+}
+function delExp(id){ LS.set('exp',LS.get('exp',[]).filter(e=>e.id!==id)); renderExpense(); }
+
+/* ============ BILLS ============ */
+const daysIn=(y,m)=>new Date(y,m+1,0).getDate();
+const today0=()=>{const t=new Date();return new Date(t.getFullYear(),t.getMonth(),t.getDate());};
+const cycKey=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+function dueInfo(b){
+ const t=today0(), y=t.getFullYear(), m=t.getMonth();
+ let d=new Date(y,m,Math.min(b.day,daysIn(y,m)));
+ if(b.paid===cycKey(d)){ const nd=new Date(y,m+1,1); d=new Date(nd.getFullYear(),nd.getMonth(),Math.min(b.day,daysIn(nd.getFullYear(),nd.getMonth()))); return {due:d,days:Math.round((d-t)/86400000),paid:true}; }
+ return {due:d,days:Math.round((d-t)/86400000),paid:false};
+}
+function nextBill(){
+ const un=LS.get('bills',[]).map(b=>({b,i:dueInfo(b)})).filter(x=>!x.i.paid).sort((a,c)=>a.i.days-c.i.days);
+ if(!un.length) return null;
+ const u=un[0];
+ return { t:u.i.days<0?'OVERDUE':(u.i.days===0?'TODAY':u.i.days+'d'), c:u.i.days<=2?'var(--red)':(u.i.days<=7?'var(--warn)':'var(--neon)') };
+}
+function renderBills(){
+ const bills=LS.get('bills',[{id:1,name:'House Rent',amt:8000,day:5,emoji:'🏠',paid:''},{id:2,name:'EB Bill',amt:1200,day:10,emoji:'⚡',paid:''},{id:3,name:'WiFi',amt:999,day:15,emoji:'📡',paid:''}]);
+ const items=bills.map(b=>({b,i:dueInfo(b)})).sort((a,c)=>a.i.paid-c.i.paid||a.i.days-c.i.days);
+ const due=items.filter(x=>!x.i.paid).reduce((s,x)=>s+(+x.b.amt),0);
+ $('#appbody').innerHTML=modHead('🛡️ Bill Guard','never miss a due date')+
+ '<div class="card"><div class="mut">TO PAY THIS CYCLE</div><div class="big" style="color:var(--warn)">'+inr(due)+'</div></div>'+
+ items.map(({b,i})=>{
+  const badge=i.paid?'<span class="badge b-grn">PAID ✓ next '+i.due.toLocaleDateString('en-IN',{day:'numeric',month:'short'})+'</span>'
+   :i.days<0?'<span class="badge b-red">OVERDUE '+(-i.days)+'d</span>'
+   :i.days===0?'<span class="badge b-red">DUE TODAY ⚠️</span>'
+   :i.days<=7?'<span class="badge b-amb">'+i.days+'d left</span>':'<span class="badge b-neo">'+i.days+'d left</span>';
+  return '<div class="lrow" style="border-bottom:1px solid var(--line)"><span style="font-size:19px">'+b.emoji+'</span><span class="grow"><b>'+esc(b.name)+'</b><br>'+badge+'</span><span style="text-align:right"><b style="color:var(--neon)">'+inr(b.amt)+'</b><br>'+(i.paid?'':'<span class="badge b-grn" style="cursor:pointer" onclick="payBill('+b.id+')">MARK PAID</span>')+' <span class="x" onclick="delBill('+b.id+')">×</span></span></div>';
+ }).join('')+
+ '<div class="card" style="margin-top:12px"><div class="row"><select id="bEmoji"><option>⚡</option><option>🏠</option><option>📡</option><option>💳</option><option>📺</option><option>🥛</option><option>🔥</option><option>📱</option><option>🏦</option><option>🧾</option></select><input type="text" id="bName" placeholder="bill name" maxlength="20"></div>'+
+ '<div class="row"><input type="number" id="bAmt" placeholder="₹" min="1"><input type="number" id="bDay" placeholder="due day 1-31" min="1" max="31"></div>'+
+ '<button class="btn btn-w full" onclick="addBill()">ADD BILL</button></div>';
+}
+function payBill(id){ const bills=LS.get('bills',[]); const b=bills.find(x=>x.id===id); if(!b)return; b.paid=cycKey(dueInfo({...b,paid:''}).due); LS.set('bills',bills); confetti(); vib(60); renderBills(); }
+function delBill(id){ if(!confirm('Delete this bill?'))return; LS.set('bills',LS.get('bills',[]).filter(x=>x.id!==id)); renderBills(); }
+function addBill(){
+ const name=$('#bName').value.trim(), amt=+$('#bAmt').value, day=+$('#bDay').value;
+ if(!name||!amt||!day||day<1||day>31){ alert('Fill name, amount, due day (1-31)'); return; }
+ const bills=LS.get('bills',[]); bills.push({id:Date.now(),name,amt,day,emoji:$('#bEmoji').value,paid:''});
+ LS.set('bills',bills); renderBills();
+}
+
+/* ============ SPIN ============ */
+const SPAL=['#22d3ee','#f472b6','#7ee787','#fbbf24','#a78bfa','#fb7185','#34d399','#60a5fa','#f97316','#e879f9'];
+let sOpts=LS.get('spin',['Biryani','Dosa night','Pizza','Fried rice','Chapati + paneer','Noodles']);
+let sAngle=0, sSpinning=false, sT0=0, sDur=0, sFrom=0, sTo=0, sRaf=null, sWd=null;
+function renderSpin(){
+ $('#appbody').innerHTML=modHead('🎡 Spin Lab','family decision wheel')+
+ '<canvas id="spincv" width="600" height="600"></canvas>'+
+ '<div style="text-align:center;min-height:44px" id="spinWin"></div>'+
+ '<div style="text-align:center;margin-bottom:12px"><button class="btn btn-p" style="font-size:16px;padding:13px 42px" id="spinGo" onclick="doSpin()">SPIN</button></div>'+
+ '<div class="card"><div class="mut" style="margin-bottom:6px">OPTIONS</div><div id="spinOpts"></div>'+
+ '<div class="row" style="margin-top:10px"><input type="text" id="sNew" placeholder="add option…" maxlength="24"><button class="btn btn-o" onclick="addSpinOpt()">ADD</button></div></div>';
+ drawWheel(); renderSpinOpts();
+}
+function renderSpinOpts(){ $('#spinOpts').innerHTML=sOpts.map((o,i)=>'<div class="lrow"><span class="habchk" style="width:13px;height:13px;border-radius:50%;background:'+SPAL[i%SPAL.length]+';border:0"></span><span class="grow">'+esc(o)+'</span><span class="x" onclick="delSpinOpt('+i+')">×</span></div>').join(''); }
+function addSpinOpt(){ const v=$('#sNew').value.trim(); if(!v)return; if(sOpts.includes(v))return; sOpts.push(v); LS.set('spin',sOpts); renderSpinOpts(); drawWheel(); $('#sNew').value=''; }
+function delSpinOpt(i){ sOpts.splice(i,1); LS.set('spin',sOpts); renderSpinOpts(); drawWheel(); }
+function drawWheel(){
+ const cv=$('#spincv'); if(!cv)return; const ctx=cv.getContext('2d');
+ const n=sOpts.length,cx=300,cy=300,R=285;
+ ctx.clearRect(0,0,600,600);
+ if(!n){ ctx.fillStyle='#8a90a6'; ctx.font='26px sans-serif'; ctx.textAlign='center'; ctx.fillText('add options',cx,cy); return; }
+ const arc=2*Math.PI/n;
+ for(let i=0;i<n;i++){
+  const a0=sAngle+i*arc;
+  ctx.beginPath(); ctx.moveTo(cx,cy); ctx.arc(cx,cy,R,a0,a0+arc); ctx.closePath();
+  ctx.fillStyle=SPAL[i%SPAL.length]+'2e'; ctx.fill();
+  ctx.strokeStyle=SPAL[i%SPAL.length]; ctx.lineWidth=2.5; ctx.stroke();
+  ctx.save(); ctx.translate(cx,cy); ctx.rotate(a0+arc/2); ctx.textAlign='right';
+  ctx.fillStyle='#eaf0fb'; ctx.font='bold 24px sans-serif';
+  const t=sOpts[i].length>15?sOpts[i].slice(0,14)+'…':sOpts[i];
+  ctx.shadowColor=SPAL[i%SPAL.length]; ctx.shadowBlur=8;
+  ctx.fillText(t,R-16,8); ctx.restore();
+ }
+ ctx.beginPath(); ctx.moveTo(cx-14,8); ctx.lineTo(cx+14,8); ctx.lineTo(cx,34); ctx.closePath();
+ ctx.fillStyle='#f472b6'; ctx.fill();
+}
+function sTick(){
+ const p=Math.min(1,(performance.now()-sT0)/sDur);
+ sAngle=sFrom+(sTo-sFrom)*(1-Math.pow(1-p,3.2));
+ if(p>=1){ sFinish(); return; }
+ drawWheel(); sRaf=requestAnimationFrame(sTick);
+}
+function sFinish(){ if(!sSpinning)return; sSpinning=false; if(sWd){clearTimeout(sWd);sWd=null;} if(sRaf)cancelAnimationFrame(sRaf); sAngle=sTo; drawWheel();
+ const n=sOpts.length, arc=2*Math.PI/n;
+ let a=(-Math.PI/2-sAngle)%(2*Math.PI); if(a<0)a+=2*Math.PI;
+ const w=sOpts[Math.floor(a/arc)%n];
+ $('#spinWin').innerHTML='<span class="badge b-grn" style="font-size:17px;padding:10px 22px">🎉 '+esc(w)+'</span>';
+ $('#spinGo').disabled=false; confetti(); vib([80,40,80]);
+}
+function doSpin(){
+ if(sSpinning||sOpts.length<2){ if(sOpts.length<2) $('#spinWin').innerHTML='<span class="mut">need 2+ options 🙂</span>'; return; }
+ sSpinning=true; $('#spinWin').innerHTML=''; $('#spinGo').disabled=true;
+ sT0=performance.now(); sDur=3800+Math.random()*1800;
+ sFrom=sAngle; sTo=sAngle+(12+Math.random()*10)*Math.PI*2;
+ vib(40); sWd=setTimeout(sFinish,sDur+1500); sRaf=requestAnimationFrame(sTick);
+}
+
+/* ============ HABITS ============ */
+function streakOf(id){
+ const hd=LS.get('habitDays',{}); let s=0; const d=new Date();
+ if(!((hd[dayKey(d)]||[]).includes(id))) d.setDate(d.getDate()-1);
+ while((hd[dayKey(d)]||[]).includes(id)){ s++; d.setDate(d.getDate()-1); }
+ return s;
+}
+function renderHabits(){
+ const habits=LS.get('habits',[]), hd=LS.get('habitDays',{}), t=dayKey();
+ const done=hd[t]||[];
+ $('#appbody').innerHTML=modHead('🔥 Habits','small daily wins, big streaks')+
+ '<div class="card"><div class="mut">TODAY</div><div class="big">'+done.length+' / '+habits.length+' <span style="font-size:15px">done</span></div></div>'+
+ '<div class="card">'+(habits.length?habits.map(h=>{
+   const d=done.includes(h.id), st=streakOf(h.id);
+   return '<div class="lrow"><div class="habchk'+(d?' done':'')+'" onclick="toggleHabit('+h.id+')">'+(d?'✓':'')+'</div><span class="grow"><b>'+esc(h.name)+'</b>'+(st?' <span class="streak">🔥 '+st+' day'+(st>1?'s':'')+'</span>':'')+'</span><span class="x" onclick="delHabit('+h.id+')">×</span></div>';
+ }).join(''):'<div class="mut">no habits yet - add one below 💪</div>')+'</div>'+
+ '<div class="card"><div class="row"><input type="text" id="hName" placeholder="e.g. 20 min walk, read 10 pages" maxlength="30"></div><button class="btn btn-g full" onclick="addHabit()">ADD HABIT</button></div>';
+}
+function toggleHabit(id){
+ const hd=LS.get('habitDays',{}), t=dayKey(); hd[t]=hd[t]||[];
+ const i=hd[t].indexOf(id); if(i>=0)hd[t].splice(i,1); else { hd[t].push(id); vib(30); }
+ LS.set('habitDays',hd); renderHabits();
+}
+function addHabit(){ const v=$('#hName').value.trim(); if(!v)return; const habits=LS.get('habits',[]); habits.push({id:Date.now(),name:v}); LS.set('habits',habits); renderHabits(); }
+function delHabit(id){ if(!confirm('Delete habit? Streaks stay in history.'))return; LS.set('habits',LS.get('habits',[]).filter(h=>h.id!==id)); renderHabits(); }
+
+/* ============ WATER ============ */
+function renderWater(){
+ const t=dayKey(); let w=LS.get('water',{day:t,n:0}); if(w.day!==t){ w={day:t,n:0}; LS.set('water',w); }
+ $('#appbody').innerHTML=modHead('💧 Water','8 glasses a day keeps the doctor away')+
+ '<div class="card" style="text-align:center"><div class="big" style="color:var(--neon)">'+w.n+' / 8</div><div class="mut">'+(w.n>=8?'HYDRATION COMPLETE 🎉':(8-w.n)+' to go')+'</div>'+
+ '<div class="glasses">'+Array.from({length:8},(_,i)=>'<div class="glass" onclick="setWater('+(i+1)+')"><i style="height:'+(i<w.n?100:0)+'%"></i><span class="n">'+(i+1)+'</span></div>').join('')+'</div>'+
+ '<div class="row" style="justify-content:center"><button class="btn btn-o" onclick="setWater('+(w.n-1)+')">−</button><button class="btn btn-p" onclick="setWater('+(w.n+1)+')">+ GLASS</button></div></div>';
+}
+function setWater(n){ n=Math.max(0,Math.min(8,n)); LS.set('water',{day:dayKey(),n}); if(n>=8){confetti(); vib([60,40,60]);} renderWater(); }
+
+/* ============ FOCUS ============ */
+let focUI=null;
+function focState(){ return LS.get('focus',{remain:25*60000,end:0,running:false}); }
+function focLeft(){ const f=focState(); return f.running?Math.max(0,f.end-Date.now()):f.remain; }
+function renderFocus(){
+ const f=focState();
+ $('#appbody').innerHTML=modHead('⏳ Focus','deep work timer · wall-clock accurate')+
+ '<div class="card"><div class="timerdisp" id="focDisp">--:--</div>'+
+ '<div style="text-align:center;margin-bottom:12px" id="focState"></div>'+
+ '<div class="row" style="justify-content:center"><button class="btn btn-o" onclick="focSet(15)">15m</button><button class="btn btn-o" onclick="focSet(25)">25m</button><button class="btn btn-o" onclick="focSet(45)">45m</button><button class="btn btn-o" onclick="focSet(60)">60m</button></div>'+
+ '<div class="row" style="justify-content:center"><button class="btn btn-g" id="focMain" onclick="focToggle()">START</button><button class="btn btn-o" onclick="focReset()">RESET</button></div></div>'+
+ '<div class="mut" style="text-align:center">keeps perfect time even if you switch apps - it reads the clock, not a counter ⏱️</div>';
+ focTickUI();
+ if(focUI)clearInterval(focUI);
+ focUI=setInterval(()=>{ if(!$('#focDisp')){clearInterval(focUI);return;} focTickUI(); },500);
+}
+function fmtMS(ms){ const s=Math.ceil(ms/1000); return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'); }
+function focTickUI(){
+ const f=focState(), left=focLeft();
+ $('#focDisp').textContent=fmtMS(left);
+ if(f.running&&left<=0){ LS.set('focus',{remain:0,end:0,running:false}); $('#focState').innerHTML='<span class="badge b-grn" style="font-size:15px;padding:9px 20px">SESSION COMPLETE 🎉</span>'; $('#focMain').textContent='START'; confetti(); vib([120,60,120]); return; }
+ $('#focState').innerHTML=f.running?'<span class="badge b-neo">FOCUS ACTIVE · ends '+new Date(f.end).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})+'</span>':'';
+ $('#focMain').textContent=f.running?'PAUSE':'START';
+}
+function focSet(m){ const f=focState(); if(f.running)return; LS.set('focus',{remain:m*60000,end:0,running:false}); focTickUI(); }
+function focToggle(){
+ const f=focState();
+ if(f.running){ LS.set('focus',{remain:focLeft(),end:0,running:false}); }
+ else { const r=f.remain>0?f.remain:25*60000; LS.set('focus',{remain:r,end:Date.now()+r,running:true}); vib(40); }
+ focTickUI();
+}
+function focReset(){ LS.set('focus',{remain:25*60000,end:0,running:false}); focTickUI(); }
+
+/* ============ NOTES ============ */
+function renderNotes(){
+ const notes=LS.get('notes',[]);
+ $('#appbody').innerHTML=modHead('📝 Notes','quick thoughts, zero cloud')+
+ '<div class="card"><textarea id="nText" rows="3" style="width:100%" placeholder="type a note…" maxlength="300"></textarea><button class="btn btn-g full" style="margin-top:8px" onclick="addNote()">SAVE NOTE</button></div>'+
+ '<div class="card">'+(notes.length?notes.map(n=>'<div class="lrow"><span class="grow">'+esc(n.text)+'<br><span class="mut">'+new Date(n.ts).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})+'</span></span><span class="x" onclick="delNote('+n.id+')">×</span></div>').join(''):'<div class="mut">no notes yet ✍️</div>')+'</div>';
+}
+function addNote(){ const v=$('#nText').value.trim(); if(!v)return; const notes=LS.get('notes',[]); notes.unshift({id:Date.now(),text:v,ts:Date.now()}); LS.set('notes',notes.slice(0,50)); renderNotes(); }
+function delNote(id){ LS.set('notes',LS.get('notes',[]).filter(n=>n.id!==id)); renderNotes(); }
+
+/* ============ DATA VAULT ============ */
+function renderVault(){
+ const keys=['exp','bills','spin','habits','habitDays','water','notes','focus'];
+ const total=keys.reduce((s,k)=>s+(localStorage.getItem('jkos_'+k)||'').length,0);
+ $('#appbody').innerHTML=modHead('🗄️ Data Vault','your data, your phone, your rules')+
+ '<div class="card"><div class="mut">LOCAL VAULT SIZE</div><div class="big" style="color:var(--vio)">'+(total/1024).toFixed(1)+' KB</div><div class="mut" style="margin-top:6px">stored on this device only · no account · no server · no tracking</div></div>'+
+ '<div class="card"><div class="mut" style="margin-bottom:8px">BACKUP</div><button class="btn btn-p full" onclick="exportAll()">⬇️ EXPORT EVERYTHING (JSON)</button></div>'+
+ '<div class="card"><div class="mut" style="margin-bottom:8px">DANGER ZONE</div><button class="btn full" style="background:rgba(248,113,113,.15);border:1px solid var(--red);color:var(--red)" onclick="wipeAll()">🗑️ WIPE ALL DATA</button></div>';
+}
+function exportAll(){
+ const out={app:'JK LIFE OS',exported:new Date().toISOString(),data:{}};
+ ['exp','bills','spin','habits','habitDays','water','notes','focus'].forEach(k=>out.data[k]=LS.get(k,null));
+ const a=document.createElement('a');
+ a.href=URL.createObjectURL(new Blob([JSON.stringify(out,null,2)],{type:'application/json'}));
+ a.download='jk-life-os-backup-'+dayKey()+'.json'; a.click();
+}
+function wipeAll(){ if(!confirm('Wipe EVERYTHING? This cannot be undone.'))return; if(!confirm('Really sure? All expenses, bills, habits, notes - gone.'))return;
+ Object.keys(localStorage).filter(k=>k.startsWith('jkos_')).forEach(k=>localStorage.removeItem(k)); sOpts=['Biryani','Dosa night','Pizza','Fried rice','Chapati + paneer','Noodles']; goHome(); }
+</script>
+</body>
+</html>
