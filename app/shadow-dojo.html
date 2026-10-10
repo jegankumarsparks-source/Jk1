@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>JK SHADOW DOJO 2040</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;touch-action:none}
+html,body{width:100%;height:100%;overflow:hidden;background:#1A1B2E}
+#game{position:fixed;inset:0}
+canvas{display:block;width:100%;height:100%}
+#bars{position:fixed;top:10px;left:12px;right:12px;z-index:5;display:flex;gap:8px;align-items:center;font-family:'Noto Sans JP',sans-serif}
+.hpW{flex:1;height:18px;background:rgba(0,0,0,.5);border:2px solid #fff;border-radius:10px;overflow:hidden}
+.hp{height:100%;width:100%;transition:width .15s}
+#hp1{background:#E63946}
+#hp2{background:#457B9D;margin-left:auto}
+#timer{width:44px;text-align:center;color:#FFD23F;font-size:24px;font-weight:900;text-shadow:0 2px 4px #000}
+.spW{flex:1;height:8px;background:rgba(0,0,0,.5);border-radius:5px;overflow:hidden;margin-top:2px}
+.sp{height:100%;width:0;background:#FFD23F}
+#round{position:fixed;top:56px;left:0;right:0;text-align:center;color:#fff;font-family:'Noto Sans JP';font-size:15px;z-index:5;text-shadow:0 2px 4px #000}
+.ctl{position:fixed;bottom:14px;z-index:5;display:flex;gap:10px;font-family:'Noto Sans JP',sans-serif}
+#mv{left:12px}#atk{right:12px}
+.cbtn{width:58px;height:58px;border-radius:50%;background:rgba(255,255,255,.14);border:2px solid rgba(255,255,255,.45);color:#fff;font-size:22px;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.cbtn.on{background:rgba(255,255,255,.4)}
+.cbtn.special{border-color:#FFD23F;color:#FFD23F}
+.overlay{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(180deg,rgba(26,27,46,.97),rgba(58,12,64,.97));font-family:'Noto Sans JP',sans-serif;text-align:center;padding:20px;color:#fff}
+.overlay.hidden{display:none}
+h1{font-size:36px;font-weight:900;letter-spacing:2px}
+.sub{color:#C9B6E4;font-size:16px;margin-top:10px;max-width:330px;line-height:1.6}
+.btn{margin-top:24px;padding:12px 40px;background:#E63946;color:#fff;font-family:'Noto Sans JP';font-size:22px;font-weight:900;border:none;border-radius:12px;cursor:pointer;box-shadow:0 5px 0 #8A1522}
+#finalTxt{font-size:44px;color:#FFD23F;margin-top:8px;font-weight:900}
+</style>
+</head>
+<body>
+<div id="game"></div>
+<div id="bars">
+<div style="flex:1"><div class="hpW"><div class="hp" id="hp1"></div></div><div class="spW"><div class="sp" id="sp1"></div></div></div>
+<div id="timer">60</div>
+<div style="flex:1"><div class="hpW"><div class="hp" id="hp2"></div></div><div class="spW"><div class="sp" id="sp2"></div></div></div>
+</div>
+<div id="round">ROUND 1 - FIGHT!</div>
+<div class="ctl" id="mv"><div class="cbtn" id="lBtn">◀</div><div class="cbtn" id="rBtn">▶</div></div>
+<div class="ctl" id="atk"><div class="cbtn" id="blkBtn">🛡️</div><div class="cbtn" id="pnBtn">👊</div><div class="cbtn" id="kkBtn">🦵</div><div class="cbtn special" id="spBtn">⚡</div></div>
+<div class="overlay" id="start">
+<h1>⛩️ SHADOW DOJO 2040 ⛩️</h1>
+<p class="sub">Rooftop duel at dawn! ◀▶ move, 👊 punch (fast), 🦵 kick (strong), 🛡️ block, ⚡ SHADOW STRIKE when the gold bar is full! Best of 3 rounds vs the DOJO MASTER AI.</p>
+<button class="btn" id="startBtn">FIGHT!</button>
+</div>
+<div class="overlay hidden" id="over">
+<h1 id="overTitle">🏆 VICTORY! 🏆</h1>
+<div id="finalTxt"></div>
+<p class="sub" id="overSub"></p>
+<button class="btn" id="overBtn">REMATCH</button>
+</div>
+<script>
+"use strict";
+const TAU=Math.PI*2;
+const container=document.getElementById('game');
+const cv=document.createElement('canvas');container.appendChild(cv);
+const g=cv.getContext('2d');
+let W=0,H=0;
+function resize(){const dpr=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*dpr;cv.height=H*dpr;g.setTransform(dpr,0,0,dpr,0,0);}
+addEventListener('resize',resize);resize();
+const GROUND=()=>H-110;
+function mkF(x,c,face,isAI){return{x,y:GROUND(),vx:0,hp:100,sp:0,c,face,isAI,state:'idle',stateT:0,atk:null,blocking:false,hitDone:false,wins:0,proj:null};}
+let p1,p2,round=1,timer=60,playing=false,over=false,parts=[],shakeT=0,roundMsgT=2,kot=0;
+const ATTACKS={punch:{dmg:6,range:52,start:.08,active:.12,rec:.18,sp:8},kick:{dmg:10,range:64,start:.16,active:.14,rec:.26,sp:13}};
+function reset(){p1=mkF(W*0.3,'#E63946',1,false);p2=mkF(W*0.7,'#457B9D',-1,true);round=1;timer=60;parts=[];shakeT=0;roundMsgT=2;kot=0;}
+function boom(x,y,c,n){for(let i=0;i<n;i++)parts.push({x,y,vx:(Math.random()-.5)*260,vy:-Math.random()*220,life:Math.random()*.5+.3,c});}
+function tryHit(a,d,atk){if(a.hitDone)return;
+const dx=Math.abs(a.x-d.x);
+if(dx<atk.range&&d.y>GROUND()-40){
+const blocked=d.blocking&&Math.sign(a.x-d.x)===d.face;
+const dmg=blocked?Math.round(atk.dmg*0.2):atk.dmg;
+d.hp=Math.max(0,d.hp-dmg);
+a.sp=Math.min(100,a.sp+atk.sp);d.sp=Math.min(100,d.sp+4);
+a.hitDone=true;shakeT=blocked?2:6;
+boom(d.x,d.y-70,blocked?'#A8DADC':'#FFD23F',blocked?4:10);
+d.vx+=Math.sign(d.x-a.x)*(blocked?40:120);
+if(!blocked){d.state='hurt';d.stateT=.28;}
+if(d.hp<=0){d.state='ko';d.stateT=0;kot=1.4;}}}
+function stepF(f,dt){f.x+=f.vx*dt;f.vx*=Math.pow(.002,dt);f.x=Math.max(40,Math.min(W-40,f.x));
+if(f.stateT>0){f.stateT-=dt;if(f.stateT<=0&&f.state!=='ko'){f.state='idle';f.atk=null;}}
+if(f.proj){f.proj.x+=f.proj.vx*dt;f.proj.life-=dt;
+const d=f===p1?p2:p1;
+if(Math.abs(f.proj.x-d.x)<26&&d.y>GROUND()-40&&!f.proj.hit){
+const blocked=d.blocking&&Math.sign(f.proj.vx)===d.face*-1?false:(d.blocking);
+const dmg=blocked?4:18;
+d.hp=Math.max(0,d.hp-dmg);boom(d.x,d.y-70,'#9B5DE5',14);shakeT=8;
+if(!blocked){d.state='hurt';d.stateT=.35;}
+f.proj.hit=true;
+if(d.hp<=0){d.state='ko';d.stateT=0;kot=1.4;}}
+if(f.proj.life<=0||f.proj.hit)f.proj=null;}}
+function aiThink(dt){const a=p2,d=p1;if(a.state==='ko'||d.state==='ko')return;
+a.aiT=(a.aiT||0)-dt;
+const dist=Math.abs(a.x-d.x);
+if(a.state==='idle'||a.state==='walk'){
+if(a.sp>=100&&dist<260&&Math.random()<0.02){a.state='special';a.stateT=.4;a.sp=0;a.proj={x:a.x+a.face*30,vx:a.face*420,life:1.2,hit:false};a.blocking=false;return;}
+if(dist>70){a.vx=a.face===Math.sign(d.x-a.x)?0:0;a.vx=Math.sign(d.x-a.x)*110;a.state='walk';}
+else{a.vx=0;
+if(a.aiT<=0){const r=Math.random();
+if(r<0.42){a.atk=ATTACKS.punch;a.state='attack';a.stateT=a.atk.start+a.atk.active+a.atk.rec;a.hitDone=false;}
+else if(r<0.75){a.atk=ATTACKS.kick;a.state='attack';a.stateT=a.atk.start+a.atk.active+a.atk.rec;a.hitDone=false;}
+else{a.blocking=true;a.state='block';a.stateT=.5;}
+a.aiT=.5+Math.random()*.7;}}
+}else if(a.state==='block'&&a.stateT<=0.05){a.blocking=false;}}
+const input={mv:0,block:false};
+function playerAct(type){if(!playing||over||p1.state==='ko')return;
+if(type==='punch'||type==='kick'){if(p1.state==='idle'||p1.state==='walk'){p1.atk=ATTACKS[type];p1.state='attack';p1.stateT=p1.atk.start+p1.atk.active+p1.atk.rec;p1.hitDone=false;p1.blocking=false;}}
+if(type==='special'&&p1.sp>=100){p1.state='special';p1.stateT=.4;p1.sp=0;p1.proj={x:p1.x+p1.face*30,vx:p1.face*420,life:1.2,hit:false};p1.blocking=false;}}
+function roundEnd(){const w=p1.hp===p2.hp?(p1.hp>50?p1:p2):(p1.hp>p2.hp?p1:p2);
+w.wins++;
+if(w.wins>=2){playing=false;over=true;
+document.getElementById('overTitle').textContent=w===p1?'🏆 VICTORY! 🏆':'💀 DEFEAT 💀';
+document.getElementById('finalTxt').textContent=w===p1?'DOJO CHAMPION!':'THE MASTER WINS';
+document.getElementById('overSub').textContent='Rounds: '+p1.wins+' - '+p2.wins;
+document.getElementById('over').classList.remove('hidden');return;}
+round++;p1.hp=100;p2.hp=100;p1.x=W*0.3;p2.x=W*0.7;p1.state=p2.state='idle';p1.proj=p2.proj=null;timer=60;roundMsgT=2;
+document.getElementById('round').textContent='ROUND '+round+' - FIGHT!';}
+function simStep(dt){if(!playing||over)return;
+if(roundMsgT>0){roundMsgT-=dt;if(roundMsgT<=0)document.getElementById('round').textContent='ROUND '+round;}
+timer-=dt;
+if(timer<=0){timer=0;roundEnd();return;}
+if(kot>0){kot-=dt;if(kot<=0){roundEnd();return;}}
+p1.face=p1.x<p2.x?1:-1;p2.face=p2.x<p1.x?1:-1;
+// player movement
+p1.blocking=input.block&&(p1.state==='idle'||p1.state==='block');
+if(p1.blocking)p1.state='block';
+else if(p1.state==='block')p1.state='idle';
+if(input.mv!==0&&(p1.state==='idle'||p1.state==='walk')){p1.vx=input.mv*150;p1.state='walk';}
+else if(p1.state==='walk'&&input.mv===0)p1.state='idle';
+aiThink(dt);
+// attacks resolve
+for(const[a,d]of[[p1,p2],[p2,p1]]){
+if(a.state==='attack'&&a.atk){const el=a.atk.start+a.atk.active+a.atk.rec-a.stateT;
+if(el>=a.atk.start&&el<=a.atk.start+a.atk.active)tryHit(a,d,a.atk);}}
+stepF(p1,dt);stepF(p2,dt);
+for(let i=parts.length-1;i>=0;i--){const p=parts[i];p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=700*dt;p.life-=dt;if(p.life<=0)parts.splice(i,1);}
+if(shakeT>0)shakeT-=dt*20;
+document.getElementById('hp1').style.width=p1.hp+'%';
+document.getElementById('hp2').style.width=p2.hp+'%';
+document.getElementById('sp1').style.width=p1.sp+'%';
+document.getElementById('sp2').style.width=p2.sp+'%';
+document.getElementById('timer').textContent=Math.ceil(timer);}
+function drawF(f){const c=f.c;g.save();g.translate(f.x,f.y);g.scale(f.face,1);
+const hurt=f.state==='hurt'?Math.random()*4-2:0;g.translate(hurt,0);
+// legs
+g.strokeStyle=c;g.lineWidth=7;g.lineCap='round';
+const kickPose=f.state==='attack'&&f.atk===ATTACKS.kick;
+g.beginPath();g.moveTo(0,-52);g.lineTo(-10,0);g.stroke();
+if(kickPose){g.beginPath();g.moveTo(0,-52);g.lineTo(34,-44);g.stroke();}
+else{g.beginPath();g.moveTo(0,-52);g.lineTo(12,0);g.stroke();}
+// body
+g.lineWidth=9;g.beginPath();g.moveTo(0,-52);g.lineTo(0,-86);g.stroke();
+// arms
+g.lineWidth=6;
+const punchPose=f.state==='attack'&&f.atk===ATTACKS.punch;
+if(f.blocking||f.state==='block'){g.beginPath();g.moveTo(0,-78);g.lineTo(16,-84);g.stroke();g.beginPath();g.moveTo(0,-72);g.lineTo(16,-70);g.stroke();}
+else if(punchPose){g.beginPath();g.moveTo(0,-78);g.lineTo(30,-80);g.stroke();g.beginPath();g.moveTo(0,-72);g.lineTo(8,-66);g.stroke();}
+else{g.beginPath();g.moveTo(0,-78);g.lineTo(12,-64);g.stroke();g.beginPath();g.moveTo(0,-72);g.lineTo(14,-58);g.stroke();}
+// head
+g.fillStyle=c;g.beginPath();g.arc(2,-98,11,0,TAU);g.fill();
+g.fillStyle='#1A1B2E';g.fillRect(-8,-104,20,5); // headband shadow
+g.fillStyle='#fff';g.fillRect(4,-100,5,3); // eye
+if(f.state==='ko'){g.rotate(Math.PI/2*0.9);g.translate(-20,-30);}
+g.restore();
+if(f.proj){g.save();g.fillStyle='#9B5DE5';g.shadowColor='#9B5DE5';g.shadowBlur=16;g.beginPath();g.arc(f.proj.x,f.y-70,10,0,TAU);g.fill();g.restore();}}
+let last=performance.now();
+function frame(now){requestAnimationFrame(frame);const dt=Math.min((now-last)/1000,.05);last=now;
+simStep(dt);
+// dawn sky
+const bg=g.createLinearGradient(0,0,0,H);bg.addColorStop(0,'#1A1B2E');bg.addColorStop(.5,'#3A0C40');bg.addColorStop(.8,'#E63946');bg.addColorStop(1,'#F4A261');
+g.fillStyle=bg;g.fillRect(0,0,W,H);
+// sun
+g.fillStyle='#FFD23F';g.globalAlpha=.85;g.beginPath();g.arc(W*0.5,H-190,46,0,TAU);g.fill();g.globalAlpha=1;
+// rooftops silhouette
+g.fillStyle='#12132A';g.fillRect(0,GROUND()+40,W,H-GROUND()-40);
+g.beginPath();g.moveTo(0,GROUND()+40);g.lineTo(W*0.2,GROUND());g.lineTo(W*0.35,GROUND()+40);g.fill();
+g.beginPath();g.moveTo(W*0.6,GROUND()+40);g.lineTo(W*0.8,GROUND()-14);g.lineTo(W,GROUND()+40);g.fill();
+// dojo platform
+g.fillStyle='#2B2D4A';g.fillRect(0,GROUND(),W,40);
+g.fillStyle='#3D3F66';g.fillRect(0,GROUND(),W,6);
+g.save();if(shakeT>0)g.translate((Math.random()-.5)*shakeT,(Math.random()-.5)*shakeT);
+if(roundMsgT>0){g.font='900 44px "Noto Sans JP",sans-serif';g.textAlign='center';g.fillStyle='rgba(255,255,255,.9)';g.fillText(roundMsgT>1?('ROUND '+round):'FIGHT!',W/2,H*0.4);}
+drawF(p1);drawF(p2);
+for(const p of parts){g.globalAlpha=Math.min(1,p.life*3);g.fillStyle=p.c;g.fillRect(p.x-2.5,p.y-2.5,5,5);}
+g.globalAlpha=1;g.restore();}
+requestAnimationFrame(frame);
+reset();
+function tog(){reset();playing=true;over=false;
+document.getElementById('start').classList.add('hidden');document.getElementById('over').classList.add('hidden');
+document.getElementById('round').textContent='ROUND 1';}
+document.getElementById('startBtn').addEventListener('click',tog);
+document.getElementById('overBtn').addEventListener('click',tog);
+function bindHold(id,on,off){const el=document.getElementById(id);
+el.addEventListener('pointerdown',e=>{e.preventDefault();el.classList.add('on');on();});
+const up=()=>{el.classList.remove('on');off();};
+el.addEventListener('pointerup',up);el.addEventListener('pointercancel',up);el.addEventListener('pointerleave',up);}
+bindHold('lBtn',()=>input.mv=-1,()=>input.mv=0);
+bindHold('rBtn',()=>input.mv=1,()=>input.mv=0);
+bindHold('blkBtn',()=>input.block=true,()=>input.block=false);
+bindHold('pnBtn',()=>playerAct('punch'),()=>{});
+bindHold('kkBtn',()=>playerAct('kick'),()=>{});
+bindHold('spBtn',()=>playerAct('special'),()=>{});
+window.__FT={G:()=>({playing,over,round,timer:Math.round(timer),p1:{hp:p1.hp,sp:p1.sp,state:p1.state,x:Math.round(p1.x),wins:p1.wins},p2:{hp:p2.hp,sp:p2.sp,state:p2.state,x:Math.round(p2.x),wins:p2.wins},parts:parts.length}),
+start:tog,sim:(dt)=>simStep(dt),
+act:playerAct,
+setInput:(o)=>{Object.assign(input,o);},
+refs:()=>({p1,p2}),
+setHP:(a,b)=>{p1.hp=a;p2.hp=b;},
+setSP:(a)=>{p1.sp=a;},
+teleport:(x1,x2)=>{p1.x=x1;p2.x=x2;},
+roundEndNow:()=>{timer=0.01;}};
+</script>
+</body>
+</html>
