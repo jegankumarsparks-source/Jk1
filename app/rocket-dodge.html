@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>JK ROCKET DODGE 2047</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+body{background:#0a0208;color:#ffe8f0;font-family:'Segoe UI',system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;min-height:100vh;overflow:hidden;touch-action:none}
+h1{font-size:22px;letter-spacing:3px;margin:10px 0 2px;color:#ff4d6d;text-shadow:0 0 12px #ff4d6d,0 0 40px #ff4d6d88}
+.sub{font-size:10px;letter-spacing:2px;color:#a88d96;margin-bottom:8px}
+.hud{display:flex;gap:8px;margin-bottom:8px;width:100%;max-width:420px;justify-content:center}
+.card{background:#1f0a12;border:1px solid #ff4d6d33;border-radius:10px;padding:6px 10px;text-align:center;min-width:72px}
+.card .l{font-size:9px;letter-spacing:1px;color:#a88d96}
+.card .v{font-size:16px;font-weight:700}
+#wrap{position:relative}
+canvas{background:linear-gradient(180deg,#16040d,#0a0208);border:2px solid #ff4d6d44;border-radius:14px;box-shadow:0 0 30px #ff4d6d22;display:block}
+#msg{margin-top:8px;font-size:13px;color:#ffd166;min-height:18px;text-align:center}
+.ov{position:absolute;inset:0;background:rgba(10,2,8,.93);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;border-radius:14px;z-index:5;backdrop-filter:blur(4px)}
+.ov.hide{display:none}
+.ov h2{font-size:26px;color:#ff4d6d;text-shadow:0 0 16px #ff4d6d}
+.ov p{font-size:13px;color:#dcb8c4;text-align:center;padding:0 24px;line-height:1.6}
+.btn{background:linear-gradient(90deg,#ff4d6d,#ff9f1c);border:none;color:#fff;font-size:16px;font-weight:700;letter-spacing:2px;padding:13px 42px;border-radius:30px;cursor:pointer;box-shadow:0 0 20px #ff4d6d66}
+.btn:active{transform:scale(.95)}
+.rs{display:flex;gap:8px;width:84%;max-width:320px}
+.rs div{flex:1;background:#1f0a12;border:1px solid #ff4d6d33;border-radius:10px;padding:8px;text-align:center;font-size:10px;color:#a88d96}
+.rs b{display:block;font-size:16px;color:#fff;margin-top:2px}
+</style>
+</head>
+<body>
+<h1>🚀 JK ROCKET DODGE</h1>
+<div class="sub">2047 METEOR STORM • 3 SHIELDS • OFFLINE</div>
+<div class="hud">
+<div class="card"><div class="l">⭐ SCORE</div><div class="v" id="sc">0</div></div>
+<div class="card"><div class="l">🛡 SHIELD</div><div class="v" id="sh">3</div></div>
+<div class="card"><div class="l">⚡ FUEL</div><div class="v" id="fu">0</div></div>
+<div class="card"><div class="l">🏆 BEST</div><div class="v" id="bs">0</div></div>
+</div>
+<div id="wrap">
+<canvas id="cv" width="400" height="600"></canvas>
+<div class="ov" id="ovStart">
+<h2>🚀 ROCKET DODGE</h2>
+<p>Rocket-அ left/right move பண்ணி meteors-அ dodge பண்ணு! ⚡ Fuel cells collect பண்ணா +25 & speed burst! Meteor மோதினா shield குறையும்! Storm போக போக கடுமை ஆகும்! எவ்வளவு நேரம் survive பண்ணுவ?</p>
+<button class="btn" id="btnStart">▶ LAUNCH</button>
+</div>
+<div class="ov hide" id="ovEnd">
+<h2>💥 SHIP DOWN!</h2>
+<div class="rs">
+<div>⭐ SCORE<b id="rSc">0</b></div>
+<div>⚡ FUEL<b id="rFu">0</b></div>
+<div>🏆 BEST<b id="rBs">0</b></div>
+</div>
+<p id="endTaunt"></p>
+<button class="btn" id="btnAgain">🔄 RELAUNCH</button>
+</div>
+</div>
+<div id="msg">🚀 Dodge the storm!</div>
+<script>
+'use strict';
+var cv=document.getElementById('cv'),cx=cv.getContext('2d');
+var W=cv.width,H=cv.height;
+var AC=window.AudioContext?new AudioContext():null;
+function beep(f,d,t){if(!AC)return;try{var o=AC.createOscillator(),g=AC.createGain();o.type=t||'square';o.frequency.value=f;g.gain.setValueAtTime(.05,AC.currentTime);g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+d);o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+d);}catch(e){}}
+function $(id){return document.getElementById(id);}
+function msg(t){$('msg').textContent=t;}
+var state='menu',score=0,fuel=0,shields=3,tick=0,invuln=0;
+var rocket,mets=[],cells=[],parts=[],stars=[];
+var best=parseInt(localStorage.getItem('jkrd_best')||'0');
+$('bs').textContent=best;
+for(var i=0;i<50;i++)stars.push({x:Math.random()*W,y:Math.random()*H,s:Math.random()<.8?1:2,sp:.3+Math.random()});
+function startGame(){
+ state='play';score=0;fuel=0;shields=3;tick=0;invuln=0;
+ rocket={x:W/2,tx:W/2,y:H-90};
+ mets=[];cells=[];parts=[];
+ $('sc').textContent=0;$('sh').textContent=3;$('fu').textContent=0;
+ $('ovStart').classList.add('hide');$('ovEnd').classList.add('hide');
+ msg('🚀 Dodge பண்ணு, fuel collect பண்ணு!');
+ if(AC&&AC.state==='suspended'){AC.resume();}
+ beep(392,.12);setTimeout(function(){beep(587,.15);},120);
+}
+function endGame(){
+ state='over';
+ if(score>best){best=score;try{localStorage.setItem('jkrd_best',best);}catch(e){}}
+ $('bs').textContent=best;
+ $('rSc').textContent=score;$('rFu').textContent=fuel;$('rBs').textContent=best;
+ $('endTaunt').textContent=score>=1500?'👑 STORM RIDER! குயிலே, உன் Ember Rows-அ விட இது நெஞ்சு படபட game! 🚀😎':score>=600?'சூப்பர் piloting! Fuel-அ miss பண்ணாதே! ⚡':'Meteor pattern-அ பாத்து earlyஆ move பண்ணு! 💪';
+ $('ovEnd').classList.remove('hide');
+ beep(150,.4,'sawtooth');
+}
+function burst(x,y,c,n){
+ for(var i=0;i<n;i++){
+   var a=Math.random()*7,s=.8+Math.random()*2.8;
+   parts.push({x:x,y:y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,l:22+Math.random()*14,c:c});
+ }
+}
+function spawnMet(){
+ var r=12+Math.random()*16;
+ mets.push({x:r+Math.random()*(W-2*r),y:-r-8,vy:1.6+Math.random()*1.8+tick*.0004,vx:(Math.random()-.5)*1.2,r:r,rot:Math.random()*7,vr:(Math.random()-.5)*.05});
+}
+function spawnCell(){
+ cells.push({x:24+Math.random()*(W-48),y:-16,vy:1.8+tick*.0003});
+}
+function step(){
+ if(state!=='play')return;
+ tick++;score+=1;
+ if(tick%30===0)$('sc').textContent=score;
+ if(invuln>0)invuln--;
+ // stars scroll
+ for(var s=0;s<stars.length;s++){stars[s].y+=stars[s].sp*(1+tick*.0002);if(stars[s].y>H)stars[s].y=0;}
+ // rocket easing toward touch x
+ rocket.x+=(rocket.tx-rocket.x)*.18;
+ rocket.x=Math.max(18,Math.min(W-18,rocket.x));
+ // spawn
+ var rate=Math.max(18,44-Math.floor(tick/300));
+ if(tick%rate===0)spawnMet();
+ if(tick%420===200)spawnCell();
+ // meteors
+ for(var i=mets.length-1;i>=0;i--){
+   var m=mets[i];
+   m.y+=m.vy;m.x+=m.vx;m.rot+=m.vr;
+   if(m.x<m.r||m.x>W-m.r)m.vx*=-1;
+   if(m.y>H+m.r){mets.splice(i,1);continue;}
+   if(invuln===0&&Math.hypot(m.x-rocket.x,m.y-rocket.y)<m.r+13){
+     mets.splice(i,1);
+     shields--;$('sh').textContent=shields;
+     invuln=90;
+     burst(rocket.x,rocket.y,'#ff4d6d',18);
+     msg('💥 Shield hit! '+shields+' left!');
+     beep(120,.3,'sawtooth');
+     if(shields<=0){endGame();return;}
+   }
+ }
+ // cells
+ for(var k=cells.length-1;k>=0;k--){
+   var c=cells[k];c.y+=c.vy;
+   if(c.y>H+16){cells.splice(k,1);continue;}
+   if(Math.hypot(c.x-rocket.x,c.y-rocket.y)<22){
+     cells.splice(k,1);fuel++;score+=25;
+     msg('⚡ FUEL +25! Total '+fuel);
+     beep(1180,.08,'sine');
+     burst(c.x,c.y,'#ffd166',10);
+     $('fu').textContent=fuel;$('sc').textContent=score;
+   }
+ }
+ // particles
+ for(var p2=parts.length-1;p2>=0;p2--){
+   var p=parts[p2];p.x+=p.vx;p.y+=p.vy;p.l--;
+   if(p.l<=0)parts.splice(p2,1);
+ }
+}
+cv.addEventListener('pointerdown',function(e){e.preventDefault();ptr(e);});
+cv.addEventListener('pointermove',function(e){if(e.buttons>0||e.pointerType==='touch')ptr(e);});
+function ptr(e){
+ var r=cv.getBoundingClientRect();
+ rocket.tx=(e.clientX-r.left)*(W/r.width);
+}
+function draw(){
+ cx.clearRect(0,0,W,H);
+ for(var s=0;s<stars.length;s++){
+   cx.fillStyle='rgba(255,220,230,.5)';
+   cx.fillRect(stars[s].x,stars[s].y,stars[s].s,stars[s].s*2.2);
+ }
+ // fuel cells
+ for(var k=0;k<cells.length;k++){
+   var c=cells[k],pl=9+Math.sin(tick*.15)*2.5;
+   cx.fillStyle='#ffd166';
+   cx.beginPath();cx.arc(c.x,c.y,pl+4,0,7);cx.fill();
+   cx.fillStyle='#a05c00';cx.font='bold 12px sans-serif';cx.textAlign='center';
+   cx.fillText('⚡',c.x,c.y+4);
+ }
+ // meteors
+ for(var i=0;i<mets.length;i++){
+   var m=mets[i];
+   cx.save();cx.translate(m.x,m.y);cx.rotate(m.rot);
+   cx.fillStyle='#6b4a3a';cx.strokeStyle='#c98a5a';cx.lineWidth=2;
+   cx.beginPath();
+   for(var j=0;j<8;j++){
+     var an=j/8*Math.PI*2,rr=m.r*(0.82+((j*53)%10)/30);
+     if(j===0)cx.moveTo(Math.cos(an)*rr,Math.sin(an)*rr);
+     else cx.lineTo(Math.cos(an)*rr,Math.sin(an)*rr);
+   }
+   cx.closePath();cx.fill();cx.stroke();
+   cx.fillStyle='#4a3128';
+   cx.beginPath();cx.arc(-m.r*.2,-m.r*.25,m.r*.22,0,7);cx.fill();
+   cx.restore();
+ }
+ // particles
+ for(var p2=0;p2<parts.length;p2++){
+   var p=parts[p2];
+   cx.fillStyle=p.c;cx.globalAlpha=Math.min(1,p.l/16);
+   cx.beginPath();cx.arc(p.x,p.y,3,0,7);cx.fill();
+   cx.globalAlpha=1;
+ }
+ // rocket
+ if(state!=='menu'&&!(invuln>0&&tick%8<4)){
+   cx.save();cx.translate(rocket.x,rocket.y);
+   // flame
+   cx.fillStyle='rgba(255,159,28,'+(.5+Math.random()*.4)+')';
+   cx.beginPath();cx.moveTo(-7,14);cx.lineTo(0,26+Math.random()*8);cx.lineTo(7,14);cx.closePath();cx.fill();
+   // body
+   cx.fillStyle='#ff4d6d';
+   cx.beginPath();cx.moveTo(0,-20);cx.lineTo(10,10);cx.lineTo(-10,10);cx.closePath();cx.fill();
+   cx.fillStyle='#ffe8f0';
+   cx.beginPath();cx.moveTo(-10,10);cx.lineTo(-15,18);cx.lineTo(-7,12);cx.closePath();cx.fill();
+   cx.beginPath();cx.moveTo(10,10);cx.lineTo(15,18);cx.lineTo(7,12);cx.closePath();cx.fill();
+   cx.fillStyle='#4cc9ff';cx.beginPath();cx.arc(0,-6,4.5,0,7);cx.fill();
+   cx.restore();
+ }
+ requestAnimationFrame(draw);
+}
+draw();
+var lastT=0,acc=0;
+function loop(ts){
+ if(!lastT)lastT=ts;
+ acc+=ts-lastT;lastT=ts;
+ var n=0;
+ while(acc>16&&n<4){step();acc-=16;n++;}
+ requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+$('btnStart').addEventListener('click',startGame);
+$('btnAgain').addEventListener('click',function(){$('ovEnd').classList.add('hide');startGame();});
+window.__RD={G:function(){return{state:state,score:score,fuel:fuel,shields:shields,rocket:{x:Math.round(rocket?rocket.x:0),tx:Math.round(rocket?rocket.tx:0)},mets:mets.map(function(m){return{x:Math.round(m.x),y:Math.round(m.y),r:m.r};}),cells:cells.length,best:best}},
+start:startGame,
+step:function(n){for(var i=0;i<n;i++){step();}},
+setTx:function(x){rocket.tx=x;},
+spawnMet:function(x,vy){var r=16;mets.push({x:x,y:-r-8,vy:vy||2.5,vx:0,r:r,rot:0,vr:.02});},
+spawnCell:function(x){cells.push({x:x,y:-16,vy:2});},
+setScore:function(s){score=s;},
+end:endGame};
+</script>
+</body>
+</html>
