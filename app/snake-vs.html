@@ -62,7 +62,7 @@ function $(id){return document.getElementById(id);}
 function msg(t){$('msg').textContent=t;}
 
 var running=false,over=false;
-var me,ai,foods,score=0,foodGot=0,kills=0,lives=3,tick=0,speed=8;
+var me,ai,foods=[],score=0,foodGot=0,kills=0,lives=3,tick=0,speed=8;
 var best=parseInt(localStorage.getItem('jksv_best')||'0');
 function mkSnake(x,y,dir){return{body:[{x:x,y:y},{x:x-dir[0],y:y-dir[1]},{x:x-dir[0]*2,y:y-dir[1]*2}],dir:dir.slice(),alive:true,growT:0};}
 function rndFood(){
