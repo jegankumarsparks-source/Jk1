@@ -1544,7 +1544,7 @@ async function directBuyCalls(){ if(V20_DIRECT_BUSY||!tgActive('buy')) return; V
    Losing / flat exits (stop, rug exit, wallet sold at a loss, manual close) post NOTHING.
    Posts never mention paper trading, bot names, stake, TP/stop rules or sell percentages.
    Milestone watch list lives in jk7_tgw (24h per coin, pauses posts at dead liquidity). */
-const TG=Object.assign({token:'8807777700:AAGiq52psSctIMSVwMmEXE6Gv3_g2WL_iFQ',chat:'-1004351887857',chatName:'SOLANA PRO SIGNALS (@solanawin) · group',bot:'Jkpremiumhunderbot',on:true,buy:true,sell:true,sent:0,fail:0,lastOk:0,err:''},LS.get('tg',{}));
+const TG=Object.assign({token:'REDACTED_BOT_TOKEN_1',chat:'-1004351887857',chatName:'SOLANA PRO SIGNALS (@solanawin) · group',bot:'Jkpremiumhunderbot',on:true,buy:true,sell:true,sent:0,fail:0,lastOk:0,err:''},LS.get('tg',{}));
 let TGQ=(LS.get('tgq',[])||[]).filter(it=>it&&it.text&&!/\(paper\)|<b>SELL<\/b>/.test(it.text)), TGbusy=false; // preserve every pending post; no silent 40-item cap
 // An interrupted request has unknown delivery. Keep it visibly held for manual review; do not double-post.
 for(const it of TGQ)if(it.sending){delete it.sending;it.uncertain=true;}
@@ -1751,7 +1751,7 @@ function tgReportTick(){ /* Legacy rolling report retired: no main-group summary
 
 /* V19.4: an independent performance bot. No performance message enters TGQ or the signal API route.
    Session boundary is the configured local clock time each day, not the last app launch. */
-const TGP=Object.assign({token:'8634095089:AAG736RRVPZG8cvCwhYrovXsBtARYcHzCV8',bot:'Jkvirus333bot',chat:'7581932848',chatName:'Private chat · saved',on:true,interval:10,start:'10:00',lastSlot:'',lastDaily:'',err:'',lastOk:0},LS.get('tgperf',{}));
+const TGP=Object.assign({token:'REDACTED_BOT_TOKEN_2',bot:'Jkvirus333bot',chat:'7581932848',chatName:'Private chat · saved',on:true,interval:10,start:'10:00',lastSlot:'',lastDaily:'',err:'',lastOk:0},LS.get('tgperf',{}));
 let TGPCHATS=[], TGPbusy=false;
 function tgpSave(){ LS.set('tgperf',TGP); }
 function tgpIdentity(){return String(TGP.token||'').split(':')[0];}
@@ -2159,8 +2159,8 @@ setInterval(v23DigestTick,30000);setTimeout(v23DigestTick,35000);
 
 // V24: pre-seeded bot tokens + silent auto-connect (open app = everything ready & ON)
 async function v24Auto(){ try{
-  if(!TG.token){TG.token='8807777700:AAGiq52psSctIMSVwMmEXE6Gv3_g2WL_iFQ';tgSave();}
-  if(!TGP.token){TGP.token='8634095089:AAG736RRVPZG8cvCwhYrovXsBtARYcHzCV8';tgpSave();}
+  if(!TG.token){TG.token='REDACTED_BOT_TOKEN_1';tgSave();}
+  if(!TGP.token){TGP.token='REDACTED_BOT_TOKEN_2';tgpSave();}
   if(!TG.bot){const me=await tgApi('getMe',{});if(me.ok&&me.result){TG.bot=me.result.username||TG.bot;TG.err='';}}
   if(!TGP.bot){const me2=await tgApi('getMe',{},TGP.token);if(me2.ok&&me2.result){TGP.bot=me2.result.username||TGP.bot;TGP.err='';}}
   if(TG.token&&!TG.chat){
