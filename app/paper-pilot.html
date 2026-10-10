@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>JK PAPER PILOT 2040</title>
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;touch-action:none}
+html,body{width:100%;height:100%;overflow:hidden;background:#FDFBF3}
+#game{position:fixed;inset:0}
+canvas{display:block;width:100%;height:100%}
+#hud{position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:14px 18px;z-index:5;font-family:'Patrick Hand',cursive;pointer-events:none}
+#dist{font-size:26px;color:#4A4E69}
+#stars{font-size:20px;color:#E9C46A}
+#stamW{position:fixed;top:52px;left:18px;width:110px;height:10px;border:2px solid #4A4E69;border-radius:6px;z-index:5;overflow:hidden;background:#fff}
+#stam{height:100%;width:100%;background:#8AC926}
+.overlay{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(253,251,243,.96);font-family:'Patrick Hand',cursive;text-align:center;padding:20px}
+.overlay.hidden{display:none}
+h1{font-size:34px;color:#4A4E69}
+.sub{color:#6D6875;font-size:17px;margin-top:10px;max-width:320px;line-height:1.6}
+.btn{margin-top:24px;padding:12px 40px;background:#fff;color:#4A4E69;font-family:'Patrick Hand',cursive;font-size:24px;border:3px solid #4A4E69;border-radius:14px;cursor:pointer;box-shadow:4px 4px 0 #4A4E69}
+#finalDist{font-size:46px;color:#E76F51;margin-top:6px}
+</style>
+</head>
+<body>
+<div id="game"></div>
+<div id="hud"><div id="dist">0 m</div><div id="stars">⭐ 0</div></div>
+<div id="stamW"><div id="stam"></div></div>
+<div class="overlay" id="start">
+<h1>✈️ JK PAPER PILOT 2040 ✈️</h1>
+<p class="sub">Hold anywhere to climb (uses stamina), release to glide. Dodge the cranes, grab the stars! How far can your paper plane fly? 📄</p>
+<button class="btn" id="startBtn">LAUNCH!</button>
+</div>
+<div class="overlay hidden" id="over">
+<h1>💥 CRASHED! 💥</h1>
+<div id="finalDist">0 m</div>
+<p class="sub" id="overSub">Nice flight!</p>
+<button class="btn" id="overBtn">FLY AGAIN</button>
+</div>
+<script>
+"use strict";
+const TAU=Math.PI*2;
+const container=document.getElementById('game');
+const cv=document.createElement('canvas');container.appendChild(cv);
+const g=cv.getContext('2d');
+let W=0,H=0;
+function resize(){const dpr=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*dpr;cv.height=H*dpr;g.setTransform(dpr,0,0,dpr,0,0);}
+addEventListener('resize',resize);resize();
+
+const GROUND=()=>H-50;
+let plane,stars=[],cranes=[],clouds=[],climbing=false,playing=false,over=false;
+let dist=0,starCount=0,stamina=100,speed=4,worldX=0,dead=false,crashY=0;
+let parts=[];
+const rand=(a,b)=>a+Math.random()*(b-a);
+function reset(){plane={x:W*0.25,y:H*0.4,vy:0,rot:0};stars=[];cranes=[];clouds=[];parts=[];
+dist=0;starCount=0;stamina=100;speed=4;worldX=0;dead=false;
+for(let i=0;i<6;i++)clouds.push({x:rand(0,W),y:rand(40,H*0.5),s:rand(.6,1.3),v:rand(.2,.5)});}
+let spawnS=0,spawnC=0;
+function stepSim(dt){
+speed=4+dist/400;
+const climb=climbing&&stamina>0;
+if(climb){plane.vy-=22*dt;stamina=Math.max(0,stamina-30*dt);}
+else stamina=Math.min(100,stamina+12*dt);
+plane.vy+=18*dt;
+plane.vy*=0.985;
+plane.y+=plane.vy*dt*10;
+plane.rot=Math.max(-0.5,Math.min(0.6,plane.vy*0.06));
+worldX+=speed*dt*10;dist=Math.floor(worldX/10);
+if(plane.y>H*0.12){plane.y=H*0.12;plane.vy=Math.max(0,plane.vy);}
+if(plane.y>GROUND()){die();}
+spawnS-=dt;if(spawnS<=0){spawnS=rand(1.2,2.2);stars.push({x:W+30,y:rand(H*0.2,GROUND()-60),got:false,ph:rand(0,TAU)});}
+spawnC-=dt;if(spawnC<=0){spawnC=rand(1.6,2.8)-Math.min(1,dist/600);cranes.push({x:W+40,y:rand(H*0.18,GROUND()-80),ph:rand(0,TAU),v:rand(20,50)});}
+for(const s of stars){s.x-=speed*dt*10;s.ph+=dt*3;
+if(!s.got&&Math.hypot(s.x-plane.x,s.y-plane.y)<34){s.got=true;starCount++;}}
+stars=stars.filter(s=>s.x>-40&&!s.got);
+for(const c of cranes){c.x-=speed*dt*10+10*dt;c.ph+=dt*4;c.y+=Math.sin(c.ph)*0.6;
+if(!dead&&Math.hypot(c.x-plane.x,c.y-plane.y)<30)die();}
+cranes=cranes.filter(c=>c.x>-60);
+for(const cl of clouds){cl.x-=cl.v;if(cl.x<-100){cl.x=W+100;cl.y=rand(40,H*0.5);}}
+for(let i=parts.length-1;i>=0;i--){const p=parts[i];p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=14*dt;p.rot+=p.rv*dt;p.life-=dt;if(p.life<=0)parts.splice(i,1);}
+}
+function die(){if(dead)return;dead=true;playing=false;over=true;
+for(let i=0;i<14;i++)parts.push({x:plane.x,y:plane.y,vx:rand(-80,120),vy:rand(-140,-20),rot:rand(0,TAU),rv:rand(-6,6),life:rand(.6,1.2),c:i%2?'#4A4E69':'#E76F51'});
+document.getElementById('finalDist').textContent=dist+' m';
+document.getElementById('overSub').textContent='Stars collected: '+starCount+' ⭐';
+document.getElementById('over').classList.remove('hidden');}
+function drawPlane(x,y,rot){g.save();g.translate(x,y);g.rotate(rot);
+g.strokeStyle='#4A4E69';g.lineWidth=2.5;g.fillStyle='#fff';g.lineJoin='round';
+g.beginPath();g.moveTo(22,0);g.lineTo(-18,-12);g.lineTo(-10,0);g.lineTo(-18,12);g.closePath();g.fill();g.stroke();
+g.beginPath();g.moveTo(-10,0);g.lineTo(22,0);g.stroke();
+g.restore();}
+function drawCrane(c){g.save();g.translate(c.x,c.y);g.rotate(Math.sin(c.ph)*0.15);
+g.strokeStyle='#E76F51';g.fillStyle='#F4A261';g.lineWidth=2;g.lineJoin='round';
+g.beginPath();g.moveTo(0,-14);g.lineTo(16,6);g.lineTo(2,10);g.lineTo(0,22);g.lineTo(-2,10);g.lineTo(-16,6);g.closePath();g.fill();g.stroke();
+g.restore();}
+function drawStar(s){g.save();g.translate(s.x,s.y);g.rotate(s.ph*0.3);
+g.fillStyle='#E9C46A';g.strokeStyle='#D4A017';g.lineWidth=1.5;g.beginPath();
+for(let i=0;i<5;i++){const a=-Math.PI/2+i*TAU/5;g.lineTo(Math.cos(a)*12,Math.sin(a)*12);const a2=a+TAU/10;g.lineTo(Math.cos(a2)*5,Math.sin(a2)*5);}
+g.closePath();g.fill();g.stroke();g.restore();}
+function paperBG(){g.fillStyle='#FDFBF3';g.fillRect(0,0,W,H);
+g.strokeStyle='rgba(150,180,220,.35)';g.lineWidth=1;
+const off=-(worldX%36);
+for(let y=30;y<H;y+=36){g.beginPath();g.moveTo(0,y);g.lineTo(W,y);g.stroke();}
+g.strokeStyle='rgba(230,120,120,.5)';g.beginPath();g.moveTo(40,0);g.lineTo(40,H);g.stroke();
+g.fillStyle='#D9C9A3';g.fillRect(0,GROUND(),H?W:0,H-GROUND());
+g.strokeStyle='#B8A67E';g.beginPath();g.moveTo(0,GROUND());g.lineTo(W,GROUND());g.stroke();}
+let last=performance.now();
+function frame(now){requestAnimationFrame(frame);const dt=Math.min((now-last)/1000,.05);last=now;
+if(playing&&!dead)stepSim(dt);
+for(const p of parts){}
+paperBG();
+for(const cl of clouds){g.fillStyle='rgba(255,255,255,.9)';g.strokeStyle='#C9D6EA';g.lineWidth=2;
+g.beginPath();g.arc(cl.x,cl.y,18*cl.s,0,TAU);g.arc(cl.x+16*cl.s,cl.y+4,14*cl.s,0,TAU);g.arc(cl.x-16*cl.s,cl.y+4,14*cl.s,0,TAU);g.fill();g.stroke();}
+for(const s of stars)drawStar(s);
+for(const c of cranes)drawCrane(c);
+if(!dead)drawPlane(plane.x,plane.y,plane.rot);
+for(const p of parts){g.save();g.translate(p.x,p.y);g.rotate(p.rot);g.fillStyle=p.c;g.globalAlpha=Math.min(1,p.life*2);g.fillRect(-4,-3,8,6);g.restore();}
+g.globalAlpha=1;
+document.getElementById('dist').textContent=dist+' m';
+document.getElementById('stars').textContent='⭐ '+starCount;
+document.getElementById('stam').style.width=stamina+'%';
+document.getElementById('stam').style.background=stamina>30?'#8AC926':'#E76F51';}
+requestAnimationFrame(frame);
+reset();
+function tog(){reset();playing=true;over=false;document.getElementById('start').classList.add('hidden');document.getElementById('over').classList.add('hidden');}
+document.getElementById('startBtn').addEventListener('click',tog);
+document.getElementById('overBtn').addEventListener('click',tog);
+const press=e=>{if(playing)climbing=true;};
+const release=()=>{climbing=false;};
+cv.addEventListener('pointerdown',press);
+addEventListener('pointerup',release);
+addEventListener('pointercancel',release);
+window.__PP={G:()=>({dist,starCount,stamina:Math.round(stamina),playing,over,dead,y:Math.round(plane.y),cranes:cranes.length,stars:stars.length,parts:parts.length}),
+start:tog,step:(n)=>{let vn=performance.now();for(let i=0;i<n;i++)frame(vn+=16);},
+sim:(dt)=>stepSim(dt),
+setClimb:(v)=>{climbing=v;},
+plane:()=>({x:plane.x,y:plane.y,vy:plane.vy}),
+teleportY:(y)=>{plane.y=y;plane.vy=0;},
+nextCrane:()=>cranes.length?{x:cranes[0].x,y:cranes[0].y}:null};
+</script>
+</body>
+</html>
