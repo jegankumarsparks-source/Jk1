@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>JK NEON BREAKOUT 2045</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#08030f;color:#e8e8f5;min-height:100vh;overflow-x:hidden}
+.wrap{max-width:480px;margin:0 auto;padding:8px 12px 24px}
+h1{text-align:center;font-size:25px;font-weight:900;letter-spacing:2px;background:linear-gradient(90deg,#ff2ea6,#00e5ff,#ffd60a);-webkit-background-clip:text;background-clip:text;color:transparent;margin-top:4px}
+.sub{text-align:center;color:#8a8ab0;font-size:10px;letter-spacing:3px;margin:2px 0 6px}
+.hud{display:flex;justify-content:space-between;background:linear-gradient(145deg,#160a2a,#0e0620);border:1px solid #2e1a52;border-radius:12px;padding:7px 14px;margin-bottom:6px;font-size:13px;font-weight:800}
+.hud .s{color:#ffd60a}.hud .l{color:#ff4d6d}.hud .lv{color:#00e5ff}
+#cv{display:block;width:100%;border-radius:12px;border:1px solid #2e1a52;background:#05020a;touch-action:none}
+.msg{text-align:center;font-size:12px;color:#b8b8d8;min-height:18px;margin-top:6px}
+.ov{position:fixed;inset:0;background:rgba(4,1,8,.94);z-index:20;display:flex;align-items:center;justify-content:center;padding:20px}
+.ov.hide{display:none}
+.ovCard{background:linear-gradient(145deg,#160a2a,#0a0516);border:1px solid #3a2060;border-radius:20px;padding:26px 20px;max-width:380px;width:100%;text-align:center}
+.ovCard h2{font-size:24px;margin-bottom:8px}
+.ovCard p{color:#b8b8d8;font-size:13px;line-height:1.8}
+.big{font-size:38px;font-weight:900;color:#ffd60a}
+.btn{display:inline-block;margin-top:14px;padding:13px 30px;border:none;border-radius:14px;font-size:15px;font-weight:800;cursor:pointer;background:linear-gradient(90deg,#ff2ea6,#00e5ff);color:#fff}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>JK NEON BREAKOUT</h1>
+<div class="sub">2045 BRICK SMASHER • 5 LEVELS • OFFLINE</div>
+<div class="hud"><span class="s">⭐ <b id="score">0</b></span><span class="lv">LV <b id="lvl">1</b></span><span class="l">❤️ <b id="lives">3</b></span></div>
+<canvas id="cv"></canvas>
+<div class="msg" id="msg">paddle-அ drag பண்ணு! ⬇️ powerups: W=wide, M=multi-ball, L=laser, S=slow</div>
+</div>
+<div class="ov" id="ov"><div class="ovCard">
+<h2>🧱 JK NEON BREAKOUT</h2>
+<p>Neon bricks-அ உடை!<br><br>🟪 normal • 🟨 2-hit • 🟥 3-hit tough<br>⬇️ <b>W</b>=wide paddle • <b>M</b>=3 balls! • <b>L</b>=laser (tap fire) • <b>S</b>=slow-mo<br>💎 bonus bricks = big points<br><br>5 levels • speed ramp • 3 balls lost = game over!</p>
+<button class="btn" onclick="startGame()">SMASH 🧱</button>
+</div></div>
+<div class="ov hide" id="ovEnd"><div class="ovCard">
+<h2 id="endTitle">💀</h2>
+<div class="big" id="endScore">0</div>
+<p id="endText"></p>
+<button class="btn" onclick="startGame()">AGAIN 🧱</button>
+</div></div>
+<script>
+var cv=document.getElementById('cv'),cx=cv.getContext('2d');
+var W=0,H=0;
+function rz(){cv.width=cv.clientWidth;cv.height=Math.min(460,innerHeight*.58);W=cv.width;H=cv.height;}
+rz();addEventListener('resize',rz);
+var padW=80,padX=0,balls=[],bricks=[],powerups=[],lasers=[],parts=[];
+var score=0,lives=3,level=1,running=false,over=false,won=false;
+var wide=0,slow=0,laserOn=0;
+var ROWS=5,COLS=8;
+var best=parseInt(localStorage.getItem('jknb_best')||'0');
+function buildLevel(){
+ bricks=[];powerups=[];lasers=[];
+ var bw=(W-20)/COLS,bh=22;
+ for(var r=0;r<ROWS;r++)for(var c=0;c<COLS;c++){
+  var hp=1+((r+level-1)%3===2?1:0)+((r===0&&level>1)?1:0);
+  var bonus=Math.random()<.1;
+  bricks.push({x:10+c*bw,y:50+r*(bh+5),w:bw-3,h:bh,hp:bonus?1:hp,bonus:bonus,
+   col:['#ff2ea6','#b44dff','#00e5ff','#3ddc84','#ffd60a'][r%5]});
+ }
+ balls=[newBall()];
+}
+function newBall(){return {x:W/2,y:H-60,vx:3*(Math.random()<.5?1:-1),vy:-4,r:6};}
+function launch(){balls.forEach(function(b){if(b.stuck){b.stuck=false;b.vx=3*(Math.random()<.5?1:-1);b.vy=-4;}});}
+cv.addEventListener('pointermove',function(e){var r2=cv.getBoundingClientRect();padX=Math.max(0,Math.min(W-padW,e.clientX-r2.left-padW/2));});
+cv.addEventListener('pointerdown',function(e){launch();if(laserOn>0){lasers.push({x:padX+6,y:H-40});lasers.push({x:padX+padW-6,y:H-40});laserOn--;msg('🔫 laser!');}});
+function msg(t){document.getElementById('msg').textContent=t;}
+function step(){
+ if(!running)return;
+ var spMul=slow>0?.6:1;
+ if(slow>0)slow--;
+ if(wide>0){wide--;if(wide===0)padW=80;}
+ balls.forEach(function(b){
+  if(b.stuck){b.x=padX+padW/2;b.y=H-46;return;}
+  b.x+=b.vx*spMul;b.y+=b.vy*spMul;
+  if(b.x<b.r){b.x=b.r;b.vx*=-1;}
+  if(b.x>W-b.r){b.x=W-b.r;b.vx*=-1;}
+  if(b.y<b.r+24){b.y=b.r+24;b.vy*=-1;}
+  // paddle
+  if(b.vy>0&&b.y>H-42&&b.y<H-30&&b.x>padX-4&&b.x<padX+padW+4){
+   var rel=(b.x-(padX+padW/2))/(padW/2);
+   b.vy=-Math.abs(b.vy);b.vx=rel*5;
+   for(var i=0;i<4;i++)parts.push({x:b.x,y:b.y,vx:(Math.random()-.5)*3,vy:-Math.random()*3,t:.4,col:'#3ddc84'});
+  }
+  // bricks
+  for(var i=0;i<bricks.length;i++){var br=bricks[i];
+   if(br.hp>0&&b.x>br.x&&b.x<br.x+br.w&&b.y>br.y&&b.y<br.y+br.h){
+    br.hp--;b.vy*=-1;
+    if(br.hp<=0){
+     score+=br.bonus?50:10;document.getElementById('score').textContent=score;
+     for(var k=0;k<8;k++)parts.push({x:b.x,y:b.y,vx:(Math.random()-.5)*5,vy:(Math.random()-.5)*5,t:.5,col:br.col});
+     if(br.bonus||Math.random()<.14){var types=['W','M','L','S'];powerups.push({x:br.x+br.w/2,y:br.y,vy:1.6,t:types[Math.floor(Math.random()*4)]});}
+    }
+    break;}
+  }
+ });
+ // lasers
+ lasers.forEach(function(l){l.y-=7;
+  for(var i=0;i<bricks.length;i++){var br=bricks[i];
+   if(br.hp>0&&l.x>br.x&&l.x<br.x+br.w&&l.y>br.y&&l.y<br.y+br.h){br.hp--;l.y=-99;
+    if(br.hp<=0){score+=br.bonus?50:10;document.getElementById('score').textContent=score;}
+    break;}}
+ });
+ lasers=lasers.filter(function(l){return l.y>0});
+ // powerups
+ powerups.forEach(function(p){p.y+=p.vy;
+  if(p.y>H-40&&p.y<H-20&&p.x>padX-8&&p.x<padX+padW+8){
+   p.got=true;
+   if(p.t==='W'){padW=140;wide=600;msg('⬇️ WIDE PADDLE!');}
+   if(p.t==='M'){var nb=[];balls.forEach(function(b2){if(!b2.stuck){nb.push({x:b2.x,y:b2.y,vx:b2.vx+1.5,vy:b2.vy,r:6});nb.push({x:b2.x,y:b2.y,vx:b2.vx-1.5,vy:b2.vy,r:6});}});balls=balls.concat(nb);msg('⬇️ MULTI-BALL!');}
+   if(p.t==='L'){laserOn=6;msg('⬇️ LASER x6 — tap to fire!');}
+   if(p.t==='S'){slow=420;msg('⬇️ SLOW-MO!');}
+  }});
+ powerups=powerups.filter(function(p){return p.y<H&&!p.got});
+ // dead balls
+ balls=balls.filter(function(b){return b.y<H+20});
+ if(balls.length===0){
+  lives--;document.getElementById('lives').textContent=lives;
+  if(lives<=0){endGame(false);return;}
+  balls=[{x:W/2,y:H-46,vx:0,vy:0,r:6,stuck:true}];msg('💔 ball lost! tap to launch');
+ }
+ // level clear
+ if(bricks.every(function(b2){return b2.hp<=0})){
+  level++;
+  if(level>5){endGame(true);return;}
+  document.getElementById('lvl').textContent=level;
+  msg('✨ LEVEL '+level+'!');
+  var base=balls[0]||newBall();
+  buildLevel();
+  balls.forEach(function(b2){b2.vx*=1.15;b2.vy*=1.15;});
+ }
+ // particles
+ parts.forEach(function(p){p.x+=p.vx;p.y+=p.vy;p.t-=.02;});
+ parts=parts.filter(function(p){return p.t>0});
+ draw();
+}
+function draw(){
+ cx.fillStyle='#05020a';cx.fillRect(0,0,W,H);
+ bricks.forEach(function(br){if(br.hp<=0)return;
+  cx.shadowColor=br.col;cx.shadowBlur=8;
+  cx.fillStyle=br.hp>1?shade(br.col):br.col;
+  cx.fillRect(br.x,br.y,br.w,br.h);
+  cx.shadowBlur=0;
+  if(br.bonus){cx.fillStyle='#fff';cx.font='10px serif';cx.textAlign='center';cx.fillText('💎',br.x+br.w/2,br.y+br.h/2+3);}
+ });
+ powerups.forEach(function(p){cx.fillStyle='#1a0a2e';cx.beginPath();cx.arc(p.x,p.y,11,0,7);cx.fill();
+  cx.strokeStyle='#ffd60a';cx.lineWidth=2;cx.stroke();
+  cx.fillStyle='#ffd60a';cx.font='bold 12px sans-serif';cx.textAlign='center';cx.fillText(p.t,p.x,p.y+4);});
+ lasers.forEach(function(l){cx.strokeStyle='#ff4d6d';cx.lineWidth=3;cx.beginPath();cx.moveTo(l.x,l.y);cx.lineTo(l.x,l.y+14);cx.stroke();});
+ // paddle
+ cx.shadowColor='#3ddc84';cx.shadowBlur=12;
+ cx.fillStyle='#3ddc84';
+ cx.beginPath();cx.roundRect?cx.roundRect(padX,H-38,padW,12,6):cx.rect(padX,H-38,padW,12);cx.fill();
+ cx.shadowBlur=0;
+ balls.forEach(function(b){cx.shadowColor='#ffd60a';cx.shadowBlur=10;cx.fillStyle='#ffd60a';
+  cx.beginPath();cx.arc(b.x,b.y,b.r,0,7);cx.fill();cx.shadowBlur=0;});
+ parts.forEach(function(p){cx.globalAlpha=p.t*2;cx.fillStyle=p.col;cx.fillRect(p.x-2,p.y-2,4,4);cx.globalAlpha=1;});
+}
+function shade(c){return c+'99';}
+var lastS=0;
+function loop(){var n=Date.now();if(n-lastS>16){lastS=n;step();}requestAnimationFrame(loop);}
+function startGame(){
+ document.getElementById('ov').classList.add('hide');document.getElementById('ovEnd').classList.add('hide');
+ score=0;lives=3;level=1;padW=80;wide=0;slow=0;laserOn=0;
+ document.getElementById('score').textContent='0';document.getElementById('lives').textContent='3';document.getElementById('lvl').textContent='1';
+ buildLevel();balls[0].stuck=true;running=true;over=false;won=false;
+ msg('tap to launch!');
+}
+function endGame(w){
+ running=false;over=true;won=w;
+ var rec=score>best;if(rec){best=score;localStorage.setItem('jknb_best',best);}
+ document.getElementById('endTitle').textContent=w?'👑 ALL LEVELS CLEAR!':'💀 GAME OVER';
+ document.getElementById('endScore').textContent=score;
+ document.getElementById('endText').innerHTML=(rec?'🎉 NEW RECORD!':'Best: '+best)+'<br>'+(w?'Breakout CHAMPION! 🏆':'Level '+level+' வரை வந்த! 💪');
+ setTimeout(function(){document.getElementById('ovEnd').classList.remove('hide')},400);
+}
+buildLevel();
+window.__NB={G:function(){return {score:score,lives:lives,level:level,balls:balls.length,bricks:bricks.filter(function(b){return b.hp>0}).length,running:running,over:over,won:won,best:best,padW:padW}},start:startGame,launch:launch,pad:function(x){padX=Math.max(0,Math.min(W-padW,x))},ball:function(){return balls[0]?{x:Math.round(balls[0].x),y:Math.round(balls[0].y),vx:balls[0].vx,vy:balls[0].vy}:null},clearBricks:function(){bricks.forEach(function(b){b.hp=0;})},end:endGame};
+loop();
+</script>
+</body>
+</html>
