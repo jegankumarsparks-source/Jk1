@@ -67,7 +67,7 @@ plane.vy*=0.985;
 plane.y+=plane.vy*dt*10;
 plane.rot=Math.max(-0.5,Math.min(0.6,plane.vy*0.06));
 worldX+=speed*dt*10;dist=Math.floor(worldX/10);
-if(plane.y>H*0.12){plane.y=H*0.12;plane.vy=Math.max(0,plane.vy);}
+if(plane.y<H*0.12){plane.y=H*0.12;plane.vy=Math.max(0,plane.vy);}
 if(plane.y>GROUND()){die();}
 spawnS-=dt;if(spawnS<=0){spawnS=rand(1.2,2.2);stars.push({x:W+30,y:rand(H*0.2,GROUND()-60),got:false,ph:rand(0,TAU)});}
 spawnC-=dt;if(spawnC<=0){spawnC=rand(1.6,2.8)-Math.min(1,dist/600);cranes.push({x:W+40,y:rand(H*0.18,GROUND()-80),ph:rand(0,TAU),v:rand(20,50)});}
