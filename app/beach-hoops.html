@@ -47,7 +47,7 @@ const g=cv.getContext('2d');
 let W=0,H=0;
 function resize(){const dpr=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*dpr;cv.height=H*dpr;g.setTransform(dpr,0,0,dpr,0,0);}
 addEventListener('resize',resize);resize();
-const GRAV=980,RIMW=46;
+const GRAV=980,RIMW=54;
 let ball,hoop,score=0,makes=0,streak=0,onFire=false,timeLeft=60,playing=false,over=false;
 let wind=0,aiming=false,aimStart=null,aimNow=null,parts=[],floats=[],swishFlag=false,acc=0;
 const rand=(a,b)=>a+Math.random()*(b-a);
@@ -71,9 +71,9 @@ if(ball.vx>0&&ball.x+10>=bbX&&ball.x<bbX+8&&Math.abs(ball.y-hoop.y)<60){ball.x=b
 // rim posts
 for(const px of[hoop.x-RIMW/2,hoop.x+RIMW/2]){
 const dx=ball.x-px,dy=ball.y-hoop.y,d=Math.hypot(dx,dy);
-if(d<12){const nx=dx/(d||1),ny=dy/(d||1);const dot=ball.vx*nx+ball.vy*ny;
+if(d<9){const nx=dx/(d||1),ny=dy/(d||1);const dot=ball.vx*nx+ball.vy*ny;
 ball.vx-=1.7*dot*nx;ball.vy-=1.7*dot*ny;ball.vx*=0.7;ball.vy*=0.7;swishFlag=false;
-ball.x=px+nx*12;ball.y=hoop.y+ny*12;}}
+ball.x=px+nx*9;ball.y=hoop.y+ny*9;}}
 // score: crossing rim line downward inside opening
 if(!ball.scored&&ball.vy>0&&ball.y- ball.vy*dt<hoop.y&&ball.y>=hoop.y&&Math.abs(ball.x-hoop.x)<RIMW/2-6){
 ball.scored=true;makes++;
