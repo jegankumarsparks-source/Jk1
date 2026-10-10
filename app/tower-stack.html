@@ -193,7 +193,7 @@ function loop(){
 reset();
 document.getElementById('ov').classList.remove('hide');
 requestAnimationFrame(loop);
-window.__TS={drop:drop,G:function(){return {score:score,perfects:perfects,best:best,over:over,blocks:blocks.length,speed:speed}},cur:function(){return cur},reset:function(){reset();document.getElementById('ov').classList.add('hide')}};
+window.__TS={drop:drop,top:function(){return blocks[blocks.length-1]},G:function(){return {score:score,perfects:perfects,best:best,over:over,blocks:blocks.length,speed:speed}},cur:function(){return cur},reset:function(){reset();document.getElementById('ov').classList.add('hide')}};
 </script>
 </body>
 </html>
