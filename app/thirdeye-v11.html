@@ -974,6 +974,7 @@ window.__TE8={W:()=>({running:!!walkInt,steps:walkSteps,left:walkLeft,pace:walkP
  status:document.getElementById('walkStatus').textContent}),
  M:()=>({mood:mMood,energy:mEnergy,time:mTime,result:document.getElementById('moodResult').textContent.slice(0,80)}),
  walkTest:(sec,pretend)=>{if(walkInt)return 'already-running';
+  sessStart('நடை',()=>walkFinish(false));
   walkLen=1;walkSteps=0;walkLeft=sec||35;walkStartTs=Date.now()-(pretend||0)*1000;
   const s=document.getElementById('walkSteps');if(s)s.textContent='0';
   walkStartTick();
