@@ -195,8 +195,10 @@ function step(){
      return;
    }
  }
- // ghost meets player
- if(ghostHide===0&&pl.cx===gh.cx&&pl.cy===gh.cy){
+ // ghost meets player (cell or pixel proximity - catches mid-swap crossings)
+ var ppc=centerOf(pl),gpc=centerOf(gh);
+ var meet=(pl.cx===gh.cx&&pl.cy===gh.cy)||Math.hypot(ppc.x-gpc.x,ppc.y-gpc.y)<14;
+ if(ghostHide===0&&meet){
    if(scared>0){
      score+=200;$('sc').textContent=score;
      ghostHide=140;scared=0;
