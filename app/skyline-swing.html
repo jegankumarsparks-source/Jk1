@@ -46,7 +46,7 @@ function resize(){const dpr=Math.min(devicePixelRatio||1,2);W=innerWidth;H=inner
 addEventListener('resize',resize);resize();
 const GRAV=1250,RANGE=300;
 let player,anchors=[],rings=[],saws=[],buildings=[],camX=0,dist=0,ringCount=0,holding=false,rope=null;
-let playing=false,over=false,genX=0,parts=[],bestX=0;
+let playing=false,over=false,genX=0,parts=[],bestX=0,bonus=0;
 const rand=(a,b)=>a+Math.random()*(b-a);
 function generate(){while(genX<camX+W*2){
 buildings.push({x:genX,w:rand(70,130),h:rand(60,190)});
@@ -55,7 +55,7 @@ if(Math.random()<0.4)rings.push({x:genX+rand(60,180),y:rand(H*0.4,H*0.62),got:fa
 if(genX>600&&Math.random()<0.3)saws.push({x:genX+rand(80,200),y0:H*0.5,y1:H*0.8,ph:rand(0,TAU),sp:rand(1,2)});
 genX+=rand(150,240);}}
 function reset(){player={x:80,y:H*0.4,vx:280,vy:0};
-anchors=[];rings=[];saws=[];buildings=[];camX=0;dist=0;ringCount=0;rope=null;genX=0;parts=[];bestX=0;
+anchors=[];rings=[];saws=[];buildings=[];camX=0;dist=0;ringCount=0;rope=null;genX=0;parts=[];bestX=0;bonus=0;
 generate();}
 function attach(){let best=null,bd=1e9;
 for(const a of anchors){const d=Math.hypot(a.x-player.x,a.y-player.y);
@@ -79,10 +79,10 @@ player.vx-=vr*nx;player.vy-=vr*ny;}}
 if(holding&&!rope)attach();
 if(!holding)rope=null;
 bestX=Math.max(bestX,player.x);
-dist=Math.floor(bestX/12);
+dist=Math.floor(bestX/12)+bonus;
 camX=player.x-W*0.32;
 generate();
-for(const r of rings){if(!r.got&&Math.hypot(r.x-player.x,r.y-player.y)<30){r.got=true;ringCount++;dist+=8;}}
+for(const r of rings){if(!r.got&&Math.hypot(r.x-player.x,r.y-player.y)<30){r.got=true;ringCount++;bonus+=8;dist=Math.floor(bestX/12)+bonus;}}
 for(const s of saws){s.ph+=dt*s.sp;
 const sy=s.y0+(Math.sin(s.ph)*0.5+0.5)*(s.y1-s.y0);
 if(Math.hypot(s.x-player.x,sy-player.y)<26){die();return;}}
