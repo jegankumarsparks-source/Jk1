@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>JK CANDY BLAST 2040</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;touch-action:none}
+html,body{width:100%;height:100%;overflow:hidden;background:#FFF1E6}
+#game{position:fixed;inset:0}
+#hud{position:fixed;top:0;left:0;right:0;display:flex;justify-content:center;gap:22px;align-items:center;padding:12px 16px;background:rgba(255,255,255,.85);backdrop-filter:blur(6px);z-index:5;font-family:'Fredoka',sans-serif}
+#score{font-size:24px;font-weight:700;color:#FF5D8F}
+#level{font-size:13px;color:#F4A259}
+#time{font-size:13px;color:#7B6E9E}
+.overlay{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(180deg,rgba(255,241,230,.97),rgba(255,214,224,.98));font-family:'Fredoka',sans-serif;text-align:center;padding:20px}
+.overlay.hidden{display:none}
+h1{font-size:36px;color:#FF5D8F;letter-spacing:1px}
+.sub{color:#F4A259;font-size:14px;margin-top:8px;max-width:320px;line-height:1.6}
+.btn{margin-top:26px;padding:14px 42px;background:linear-gradient(180deg,#FF8FAB,#FF5D8F);color:#fff;font-family:'Fredoka',sans-serif;font-size:20px;font-weight:700;border:none;border-radius:40px;cursor:pointer;box-shadow:0 8px 20px rgba(255,93,143,.4)}
+#gameoverScore{font-size:44px;color:#FF5D8F;margin-top:8px;font-weight:700}
+</style>
+</head>
+<body>
+<div id="game"></div>
+<div id="hud"><div id="level">LV 1</div><div id="score">0</div><div id="time">60s</div></div>
+<div class="overlay" id="start">
+<h1>🍬 CANDY BLAST 2040 🍬</h1>
+<p class="sub">Tap a candy, then tap a neighbor to swap. Match 3 or more to blast! Chains = combo bonus! 60 seconds per level. Beat the blast! 🍭</p>
+<button class="btn" id="startBtn">START</button>
+</div>
+<div class="overlay hidden" id="over">
+<h1>⏰ LEVEL UP TIME! ⏰</h1>
+<div id="gameoverScore">0</div>
+<p class="sub" id="overSub">Keep blasting!</p>
+<button class="btn" id="overBtn">NEXT LEVEL</button>
+</div>
+<script>
+"use strict";
+const TAU=Math.PI*2;
+const COLS=8,ROWS=8,TYPES=6;
+const COLORS=['#FF5D8F','#FFB703','#FFD23F','#8AC926','#48CAE4','#9B5DE5'];
+const container=document.getElementById('game');
+const cv=document.createElement('canvas');cv.style.cssText='display:block;width:100%;height:100%';container.appendChild(cv);
+const g=cv.getContext('2d');
+let W=0,H=0,cell=44,ox=0,oy=0;
+function resize(){const dpr=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*dpr;cv.height=H*dpr;g.setTransform(dpr,0,0,dpr,0,0);
+cell=Math.floor(Math.min((W-20)/COLS,(H-120)/ROWS));ox=Math.floor((W-cell*COLS)/2);oy=70+Math.floor((H-120-cell*ROWS)/2);}
+addEventListener('resize',resize);resize();
+
+let grid=[],sel=null,score=0,level=1,timeLeft=60,playing=false,over=false,combo=0;
+let pops=[],floats=[],shakeT=0;
+const rand=n=>Math.floor(Math.random()*n);
+function newGrid(){grid=[];for(let y=0;y<ROWS;y++){grid.push([]);for(let x=0;x<COLS;x++){let t;do{t=rand(TYPES);}while((x>=2&&grid[y][x-1]===t&&grid[y][x-2]===t)||(y>=2&&grid[y-1][x]===t&&grid[y-2][x]===t));grid[y].push(t);}}}
+function findMatches(){const m=new Set();
+for(let y=0;y<ROWS;y++)for(let x=0;x<COLS-2;x++){const t=grid[y][x];if(t>=0&&grid[y][x+1]===t&&grid[y][x+2]===t)for(let k=0;k<3;k++)m.add((x+k)+','+y);}
+for(let x=0;x<COLS;x++)for(let y=0;y<ROWS-2;y++){const t=grid[y][x];if(t>=0&&grid[y+1][x]===t&&grid[y+2][x]===t)for(let k=0;k<3;k++)m.add(x+','+(y+k));}
+return m;}
+function hasAnyMove(){for(let y=0;y<ROWS;y++)for(let x=0;x<COLS;x++){const dirs=[[1,0],[0,1]];for(const[dx,dy]of dirs){const nx=x+dx,ny=y+dy;if(nx>=COLS||ny>=ROWS)continue;const t=grid[y][x];grid[y][x]=grid[ny][nx];grid[ny][nx]=t;const ok=findMatches().size>0;grid[ny][nx]=grid[y][x];grid[y][x]=t;if(ok)return true;}}return false;}
+function resolve(){let chain=0;
+for(;;){const m=findMatches();if(m.size===0)break;chain++;
+for(const key of m){const[x,y]=key.split(',').map(Number);pops.push({x,y,t:grid[y][x],life:18});grid[y][x]=-1;}
+score+=m.size*10*chain;combo=Math.max(combo,chain);
+if(chain>1)floats.push({x:W/2,y:H/2-60,text:'COMBO x'+chain+'!',life:40});
+for(let x=0;x<COLS;x++){const col=[];for(let y=ROWS-1;y>=0;y--)if(grid[y][x]>=0)col.push(grid[y][x]);for(let y=ROWS-1;y>=0;y--)grid[y][x]=col.length?col.shift():rand(TYPES);}}
+shakeT=chain>2?10:4;
+if(!hasAnyMove())newGrid();}
+function swap(a,b){const t=grid[a.y][a.x];grid[a.y][a.x]=grid[b.y][a.x];grid[b.y][b.x]=t;
+if(findMatches().size===0){const t2=grid[a.y][a.x];grid[a.y][a.x]=grid[b.y][b.x];grid[b.y][b.x]=t2;return false;}
+resolve();return true;}
+function tap(px,py){if(!playing||over)return;
+const x=Math.floor((px-ox)/cell),y=Math.floor((py-oy)/cell);
+if(x<0||x>=COLS||y<0||y>=ROWS){sel=null;return;}
+if(!sel){sel={x,y};return;}
+if(Math.abs(sel.x-x)+Math.abs(sel.y-y)===1){if(swap(sel,{x,y})){}sel=null;}else sel={x,y};}
+function tog(v){const t=v==='auto'?playing===false:v;if(t){if(over){level++;timeLeft=60;over=false;document.getElementById('over').classList.add('hidden');score=0;combo=0;}playing=true;document.getElementById('start').classList.add('hidden');}else playing=false;}
+document.getElementById('startBtn').addEventListener('click',()=>{newGrid();tog(true);});
+document.getElementById('overBtn').addEventListener('click',()=>tog(true));
+cv.addEventListener('pointerdown',e=>{const r=cv.getBoundingClientRect();tap(e.clientX-r.left,e.clientY-r.top);});
+function drawCandy(x,y,t,s,glow){const cx=ox+x*cell+cell/2,cy=oy+y*cell+cell/2,r=cell*s;
+g.save();if(glow){g.shadowColor=COLORS[t];g.shadowBlur=16;}
+g.fillStyle=COLORS[t];
+if(t%2===0){g.beginPath();g.arc(cx,cy,r,0,TAU);g.fill();}
+else{g.beginPath();g.moveTo(cx-r,cy+r);g.quadraticCurveTo(cx-r*1.2,cy-r*1.2,cx,cy-r);g.quadraticCurveTo(cx+r*1.2,cy-r*1.2,cx+r,cy+r);g.quadraticCurveTo(cx,cy+r*1.3,cx-r,cy+r);g.fill();}
+g.fillStyle='rgba(255,255,255,.55)';g.beginPath();g.arc(cx-r*.35,cy-r*.4,r*.28,0,TAU);g.fill();
+g.restore();}
+let last=performance.now(),acc=0;
+function frame(now){requestAnimationFrame(frame);const dt=Math.min((now-last)/1000,.1);last=now;
+if(playing&&!over){acc+=dt;if(acc>=1){acc-=1;timeLeft--;if(timeLeft<=0){over=true;playing=false;document.getElementById('gameoverScore').textContent=score;document.getElementById('overSub').textContent='Level '+level+' done! Best combo x'+(combo||1)+'!';document.getElementById('over').classList.remove('hidden');}}
+document.getElementById('time').textContent=timeLeft+'s';document.getElementById('score').textContent=score;document.getElementById('level').textContent='LV '+level;}
+for(let i=pops.length-1;i>=0;i--){pops[i].life--;if(pops[i].life<=0)pops.splice(i,1);}
+for(let i=floats.length-1;i>=0;i--){floats[i].life--;floats[i].y-=1;if(floats[i].life<=0)floats.splice(i,1);}
+if(shakeT>0)shakeT--;
+const bg=g.createLinearGradient(0,0,0,H);bg.addColorStop(0,'#FFF1E6');bg.addColorStop(1,'#FFE3EC');g.fillStyle=bg;g.fillRect(0,0,W,H);
+g.save();if(shakeT>0)g.translate((Math.random()-.5)*shakeT,(Math.random()-.5)*shakeT);
+g.fillStyle='rgba(255,255,255,.75)';g.beginPath();g.roundRect(ox-6,oy-6,cell*COLS+12,cell*ROWS+12,18);g.fill();
+for(let y=0;y<ROWS;y++)for(let x=0;x<COLS;x++){const t=grid[y][x];if(t<0)continue;
+const isSel=sel&&sel.x===x&&sel.y===y;drawCandy(x,y,t,isSel?.46:.4,isSel);}
+for(const p of pops){const a=p.life/18;g.globalAlpha=a;drawCandy(p.x,p.y,p.t,.4+(1-a)*.25,true);g.globalAlpha=1;}
+g.restore();
+for(const f of floats){g.globalAlpha=f.life/40;g.font='bold 34px Fredoka,sans-serif';g.textAlign='center';g.fillStyle='#FF5D8F';g.fillText(f.text,f.x,f.y);g.globalAlpha=1;}
+}
+requestAnimationFrame(frame);
+newGrid();
+window.__CB={G:()=>({score,level,timeLeft,playing,over,combo,pops:pops.length,moves:hasAnyMove()}),
+start:()=>{newGrid();score=0;level=1;timeLeft=60;combo=0;playing=true;over=false;document.getElementById('start').classList.add('hidden');document.getElementById('over').classList.add('hidden');},
+tap,grid:()=>grid.map(r=>r.slice()),
+setCell:(x,y,t)=>{grid[y][x]=t;},
+swapRaw:(ax,ay,bx,by)=>swap({x:ax,y:ay},{x:bx,y:by}),
+hasMove:hasAnyMove,findMatches:()=>findMatches().size,
+step:(n)=>{for(let i=0;i<n;i++)frame(performance.now());},
+expire:()=>{timeLeft=1;},
+forceResolve:resolve};
+</script>
+</body>
+</html>
