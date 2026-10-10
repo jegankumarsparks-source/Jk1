@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#07090a">
-<title>JK App V40 · JK PRO Signal</title>
+<title>JK App V41 · JK PRO Signal</title>
 <style>
 :root{--bg:#07090a;--bg2:#0d1113;--card:#11171a;--card2:#161e22;--line:#1f2a2f;--line2:#2a383e;--tx:#e8f0ec;--mut:#8a9a94;--dim:#5d6b66;--lime:#b6ff3b;--lime2:#8fd61a;--limeg:rgba(182,255,59,.14);--red:#ff5a5f;--redg:rgba(255,90,95,.13);--amb:#ffc23b;--ambg:rgba(255,194,59,.13);--cyan:#3be3ff;--cyang:rgba(59,227,255,.12);--vio:#b48bff;--r:14px}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -391,7 +391,7 @@ body{padding-bottom:calc(78px + env(safe-area-inset-bottom))}
 <div class="hdr">
   <div class="hrow">
     <button class="btn s o jk-shell-menu" type="button" onclick="jkDrawerOpen()" aria-label="Open navigation menu" aria-haspopup="dialog">☰</button><div class="logo">JK</div>
-    <div class="col"><div class="ttl">JK APP <small>V40</small></div><div class="sub">profit hunter · ranked signals · jk pro signal</div></div>
+    <div class="col"><div class="ttl">JK APP <small>V41</small></div><div class="sub">profit hunter · ranked signals · jk pro signal</div></div>
     <div class="sp"></div>
     <div class="col" style="align-items:flex-end;gap:3px"><div class="net"><span class="dot wait" id="netDot"></span><span id="netTxt">starting</span></div><div class="sub" id="clock">--</div></div>
   </div>
@@ -441,7 +441,7 @@ body{padding-bottom:calc(78px + env(safe-area-inset-bottom))}
    Simulation only. This file never connects a wallet, never signs,
    never sends a transaction. Every "buy" and "sell" is paper money.
    ===================================================================== */
-const VERSION='V40';
+const VERSION='V41';
 const JP='https://datapi.jup.ag', LITE='https://lite-api.jup.ag', DEX='https://api.dexscreener.com', RPC='https://solana-rpc.publicnode.com';
 const SOL_MINT='So11111111111111111111111111111111111111112';
 const BASE_MINTS=new Set([SOL_MINT,'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v','Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB','mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So','J1toso1uCk3RLmjorhTtrVwY9HJ7X8V9yYac6Y7kGCPn']);
@@ -513,7 +513,7 @@ if(!ST.smart) ST.smart={cash:CFG.bank,start:CFG.bank,pos:[],closed:[],born:Date.
 if(!ST.launch) ST.launch={cash:CFG.bank,start:CFG.bank,pos:[],closed:[],born:Date.now()}; // V13: LAUNCH AUTO keeps its OWN paper wallet
 if(!ST.closest) ST.closest={cash:CFG.bank,start:CFG.bank,pos:[],closed:[],born:Date.now()}; // V11: CLOSEST AUTO keeps its OWN paper wallet
 // owner rule: every new app version starts ALL paper bots fresh at $500 each. The original four reset WITH archival in jkFreshUpgrade (JK_UPGRADE_ID); here we reset the two books it does not cover.
-const JK_VER='V40'; if(LS.get('appVer')!==JK_VER){ LS.set('appVer',JK_VER); ST.walletSignal={cash:500,start:500,pos:[],closed:[],born:Date.now()}; ST.hourly={cash:500,start:500,pos:[],closed:[],born:Date.now()}; ST.lastBuyWS={}; ST.lastBuyH={}; LS.set('hourlyBook',{cash:500,start:500,pos:[],closed:[],born:Date.now(),on:true,lastMint:'',status:'Fresh $500 for the new version'}); saveBooks(); }
+const JK_VER='V41'; if(LS.get('appVer')!==JK_VER){ LS.set('appVer',JK_VER); ST.walletSignal={cash:500,start:500,pos:[],closed:[],born:Date.now()}; ST.hourly={cash:500,start:500,pos:[],closed:[],born:Date.now()}; ST.lastBuyWS={}; ST.lastBuyH={}; LS.set('hourlyBook',{cash:500,start:500,pos:[],closed:[],born:Date.now(),on:true,lastMint:'',status:'Fresh $500 for the new version'}); saveBooks(); }
 // V9 upgrade: sync still-open positions to the tiered rule (tier 1 = sell 50% at +30%, tier 2 = sell the rest at 2x, stop -30% from entry)
 function syncPosRule(){ for(const B of [ST.paper,ST.manual]) if(B&&B.pos) for(const p of B.pos) if(p&&p.entry>0){
   p.tp2=p.entry*CFG.tp2X; if(!p.tpDone){ p.tp=p.entry*CFG.tpX; p.stop=p.entry*(1-CFG.stopPct/100); } else if(CFG.trail==='entry'){ p.stop=p.entry*(1-CFG.stopPct/100); } } }
@@ -1203,8 +1203,8 @@ function dashBoard(){ const R=ST.res; if(!R||!R.top.length) return '';
   const cls=x=>x>=0?'g':'r'; const inf=o.a&&o.a.info||{}; const edge=[]; if(inf.m15!=null)edge.push('mom '+fmtPct(inf.m15,0)); if(inf.br)edge.push('buyers '+(inf.br>=9?'9+':inf.br.toFixed(1))+'x'); if(inf.burst)edge.push('vol '+inf.burst.toFixed(1)+'x'); if(inf.ema)edge.push('EMA up'); if(inf.rsi!=null)edge.push('RSI '+inf.rsi.toFixed(0)); if(o.wl&&o.wl.n)edge.push(o.wl.n+' wallet'+(o.wl.n>1?'s':''));
   return '<div class="drow" onclick="openCoin(\''+c.m+'\')"><span class="drk">'+(i+1)+'</span><div class="dcol"><b>'+esc(c.sym||'?')+'</b> '+(o.bz?'<span class="bztag">BUY ZONE</span> ':'')+'<div class="dsub">'+esc(String(c.name||'').slice(0,16))+' \u00B7 '+fmtUsd(c.liq,0)+' liq \u00B7 '+fmtUsd(c.mcap,0)+' mc \u00B7 '+dashAge(c)+' old</div>'+(edge.length?'<div class="dsub" style="color:var(--acc,#7ee787)">'+edge.slice(0,4).join(' \u00B7 ')+'</div>':'')+'</div><div class="dcol r"><span class="dnum '+cls(p5)+'">'+fmtPct(p5,0)+'</span> <span class="dnum '+cls(p1)+'">'+fmtPct(p1,0)+'</span> <span class="dnum '+cls(p24)+'">'+fmtPct(p24,0)+'</span><div class="dsub">5m \u00B7 1h \u00B7 24h</div></div><span class="jksc">JK '+Math.round(o.sc)+'</span></div>'; }).join('')+'</div>'; }
 function raceBoard(){ const bots=[['\u{1F916} Auto pilot',ST.paper],['\u{1F3AF} Closest',ST.closest],['\u{1F680} Launch',ST.launch],['\u{1F40B} Smart money',ST.smart],['\u{1F45B} Wallet Signal',ST.walletSignal],['\u23F1 1-hour cycle',JK_HOURLY]];
- const R=bots.map(([n,B])=>{ const S=bookStats(B); const cl=(B&&B.closed)||[]; const W=cl.filter(t=>t&&t.pnl>0), L=cl.filter(t=>t&&t.pnl<=0); const aw=W.length?W.reduce((a,t)=>a+num(t.pct),0)/W.length:0; const al=L.length?L.reduce((a,t)=>a+num(t.pct),0)/L.length:0; const rec=cl.length?(W.length+'/'+cl.length+' won \u00B7 avg '+(W.length?('+'+aw.toFixed(1)+'%'):'--')+' / '+(L.length?al.toFixed(1)+'%':'--')):'no closed trades yet'; return {n,S,rec}; }).sort((a,b)=>b.S.val-a.S.val); const medals=['\u{1F947}','\u{1F948}','\u{1F949}'];
- return '<div class="sec">\u{1F3C1} $500 race <span class="h">all six paper wallets started V40 at $500 \u00B7 live ranking</span></div><div class="card" style="padding:6px 10px">'+R.map((r,i)=>'<div class="race"><span class="rk">'+(medals[i]||(i+1)+'.')+'</span><span class="nm">'+r.n+'<div class="dsub">'+r.rec+'</div></span><span class="vl '+(r.S.pnl>=0?'g':'r')+'">'+money(r.S.val)+'</span><span class="xs '+(r.S.pnl>=0?'g':'r')+'">'+(r.S.pct>=0?'+':'')+r.S.pct.toFixed(1)+'%</span></div>').join('')+'</div>'; }
+ const R=bots.map(([n,B])=>{ const S=bookStats(B); const cl=(B&&B.closed)||[]; const W=cl.filter(t=>t&&t.pnl>0), L=cl.filter(t=>t&&t.pnl<=0); const aw=W.length?W.reduce((a,t)=>a+num(t.pct),0)/W.length:0; const al=L.length?L.reduce((a,t)=>a+num(t.pct),0)/L.length:0; const rec=cl.length?(W.length+'/'+cl.length+' won \u00B7 avg '+(W.length?('+'+aw.toFixed(1)+'%'):'--')+' / '+(L.length?al.toFixed(1)+'%':'--')):'no closed trades yet'; const op=(B&&B.pos)||[]; const hrs=(Date.now()-(B&&B.born||Date.now()))/3600e3; const pace=hrs>0.08?(S.val-500)/hrs:null; const live=(op.length?('holding: '+op.slice(0,3).map(p=>esc(p.sym||'?')).join(', ')+(op.length>3?' +'+(op.length-3):'')):'holding: none')+(pace!=null?(' \u00B7 pace '+(pace>=0?'+':'')+pace.toFixed(2)+'$/hr observed - not a prediction'):''); return {n,S,rec,live}; }).sort((a,b)=>b.S.val-a.S.val); const medals=['\u{1F947}','\u{1F948}','\u{1F949}'];
+ return '<div class="sec">\u{1F3C1} $500 race <span class="h">all six paper wallets started V41 at $500 \u00B7 live ranking</span></div><div class="card" style="padding:6px 10px">'+R.map((r,i)=>'<div class="race"><span class="rk">'+(medals[i]||(i+1)+'.')+'</span><span class="nm">'+r.n+'<div class="dsub">'+r.rec+'</div><div class="dsub" style="color:var(--acc,#7ee787)">'+r.live+'</div></span><span class="vl '+(r.S.pnl>=0?'g':'r')+'">'+money(r.S.val)+'</span><span class="xs '+(r.S.pnl>=0?'g':'r')+'">'+(r.S.pct>=0?'+':'')+r.S.pct.toFixed(1)+'%</span></div>').join('')+'</div>'; }
 function hourlyTick(){ if(CFG.hourlyAuto===false||!ST.res) return; const B=ST.hourly; const p=B.pos[0];
  if(p){ const c=ST.coins[p.m]; const px=c&&c.price>0?c.price:p.last; if(c&&c.price>0){ p.last=c.price; p.lastTs=Date.now(); p.peak=Math.max(p.peak,c.price); }
   const pct=(px-p.entry)/p.entry*100; const ageH=(Date.now()-p.ts)/3600e3;
@@ -2521,7 +2521,7 @@ importData=function(f){if(!f)return;if(f.size>8*1024*1024){toast('Backup is over
 const jkBackupRenderPage=renderPage;
 renderPage=function(t){jkBackupRenderPage(t);if(t==='set'&&!document.getElementById('jkBackupNotice')){
  const el=document.createElement('div');el.id='jkBackupNotice';el.className='card';
- el.innerHTML='<b>🔒 Safe backup · V40</b><div class="xs m" style="margin-top:8px">Export keeps paper wallets, tracked wallets, settings and saved analysis. Bot credentials, Telegram destinations and pending post queues are excluded, including extra-bot secrets. Imports are checked before writing and require your confirmation. Existing local Telegram settings stay untouched.</div><div class="btns"><button class="btn" onclick="exportData()">Download safe backup</button></div>';document.getElementById('pg-set').prepend(el);
+ el.innerHTML='<b>🔒 Safe backup · V41</b><div class="xs m" style="margin-top:8px">Export keeps paper wallets, tracked wallets, settings and saved analysis. Bot credentials, Telegram destinations and pending post queues are excluded, including extra-bot secrets. Imports are checked before writing and require your confirmation. Existing local Telegram settings stay untouched.</div><div class="btns"><button class="btn" onclick="exportData()">Download safe backup</button></div>';document.getElementById('pg-set').prepend(el);
 }};
 
 
@@ -2827,7 +2827,7 @@ jkCoinSummary=function(c){return jkTimestampSummary(c)+'\n'+jkProviderFreshness(
 
 
 /* V24.27 owner-requested fresh original-four wallets and hourly paper dashboard. */
-const JK_UPGRADE_ID='V40';
+const JK_UPGRADE_ID='V41';
 let JK_RESET_ERROR='';
 function jkFreshUpgrade(){if(LS.get('freshReset','')===JK_UPGRADE_ID)return true;
  const keys=['paper','closest','launch','smart'],rollbackKeys=[...keys,'lastBuy','lastBuyC','lastBuyL','lastBuyS','cfg','freshReset','upgradeArchives'],previous=rollbackKeys.map(k=>[k,localStorage.getItem('jk7_'+k)]),oldCFG=JSON.parse(JSON.stringify(CFG)),snapshot={version:JK_UPGRADE_ID,at:Date.now(),wallets:{},cooldowns:{}};
