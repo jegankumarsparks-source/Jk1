@@ -128,7 +128,7 @@ function simStep(dt){
    if(b.x+b.r>k.x&&b.x-b.r<k.x+k.w&&b.y+b.r>k.y&&b.y-b.r<k.y+k.h){
     const ox=Math.min(b.x+b.r-k.x,k.x+k.w-(b.x-b.r));
     const oy=Math.min(b.y+b.r-k.y,k.y+k.h-(b.y-b.r));
-    if(ox<oy)b.vx=-b.vx;else b.vy=-b.vy;
+    if(ox<oy){b.vx=-b.vx;b.x+=(b.x<k.x+k.w/2?-ox:ox);}else{b.vy=-b.vy;b.y+=(b.y<k.y+k.h/2?-oy:oy);}
     hitBrick(k,b);break;}
   }
   if(b.y>H+20){balls.splice(i,1);
