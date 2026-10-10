@@ -324,7 +324,7 @@ function draw(){
 }
 var rafN=0;function loop(){rafN++;update();draw();requestAnimationFrame(loop);}
 loop();
-window.__SR={G:G,ship:ship,foes:foes,bullets:bullets,parts:parts,ebullets:ebullets,start:start,gameOver:gameOver,boss:function(){return boss},waveLeft:function(){return waveLeft},spawnT:function(){return spawnT},hidden:function(){return document.hidden},raf:function(){return rafN}};
+window.__SR={G:G,ship:ship,foes:function(){return foes},bullets:function(){return bullets},parts:function(){return parts},ebullets:function(){return ebullets},start:start,gameOver:gameOver,boss:function(){return boss},waveLeft:function(){return waveLeft},spawnT:function(){return spawnT},hidden:function(){return document.hidden},raf:function(){return rafN}};
 /* idle attract: ship parked */
 ship.x=W/2;ship.y=H-90;
 })();
