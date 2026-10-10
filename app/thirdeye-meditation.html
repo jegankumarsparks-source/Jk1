@@ -806,7 +806,7 @@ function syncStopAll(msg){
  document.getElementById('syncInfo').textContent='சுழற்சி: — / 7';}
 document.getElementById('syncStart').addEventListener('click',()=>{
  if(syncInt)return;
- syncCyc=0;syncPhase=0;syncStarts=[];syncTaps=[];syncTest=false;lastTap=0;
+ syncCyc=0;syncPhase=0;syncStarts=[];syncTaps=[];syncTest=false;lastTap=performance.now()-10000;
  document.getElementById('syncTap').style.display='inline-block';
  document.getElementById('syncStop').style.display='inline-block';
  document.getElementById('syncScore').textContent='';
