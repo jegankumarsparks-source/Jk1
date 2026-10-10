@@ -10,7 +10,7 @@
 html{scroll-behavior:smooth}
 body{background:var(--bg);color:var(--ink);font-family:'Noto Sans Tamil','Latha','Tamil Sangam MN',sans-serif;line-height:1.85;font-size:16px}
 header{position:relative;text-align:center;padding:42px 20px 28px;background:linear-gradient(180deg,#1C3D27 0%,var(--bg) 85%)}
-.leafRing{width:120px;height:120px;margin:0 auto 12px;position:relative}
+.leafRing{width:120px;height:120px;margin:0 auto 26px;position:relative;overflow:visible}
 .leafRing .lf{position:absolute;left:50%;top:50%;width:14px;height:34px;background:linear-gradient(180deg,var(--leaf2),var(--leaf));border-radius:50% 50% 50% 50%/60% 60% 40% 40%;transform-origin:50% 60px;animation:sway 4s ease-in-out infinite}
 @keyframes sway{0%,100%{filter:brightness(1)}50%{filter:brightness(1.25)}}
 .leafEye{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:44px;height:26px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center}
@@ -140,7 +140,7 @@ footer{text-align:center;color:var(--dim);font-size:13px;padding:28px 20px 40px}
 // leaf ring
 const lr=document.getElementById('leafRing');
 for(let i=0;i<12;i++){const d=document.createElement('div');d.className='lf';
- d.style.transform='rotate('+i*30+'deg) translateY(-52px)';d.style.animationDelay=(i*0.2)+'s';
+ d.style.transform='rotate('+i*30+'deg) translateY(-46px)';d.style.animationDelay=(i*0.2)+'s';
  lr.insertBefore(d,lr.firstChild);}
 // nav
 const links=[...document.querySelectorAll('nav a')];
