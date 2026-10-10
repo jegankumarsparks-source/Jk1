@@ -232,7 +232,7 @@ function paintDash(){
  document.getElementById('h-sip').textContent=fm(RES.sip1)+'/mo';
  document.getElementById('h-mult').textContent=(RES.inv>0?(RES.end/(RES.inv+S.corpus)):0).toFixed(2)+'x';
  var cr=RES.miles[1e7];
- document.getElementById('h-crore').innerHTML=cr?('உங்கள் <b>பிற்று கோடி</b> year <b>'+cr+'</b> &bull; '+(new Date().getFullYear()+cr)):'Horizon-க்குள் கோடி reach ஆகாது - sliders மாற்றி பாருங்கள்';
+ document.getElementById('h-crore').innerHTML=cr?('உங்கள் <b>முதல் கோடி</b> year <b>'+cr+'</b> &bull; '+(new Date().getFullYear()+cr)):'Horizon-க்குள் கோடி reach ஆகாது - sliders மாற்றி பாருங்கள்';
  drawChart('cv-dash',RES.rows);
 }
 function drawChart(id,rows){
