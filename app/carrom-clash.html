@@ -183,7 +183,7 @@ function resolve(){
  if(!qAlive&&queenOwner){if(queenOwner==='you')scoreYou+=3;else scoreAi+=3;var qo=queenOwner;queenOwner='done';paintScore();}
  if(wAlive===0||bAlive===0){phase='over';finish(wAlive===0?'you':'ai');return}
  if(turn==='you'){phase='place';placeStriker();}
- else{phase='move';setTimeout(aiShot,900);}
+ else{phase='aiwait';setTimeout(aiShot,900);}
  setTurnText();
 }
 function respawnStriker(){var s=striker();s.alive=true;s.vx=0;s.vy=0;}
@@ -239,7 +239,7 @@ function placeStriker2(s){
 
 /* ---------- AI ---------- */
 function aiShot(){
- if(phase==='over')return;
+ if(phase!=='aiwait')return;
  var s=striker();
  /* ensure striker placed on AI baseline */
  s.alive=true;s.vx=0;s.vy=0;s.y=M+30;
