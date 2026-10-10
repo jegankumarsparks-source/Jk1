@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>JK CYCLONE HOCKEY</title>
+<style>
+html,body{width:100%;height:100%;overflow:hidden;background:#0A1628;margin:0;touch-action:none;user-select:none;-webkit-user-select:none;font-family:'Trebuchet MS',Verdana,sans-serif}
+canvas{display:block;width:100%;height:100%}
+.ov{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(10,22,40,.9);color:#D6E9FF;text-align:center;z-index:5;padding:20px;box-sizing:border-box}
+.hidden{display:none}
+h1{font-size:32px;margin:0;letter-spacing:2px;color:#7FE3F0;text-shadow:3px 3px 0 #0F5E7A}
+.sub{color:#A8C4E6;font-size:15px;margin-top:12px;max-width:330px;line-height:1.6}
+button{margin-top:20px;background:#F4A259;color:#0A1628;border:none;padding:13px 32px;font-size:18px;font-weight:700;border-radius:10px;letter-spacing:1px;box-shadow:0 4px 0 #B06A28;font-family:inherit}
+button:active{transform:translateY(3px);box-shadow:none}
+.diff{display:flex;gap:10px;margin-top:16px}
+.diff button{padding:10px 18px;font-size:15px;margin-top:0}
+.big{font-size:44px;color:#FFD23F;font-weight:800;margin-top:8px}
+.card{margin-top:12px;font-size:16px;line-height:1.9;color:#A8C4E6}
+.card b{color:#7FE3F0}
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+<div id="start" class="ov">
+<h1>CYCLONE HOCKEY</h1>
+<div class="sub">Air hockey in a storm. First to 5.<br>Drag your paddle (bottom half).<br>Fast paddle = POWER SHOT. Watch for cyclone gusts curving the puck!</div>
+<div class="diff">
+<button data-d="0">ROOKIE</button>
+<button data-d="1">PRO</button>
+<button data-d="2">ADAPTIVE</button>
+</div>
+</div>
+<div id="over" class="ov hidden">
+<h1 id="overTitle">YOU WIN</h1>
+<div class="big" id="finalScore">5 - 0</div>
+<div class="card" id="scoreCard"></div>
+<button id="overBtn">REMATCH</button>
+</div>
+<script>
+const cv=document.getElementById('cv'),g=cv.getContext('2d');
+let W,H;const TAU=Math.PI*2;
+addEventListener('resize',resize);resize();
+function resize(){const dpr=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*dpr;cv.height=H*dpr;g.setTransform(dpr,0,0,dpr,0,0);}
+const rand=(a,b)=>a+Math.random()*(b-a);
+const GOALW=()=>W*0.34;
+let playing=false,over=false,diff=1;
+let pScore,aScore,shots,saves,topSpeed,gusts,gustT,gustMsg=0,flashT=0;
+let puck,me,ai,trail=[],parts=[];
+let mePrev=null;
+function reset(){pScore=0;aScore=0;shots=0;saves=0;topSpeed=0;gusts=0;gustT=rand(6,10);gustMsg=0;flashT=0;
+ puck={x:W/2,y:H/2,vx:0,vy:0,r:13,gx:0};
+ me={x:W/2,y:H*0.82,r:24,px:W/2,py:H*0.82};
+ ai={x:W/2,y:H*0.18,r:24};
+ trail=[];parts=[];}
+function serve(dir){puck.x=W/2;puck.y=H/2;puck.vx=rand(-160,160);puck.vy=dir*rand(220,300);puck.gx=0;}
+function goal(forMe){
+ if(forMe){pScore++;burst(W/2,H*0.06,'#7FE3F0');}
+ else{aScore++;burst(W/2,H*0.94,'#FF6B8A');}
+ if(pScore>=5||aScore>=5){finish();return;}
+ serve(forMe?1:-1);}
+function burst(x,y,c){for(let i=0;i<18;i++)parts.push({x:x,y:y,vx:rand(-260,260),vy:rand(-260,260),life:rand(.4,.9),c:c});}
+function finish(){playing=false;over=true;
+ const won=pScore>aScore;
+ document.getElementById('overTitle').textContent=won?'YOU WIN! 🏆':'BOT WINS 😤';
+ document.getElementById('finalScore').textContent=pScore+' - '+aScore;
+ document.getElementById('scoreCard').innerHTML='Shots: <b>'+shots+'</b> &nbsp; Saves: <b>'+saves+'</b><br>Top puck speed: <b>'+Math.round(topSpeed)+'</b><br>Cyclone gusts: '+gusts;
+ document.getElementById('over').classList.remove('hidden');}
+function collide(p,isMe){
+ const dx=puck.x-p.x,dy=puck.y-p.y,d=Math.hypot(dx,dy),min=puck.r+p.r;
+ if(d>=min||d===0)return;
+ const nx=dx/d,ny=dy/d;
+ puck.x=p.x+nx*min;puck.y=p.y+ny*min;
+ let pvx,pvy;
+ if(isMe){pvx=(me.x-me.px)*60;pvy=(me.y-me.py)*60;}
+ else{pvx=ai.vx||0;pvy=ai.vy||0;}
+ const rel=(puck.vx-pvx)*nx+(puck.vy-pvy)*ny;
+ if(rel<0){puck.vx-=2*rel*nx;puck.vy-=2*rel*ny;
+  puck.vx+=pvx*0.25;puck.vy+=pvy*0.25;
+  const sp=Math.hypot(puck.vx,puck.vy);
+  const max=1150; if(sp>max){puck.vx*=max/sp;puck.vy*=max/sp;}
+  if(sp>topSpeed)topSpeed=sp;
+  if(isMe){const psp=Math.hypot(pvx,pvy);
+   if(psp>900){puck.vx*=1.25;puck.vy*=1.25;burst(puck.x,puck.y,'#FFD23F');}
+   if(puck.vy<0)shots++; if(puck.vy<0&&puck.y>H*0.7)saves=Math.max(saves-1,0);}
+ }}
+function simStep(dt){
+ if(!playing||over)return;
+ // AI
+ const aiSpd=diff===0?280:diff===1?460:Math.min(640,320+(pScore+aScore)*45);
+ let tx=W/2,ty=H*0.18;
+ if(puck.y<H/2){tx=puck.x;ty=Math.max(H*0.06,puck.y-40);
+  if(diff===2&&puck.vy>0){tx=puck.x+puck.vx*0.25;}}
+ else{tx=W/2+(puck.x-W/2)*0.2;ty=H*0.18;}
+ const dx=tx-ai.x,dy=ty-ai.y,dd=Math.hypot(dx,dy);
+ if(dd>1){const mv=Math.min(dd,aiSpd*dt);ai.vx=dx/dd*mv/dt;ai.vy=dy/dd*mv/dt;
+  ai.x+=dx/dd*mv;ai.y+=dy/dd*mv;}else{ai.vx=0;ai.vy=0;}
+ ai.y=Math.min(ai.y,H/2-30);
+ // puck physics
+ puck.x+=puck.vx*dt;puck.y+=puck.vy*dt;
+ // cyclone gust
+ gustT-=dt;
+ if(gustT<=0){gustT=rand(7,12);gusts++;puck.gx=rand(-260,260);gustMsg=1.2;flashT=0.15;}
+ puck.vx+=puck.gx*dt;puck.gx*=Math.pow(0.4,dt);
+ if(gustMsg>0)gustMsg-=dt; if(flashT>0)flashT-=dt;
+ // friction
+ const fr=Math.pow(0.55,dt);puck.vx*=fr;puck.vy*=fr;
+ const sp=Math.hypot(puck.vx,puck.vy);if(sp>topSpeed&&sp>40)topSpeed=sp;
+ // walls
+ const gw=GOALW();
+ if(puck.x<puck.r){puck.x=puck.r;puck.vx=Math.abs(puck.vx)*0.92;}
+ if(puck.x>W-puck.r){puck.x=W-puck.r;puck.vx=-Math.abs(puck.vx)*0.92;}
+ if(puck.y<puck.r){
+  if(Math.abs(puck.x-W/2)<gw/2){goal(false);return;}
+  puck.y=puck.r;puck.vy=Math.abs(puck.vy)*0.92;}
+ if(puck.y>H-puck.r){
+  if(Math.abs(puck.x-W/2)<gw/2){goal(true);return;}
+  puck.y=H-puck.r;puck.vy=-Math.abs(puck.vy)*0.92;}
+ collide(me,true);collide(ai,false);
+ // save detection: puck moving toward my goal fast, blocked
+ trail.push({x:puck.x,y:puck.y});if(trail.length>12)trail.shift();
+ for(let i=parts.length-1;i>=0;i--){const p=parts[i];p.x+=p.vx*dt;p.y+=p.vy*dt;p.vx*=0.96;p.vy*=0.96;p.life-=dt;if(p.life<=0)parts.splice(i,1);}
+ me.px=me.x;me.py=me.y;
+}
+function draw(){
+ // storm table
+ const bg=g.createLinearGradient(0,0,0,H);
+ bg.addColorStop(0,'#12263F');bg.addColorStop(0.5,'#0A1628');bg.addColorStop(1,'#12263F');
+ g.fillStyle=bg;g.fillRect(0,0,W,H);
+ // rain streaks
+ g.strokeStyle='rgba(127,227,240,.08)';g.lineWidth=1;
+ const off=performance.now()/12%40;
+ for(let x=-20;x<W+20;x+=26){g.beginPath();g.moveTo(x+(x*7%13),-20+off);g.lineTo(x-14+(x*7%13),20+off);g.stroke();}
+ // lightning flash
+ if(flashT>0){g.fillStyle='rgba(214,233,255,'+flashT*1.6+')';g.fillRect(0,0,W,H);}
+ // rink markings
+ g.strokeStyle='rgba(127,227,240,.3)';g.lineWidth=3;
+ g.beginPath();g.moveTo(0,H/2);g.lineTo(W,H/2);g.stroke();
+ g.beginPath();g.arc(W/2,H/2,60,0,TAU);g.stroke();
+ // goals
+ const gw=GOALW();
+ g.fillStyle='#7FE3F0';g.fillRect(W/2-gw/2,0,gw,8);
+ g.fillStyle='#FF6B8A';g.fillRect(W/2-gw/2,H-8,gw,8);
+ g.strokeStyle='rgba(127,227,240,.6)';g.strokeRect(W/2-gw/2,0,gw,26);
+ g.strokeStyle='rgba(255,107,138,.6)';g.strokeRect(W/2-gw/2,H-26,gw,26);
+ // puck trail
+ for(let i=0;i<trail.length;i++){const t=trail[i];g.globalAlpha=i/trail.length*0.3;
+  g.fillStyle='#FFD23F';g.beginPath();g.arc(t.x,t.y,puck.r*0.7,0,TAU);g.fill();}
+ g.globalAlpha=1;
+ // puck
+ g.fillStyle='rgba(255,210,63,.3)';g.beginPath();g.arc(puck.x,puck.y,puck.r+7,0,TAU);g.fill();
+ g.fillStyle='#FFD23F';g.beginPath();g.arc(puck.x,puck.y,puck.r,0,TAU);g.fill();
+ g.fillStyle='#B8860B';g.beginPath();g.arc(puck.x,puck.y,puck.r*0.45,0,TAU);g.fill();
+ // paddles
+ g.fillStyle='#FF6B8A';g.beginPath();g.arc(me.x,me.y,me.r,0,TAU);g.fill();
+ g.fillStyle='#C23A5C';g.beginPath();g.arc(me.x,me.y,me.r*0.55,0,TAU);g.fill();
+ g.fillStyle='#7FE3F0';g.beginPath();g.arc(ai.x,ai.y,ai.r,0,TAU);g.fill();
+ g.fillStyle='#3A9BB5';g.beginPath();g.arc(ai.x,ai.y,ai.r*0.55,0,TAU);g.fill();
+ for(const p of parts){g.globalAlpha=Math.min(1,p.life*2);g.fillStyle=p.c;g.beginPath();g.arc(p.x,p.y,4,0,TAU);g.fill();}
+ g.globalAlpha=1;
+ // HUD
+ g.fillStyle='rgba(10,22,40,.75)';g.fillRect(0,H/2-26,W,52);
+ g.textBaseline='middle';g.textAlign='left';
+ g.fillStyle='#7FE3F0';g.font='800 24px Trebuchet MS';
+ g.fillText('BOT '+aScore,16,H/2);
+ g.textAlign='right';g.fillStyle='#FF6B8A';
+ g.fillText(pScore+' YOU',W-16,H/2);
+ if(gustMsg>0){g.textAlign='center';g.fillStyle='#FFD23F';g.font='800 20px Trebuchet MS';
+  g.strokeStyle='#0A1628';g.lineWidth=4;
+  g.strokeText('🌀 CYCLONE GUST!',W/2,H*0.42);g.fillText('🌀 CYCLONE GUST!',W/2,H*0.42);}
+}
+let last=performance.now();
+function frame(now){requestAnimationFrame(frame);const dt=Math.min((now-last)/1000,.05);last=now;simStep(dt);draw();}
+requestAnimationFrame(frame);
+reset();
+function tog(d){reset();diff=(typeof d==='number')?d:diff;playing=true;over=false;
+ serve(Math.random()<0.5?1:-1);
+ document.getElementById('start').classList.add('hidden');document.getElementById('over').classList.add('hidden');}
+document.querySelectorAll('.diff button').forEach(b=>b.addEventListener('click',()=>tog(+b.dataset.d)));
+document.getElementById('overBtn').addEventListener('click',()=>{tog(diff);});
+cv.addEventListener('pointerdown',e=>{if(e.clientY>H/2){me.x=e.clientX;me.y=Math.max(H/2+30,e.clientY);}});
+cv.addEventListener('pointermove',e=>{if(e.buttons||e.pointerType==='touch'){
+ me.x=Math.max(me.r,Math.min(W-me.r,e.clientX));
+ me.y=Math.max(H/2+30,Math.min(H-me.r,e.clientY));}});
+window.__CH={G:()=>({pScore,aScore,shots,saves,topSpeed:Math.round(topSpeed),gusts,diff,playing,over,puckX:Math.round(puck.x),puckY:Math.round(puck.y),puckVx:Math.round(puck.vx),puckVy:Math.round(puck.vy),aiX:Math.round(ai.x),aiY:Math.round(ai.y)}),
+ start:(d)=>tog(d),sim:(dt)=>simStep(dt),
+ refs:()=>({puck,me,ai}),
+ setPaddle:(x,y)=>{me.x=x;me.y=Math.max(H/2+30,y);},
+ warpPuck:(x,y,vx,vy)=>{puck.x=x;puck.y=y;puck.vx=vx;puck.vy=vy;},
+ setScore:(p,a)=>{pScore=p;aScore=a;},
+ forceGust:()=>{gustT=0.01;}};
+</script>
+</body>
+</html>
