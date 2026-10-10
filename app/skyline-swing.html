@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>JK SKYLINE SWING 2040</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;touch-action:none}
+html,body{width:100%;height:100%;overflow:hidden;background:#FFE8D6}
+#game{position:fixed;inset:0}
+canvas{display:block;width:100%;height:100%}
+#hud{position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;padding:12px 16px;z-index:5;font-family:'Sora',sans-serif;pointer-events:none;color:#3D405B}
+#dist{font-size:26px;font-weight:800}
+#rings{font-size:17px;color:#B07D00}
+.overlay{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(180deg,rgba(255,232,214,.97),rgba(255,200,170,.97));font-family:'Sora',sans-serif;text-align:center;padding:20px;color:#3D405B}
+.overlay.hidden{display:none}
+h1{font-size:32px;font-weight:800}
+.sub{color:#6D6875;font-size:16px;margin-top:10px;max-width:330px;line-height:1.6}
+.btn{margin-top:24px;padding:13px 40px;background:#E07A5F;color:#fff;font-family:'Sora';font-size:22px;font-weight:800;border:none;border-radius:14px;cursor:pointer;box-shadow:0 5px 0 #A34A33}
+#finalDist{font-size:50px;color:#E07A5F;margin-top:8px;font-weight:800}
+</style>
+</head>
+<body>
+<div id="game"></div>
+<div id="hud"><div id="dist">0 m</div><div id="rings">◎ 0</div></div>
+<div class="overlay" id="start">
+<h1>🌆 SKYLINE SWING 2040 🌆</h1>
+<p class="sub">HOLD to shoot your grappling rope to the nearest sky anchor - swing like a pendulum - RELEASE to fly! Golden rings +100. Dodge the saws. Don't touch the rooftops!</p>
+<button class="btn" id="startBtn">SWING!</button>
+</div>
+<div class="overlay hidden" id="over">
+<h1>💥 SPLAT! 💥</h1>
+<div id="finalDist">0 m</div>
+<p class="sub" id="overSub"></p>
+<button class="btn" id="overBtn">SWING AGAIN</button>
+</div>
+<script>
+"use strict";
+const TAU=Math.PI*2;
+const container=document.getElementById('game');
+const cv=document.createElement('canvas');container.appendChild(cv);
+const g=cv.getContext('2d');
+let W=0,H=0;
+function resize(){const dpr=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*dpr;cv.height=H*dpr;g.setTransform(dpr,0,0,dpr,0,0);}
+addEventListener('resize',resize);resize();
+const GRAV=1250,RANGE=300;
+let player,anchors=[],rings=[],saws=[],buildings=[],camX=0,dist=0,ringCount=0,holding=false,rope=null;
+let playing=false,over=false,genX=0,parts=[],bestX=0;
+const rand=(a,b)=>a+Math.random()*(b-a);
+function generate(){while(genX<camX+W*2){
+buildings.push({x:genX,w:rand(70,130),h:rand(60,190)});
+if(Math.random()<0.75)anchors.push({x:genX+rand(30,120),y:rand(H*0.14,H*0.42)});
+if(Math.random()<0.4)rings.push({x:genX+rand(60,180),y:rand(H*0.4,H*0.62),got:false});
+if(genX>600&&Math.random()<0.3)saws.push({x:genX+rand(80,200),y0:H*0.5,y1:H*0.8,ph:rand(0,TAU),sp:rand(1,2)});
+genX+=rand(150,240);}}
+function reset(){player={x:80,y:H*0.4,vx:280,vy:0};
+anchors=[];rings=[];saws=[];buildings=[];camX=0;dist=0;ringCount=0;rope=null;genX=0;parts=[];bestX=0;
+generate();}
+function attach(){let best=null,bd=1e9;
+for(const a of anchors){const d=Math.hypot(a.x-player.x,a.y-player.y);
+if(d<RANGE&&a.y<player.y-40&&a.x>player.x-40&&d<bd){bd=d;best=a;}}
+if(best)rope={a:best,len:Math.max(60,Math.hypot(best.x-player.x,best.y-player.y))};}
+function die(){if(over)return;playing=false;over=true;
+for(let i=0;i<14;i++)parts.push({x:player.x,y:player.y,vx:rand(-160,160),vy:rand(-260,-40),life:rand(.5,1),c:'#E07A5F'});
+document.getElementById('finalDist').textContent=dist+' m';
+document.getElementById('overSub').textContent='Rings: '+ringCount+' ◎';
+document.getElementById('over').classList.remove('hidden');}
+function simStep(dt){if(!playing||over)return;
+player.vy+=GRAV*dt;
+player.x+=player.vx*dt;player.y+=player.vy*dt;
+if(rope){const a=rope.a;
+let dx=player.x-a.x,dy=player.y-a.y;
+const d=Math.hypot(dx,dy);
+if(d>rope.len){const nx=dx/d,ny=dy/d;
+player.x=a.x+nx*rope.len;player.y=a.y+ny*rope.len;
+const vr=player.vx*nx+player.vy*ny;
+player.vx-=vr*nx;player.vy-=vr*ny;}}
+if(holding&&!rope)attach();
+if(!holding)rope=null;
+bestX=Math.max(bestX,player.x);
+dist=Math.floor(bestX/12);
+camX=player.x-W*0.32;
+generate();
+for(const r of rings){if(!r.got&&Math.hypot(r.x-player.x,r.y-player.y)<30){r.got=true;ringCount++;dist+=8;}}
+for(const s of saws){s.ph+=dt*s.sp;
+const sy=s.y0+(Math.sin(s.ph)*0.5+0.5)*(s.y1-s.y0);
+if(Math.hypot(s.x-player.x,sy-player.y)<26){die();return;}}
+const roofH=(b)=>H-b.h;
+for(const b of buildings){if(player.x>b.x-8&&player.x<b.x+b.w+8&&player.y>roofH(b)-4&&player.y<H+200){
+if(player.y- player.vy*dt<=roofH(b)-4&&player.vy>0){player.y=roofH(b)-4;player.vy=0;player.vx*=0.7;}
+else{die();return;}}}
+if(player.y>H+120){die();return;}
+for(let i=parts.length-1;i>=0;i--){const p=parts[i];p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=900*dt;p.life-=dt;if(p.life<=0)parts.splice(i,1);}
+document.getElementById('dist').textContent=dist+' m';
+document.getElementById('rings').textContent='◎ '+ringCount;}
+let last=performance.now();
+function frame(now){requestAnimationFrame(frame);const dt=Math.min((now-last)/1000,.05);last=now;
+simStep(dt);
+const bg=g.createLinearGradient(0,0,0,H);bg.addColorStop(0,'#FFD9C0');bg.addColorStop(.5,'#FFE8D6');bg.addColorStop(1,'#FFF6EC');
+g.fillStyle=bg;g.fillRect(0,0,W,H);
+g.fillStyle='#FFC8A2';g.beginPath();g.arc(W*0.78,H*0.2,44,0,TAU);g.fill();
+g.save();g.translate(-camX,0);
+// far skyline
+g.fillStyle='rgba(224,122,95,.18)';
+for(let i=-1;i<8;i++){const bx=(Math.floor(camX*0.4/160)+i)*160;g.fillRect(bx+camX*0.6-camX*0? bx: bx,H*0.45,120,H);}
+// buildings
+for(const b of buildings){g.fillStyle='#D9B8A3';g.fillRect(b.x,H-b.h,b.w,b.h);
+g.fillStyle='#C49A82';g.fillRect(b.x,H-b.h,b.w,8);
+g.fillStyle='rgba(255,255,255,.5)';
+for(let wy=H-b.h+16;wy<H-10;wy+=22)for(let wx=b.x+8;wx<b.x+b.w-10;wx+=18)g.fillRect(wx,wy,10,12);}
+// anchors
+for(const a of anchors){if(a.x<camX-40||a.x>camX+W+40)continue;
+g.strokeStyle='#8D6B94';g.lineWidth=3;g.beginPath();g.moveTo(a.x,a.y-16);g.lineTo(a.x,a.y);g.stroke();
+g.fillStyle='#8D6B94';g.beginPath();g.arc(a.x,a.y,7,0,TAU);g.fill();
+g.fillStyle='#B593BC';g.beginPath();g.arc(a.x,a.y,3.5,0,TAU);g.fill();}
+// rings
+for(const r of rings){if(r.got||r.x<camX-40||r.x>camX+W+40)continue;
+g.strokeStyle='#E3A008';g.lineWidth=5;g.beginPath();g.arc(r.x,r.y,14,0,TAU);g.stroke();
+g.strokeStyle='#FFD23F';g.lineWidth=2;g.beginPath();g.arc(r.x,r.y,14,0,TAU);g.stroke();}
+// saws
+for(const s of saws){if(s.x<camX-60||s.x>camX+W+60)continue;
+const sy=s.y0+(Math.sin(s.ph)*0.5+0.5)*(s.y1-s.y0);
+g.save();g.translate(s.x,sy);g.rotate(s.ph*3);
+g.fillStyle='#E63946';
+for(let k=0;k<8;k++){g.rotate(TAU/8);g.beginPath();g.moveTo(0,-22);g.lineTo(-6,-10);g.lineTo(6,-10);g.closePath();g.fill();}
+g.fillStyle='#B01824';g.beginPath();g.arc(0,0,10,0,TAU);g.fill();
+g.restore();}
+// rope
+if(rope){g.strokeStyle='#3D405B';g.lineWidth=3;g.beginPath();g.moveTo(rope.a.x,rope.a.y);g.lineTo(player.x,player.y);g.stroke();}
+// player
+g.save();g.translate(player.x,player.y);
+g.fillStyle='#E07A5F';g.beginPath();g.arc(0,0,12,0,TAU);g.fill();
+g.fillStyle='#fff';g.beginPath();g.arc(4,-3,3.5,0,TAU);g.fill();
+g.fillStyle='#3D405B';g.beginPath();g.arc(5,-3,1.8,0,TAU);g.fill();
+g.restore();
+for(const p of parts){g.globalAlpha=Math.min(1,p.life*2);g.fillStyle=p.c;g.fillRect(p.x-3,p.y-3,6,6);}
+g.globalAlpha=1;
+g.restore();}
+requestAnimationFrame(frame);
+reset();
+function tog(){reset();playing=true;over=false;
+document.getElementById('start').classList.add('hidden');document.getElementById('over').classList.add('hidden');}
+document.getElementById('startBtn').addEventListener('click',tog);
+document.getElementById('overBtn').addEventListener('click',tog);
+cv.addEventListener('pointerdown',()=>{holding=true;});
+addEventListener('pointerup',()=>{holding=false;});
+addEventListener('pointercancel',()=>{holding=false;});
+window.__SW={G:()=>({dist,ringCount,playing,over,rope:!!rope,x:Math.round(player.x),y:Math.round(player.y),vx:Math.round(player.vx),vy:Math.round(player.vy),anchors:anchors.length,rings:rings.filter(r=>!r.got).length,saws:saws.length}),
+start:tog,sim:(dt)=>simStep(dt),
+setHold:(v)=>{holding=v;},
+refs:()=>({player,anchors,rings,saws}),
+warpX:(x)=>{player.x=x;bestX=Math.max(bestX,x);},
+nextAnchor:()=>{let best=null,bd=1e9;for(const a of anchors){const d=a.x-player.x;if(d>0&&d<bd){bd=d;best=a;}}return best?{x:best.x,y:best.y}:null;},
+nextRing:()=>{for(const r of rings){if(!r.got)return{x:r.x,y:r.y};}return null;}};
+</script>
+</body>
+</html>
