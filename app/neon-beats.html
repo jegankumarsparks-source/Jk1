@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>JK NEON BEATS 2040</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;overflow:hidden;background:#050014;font-family:'Courier New',monospace;touch-action:none;user-select:none}
+#wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 100%,#1c0045 0%,#050014 70%)}
+canvas{display:block;box-shadow:0 0 60px #00e5ff44,0 0 120px #ff2fd633;border-radius:12px}
+#ov{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(5,0,20,.9);z-index:10;text-align:center;padding:20px}
+#ov h1{color:#00e5ff;font-size:26px;text-shadow:0 0 18px #00e5ff;letter-spacing:2px;margin-bottom:12px}
+#ov .sc{color:#ffe94a;font-size:42px;text-shadow:0 0 22px #ffe94a;margin-bottom:6px}
+#ov .bs{color:#ff4ad8;font-size:15px;text-shadow:0 0 12px #ff4ad8;margin-bottom:8px;white-space:pre-line}
+#ov button{background:transparent;border:2px solid #00ff9d;color:#00ff9d;font-family:inherit;font-size:18px;padding:14px 34px;border-radius:10px;letter-spacing:2px;text-shadow:0 0 10px #00ff9d;box-shadow:0 0 18px #00ff9d66,inset 0 0 14px #00ff9d22;margin-top:18px}
+</style>
+</head>
+<body>
+<div id="wrap"><canvas id="cv"></canvas></div>
+<div id="ov"><h1 id="ovT">NEON BEATS 2040</h1><div class="sc" id="ovS"></div><div class="bs" id="ovB"></div><button id="ovBtn">DROP THE BEAT</button></div>
+<script>
+(function(){
+'use strict';
+var cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+var W=390,H=844;
+function fit(){var s=Math.min(innerWidth/W,innerHeight/H);var d=Math.min(devicePixelRatio||1,2);cv.width=W*d;cv.height=H*d;cv.style.width=(W*s)+'px';cv.style.height=(H*s)+'px';ctx.setTransform(d,0,0,d,0,0);}
+fit();addEventListener('resize',fit);
+var LS='jknb_best';
+var BPM=126,BEAT=60/BPM,LEAD=1.6,HIT_Y=700,LANE_W=90,LX=15;
+var LANEC=['#00e5ff','#ff2fd6','#ffe94a','#00ff9d'];
+var chart=[],chartEnd=0;
+function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function buildChart(){
+ chart=[];var rnd=mulberry(2040);
+ for(var b=0;b<64;b++){
+  var bar=Math.floor(b/4),q=b%4;
+  if(q===0)chart.push({lane:bar%2===0?0:3,t:b*BEAT});
+  if(q===2)chart.push({lane:bar%2===0?1:2,t:b*BEAT});
+  if(rnd()<0.55)chart.push({lane:Math.floor(rnd()*4),t:(b+0.5)*BEAT});
+  if(q===3&&rnd()<0.5){chart.push({lane:Math.floor(rnd()*4),t:(b-0.5)*BEAT});}
+ }
+ chart.sort(function(a,b){return a.t-b.t;});
+ for(var i=0;i<chart.length;i++)chart[i].hit=false;
+ chartEnd=chart[chart.length-1].t+2.2;
+}
+var S,AC=null,master,noiseBuf,startT=0,manualT=null,nextStep=0,stepIdx=0,audioOn=false;
+function newState(){S={mode:'title',score:0,combo:0,maxCombo:0,perfect:0,great:0,good:0,miss:0,judge:'',judgeT:0,judgeC:'#fff',best:parseInt(localStorage.getItem(LS)||'0',10)||0};}
+var parts=[];
+function midi(m){return 440*Math.pow(2,(m-69)/12);}
+function initAudio(){
+ if(AC)return;
+ try{
+  AC=new (window.AudioContext||window.webkitAudioContext)();
+  master=AC.createGain();master.gain.value=0.5;master.connect(AC.destination);
+  var len=AC.sampleRate*0.2;noiseBuf=AC.createBuffer(1,len,AC.sampleRate);
+  var d=noiseBuf.getChannelData(0);for(var i=0;i<len;i++)d[i]=Math.random()*2-1;
+  audioOn=true;
+ }catch(e){audioOn=false;}
+}
+function kick(t){var o=AC.createOscillator(),g=AC.createGain();o.type='sine';o.frequency.setValueAtTime(150,t);o.frequency.exponentialRampToValueAtTime(38,t+0.12);g.gain.setValueAtTime(0.9,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.18);o.connect(g);g.connect(master);o.start(t);o.stop(t+0.2);}
+function hat(t,v){var s=AC.createBufferSource();s.buffer=noiseBuf;var f=AC.createBiquadFilter();f.type='highpass';f.frequency.value=7000;var g=AC.createGain();g.gain.setValueAtTime(v||0.16,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.05);s.connect(f);f.connect(g);g.connect(master);s.start(t);s.stop(t+0.06);}
+function bass(t,m){var o=AC.createOscillator(),g=AC.createGain(),f=AC.createBiquadFilter();o.type='square';o.frequency.value=midi(m);f.type='lowpass';f.frequency.value=700;g.gain.setValueAtTime(0.28,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.22);o.connect(f);f.connect(g);g.connect(master);o.start(t);o.stop(t+0.24);}
+function lead(t,m,v){var o=AC.createOscillator(),g=AC.createGain();o.type='sawtooth';o.frequency.value=midi(m);g.gain.setValueAtTime(v||0.12,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.16);o.connect(g);g.connect(master);o.start(t);o.stop(t+0.18);}
+var BASSLINE=[45,41,36,43];
+var PENTA=[69,72,74,76,79,81];
+function scheduleStep(idx,t){
+ var beatI=Math.floor(idx/2),off=idx%2===1;
+ var bar=Math.floor(beatI/4)%4;
+ if(!off)kick(t);else hat(t);
+ if(idx%8===0||idx%8===3||idx%8===6)bass(t,BASSLINE[bar]);
+ var phrase=Math.floor(beatI/16)%2;
+ if(phrase===1)lead(t,PENTA[(idx*3)%6]+(bar%2)*12,0.1);
+}
+function pos(){
+ if(manualT!==null)return manualT;
+ if(audioOn&&AC)return AC.currentTime-startT;
+ return (performance.now()-startT)/1000;
+}
+function burst(x,y,c,n){for(var i=0;i<n;i++){var a=Math.random()*6.283,sp=1+Math.random()*5;parts.push({x:x,y:y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:1,c:c});}}
+function lanePress(l){
+ if(S.mode!=='play')return;
+ var p=pos(),best=null,bd=0.19;
+ for(var i=0;i<chart.length;i++){var n=chart[i];if(n.hit||n.lane!==l)continue;var d=Math.abs(n.t-p);if(d<bd){bd=d;best=n;}}
+ if(best){best.hit=true;
+  var pts,txt,c;
+  if(bd<0.06){pts=300;txt='PERFECT';c='#00ff9d';S.perfect++;}
+  else if(bd<0.12){pts=200;txt='GREAT';c='#00e5ff';S.great++;}
+  else{pts=100;txt='GOOD';c='#ffe94a';S.good++;}
+  S.combo++;if(S.combo>S.maxCombo)S.maxCombo=S.combo;
+  S.score+=Math.round(pts*(1+S.combo/50));
+  S.judge=txt;S.judgeC=c;S.judgeT=40;
+  burst(LX+l*LANE_W+LANE_W/2,HIT_Y,c,10);
+ }else{S.combo=0;S.judge='MISS';S.judgeC='#ff3355';S.judgeT=40;}
+}
+function update(){
+ if(S.mode!=='play')return;
+ var p=pos();
+ if(audioOn&&AC&&manualT===null){
+  while(nextStep<AC.currentTime+0.15&&nextStep<chartEnd+1){scheduleStep(stepIdx,nextStep);nextStep+=BEAT/2;stepIdx++;}
+ }
+ for(var i=0;i<chart.length;i++){var n=chart[i];if(!n.hit&&p-n.t>0.19){n.hit=true;n.missed=true;S.miss++;S.combo=0;S.judge='MISS';S.judgeC='#ff3355';S.judgeT=40;}}
+ if(p>chartEnd){finish();}
+}
+function grade(){
+ var tot=S.perfect+S.great+S.good+S.miss;if(!tot)return'C';
+ var acc=(S.perfect*1+S.great*0.7+S.good*0.4)/tot;
+ return acc>0.92?'S':acc>0.8?'A':acc>0.65?'B':'C';
+}
+function finish(){
+ S.mode='over';
+ if(S.score>S.best){S.best=S.score;localStorage.setItem(LS,String(S.best));}
+ document.getElementById('ovT').textContent='TRACK COMPLETE';
+ document.getElementById('ovS').textContent='RANK '+grade();
+ document.getElementById('ovB').textContent='SCORE '+S.score+' - BEST '+S.best+'\nPERFECT '+S.perfect+'  GREAT '+S.great+'  GOOD '+S.good+'  MISS '+S.miss+'\nMAX COMBO '+S.maxCombo;
+ document.getElementById('ovBtn').textContent='PLAY AGAIN';
+ document.getElementById('ov').style.display='flex';
+}
+function start(){
+ initAudio();
+ if(AC&&AC.state==='suspended')AC.resume();
+ buildChart();newState();parts=[];
+ S.mode='play';manualT=null;
+ if(audioOn&&AC){startT=AC.currentTime+0.6;nextStep=startT;stepIdx=0;}
+ else{startT=performance.now()+600;}
+ document.getElementById('ov').style.display='none';
+}
+document.getElementById('ovBtn').addEventListener('click',start);
+function pressX(x){var l=Math.floor((x-LX)/LANE_W);if(l>=0&&l<4)lanePress(l);}
+cv.addEventListener('touchstart',function(e){e.preventDefault();var t=e.changedTouches[0],r=cv.getBoundingClientRect();pressX((t.clientX-r.left)/r.width*W);},{passive:false});
+cv.addEventListener('mousedown',function(e){var r=cv.getBoundingClientRect();pressX((e.clientX-r.left)/r.width*W);});
+addEventListener('keydown',function(e){var k=e.key.toLowerCase();var m={d:0,f:1,j:2,k:3};if(k in m)lanePress(m[k]);if(k===' '&&S.mode!=='play')start();});
+function draw(){
+ ctx.fillStyle='#07001a';ctx.fillRect(0,0,W,H);
+ var p=pos(),beatPulse=S.mode==='play'?Math.max(0,1-((p%BEAT)/BEAT)*2):0;
+ ctx.strokeStyle='#ffffff10';ctx.lineWidth=1;
+ for(var g=0;g<14;g++){ctx.beginPath();ctx.moveTo(0,g*64+(S.mode==='play'?(p*140)%64:0));ctx.lineTo(W,g*64+(S.mode==='play'?(p*140)%64:0));ctx.stroke();}
+ for(var l=0;l<4;l++){
+  ctx.fillStyle=LANEC[l]+'0d';ctx.fillRect(LX+l*LANE_W+2,0,LANE_W-4,H);
+  ctx.strokeStyle=LANEC[l]+'55';ctx.lineWidth=1;ctx.strokeRect(LX+l*LANE_W+2,0,LANE_W-4,H);
+  ctx.fillStyle=LANEC[l];ctx.font='bold 13px Courier New';ctx.textAlign='center';
+  ctx.fillText(['D','F','J','K'][l],LX+l*LANE_W+LANE_W/2,H-16);
+ }
+ ctx.strokeStyle='rgba(0,255,157,'+(0.5+beatPulse*0.5)+')';ctx.lineWidth=4+beatPulse*3;
+ ctx.shadowColor='#00ff9d';ctx.shadowBlur=12+beatPulse*18;
+ ctx.beginPath();ctx.moveTo(LX,HIT_Y);ctx.lineTo(LX+4*LANE_W,HIT_Y);ctx.stroke();ctx.shadowBlur=0;
+ if(S.mode==='play'){
+  for(var i=0;i<chart.length;i++){var n=chart[i];if(n.hit)continue;
+   var y=HIT_Y-(n.t-p)/LEAD*(HIT_Y+40);
+   if(y<-40||y>H+40)continue;
+   var cx=LX+n.lane*LANE_W+LANE_W/2;
+   ctx.fillStyle=LANEC[n.lane];ctx.shadowColor=LANEC[n.lane];ctx.shadowBlur=14;
+   ctx.beginPath();ctx.arc(cx,y,13,0,6.283);ctx.fill();ctx.shadowBlur=0;
+   ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(cx,y,5,0,6.283);ctx.fill();
+  }
+ }
+ for(var q=parts.length-1;q>=0;q--){var pt=parts[q];pt.x+=pt.vx;pt.y+=pt.vy;pt.life-=0.03;if(pt.life<=0){parts.splice(q,1);continue;}ctx.globalAlpha=pt.life;ctx.fillStyle=pt.c;ctx.fillRect(pt.x-2,pt.y-2,4,4);ctx.globalAlpha=1;}
+ ctx.fillStyle='#00e5ff';ctx.font='bold 17px Courier New';ctx.textAlign='left';ctx.fillText('SCORE '+S.score,12,20);
+ ctx.fillStyle='#ff4ad8';ctx.textAlign='right';ctx.fillText('BEST '+S.best,W-12,20);
+ if(S.combo>1){ctx.fillStyle='#ffe94a';ctx.font='bold 26px Courier New';ctx.textAlign='center';ctx.shadowColor='#ffe94a';ctx.shadowBlur=14;ctx.fillText(S.combo+'x COMBO',195,120);ctx.shadowBlur=0;}
+ if(S.judgeT>0){S.judgeT--;ctx.globalAlpha=Math.min(1,S.judgeT/20);ctx.fillStyle=S.judgeC;ctx.font='bold 30px Courier New';ctx.textAlign='center';ctx.shadowColor=S.judgeC;ctx.shadowBlur=16;ctx.fillText(S.judge,195,HIT_Y-70);ctx.shadowBlur=0;ctx.globalAlpha=1;}
+ if(S.mode==='play'){var prog=Math.min(1,p/chartEnd);ctx.fillStyle='#ffffff18';ctx.fillRect(LX,30,4*LANE_W,5);ctx.fillStyle='#00ff9d';ctx.fillRect(LX,30,4*LANE_W*prog,5);}
+ ctx.textAlign='left';
+}
+newState();buildChart();
+document.getElementById('ovB').textContent='4 LANES - TAP ON THE BEAT\nSYNTH SOUNDTRACK LIVE-GENERATED';
+document.getElementById('ov').style.display='flex';
+function loop(){update();draw();requestAnimationFrame(loop);}
+loop();
+window.__NB={
+ G:function(){return{mode:S.mode,score:S.score,combo:S.combo,maxCombo:S.maxCombo,perfect:S.perfect,great:S.great,good:S.good,miss:S.miss,pos:pos(),best:S.best,acc:grade(),audioOn:audioOn};},
+ start:start,
+ forceTick:function(t){manualT=t;update();},
+ realTime:function(){manualT=null;},
+ lanePress:lanePress,
+ chart:function(n){var out=[];for(var i=0;i<chart.length&&out.length<(n||8);i++)if(!chart[i].hit)out.push({lane:chart[i].lane,t:chart[i].t});return out;},
+ chartEnd:function(){return chartEnd;}
+};
+})();
+</script>
+</body>
+</html>
