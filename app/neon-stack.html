@@ -95,6 +95,7 @@ function endGame(){
 function drop(){
  if(state!=='play'||!moving||moving.dropping)return;
  moving.dropping=true;
+ moving.dy=Math.max(0,towerTopY()-BH-60);
  beep(330,.06,'triangle');
 }
 cv.addEventListener('pointerdown',function(e){e.preventDefault();drop();});
@@ -115,7 +116,7 @@ function step(){
    if(moving.dir<0&&moving.x<-moving.w)moving.x=W;
  }else{
    // falling animation
-   moving.dy+=4;
+   moving.dy+=8;
    var targetY=towerTopY()-BH;
    if(moving.dy>=targetY){
      land();
