@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>JK CRT INVADERS 2040</title>
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;touch-action:none}
+html,body{width:100%;height:100%;overflow:hidden;background:#000}
+#game{position:fixed;inset:0}
+canvas{display:block;width:100%;height:100%}
+#crt{position:fixed;inset:0;pointer-events:none;z-index:6;
+background:repeating-linear-gradient(0deg,rgba(0,0,0,.22) 0 2px,transparent 2px 4px);}
+#crt::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.55) 100%);}
+#hud{position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;padding:10px 16px;z-index:5;font-family:'VT323',monospace;color:#33FF66;text-shadow:0 0 8px #33FF66;pointer-events:none}
+#score{font-size:26px}#wave{font-size:20px}#lives{font-size:20px}
+.overlay{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,8,2,.92);font-family:'VT323',monospace;text-align:center;padding:20px;color:#33FF66}
+.overlay.hidden{display:none}
+h1{font-size:38px;text-shadow:0 0 12px #33FF66;letter-spacing:2px}
+.sub{color:#2BD957;font-size:19px;margin-top:12px;max-width:340px;line-height:1.5}
+.btn{margin-top:28px;padding:12px 42px;background:transparent;color:#33FF66;font-family:'VT323',monospace;font-size:26px;border:2px solid #33FF66;cursor:pointer;text-shadow:0 0 8px #33FF66;box-shadow:0 0 14px rgba(51,255,102,.4),inset 0 0 10px rgba(51,255,102,.15)}
+#finalScore{font-size:52px;color:#FFD23F;text-shadow:0 0 12px #FFD23F;margin-top:8px}
+.blink{animation:bl 1s steps(2) infinite}@keyframes bl{50%{opacity:.2}}
+</style>
+</head>
+<body>
+<div id="game"></div>
+<div id="crt"></div>
+<div id="hud"><div id="wave">WAVE 1</div><div id="score">0</div><div id="lives">♥♥♥</div></div>
+<div class="overlay" id="start">
+<h1>CRT INVADERS 2040</h1>
+<p class="sub">> PHOSPHOR DISPLAY ONLINE<br>> DRAG TO MOVE - AUTO CANNON ARMED<br>> STOP THE DESCENT. PROTECT EARTH.<br><span class="blink">PRESS START_</span></p>
+<button class="btn" id="startBtn">START</button>
+</div>
+<div class="overlay hidden" id="over">
+<h1>SIGNAL LOST</h1>
+<div id="finalScore">0</div>
+<p class="sub" id="overSub">> EARTH HAS FALLEN_</p>
+<button class="btn" id="overBtn">REBOOT</button>
+</div>
+<script>
+"use strict";
+const TAU=Math.PI*2;
+const container=document.getElementById('game');
+const cv=document.createElement('canvas');container.appendChild(cv);
+const g=cv.getContext('2d');
+let W=0,H=0;
+function resize(){const dpr=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*dpr;cv.height=H*dpr;g.setTransform(dpr,0,0,dpr,0,0);}
+addEventListener('resize',resize);resize();
+
+let player,bullets=[],ebullets=[],aliens=[],shields=[],parts=[],ufo=null;
+let dir=1,alienDx=0,score=0,wave=1,lives=3,playing=false,over=false;
+let fireT=0,alienFireT=1.5,ufoT=20,flashT=0,targetX=null;
+const rand=(a,b)=>a+Math.random()*(b-a);
+function mkAliens(){aliens=[];const rows=4,cols=8,aw=34,ax0=(W-cols*aw)/2+aw/2,ay0=90;
+for(let r=0;r<rows;r++)for(let c=0;c<cols;c++)aliens.push({x:ax0+c*aw,y:ay0+r*34,t:r===0?2:r<3?1:0,ph:rand(0,TAU)});dir=1;}
+function mkShields(){shields=[];const n=4;for(let i=0;i<n;i++){const sx=(i+0.5)*W/n;for(let bx=-2;bx<=2;bx++)for(let by=0;by<2;by++){if(Math.abs(bx)===2&&by===0)continue;shields.push({x:sx+bx*11,y:H-150+by*11,hp:2});}}}
+function reset(){player={x:W/2};bullets=[];ebullets=[];parts=[];ufo=null;score=0;wave=1;lives=3;fireT=0;alienFireT=1.5;ufoT=16;flashT=0;mkAliens();mkShields();}
+function boom(x,y,c,n){for(let i=0;i<n;i++)parts.push({x,y,vx:rand(-120,120),vy:rand(-160,60),life:rand(.3,.8),c});}
+function stepSim(dt){
+if(targetX!==null){const d=targetX-player.x;player.x+=Math.max(-420*dt,Math.min(420*dt,d));player.x=Math.max(20,Math.min(W-20,player.x));}
+fireT-=dt;if(fireT<=0){fireT=0.38;bullets.push({x:player.x,y:H-84});}
+for(const b of bullets)b.y-=560*dt;
+bullets=bullets.filter(b=>b.y>-20);
+let edge=false;
+const sp=18+wave*4+Math.max(0,(32-aliens.length))*0.6;
+for(const a of aliens){a.x+=dir*sp*dt;a.ph+=dt*2;if((dir>0&&a.x>W-24)||(dir<0&&a.x<24))edge=true;}
+if(edge){dir*=-1;for(const a of aliens)a.y+=16;}
+for(const a of aliens)if(a.y>H-120){die();return;}
+alienFireT-=dt;
+if(alienFireT<=0&&aliens.length){alienFireT=Math.max(.35,1.4-wave*.12);const a=aliens[Math.floor(Math.random()*aliens.length)];ebullets.push({x:a.x,y:a.y+14});}
+for(const b of ebullets)b.y+=300*dt;
+ufoT-=dt;if(ufoT<=0&&!ufo){ufoT=rand(18,30);ufo={x:-40,y:60,v:90};}
+if(ufo){ufo.x+=ufo.v*dt;if(ufo.x>W+60)ufo=null;}
+// bullet vs alien
+for(const b of bullets){if(b.dead)continue;
+for(const a of aliens){if(a.dead)continue;if(Math.abs(b.x-a.x)<15&&Math.abs(b.y-a.y)<13){a.dead=true;b.dead=true;score+=(a.t+1)*10;boom(a.x,a.y,'#33FF66',10);break;}}
+if(!b.dead&&ufo&&Math.abs(b.x-ufo.x)<22&&Math.abs(b.y-ufo.y)<10){b.dead=true;score+=150;boom(ufo.x,ufo.y,'#FFD23F',16);ufo=null;}
+if(!b.dead)for(const s of shields){if(s.hp>0&&Math.abs(b.x-s.x)<6&&Math.abs(b.y-s.y)<6){s.hp--;b.dead=true;break;}}}
+bullets=bullets.filter(b=>!b.dead);
+aliens=aliens.filter(a=>!a.dead);
+// ebullet vs player/shield
+for(const b of ebullets){if(b.dead)continue;
+for(const s of shields){if(s.hp>0&&Math.abs(b.x-s.x)<6&&Math.abs(b.y-s.y)<6){s.hp--;b.dead=true;break;}}
+if(!b.dead&&Math.abs(b.x-player.x)<16&&Math.abs(b.y-(H-70))<12){b.dead=true;boom(player.x,H-70,'#FF5555',18);lives--;flashT=.3;if(lives<=0){die();return;}}}
+ebullets=ebullets.filter(b=>!b.dead&&b.y<H+20);
+if(!aliens.length){wave++;score+=100;mkAliens();mkShields();}
+for(let i=parts.length-1;i>=0;i--){const p=parts[i];p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=300*dt;p.life-=dt;if(p.life<=0)parts.splice(i,1);}
+if(flashT>0)flashT-=dt;}
+function die(){playing=false;over=true;
+document.getElementById('finalScore').textContent=score;
+document.getElementById('overSub').textContent='> WAVE REACHED: '+wave+'_';
+document.getElementById('over').classList.remove('hidden');}
+function alienShape(a){const s=Math.sin(a.ph*3)>0?1:0;g.save();g.translate(a.x,a.y);g.fillStyle=a.t===2?'#FFD23F':a.t===1?'#33FF66':'#2BD957';g.shadowColor='#33FF66';g.shadowBlur=8;
+if(a.t===0){g.fillRect(-10,-6+s*2,20,10);g.fillRect(-6,-10+s*2,12,4);g.fillRect(-12,4,5,4);g.fillRect(7,4,5,4);}
+else if(a.t===1){g.fillRect(-11,-7,22,12);g.fillRect(-4,-11,8,4);g.fillRect(-13,5,6,3);g.fillRect(7,5,6,3);}
+else{g.beginPath();g.arc(0,0,10,0,TAU);g.fill();g.fillRect(-14,-2,4,4);g.fillRect(10,-2,4,4);}
+g.restore();}
+let last=performance.now();
+function frame(now){requestAnimationFrame(frame);const dt=Math.min((now-last)/1000,.05);last=now;
+if(playing&&!over)stepSim(dt);
+g.fillStyle='#020804';g.fillRect(0,0,W,H);
+if(flashT>0){g.fillStyle='rgba(255,60,60,.25)';g.fillRect(0,0,W,H);}
+g.strokeStyle='rgba(51,255,102,.12)';g.lineWidth=1;g.beginPath();g.moveTo(0,H-50);g.lineTo(W,H-50);g.stroke();
+for(const s of shields){if(s.hp<=0)continue;g.fillStyle=s.hp===2?'#33FF66':'#1A8033';g.shadowColor='#33FF66';g.shadowBlur=4;g.fillRect(s.x-5,s.y-5,10,10);}
+g.shadowBlur=0;
+for(const a of aliens)alienShape(a);
+if(ufo){g.fillStyle='#FF5555';g.shadowColor='#FF5555';g.shadowBlur=10;g.fillRect(ufo.x-18,ufo.y-6,36,10);g.fillRect(ufo.x-8,ufo.y-12,16,7);g.shadowBlur=0;}
+g.fillStyle='#33FF66';g.shadowColor='#33FF66';g.shadowBlur=10;
+for(const b of bullets)g.fillRect(b.x-2,b.y-8,4,10);
+g.fillStyle='#FF5555';g.shadowColor='#FF5555';
+for(const b of ebullets)g.fillRect(b.x-2,b.y-4,4,10);
+g.shadowBlur=0;
+// player cannon
+g.fillStyle='#33FF66';g.shadowColor='#33FF66';g.shadowBlur=12;
+g.beginPath();g.moveTo(player.x-18,H-56);g.lineTo(player.x-8,H-70);g.lineTo(player.x-3,H-70);g.lineTo(player.x-3,H-84);g.lineTo(player.x+3,H-84);g.lineTo(player.x+3,H-70);g.lineTo(player.x+8,H-70);g.lineTo(player.x+18,H-56);g.closePath();g.fill();g.shadowBlur=0;
+for(const p of parts){g.globalAlpha=Math.min(1,p.life*3);g.fillStyle=p.c;g.fillRect(p.x-2,p.y-2,4,4);}
+g.globalAlpha=1;
+document.getElementById('score').textContent=score;
+document.getElementById('wave').textContent='WAVE '+wave;
+document.getElementById('lives').textContent='♥'.repeat(Math.max(0,lives));}
+requestAnimationFrame(frame);
+reset();
+function tog(){reset();playing=true;over=false;document.getElementById('start').classList.add('hidden');document.getElementById('over').classList.add('hidden');}
+document.getElementById('startBtn').addEventListener('click',tog);
+document.getElementById('overBtn').addEventListener('click',tog);
+cv.addEventListener('pointerdown',e=>{const r=cv.getBoundingClientRect();targetX=e.clientX-r.left;});
+cv.addEventListener('pointermove',e=>{if(e.buttons){const r=cv.getBoundingClientRect();targetX=e.clientX-r.left;}});
+addEventListener('pointerup',()=>{targetX=null;});
+window.__CI={G:()=>({score,wave,lives,playing,over,aliens:aliens.length,bullets:bullets.length,ebullets:ebullets.length,shields:shields.filter(s=>s.hp>0).length,parts:parts.length,px:Math.round(player.x),ufo:!!ufo}),
+start:tog,step:(n)=>{let vn=performance.now();for(let i=0;i<n;i++)frame(vn+=16);},
+sim:(dt)=>stepSim(dt),
+moveTo:(x)=>{targetX=x;},
+firstAlien:()=>aliens.length?{x:aliens[0].x,y:aliens[0].y}:null,
+anyAlien:()=>aliens.length?{x:aliens[Math.floor(aliens.length/2)].x,y:aliens[Math.floor(aliens.length/2)].y}:null};
+</script>
+</body>
+</html>
