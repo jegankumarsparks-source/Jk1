@@ -106,8 +106,9 @@ const near=nearest(c.x,c.y,c.ni);c.ni=near.i;
 const offroad=near.d>34;
 if(offroad)c.v=Math.max(0,c.v-260*dt);
 c.x+=Math.cos(c.a)*c.v*dt;c.y+=Math.sin(c.a)*c.v*dt;
+c.onroad=!offroad;
 const idx=Math.round(c.ni);
-if(idx<60&&c.lastIdx>path.length-60){c.lap++;if(c.lap>LAPS&&!c.done){c.done=true;c.finishT=raceT;finishOrder.push(c);}}
+if(idx<60&&c.lastIdx>path.length-60&&c.onroad){c.lap++;if(c.lap>LAPS&&!c.done){c.done=true;c.finishT=raceT;finishOrder.push(c);}}
 c.lastIdx=idx;
 c.prog=(c.lap-1)*path.length+c.ni;}
 function simStep(dt){if(!playing)return;
