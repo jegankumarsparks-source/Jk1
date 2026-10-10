@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>JK BUBBLE POP FRENZY 2041</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+body{background:#050514;color:#e8e8ff;font-family:'Segoe UI',system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;min-height:100vh;overflow:hidden;touch-action:none}
+h1{font-size:22px;letter-spacing:3px;margin:10px 0 2px;color:#c084fc;text-shadow:0 0 12px #c084fc,0 0 40px #c084fc88}
+.sub{font-size:10px;letter-spacing:2px;color:#8d7da0;margin-bottom:8px}
+.hud{display:flex;gap:8px;margin-bottom:8px;width:100%;max-width:420px;justify-content:center}
+.card{background:#14102a;border:1px solid #c084fc33;border-radius:10px;padding:6px 12px;text-align:center;min-width:74px}
+.card .l{font-size:9px;letter-spacing:1px;color:#8d7da0}
+.card .v{font-size:17px;font-weight:700}
+#wrap{position:relative}
+canvas{background:linear-gradient(180deg,#0d0a24 0%,#171040 60%,#241556 100%);border:2px solid #c084fc44;border-radius:14px;box-shadow:0 0 30px #c084fc22;display:block}
+#msg{margin-top:8px;font-size:13px;color:#ffd166;min-height:18px;text-align:center}
+.ov{position:absolute;inset:0;background:rgba(5,5,20,.93);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;border-radius:14px;z-index:5;backdrop-filter:blur(4px)}
+.ov.hide{display:none}
+.ov h2{font-size:26px;color:#c084fc;text-shadow:0 0 16px #c084fc}
+.ov p{font-size:13px;color:#c4b8d8;text-align:center;padding:0 24px;line-height:1.6}
+.btn{background:linear-gradient(90deg,#c084fc,#ff2d78);border:none;color:#fff;font-size:16px;font-weight:700;letter-spacing:2px;padding:13px 42px;border-radius:30px;cursor:pointer;box-shadow:0 0 20px #c084fc66}
+.btn:active{transform:scale(.95)}
+.rs{display:flex;gap:8px;width:86%;max-width:330px}
+.rs div{flex:1;background:#14102a;border:1px solid #c084fc33;border-radius:10px;padding:8px;text-align:center;font-size:10px;color:#8d7da0}
+.rs b{display:block;font-size:16px;color:#fff;margin-top:2px}
+</style>
+</head>
+<body>
+<h1>🫧 JK BUBBLE POP</h1>
+<div class="sub">2041 FRENZY MODE • 60s • OFFLINE</div>
+<div class="hud">
+<div class="card"><div class="l">⭐ SCORE</div><div class="v" id="sc">0</div></div>
+<div class="card"><div class="l">🔥 COMBO</div><div class="v" id="cb">x1</div></div>
+<div class="card"><div class="l">⏱ TIME</div><div class="v" id="tm">60</div></div>
+<div class="card"><div class="l">🏆 BEST</div><div class="v" id="bs">0</div></div>
+</div>
+<div id="wrap">
+<canvas id="cv" width="400" height="600"></canvas>
+<div class="ov" id="ovStart">
+<h2>🫧 BUBBLE POP</h2>
+<p>Bubbles-அ வேகமா POP பண்ணு! Chain pops = combo multiplier 🔥 சின்ன bubbles = அதிக points! 💣 கருப்பு BOMB-அ தொட்டுடாதே (-50)! 🌟 தங்க bubble = +100! 60 seconds frenzy!</p>
+<button class="btn" id="btnStart">▶ START POPPING</button>
+</div>
+<div class="ov hide" id="ovEnd">
+<h2>⏱ TIME UP!</h2>
+<div class="rs">
+<div>⭐ SCORE<b id="rSc">0</b></div>
+<div>🫧 POPPED<b id="rPp">0</b></div>
+<div>🔥 MAX COMBO<b id="rCb">x1</b></div>
+<div>🏆 BEST<b id="rBs">0</b></div>
+</div>
+<p id="endTaunt"></p>
+<button class="btn" id="btnAgain">🔄 POP AGAIN</button>
+</div>
+</div>
+<div id="msg">🫧 Pop! Pop! Pop!</div>
+<script>
+'use strict';
+var cv=document.getElementById('cv'),cx=cv.getContext('2d');
+var W=cv.width,H=cv.height;
+var AC=window.AudioContext?new AudioContext():null;
+function beep(f,d,t){if(!AC)return;try{var o=AC.createOscillator(),g=AC.createGain();o.type=t||'sine';o.frequency.value=f;g.gain.setValueAtTime(.06,AC.currentTime);g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+d);o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+d);}catch(e){}}
+function $(id){return document.getElementById(id);}
+function msg(t){$('msg').textContent=t;}
+var state='menu',score=0,combo=1,maxCombo=1,popped=0,bombsHit=0,timeLeft=3600,tick=0,lastPopT=-999;
+var bubbles=[],parts=[],shake=0;
+var best=parseInt(localStorage.getItem('jkbp_best')||'0');
+$('bs').textContent=best;
+function mkBubble(x,y,r,vy,type){
+ return {x:x,y:y,r:r,vy:vy,vx:(Math.random()-.5)*.6,wob:Math.random()*7,type:type||'n'};
+}
+function spawnRand(){
+ var r=Math.random();
+ var type=r<.1?'bomb':r<.16?'gold':'n';
+ var rad=type==='gold'?16:14+Math.random()*22;
+ bubbles.push(mkBubble(20+Math.random()*(W-40),H+rad+6,rad,.8+Math.random()*1.6+(type==='gold'?.8:0),type));
+}
+function startGame(){
+ state='play';score=0;combo=1;maxCombo=1;popped=0;bombsHit=0;timeLeft=3600;tick=0;lastPopT=-999;
+ bubbles=[];parts=[];shake=0;
+ $('sc').textContent=0;$('cb').textContent='x1';$('tm').textContent=60;
+ $('ovStart').classList.add('hide');$('ovEnd').classList.add('hide');
+ msg('🫧 Pop பண்ணு! Bomb-அ விடு!');
+ if(AC&&AC.state==='suspended'){AC.resume();}
+ beep(660,.1);setTimeout(function(){beep(880,.12);},100);
+}
+function endGame(){
+ state='over';
+ if(score>best){best=score;try{localStorage.setItem('jkbp_best',best);}catch(e){}}
+ $('bs').textContent=best;
+ $('rSc').textContent=score;$('rPp').textContent=popped;
+ $('rCb').textContent='x'+maxCombo;$('rBs').textContent=best;
+ $('endTaunt').textContent=score>=1500?'👑 POP QUEEN/KING! குயிலே, உன் 4x4 Sudoku-விட இது fast fingers game! 🫧😎':score>=700?'சூப்பர் popping! இன்னும் வேகமா! 🫧':'Bomb-அ avoid பண்ணு, chain-அ maintain பண்ணு! 💪';
+ $('ovEnd').classList.remove('hide');
+ beep(700,.25,'triangle');setTimeout(function(){beep(950,.25,'triangle');},180);
+}
+function burst(x,y,c,n){
+ for(var i=0;i<n;i++){
+   var a=Math.random()*7,s=1+Math.random()*3;
+   parts.push({x:x,y:y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,l:26+Math.random()*14,c:c});
+ }
+}
+function popAt(px,py){
+ if(state!=='play')return;
+ for(var i=bubbles.length-1;i>=0;i--){
+   var b=bubbles[i];
+   if(Math.hypot(px-b.x,py-b.y)<b.r+6){
+     bubbles.splice(i,1);
+     if(b.type==='bomb'){
+       bombsHit++;score=Math.max(0,score-50);combo=1;shake=14;
+       msg('💣 BOMB! -50! Combo போச்சு!');
+       beep(120,.3,'sawtooth');burst(b.x,b.y,'#555',18);
+     }else{
+       var chain=tick-lastPopT<72;
+       combo=chain?Math.min(9,combo+1):1;
+       if(combo>maxCombo)maxCombo=combo;
+       lastPopT=tick;popped++;
+       var base=b.type==='gold'?100:Math.max(10,Math.round(46-b.r));
+       var pts=base*combo;score+=pts;
+       msg(b.type==='gold'?'🌟 GOLDEN +'+pts+'!':'+'+pts+(combo>1?' 🔥x'+combo:''));
+       beep(b.type==='gold'?1400:500+(40-b.r)*14,.07,'sine');
+       burst(b.x,b.y,b.type==='gold'?'#ffd166':'#c084fc',12);
+     }
+     $('sc').textContent=score;$('cb').textContent='x'+combo;
+     return;
+   }
+ }
+ // missed tap breaks chain gently
+ if(combo>1){combo=1;$('cb').textContent='x1';}
+}
+cv.addEventListener('pointerdown',function(e){
+ e.preventDefault();
+ var r=cv.getBoundingClientRect();
+ popAt((e.clientX-r.left)*(W/r.width),(e.clientY-r.top)*(H/r.height));
+});
+function step(){
+ if(state!=='play')return;
+ tick++;timeLeft--;
+ if(timeLeft<=0){endGame();return;}
+ if(tick%26===0)spawnRand();
+ if(tick%130===65)spawnRand();
+ for(var i=bubbles.length-1;i>=0;i--){
+   var b=bubbles[i];
+   b.y-=b.vy;b.wob+=.06;
+   b.x+=b.vx+Math.sin(b.wob)*.4;
+   if(b.x<b.r||b.x>W-b.r)b.vx*=-1;
+   if(b.y<-b.r-6){
+     bubbles.splice(i,1);
+     if(b.type!=='bomb'&&combo>1){combo=1;$('cb').textContent='x1';msg('💨 Escape! Combo reset');}
+   }
+ }
+ for(var j=parts.length-1;j>=0;j--){
+   var p=parts[j];p.x+=p.vx;p.y+=p.vy;p.vy+=.08;p.l--;
+   if(p.l<=0)parts.splice(j,1);
+ }
+ if(shake>0)shake--;
+ $('tm').textContent=Math.ceil(timeLeft/60);
+}
+function drawBubble(b){
+ var grd=cx.createRadialGradient(b.x-b.r*.3,b.y-b.r*.3,b.r*.1,b.x,b.y,b.r);
+ if(b.type==='bomb'){grd.addColorStop(0,'#666');grd.addColorStop(1,'#111');}
+ else if(b.type==='gold'){grd.addColorStop(0,'rgba(255,240,180,.95)');grd.addColorStop(1,'rgba(255,159,28,.75)');}
+ else{grd.addColorStop(0,'rgba(230,210,255,.9)');grd.addColorStop(1,'rgba(150,100,250,.55)');}
+ cx.fillStyle=grd;
+ cx.beginPath();cx.arc(b.x,b.y,b.r,0,7);cx.fill();
+ cx.strokeStyle=b.type==='gold'?'#ffd166':b.type==='bomb'?'#ff2d55':'rgba(255,255,255,.5)';
+ cx.lineWidth=1.5;cx.stroke();
+ cx.fillStyle='rgba(255,255,255,.75)';
+ cx.beginPath();cx.arc(b.x-b.r*.35,b.y-b.r*.4,b.r*.16,0,7);cx.fill();
+ if(b.type==='bomb'){
+   cx.fillStyle='#ff2d55';cx.font='bold '+Math.round(b.r)+'px sans-serif';cx.textAlign='center';
+   cx.fillText('✸',b.x,b.y+b.r*.35);
+ }
+ if(b.type==='gold'){
+   cx.fillStyle='#a05c00';cx.font='bold '+Math.round(b.r*.8)+'px sans-serif';cx.textAlign='center';
+   cx.fillText('★',b.x,b.y+b.r*.3);
+ }
+}
+function draw(){
+ cx.clearRect(0,0,W,H);
+ cx.save();
+ if(shake>0)cx.translate((Math.random()-.5)*shake,(Math.random()-.5)*shake);
+ for(var i=0;i<bubbles.length;i++)drawBubble(bubbles[i]);
+ for(var j=0;j<parts.length;j++){
+   var p=parts[j];
+   cx.fillStyle=p.c;cx.globalAlpha=Math.min(1,p.l/20);
+   cx.beginPath();cx.arc(p.x,p.y,3,0,7);cx.fill();
+   cx.globalAlpha=1;
+ }
+ cx.restore();
+ requestAnimationFrame(draw);
+}
+draw();
+var lastT=0,acc=0;
+function loop(ts){
+ if(!lastT)lastT=ts;
+ acc+=ts-lastT;lastT=ts;
+ var n=0;
+ while(acc>16&&n<4){step();acc-=16;n++;}
+ requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+$('btnStart').addEventListener('click',startGame);
+$('btnAgain').addEventListener('click',function(){$('ovEnd').classList.add('hide');startGame();});
+window.__BP={G:function(){return{state:state,score:score,combo:combo,maxCombo:maxCombo,popped:popped,bombsHit:bombsHit,timeLeft:timeLeft,bubbles:bubbles.map(function(b){return{x:Math.round(b.x),y:Math.round(b.y),r:Math.round(b.r),type:b.type};}),parts:parts.length,best:best}},
+start:startGame,
+step:function(n){for(var i=0;i<n;i++){step();}},
+spawn:function(x,y,r,vy,type){bubbles.push(mkBubble(x,y,r,vy,type));},
+popAt:popAt,
+setTime:function(t){timeLeft=t;},
+end:endGame};
+</script>
+</body>
+</html>
