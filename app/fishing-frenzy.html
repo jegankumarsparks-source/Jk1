@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>JK FISHING FRENZY 2044</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#02121f;color:#e8f5ff;min-height:100vh;overflow-x:hidden}
+.wrap{max-width:480px;margin:0 auto;padding:10px 12px 30px}
+h1{text-align:center;font-size:26px;font-weight:900;letter-spacing:2px;background:linear-gradient(90deg,#00e5ff,#3ddc84,#ffd60a);-webkit-background-clip:text;background-clip:text;color:transparent;margin-top:4px}
+.sub{text-align:center;color:#6a9ab0;font-size:10px;letter-spacing:3px;margin:2px 0 8px}
+.hud{display:flex;justify-content:space-between;background:linear-gradient(145deg,#062236,#041824);border:1px solid #0e4a6a;border-radius:12px;padding:8px 14px;margin-bottom:8px;font-size:13px;font-weight:800}
+.hud .s{color:#ffd60a}.hud .t{color:#00e5ff}.hud .c{color:#3ddc84}
+#cv{display:block;width:100%;border-radius:14px;border:1px solid #0e4a6a;touch-action:none;background:linear-gradient(180deg,#0a3a5c 0%,#062a44 40%,#03182a 100%)}
+.msg{text-align:center;font-size:12px;color:#9ac0d8;min-height:18px;margin-top:6px}
+.shop{background:linear-gradient(145deg,#062236,#041824);border:1px solid #0e4a6a;border-radius:14px;padding:12px;margin-top:10px}
+.shop h3{font-size:13px;color:#ffd60a;margin-bottom:8px}
+.sitem{display:flex;justify-content:space-between;align-items:center;background:#04202f;border:1px solid #0e3a52;border-radius:10px;padding:8px 12px;margin:6px 0;font-size:12px}
+.sitem button{background:linear-gradient(90deg,#ffd60a,#ff9f43);border:none;color:#3a2600;font-weight:900;border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer}
+.sitem button:disabled{opacity:.35}
+.sitem .own{color:#3ddc84;font-weight:800}
+.ov{position:fixed;inset:0;background:rgba(1,8,14,.94);z-index:20;display:flex;align-items:center;justify-content:center;padding:20px}
+.ov.hide{display:none}
+.ovCard{background:linear-gradient(145deg,#062236,#030e18);border:1px solid #0e4a6a;border-radius:20px;padding:26px 20px;max-width:380px;width:100%;text-align:center}
+.ovCard h2{font-size:24px;margin-bottom:8px}
+.ovCard p{color:#9ac0d8;font-size:13px;line-height:1.8}
+.big{font-size:38px;font-weight:900;color:#ffd60a}
+.btn{display:inline-block;margin-top:14px;padding:13px 30px;border:none;border-radius:14px;font-size:15px;font-weight:800;cursor:pointer;background:linear-gradient(90deg,#00e5ff,#3ddc84);color:#04222a}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>JK FISHING FRENZY</h1>
+<div class="sub">2044 DEEP SEA ARCADE • 90 வினாடி • OFFLINE</div>
+<div class="hud"><span class="s">⭐ <b id="score">0</b></span><span class="t">⏱ <b id="tm">90</b>s</span><span class="c">🐟 <b id="cnt">0</b></span></div>
+<canvas id="cv"></canvas>
+<div class="msg" id="msg">hook-அ tap/நகர்த்து — மீன் பிடி! 👑 golden fish = JACKPOT!</div>
+<div class="shop">
+<h3>🛒 DOCK SHOP</h3>
+<div class="sitem"><span>⚡ Fast Reel (வேகமா ரீல்)</span><span id="p1"></span></div>
+<div class="sitem"><span>🧲 Fish Magnet (அருகிலுள்ள மீன் வரும்)</span><span id="p2"></span></div>
+<div class="sitem"><span>👑 Golden Radar (golden அதிகம்)</span><span id="p3"></span></div>
+</div>
+</div>
+<div class="ov" id="ov"><div class="ovCard">
+<h2>🎣 JK FISHING FRENZY</h2>
+<p>Deep sea arcade!<br><br>🐟 சின்ன மீன் = 10 ⭐<br>🐠 நடு மீன் = 25 ⭐<br>🦈 சுறா = 60 ⭐ (வேகம்!)<br>👑 GOLDEN = 150 ⭐ JACKPOT!<br>🐡 puffer = -20 (பிடிக்காதே!)<br>💣 mine = -40!<br><br>Shop upgrades உன் coins-ல! 90 seconds!</p>
+<button class="btn" onclick="startGame()">CAST OFF 🎣</button>
+</div></div>
+<div class="ov hide" id="ovEnd"><div class="ovCard">
+<h2>⏱ TIME!</h2>
+<div class="big" id="endScore">0</div>
+<p id="endText"></p>
+<button class="btn" onclick="startGame()">AGAIN 🎣</button>
+</div></div>
+<script>
+var cv=document.getElementById('cv'),cx=cv.getContext('2d');
+var W=0,H=0;
+function rz(){cv.width=cv.clientWidth;cv.height=Math.min(420,innerHeight*.5);W=cv.width;H=cv.height;}
+rz();addEventListener('resize',rz);
+var score=0,count=0,t=90,iv=null,running=false;
+var hookX=180,hookY=0,hookVy=0,hookDir=1,reeling=false;
+var fishes=[],bubbles=[];
+var upg={reel:false,magnet:false,radar:false};
+var upgCost={reel:150,magnet:250,radar:400};
+var FT=[{e:'🐟',pts:10,w:.45,sp:1,sz:20},{e:'🐠',pts:25,w:.3,sp:1.6,sz:24},{e:'🦈',pts:60,w:.14,sp:2.6,sz:34},{e:'👑',pts:150,w:.03,sp:1.2,sz:26},{e:'🐡',pts:-20,w:.05,sp:1,sz:22},{e:'💣',pts:-40,w:.03,sp:.8,sz:22}];
+var best=parseInt(localStorage.getItem('jkff_best')||'0');
+function pickFish(){
+ var r=Math.random(),acc=0;
+ var wm=upg.radar&&FT[3]===undefined?1:1;
+ for(var i=0;i<FT.length;i++){var w=FT[i].w;if(i===3&&upg.radar)w*=2.5;acc+=w;if(r<acc)return FT[i];}
+ return FT[0];
+}
+function spawnFish(){
+ var t2=pickFish();
+ var fromLeft=Math.random()<.5;
+ fishes.push({t:t2,x:fromLeft?-40:W+40,y:60+Math.random()*(H-100),vx:(fromLeft?1:-1)*t2.sp*(0.8+Math.random()*.4),wob:Math.random()*7});
+}
+function castOrReel(){if(!running)return;if(reeling){reeling=false;hookVy=0;}else{hookVy=2.2;}}
+cv.addEventListener('pointerdown',function(e){var r=cv.getBoundingClientRect();hookX=Math.max(10,Math.min(W-10,e.clientX-r.left));});
+cv.addEventListener('pointermove',function(e){if(!running)return;var r=cv.getBoundingClientRect();hookX=Math.max(10,Math.min(W-10,e.clientX-r.left));});
+cv.addEventListener('pointerup',function(){if(hookY>H*.5)reeling=true;});
+function step(){
+ if(!running)return;
+ // hook physics
+ if(reeling){hookY-=upg.reel?6.5:4.2;if(hookY<=0){hookY=0;reeling=false;}}
+ else{hookVy=Math.min(3.2,hookVy+.05);hookY+=hookVy;if(hookY>H-14){hookY=H-14;reeling=true;}}
+ // fishes
+ if(fishes.length<9&&Math.random()<.05)spawnFish();
+ fishes.forEach(function(f){
+  f.x+=f.vx;f.wob+=.05;f.y+=Math.sin(f.wob)*.5;
+  if(upg.magnet&&!f.caught&&f.t.pts>0){var d=Math.hypot(f.x-hookX,f.y-(hookY+8));if(d<70){f.x+=Math.sign(hookX-f.x)*.8;f.y+=Math.sign(hookY+8-f.y)*.8;}}
+  // catch
+  if(!f.caught&&Math.abs(f.x-hookX)<f.t.sz/2+8&&Math.abs(f.y-(hookY+8))<f.t.sz/2+6){
+   f.caught=true;score+=f.t.pts;count++;
+   document.getElementById('score').textContent=score;
+   document.getElementById('cnt').textContent=count;
+   if(f.t.pts>=150)msg('👑 JACKPOT! +150!');
+   else if(f.t.pts<0)msg(f.t.e+' அய்யோ! '+f.t.pts);
+   reeling=true;
+   refreshShop();
+  }
+ });
+ fishes=fishes.filter(function(f){return f.x>-60&&f.x<W+60&&!f.caught});
+ if(Math.random()<.04)bubbles.push({x:Math.random()*W,y:H,r:1+Math.random()*3});
+ bubbles.forEach(function(b){b.y-=1.2;});
+ bubbles=bubbles.filter(function(b){return b.y>-10;});
+ draw();
+}
+function draw(){
+ // water gradient is CSS bg; draw wave surface
+ cx.clearRect(0,0,W,H);
+ cx.fillStyle='rgba(255,255,255,.12)';
+ for(var x=0;x<W;x+=24){cx.beginPath();cx.arc(x,6+Math.sin(Date.now()*.002+x*.05)*3,10,0,Math.PI);cx.fill();}
+ bubbles.forEach(function(b){cx.strokeStyle='rgba(255,255,255,.25)';cx.beginPath();cx.arc(b.x,b.y,b.r,0,7);cx.stroke();});
+ // boat
+ cx.font='26px serif';cx.textAlign='center';cx.fillText('🚤',W/2,18);
+ // line + hook
+ cx.strokeStyle='#ffd60a';cx.lineWidth=2;
+ cx.beginPath();cx.moveTo(W/2+10,16);cx.lineTo(hookX,hookY);cx.stroke();
+ cx.font='16px serif';cx.fillText('🪝',hookX,hookY+8);
+ // fishes
+ fishes.forEach(function(f){
+  cx.save();cx.translate(f.x,f.y);if(f.vx<0)cx.scale(-1,1);
+  cx.font=f.t.sz+'px serif';cx.fillText(f.t.e,0,0);
+  cx.restore();
+  if(f.t.pts>=150){cx.strokeStyle='rgba(255,214,10,.5)';cx.beginPath();cx.arc(f.x,f.y,f.t.sz*.8,0,7);cx.stroke();}
+ });
+}
+function refreshShop(){
+ [['reel','p1'],['magnet','p2'],['radar','p3']].forEach(function(p){
+  var u=p[0],el=document.getElementById(p[1]);
+  el.innerHTML=upg[u]?'<span class="own">OWNED ✓</span>':'<button '+(score<upgCost[u]?'disabled':'')+' onclick="buy(\''+u+'\')">⭐'+upgCost[u]+'</button>';
+ });
+}
+function buy(u){if(upg[u]||score<upgCost[u])return;score-=upgCost[u];upg[u]=true;document.getElementById('score').textContent=score;msg('🛒 upgrade bought!');refreshShop();}
+var lastS=0;
+function loop(){var n=Date.now();if(n-lastS>33){lastS=n;step();}requestAnimationFrame(loop);}
+function startGame(){
+ document.getElementById('ov').classList.add('hide');document.getElementById('ovEnd').classList.add('hide');
+ score=0;count=0;t=90;fishes=[];hookY=0;reeling=false;upg={reel:false,magnet:false,radar:false};
+ document.getElementById('score').textContent='0';document.getElementById('cnt').textContent='0';document.getElementById('tm').textContent='90';
+ running=true;refreshShop();
+ clearInterval(iv);
+ iv=setInterval(function(){t--;document.getElementById('tm').textContent=t;if(t<=0)endGame();},1000);
+ msg('hook-அ நகர்த்து — மீன் பிடி!');
+}
+function endGame(){
+ running=false;clearInterval(iv);
+ var rec=score>best;if(rec){best=score;localStorage.setItem('jkff_best',best);}
+ document.getElementById('endScore').textContent=score+' ⭐';
+ document.getElementById('endText').innerHTML='🐟 '+count+' மீன் பிடிச்ச!<br>'+(rec?'🎉 NEW RECORD!':'Best: '+best)+'<br>'+(score>600?'🎣 FISHING LEGEND!':score>250?'🌊 நல்ல catch!':'🐟 golden fish-அ தேடு!');
+ document.getElementById('ovEnd').classList.remove('hide');
+}
+window.__FF={G:function(){return {score:score,count:count,t:t,running:running,fishes:fishes.length,upg:upg,best:best}},start:startGame,end:endGame,spawn:spawnFish,hook:function(x,y){hookX=x;hookY=y},fish:function(i){return fishes[i]?{x:Math.round(fishes[i].x),y:Math.round(fishes[i].y),pts:fishes[i].t.pts}:null},reel:function(){reeling=true}};
+loop();
+</script>
+</body>
+</html>
