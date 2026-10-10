@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>JK GRAVITY NINJA 2042</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#04060e;color:#e8e8f5;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+#hud{display:flex;justify-content:space-between;padding:8px 14px;background:linear-gradient(180deg,#0c1226,#070b1a);border-bottom:1px solid #1e2a52;font-size:13px;font-weight:800;z-index:2}
+#hud .d{color:#ff4d6d}#hud .t{color:#00e5ff}#hud .g{color:#ffd60a}
+#cv{flex:1;width:100%;display:block;touch-action:none}
+#ctl{display:flex;gap:10px;padding:10px;background:#070b1a;border-top:1px solid #1e2a52;z-index:2}
+.cbtn{flex:1;padding:16px;border:none;border-radius:14px;font-size:17px;font-weight:900;cursor:pointer}
+.cbtn.jump{background:linear-gradient(90deg,#3ddc84,#00e5ff);color:#04222a}
+.cbtn.flip{background:linear-gradient(90deg,#b44dff,#ff2ea6);color:#fff}
+.cbtn:active{transform:scale(.96)}
+.ov{position:fixed;inset:0;background:rgba(2,3,8,.94);z-index:20;display:flex;align-items:center;justify-content:center;padding:20px}
+.ov.hide{display:none}
+.ovCard{background:linear-gradient(145deg,#0e1630,#070b1a);border:1px solid #2a3a6a;border-radius:20px;padding:26px 20px;max-width:380px;width:100%;text-align:center}
+.ovCard h2{font-size:24px;margin-bottom:8px;background:linear-gradient(90deg,#00e5ff,#b44dff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.ovCard p{color:#b8b8d8;font-size:13px;line-height:1.8}
+.big{font-size:38px;font-weight:900;color:#ffd60a}
+.btn{display:inline-block;margin-top:14px;padding:13px 30px;border:none;border-radius:14px;font-size:15px;font-weight:800;cursor:pointer;background:linear-gradient(90deg,#3ddc84,#00e5ff);color:#04222a}
+</style>
+</head>
+<body>
+<div id="hud"><span class="d">🏃 <b id="dist">0</b>m</span><span class="t">⏱ <b id="tm">0</b>s</span><span class="g">⭐ <b id="stars">0</b></span></div>
+<canvas id="cv"></canvas>
+<div id="ctl">
+<button class="cbtn jump" id="jbtn">⬆️ JUMP</button>
+<button class="cbtn flip" id="fbtn">🔄 GRAVITY FLIP</button>
+</div>
+<div class="ov" id="ov"><div class="ovCard">
+<h2>🥷 JK GRAVITY NINJA</h2>
+<p>2042-ல gravity-யே உன் ஆயுதம்!<br><br>⬆️ <b>JUMP</b> — spikes தாண்டு<br>🔄 <b>FLIP</b> — ceiling-ல ஓடு!<br>⭐ stars சேரு, ⚡ zones-ல speed மாறும்.<br><br>REAL physics: momentum, gravity, velocity — grid slide அல்ல! 😤<br>எத்தனை meters ஓடுவ?</p>
+<button class="btn" onclick="startGame()">RUN 🥷</button>
+</div></div>
+<div class="ov hide" id="ovEnd"><div class="ovCard">
+<h2>💀 WIPEOUT!</h2>
+<div class="big" id="endDist">0m</div>
+<p id="endText"></p>
+<button class="btn" onclick="startGame()">AGAIN 🥷</button>
+</div></div>
+<script>
+var cv=document.getElementById('cv'),cx=cv.getContext('2d');
+var W=0,H=0;
+function rz(){cv.width=cv.clientWidth;cv.height=cv.clientHeight;W=cv.width;H=cv.height;}
+rz();addEventListener('resize',rz);
+var G=0.5,gravDir=1,px=60,py=0,vy=0,vx=4.2,onGround=false,running=false,dead=false;
+var dist=0,starsGot=0,startT=0,elapsed=0,camX=0;
+var terrain=[],stars=[],zones=[],TERR_LEN=4000;
+var best=parseInt(localStorage.getItem('jkgn_best')||'0');
+function genWorld(){
+ terrain=[];stars=[];zones=[];
+ var y=H*0.7,x=0;
+ while(x<TERR_LEN){
+  var seg={x:x,w:80+Math.random()*160,y:y};
+  // spikes
+  if(x>300&&Math.random()<.4)seg.spikes=true;
+  terrain.push(seg);
+  // star above segment
+  if(Math.random()<.5)stars.push({x:x+seg.w/2,y:y-60-Math.random()*60,got:false});
+  // gravity zone
+  if(x>400&&Math.random()<.25)zones.push({x:x,w:seg.w,type:Math.random()<.5?'low':'high'});
+  x+=seg.w+(Math.random()<.3?60+Math.random()*80:0); // gaps
+  y=Math.max(H*0.35,Math.min(H*0.85,y+(Math.random()-.5)*120));
+ }
+}
+function platAt(wx){
+ // standing on top surface (gravDir 1) or underside (gravDir -1)
+ for(var i=0;i<terrain.length;i++){var s=terrain[i];
+  if(wx>=s.x&&wx<=s.x+s.w){
+   if(gravDir===1&&Math.abs(py-s.y)<22)return s;
+   if(gravDir===-1&&Math.abs(py-(s.y-120))<22)return s;
+  }}
+ return null;
+}
+function zoneAt(wx){for(var i=0;i<zones.length;i++){var z=zones[i];if(wx>=z.x&&wx<=z.x+z.w)return z;}return null;}
+function jump(){if(!running||dead)return;if(onGround){vy=-11*gravDir*(curZone==='low'?1.35:1);onGround=false;}}
+function flip(){if(!running||dead)return;gravDir*=-1;vy=2*gravDir;onGround=false;}
+document.getElementById('jbtn').addEventListener('pointerdown',jump);
+document.getElementById('fbtn').addEventListener('pointerdown',flip);
+cv.addEventListener('pointerdown',function(e){var r=cv.getBoundingClientRect();if(e.clientX-r.left<W/2)jump();else flip();});
+document.addEventListener('keydown',function(e){if(e.key===' '||e.key==='ArrowUp')jump();if(e.key==='f'||e.key==='ArrowDown')flip();});
+var curZone=null;
+function step(){
+ if(!running)return;
+ var z=zoneAt(px+camX);curZone=z?z.type:null;
+ var gEff=G*(curZone==='low'?0.55:curZone==='high'?1.5:1)*gravDir;
+ vy+=gEff;
+ py+=vy;
+ var speed=vx*(curZone==='low'?1.25:1);
+ camX+=speed;
+ dist=Math.floor(camX/10);
+ var wpx=px+camX;
+ // platforms & ground logic
+ var plat=platAt(wpx);
+ onGround=false;
+ if(plat){
+  if(gravDir===1&&vy>=0){py=plat.y;vy=0;onGround=true;
+   if(plat.spikes)die();}
+  else if(gravDir===-1&&vy<=0){py=plat.y-120;vy=0;onGround=true;
+   if(plat.spikes)die();}
+ }
+ // fell into gap
+ if(py>H+80||py<-80)die();
+ // stars
+ stars.forEach(function(s){if(!s.got&&Math.abs(wpx-s.x)<24&&Math.abs(py-s.y)<30){s.got=true;starsGot++;document.getElementById('stars').textContent=starsGot;}});
+ elapsed=Math.floor((Date.now()-startT)/1000);
+ document.getElementById('tm').textContent=elapsed;
+ document.getElementById('dist').textContent=dist;
+ draw();
+}
+function draw(){
+ cx.fillStyle='#04060e';cx.fillRect(0,0,W,H);
+ // parallax stars
+ cx.fillStyle='rgba(255,255,255,.5)';
+ for(var i=0;i<40;i++){var sx=(i*137-camX*.2)%W;sx=sx<0?sx+W:sx;cx.fillRect(sx,(i*89)%H,1.5,1.5);}
+ // zones
+ zones.forEach(function(z){var zx=z.x-camX;if(zx+z.w<0||zx>W)return;
+  cx.fillStyle=z.type==='low'?'rgba(180,77,255,.08)':'rgba(255,75,109,.08)';cx.fillRect(zx,0,z.w,H);
+  cx.font='13px serif';cx.textAlign='center';cx.fillText(z.type==='low'?'🌙 LOW-G':'🔥 HIGH-G',zx+z.w/2,20);});
+ // terrain
+ terrain.forEach(function(s){var sx=s.x-camX;if(sx+s.w<-20||sx>W+20)return;
+  cx.fillStyle='#16204a';cx.fillRect(sx,s.y,s.w,H-s.y);
+  cx.fillStyle='#00e5ff';cx.fillRect(sx,s.y,s.w,3);
+  cx.fillStyle='#0e1630';cx.fillRect(sx,Math.max(0,s.y-120),s.w,3); // ceiling ledge hint
+  cx.fillStyle='#b44dff';cx.fillRect(sx,s.y-120,s.w,2);
+  if(s.spikes){cx.fillStyle='#ff4d6d';
+   for(var k=0;k<s.w;k+=14){cx.beginPath();cx.moveTo(sx+k,s.y);cx.lineTo(sx+k+7,s.y-16);cx.lineTo(sx+k+14,s.y);cx.fill();}}
+ });
+ // stars
+ stars.forEach(function(s){if(s.got)return;var sx=s.x-camX;if(sx<-20||sx>W+20)return;
+  cx.font='16px serif';cx.textAlign='center';cx.fillText('⭐',sx,s.y+Math.sin(Date.now()*.005+s.x)*3);});
+ // ninja
+ var rot=gravDir===1?0:Math.PI;
+ cx.save();cx.translate(px,py);cx.rotate(rot+(onGround?0:vy*.02*gravDir));
+ cx.shadowColor='#3ddc84';cx.shadowBlur=14;
+ cx.font='24px serif';cx.textAlign='center';cx.textBaseline='middle';
+ cx.fillText('🥷',0,0);
+ cx.restore();
+ // speed lines
+ if(!onGround){cx.strokeStyle='rgba(0,229,255,.3)';cx.lineWidth=2;
+  for(var i=0;i<3;i++){cx.beginPath();cx.moveTo(px-20-i*12,py-6+i*6);cx.lineTo(px-38-i*12,py-6+i*6);cx.stroke();}}
+}
+var lastS=0;
+function loop(){var n=Date.now();if(n-lastS>16){lastS=n;step();}requestAnimationFrame(loop);}
+function die(){
+ if(dead)return;dead=true;running=false;
+ var rec=dist>best;if(rec){best=dist;localStorage.setItem('jkgn_best',best);}
+ document.getElementById('endDist').textContent=dist+'m';
+ document.getElementById('endText').innerHTML='⭐ '+starsGot+' stars • ⏱ '+elapsed+'s<br>'+(rec?'🎉 NEW RECORD!':'Best: '+best+'m')+'<br>'+(dist>300?'🥷 NINJA MASTER!':dist>120?'💪 நல்ல ஓட்டம்!':'🌙 low-g zone-அ use பண்ணு!');
+ setTimeout(function(){document.getElementById('ovEnd').classList.remove('hide');},600);
+}
+function startGame(){
+ document.getElementById('ov').classList.add('hide');document.getElementById('ovEnd').classList.add('hide');
+ gravDir=1;px=60;py=H*0.7;vy=0;vx=4.2;camX=0;dist=0;starsGot=0;dead=false;onGround=true;
+ document.getElementById('stars').textContent='0';document.getElementById('dist').textContent='0';
+ genWorld();startT=Date.now();running=true;
+}
+genWorld();
+window.__GN={G:function(){return {dist:dist,stars:starsGot,gravDir:gravDir,onGround:onGround,running:running,dead:dead,best:best,py:Math.round(py),zone:curZone}},start:startGame,jump:jump,flip:flip,die:die,setVx:function(v){vx=v}};
+loop();
+</script>
+</body>
+</html>
