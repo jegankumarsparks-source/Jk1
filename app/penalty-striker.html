@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>JK PENALTY STRIKER 2046</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#04140a;color:#e8f5ec;min-height:100vh;overflow-x:hidden}
+.wrap{max-width:480px;margin:0 auto;padding:8px 12px 24px}
+h1{text-align:center;font-size:25px;font-weight:900;letter-spacing:2px;background:linear-gradient(90deg,#3ddc84,#ffd60a,#00e5ff);-webkit-background-clip:text;background-clip:text;color:transparent;margin-top:4px}
+.sub{text-align:center;color:#7ab08a;font-size:10px;letter-spacing:3px;margin:2px 0 6px}
+.hud{display:flex;justify-content:space-between;background:linear-gradient(145deg,#0a2a16,#061c0e);border:1px solid #1a5a32;border-radius:12px;padding:7px 14px;margin-bottom:6px;font-size:13px;font-weight:800}
+.hud .g{color:#3ddc84}.hud .r{color:#ffd60a}.hud .s{color:#00e5ff}
+#cv{display:block;width:100%;border-radius:12px;border:1px solid #1a5a32;touch-action:none;background:linear-gradient(180deg,#0e5a2e 0%,#0a4a26 55%,#063a1e 100%)}
+.msg{text-align:center;font-size:13px;color:#a8d8b8;min-height:20px;margin-top:6px;font-weight:700}
+.ov{position:fixed;inset:0;background:rgba(2,10,5,.94);z-index:20;display:flex;align-items:center;justify-content:center;padding:20px}
+.ov.hide{display:none}
+.ovCard{background:linear-gradient(145deg,#0a2a16,#04140a);border:1px solid #1a5a32;border-radius:20px;padding:26px 20px;max-width:380px;width:100%;text-align:center}
+.ovCard h2{font-size:24px;margin-bottom:8px}
+.ovCard p{color:#a8d8b8;font-size:13px;line-height:1.8}
+.big{font-size:38px;font-weight:900;color:#ffd60a}
+.btn{display:inline-block;margin-top:14px;padding:13px 30px;border:none;border-radius:14px;font-size:15px;font-weight:800;cursor:pointer;background:linear-gradient(90deg,#3ddc84,#00e5ff);color:#04222a}
+.streakRow{display:flex;justify-content:center;gap:8px;margin:6px 0;font-size:20px;min-height:26px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>JK PENALTY STRIKER</h1>
+<div class="sub">2046 FLICK FOOTBALL • 5 KICKS • OFFLINE</div>
+<div class="hud"><span class="g">⚽ <b id="goals">0</b>/5</span><span class="r">🔥 <b id="streak">0</b></span><span class="s">⭐ <b id="score">0</b></span></div>
+<div class="streakRow" id="balls"></div>
+<canvas id="cv"></canvas>
+<div class="msg" id="msg">SWIPE to shoot! Keeper-அ ஏமாத்து! 🧤</div>
+</div>
+<div class="ov" id="ov"><div class="ovCard">
+<h2>⚽ JK PENALTY STRIKER</h2>
+<p>5 penalty kicks!<br><br>👉 <b>Swipe fast &amp; angled</b> — ball உன் swipe direction-ல போகும்!<br>🧤 Keeper AI உன் history-அ படிச்சு dive பண்ணுவான் — same side-ல அடிக்காதே!<br>🎯 Corners = bonus points<br>🔥 Streak = multiplier!<br><br>Target zones மாறும் — ⭐ zone-ல அடிச்சா double!</p>
+<button class="btn" onclick="startGame()">KICK OFF ⚽</button>
+</div></div>
+<div class="ov hide" id="ovEnd"><div class="ovCard">
+<h2>🏁 FULL TIME!</h2>
+<div class="big" id="endScore">0</div>
+<p id="endText"></p>
+<button class="btn" onclick="startGame()">PLAY AGAIN ⚽</button>
+</div></div>
+<script>
+var cv=document.getElementById('cv'),cx=cv.getContext('2d');
+var W=0,H=0;
+function rz(){cv.width=cv.clientWidth;cv.height=Math.min(430,innerHeight*.55);W=cv.width;H=cv.height;}
+rz();addEventListener('resize',rz);
+var goals=0,kick=0,score=0,streak=0,bestStreak=0,results=[];
+var ball={x:0,y:0,vx:0,vy:0,flying:false,sc:1};
+var keeper={x:0,y:0,tx:0,diving:false,dspeed:0};
+var targetZone=null,resolving=false,running=false,over=false;
+var history=[];
+var best=parseInt(localStorage.getItem('jkps_best')||'0');
+function goalDims(){return {x1:W*.18,x2:W*.82,y:H*.18};}
+function resetPositions(){
+ ball={x:W/2,y:H*.82,vx:0,vy:0,flying:false,sc:1};
+ keeper={x:W/2,y:goalDims().y+16,tx:W/2,diving:false,dspeed:0};
+ // random target zone in goal
+ var g=goalDims();
+ targetZone={x:g.x1+Math.random()*(g.x2-g.x1-60),y:g.y+14+Math.random()*30,w:60,h:34};
+}
+function keeperAI(){
+ // reads history: if player favors a side, pre-dive there
+ var lefts=history.filter(function(h){return h==='L'}).length;
+ var rights=history.filter(function(h){return h==='R'}).length;
+ var g=goalDims();
+ var guess=Math.random();
+ if(lefts>=2&&lefts>rights){keeper.tx=g.x1+(g.x2-g.x1)*.2;}
+ else if(rights>=2&&rights>lefts){keeper.tx=g.x1+(g.x2-g.x1)*.8;}
+ else if(guess<.33)keeper.tx=g.x1+(g.x2-g.x1)*.15;
+ else if(guess<.66)keeper.tx=g.x1+(g.x2-g.x1)*.85;
+ else keeper.tx=W/2;
+ keeper.diving=true;keeper.dspeed=3.2+Math.random()*1.2;
+}
+var sx=0,sy=0,st=0;
+cv.addEventListener('pointerdown',function(e){if(!running||ball.flying||resolving)return;var r=cv.getBoundingClientRect();sx=e.clientX-r.left;sy=e.clientY-r.top;st=Date.now();});
+cv.addEventListener('pointerup',function(e){
+ if(!running||ball.flying||resolving||!st)return;
+ var r=cv.getBoundingClientRect();
+ var dx=(e.clientX-r.left)-sx,dy=(e.clientY-r.top)-sy,dt=Math.max(60,Date.now()-st);
+ if(dy>-20)return; // must swipe up
+ var power=Math.min(1,(Math.abs(dy)+Math.abs(dx)*.5)/(dt*.6));
+ ball.vx=dx/dt*14*power+.0;
+ ball.vy=dy/dt*12*power;
+ if(Math.abs(ball.vy)<5)ball.vy=-5*Math.sign(ball.vy||1);
+ ball.flying=true;
+ keeperAI();
+ msg('');
+});
+function msg(t){document.getElementById('msg').textContent=t;}
+function step(){
+ if(!running)return;
+ if(keeper.diving){keeper.x+=Math.sign(keeper.tx-keeper.x)*keeper.dspeed;if(Math.abs(keeper.tx-keeper.x)<4)keeper.diving=false;}
+ if(ball.flying&&!resolving){
+  ball.x+=ball.vx;ball.y+=ball.vy;ball.vy*=.985;ball.vx*=.99;ball.sc*=.988;
+  var g=goalDims();
+  if(ball.y<=g.y+10){
+   resolving=true;
+   // save?
+   var saved=Math.abs(ball.x-keeper.x)<34;
+   var inGoal=ball.x>g.x1&&ball.x<g.x2;
+   var inZone=targetZone&&ball.x>targetZone.x&&ball.x<targetZone.x+targetZone.w&&ball.y<targetZone.y+targetZone.h+30;
+   var isGoal=inGoal&&!saved;
+   var side=ball.x<W*.4?'L':ball.x>W*.6?'R':'C';
+   history.push(side);if(history.length>4)history.shift();
+   var pts=0;
+   if(isGoal){goals++;streak++;if(streak>bestStreak)bestStreak=streak;
+    pts=100+streak*25+(inZone?100:0);
+    score+=pts;results.push('⚽');
+    msg(inZone?'🎯🌟 ZONE GOAL! +'+pts:'⚽ GOAL! +'+pts);
+   }else{streak=0;results.push(saved?'🧤':'❌');
+    msg(saved?'🧤 SAVED! Keeper பிடிச்சுட்டான்!':'❌ MISS!');
+   }
+   document.getElementById('goals').textContent=goals;
+   document.getElementById('score').textContent=score;
+   document.getElementById('streak').textContent=streak;
+   document.getElementById('balls').innerHTML=results.join(' ');
+   kick++;
+   setTimeout(function(){
+    if(kick>=5)endGame();
+    else{resetPositions();resolving=false;}
+   },1100);
+  }
+ }
+ draw();
+}
+function draw(){
+ cx.clearRect(0,0,W,H);
+ var g=goalDims();
+ // goal
+ cx.strokeStyle='#fff';cx.lineWidth=4;
+ cx.strokeRect(g.x1,g.y,g.x2-g.x1,10);
+ cx.strokeStyle='rgba(255,255,255,.25)';cx.lineWidth=1;
+ for(var nx=g.x1;nx<g.x2;nx+=12){cx.beginPath();cx.moveTo(nx,g.y);cx.lineTo(nx-8,g.y+34);cx.stroke();}
+ // target zone
+ if(targetZone){cx.fillStyle='rgba(255,214,10,.25)';cx.fillRect(targetZone.x,targetZone.y,targetZone.w,targetZone.h);
+  cx.strokeStyle='#ffd60a';cx.setLineDash([4,4]);cx.strokeRect(targetZone.x,targetZone.y,targetZone.w,targetZone.h);cx.setLineDash([]);
+  cx.font='12px serif';cx.textAlign='center';cx.fillText('⭐',targetZone.x+targetZone.w/2,targetZone.y+targetZone.h/2+4);}
+ // pitch lines
+ cx.strokeStyle='rgba(255,255,255,.15)';cx.lineWidth=2;
+ cx.beginPath();cx.ellipse(W/2,H*.82,60,18,0,0,7);cx.stroke();
+ // keeper
+ cx.font='30px serif';cx.textAlign='center';cx.textBaseline='middle';
+ cx.save();cx.translate(keeper.x,keeper.y);
+ if(keeper.diving)cx.rotate(Math.sign(keeper.tx-keeper.x)*.7);
+ cx.fillText('🧤',0,0);cx.restore();
+ // ball
+ cx.save();cx.translate(ball.x,ball.y);cx.scale(ball.sc,ball.sc);
+ cx.shadowColor='#fff';cx.shadowBlur=8;
+ cx.font='22px serif';cx.fillText('⚽',0,0);cx.restore();
+ // shooter hint
+ if(!ball.flying&&!resolving){cx.font='26px serif';cx.fillText('🧍',W/2,H*.92);}
+}
+var lastS=0;
+function loop(){var n=Date.now();if(n-lastS>16){lastS=n;step();}requestAnimationFrame(loop);}
+function startGame(){
+ document.getElementById('ov').classList.add('hide');document.getElementById('ovEnd').classList.add('hide');
+ goals=0;kick=0;score=0;streak=0;bestStreak=0;results=[];history=[];running=true;over=false;resolving=false;
+ document.getElementById('goals').textContent='0';document.getElementById('score').textContent='0';document.getElementById('streak').textContent='0';document.getElementById('balls').innerHTML='';
+ resetPositions();msg('SWIPE to shoot! 🧤');
+}
+function endGame(){
+ running=false;over=true;
+ var rec=score>best;if(rec){best=score;localStorage.setItem('jkps_best',best);}
+ document.getElementById('endScore').textContent=score;
+ document.getElementById('endText').innerHTML='⚽ '+goals+'/5 goals • 🔥 best streak '+bestStreak+'<br>'+(rec?'🎉 NEW RECORD!':'Best: '+best)+'<br>'+(goals===5?'👑 PERFECT STRIKER!':goals>=3?'⚽ நல்ல finishing!':'🧤 keeper-அ ஏமாத்து — sides மாத்து!');
+ document.getElementById('ovEnd').classList.remove('hide');
+}
+resetPositions();
+window.__PS={G:function(){return {goals:goals,kick:kick,score:score,streak:streak,running:running,over:over,best:best,ballX:Math.round(ball.x),ballY:Math.round(ball.y),keeperX:Math.round(keeper.x),flying:ball.flying,hist:history.join('')}},start:startGame,shoot:function(dx,dy,dt2){if(ball.flying||resolving)return false;var power=Math.min(1,(Math.abs(dy)+Math.abs(dx)*.5)/(dt2*.6));ball.vx=dx/dt2*14*power;ball.vy=dy/dt2*12*power;if(Math.abs(ball.vy)<5)ball.vy=-5*Math.sign(ball.vy||1);ball.flying=true;keeperAI();return true},keeper:function(){return{x:Math.round(keeper.x),tx:Math.round(keeper.tx)}},end:endGame};
+loop();
+</script>
+</body>
+</html>
