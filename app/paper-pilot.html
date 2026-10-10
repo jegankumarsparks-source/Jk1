@@ -137,7 +137,8 @@ sim:(dt)=>stepSim(dt),
 setClimb:(v)=>{climbing=v;},
 plane:()=>({x:plane.x,y:plane.y,vy:plane.vy}),
 teleportY:(y)=>{plane.y=y;plane.vy=0;},
-nextCrane:()=>cranes.length?{x:cranes[0].x,y:cranes[0].y}:null};
+nextCrane:()=>cranes.length?{x:cranes[0].x,y:cranes[0].y}:null,
+stars:()=>stars.map(s=>({x:s.x,y:s.y,got:s.got}))};
 </script>
 </body>
 </html>
