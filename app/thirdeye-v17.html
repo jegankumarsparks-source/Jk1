@@ -1429,7 +1429,7 @@ $sb('sbStart').addEventListener('click',()=>{if(!sbSeq.length||sbInt)return;
  sbInt=setInterval(()=>{sbPaint();
   if(sbLeft<=0){sbIdx++;bell(880,.15);
    if(sbIdx>=sbSeq.length){sbDone('end');return;}
-   sbStartBlock();}},250);});
+   sbStartBlock();}},250);sbRenderSeq();});
 $sb('sbSkip').addEventListener('click',()=>{if(!sbInt)return;sbIdx++;bell(880,.15);
  if(sbIdx>=sbSeq.length){sbDone('end');return;}sbStartBlock();});
 $sb('sbStop').addEventListener('click',()=>{if(sbInt)sbDone('stop');});
