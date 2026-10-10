@@ -1,0 +1,275 @@
+<!DOCTYPE html><html lang="ta"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>JK TANK STRIKE 2047</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:#0c0a04;color:#fff;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;overflow:hidden;touch-action:none}
+.wrap{max-width:440px;margin:0 auto;padding:12px 12px 24px}
+h1{font-size:24px;letter-spacing:3px;text-align:center;background:linear-gradient(90deg,#ffe14d,#ff9f1c,#ff4757);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:900}
+.sub{text-align:center;font-size:10px;letter-spacing:2px;color:#b8a67d;margin:4px 0 10px}
+.hud{display:flex;gap:8px;margin-bottom:8px}
+.hud>div{flex:1;background:#1a1408;border:1px solid #4a3a1e;border-radius:10px;padding:6px 4px;text-align:center;font-size:11px;color:#d0c0a0}
+.hud b{display:block;font-size:14px;color:#fff}
+.hpbar{height:6px;background:#333;border-radius:4px;overflow:hidden;margin-top:3px}
+.hpbar>div{height:100%;background:linear-gradient(90deg,#2dff9b,#ffe14d)}
+.hpbar.enemy>div{background:linear-gradient(90deg,#ff4757,#ff9f1c)}
+#cv{display:block;width:100%;border-radius:14px;border:1px solid #4a3a1e;background:#0a0810;touch-action:none}
+.ov{position:fixed;inset:0;background:rgba(8,6,2,.93);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
+.ovCard{background:linear-gradient(160deg,#241c0c,#141008);border:1px solid #5f4a26;border-radius:20px;padding:24px 20px;width:100%;max-width:400px;text-align:center;box-shadow:0 0 40px #ff9f1c33}
+.ovCard h2{font-size:22px;margin-bottom:8px;letter-spacing:1px}
+.ovCard p{font-size:13px;color:#d0c0a0;line-height:1.6;margin-bottom:12px}
+.btn{display:block;width:100%;margin:8px 0;padding:14px;border:none;border-radius:12px;font-size:16px;font-weight:800;letter-spacing:1px;cursor:pointer;background:linear-gradient(90deg,#ffe14d,#ff4757);color:#2a1000;box-shadow:0 4px 18px #ff475744}
+.btn:active{transform:scale(.97)}
+.hide{display:none!important}
+#msg{text-align:center;font-size:13px;color:#d0c0a0;margin-top:8px;min-height:18px;font-weight:600}
+.resRow{display:flex;justify-content:space-between;background:#1a1408;border:1px solid #4a3a1e;border-radius:10px;padding:9px 12px;margin:5px 0;font-size:13px}
+.resRow b{color:#ffe14d}
+</style></head><body>
+<div class="wrap">
+<h1>JK TANK STRIKE</h1>
+<div class="sub">2047 ARTILLERY DUEL • WIND + CRATERS • OFFLINE</div>
+<div class="hud">
+<div>🫵 YOU<div class="hpbar"><div id="hpP" style="width:100%"></div></div></div>
+<div>💨 WIND<b id="wind">0</b></div>
+<div>🏆 WINS<b id="wins">0</b></div>
+<div>🤖 AI<div class="hpbar enemy"><div id="hpA" style="width:100%"></div></div></div>
+</div>
+<canvas id="cv" width="380" height="400"></canvas>
+<div id="msg"></div>
+</div>
+
+<div class="ov" id="ovStart"><div class="ovCard">
+<h2>💣 TANK STRIKE 2047</h2>
+<p>AI tank-க்கு எதிரா artillery duel! DRAG பண்ணி angle + power set பண்ணு, release = FIRE! 💨 wind-அ பாரு! Direct hit = 40 damage, near miss = splash! Terrain crater ஆகும் — AI smart-ஆ aim பண்ணும்!</p>
+<button class="btn" onclick="startGame()">💣 START DUEL</button>
+</div></div>
+
+<div class="ov hide" id="ovEnd"><div class="ovCard">
+<h2 id="endTitle">🏆 VICTORY!</h2>
+<div style="font-size:38px;margin:8px 0" id="endIcon">💣</div>
+<div class="resRow"><span>🎯 Shots Fired</span><b id="rShots">0</b></div>
+<div class="resRow"><span>💥 Hits Landed</span><b id="rHits">0</b></div>
+<div class="resRow"><span>🏆 Total Wins</span><b id="rWins">0</b></div>
+<p id="endTaunt"></p>
+<button class="btn" onclick="again()">🔄 REMATCH</button>
+</div></div>
+
+<script>
+'use strict';
+var cv=document.getElementById('cv'),cx=cv.getContext('2d');
+var W=cv.width,H=cv.height;
+var AC=window.AudioContext?new AudioContext():null;
+function beep(f,d,t){if(!AC)return;try{var o=AC.createOscillator(),g=AC.createGain();o.type=t||'square';o.frequency.value=f;g.gain.setValueAtTime(.06,AC.currentTime);g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+d);o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+d);}catch(e){}}
+function $(id){return document.getElementById(id);}
+function msg(t){$('msg').textContent=t;}
+
+var terrain=[],running=false,over=false;
+var hpP=100,hpA=100,wind=0,turn='P';
+var shell=null,parts=[],shots=0,hits=0;
+var dragging=false,dragX=0,dragY=0,tankPX=46,tankAX=W-46;
+var wins=parseInt(localStorage.getItem('jkts_wins')||'0');
+function genTerrain(){
+ terrain=[];
+ var h1=80+Math.random()*60,h2=60+Math.random()*80,h3=40+Math.random()*60;
+ for(var x=0;x<W;x++){
+   terrain.push(H-40-h1*Math.exp(-Math.pow((x-60)/70,2))-h2*Math.exp(-Math.pow((x-W/2)/90,2))-h3*Math.exp(-Math.pow((x-W+60)/70,2)));
+ }
+}
+function groundAt(x){x=Math.max(0,Math.min(W-1,Math.round(x)));return terrain[x];}
+function tankY(x){return groundAt(x)-14;}
+function startGame(){
+ genTerrain();
+ hpP=100;hpA=100;shots=0;hits=0;shell=null;parts=[];turn='P';
+ wind=Math.round((Math.random()*2-1)*10)/10;
+ $('wind').textContent=(wind>0?'→ ':'← ')+Math.abs(wind);
+ updateHP();
+ running=true;over=false;
+ $('ovStart').classList.add('hide');$('ovEnd').classList.add('hide');
+ msg('உன் turn! Drag & fire 💣');
+ if(AC&&AC.state==='suspended'){AC.resume();}
+}
+function again(){$('ovEnd').classList.add('hide');startGame();}
+function updateHP(){
+ $('hpP').style.width=hpP+'%';$('hpA').style.width=hpA+'%';
+}
+function boom(x,y,n,big){
+ for(var i=0;i<n;i++){
+   var a=Math.random()*6.28,s=Math.random()*(big?6:3)+1;
+   parts.push({x:x,y:y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-2,life:35,col:['#ff9f1c','#ff4757','#ffe14d'][Math.floor(Math.random()*3)],r:2+Math.random()*3});
+ }
+}
+function crater(x,r){
+ for(var i=0;i<W;i++){
+   var d=Math.abs(i-x);
+   if(d<r){terrain[i]=Math.min(H-6,terrain[i]+(r-d)*0.7);}
+ }
+}
+function fire(x,y,angDeg,power,owner){
+ if(shell||!running||over)return false;
+ var a=angDeg*Math.PI/180;
+ shell={x:x,y:y,vx:Math.cos(a)*power*0.16,vy:-Math.sin(a)*power*0.16,owner:owner};
+ if(owner==='P')shots++;
+ beep(300,.15,'sawtooth');
+ return true;
+}
+function explode(s){
+ var x=s.x,y=s.y;
+ boom(x,y,26,true);
+ crater(x,26);
+ beep(80,.5,'sawtooth');
+ var hit=false;
+ // damage
+ var dP=Math.hypot(x-tankPX,y-tankY(tankPX));
+ var dA=Math.hypot(x-tankAX,y-tankY(tankAX));
+ if(s.owner==='P'){
+   if(dA<24){hpA-=40;hits++;hit=true;msg('💥 DIRECT HIT! -40');}
+   else if(dA<60){hpA-=15;hits++;hit=true;msg('💨 Splash! -15');}
+   else msg('😅 Miss... AI turn!');
+   if(dP<30){hpP-=20;msg('😱 SELF DAMAGE -20!');}
+ }else{
+   if(dP<24){hpP-=40;msg('💥 AI DIRECT HIT! -40');}
+   else if(dP<60){hpP-=15;msg('💨 AI splash! -15');}
+   else msg('😎 AI miss! உன் turn!');
+ }
+ hpP=Math.max(0,hpP);hpA=Math.max(0,hpA);
+ updateHP();
+ shell=null;
+ wind=Math.round((Math.random()*2-1)*10)/10;
+ $('wind').textContent=(wind>0?'→ ':'← ')+Math.abs(wind);
+ if(hpA<=0||hpP<=0){endGame(hpA<=0&&hpP>0);return;}
+ turn=s.owner==='P'?'A':'P';
+ if(turn==='A'){setTimeout(aiFire,400);}
+}
+function aiFire(){
+ if(!running||over||shell)return;
+ // AI aims with error
+ var dx=tankPX-tankAX;
+ var dy=tankY(tankPX)-tankY(tankAX);
+ var baseAng=35+Math.random()*30; // degrees
+ var dist=Math.abs(dx);
+ var power=Math.sqrt(dist*9.8*2.2)*2.6+Math.random()*14-7;
+ var err=(Math.random()-0.5)*14;
+ fire(tankAX,tankY(tankAX),180-baseAng+err*0.3,power+err,'A');
+}
+function endGame(won){
+ running=false;over=true;
+ if(won){wins++;localStorage.setItem('jkts_wins',wins);}
+ $('endTitle').textContent=won?'🏆 VICTORY!':'💀 DEFEATED';
+ $('endIcon').textContent=won?'💣':'🔥';
+ $('rShots').textContent=shots;
+ $('rHits').textContent=hits;
+ $('rWins').textContent=wins;
+ $('endTaunt').textContent=won?'AI tank-அ destroy பண்ணிட்ட! குயில், இது தான் STRATEGY + PHYSICS — உன் guessing games கிட்ட வராது! 😎':'AI இந்த duel ஜெயிச்சிடுச்சி... wind-அ கவனி, rematch! 🔥';
+ $('ovEnd').classList.remove('hide');
+ if(won){beep(523,.12);setTimeout(function(){beep(659,.12);},120);setTimeout(function(){beep(784,.3);},240);}
+}
+cv.addEventListener('pointerdown',function(e){
+ e.preventDefault();
+ if(!running||over||turn!=='P'||shell)return;
+ dragging=true;
+ var r=cv.getBoundingClientRect();
+ dragX=(e.clientX-r.left)*(W/r.width);dragY=(e.clientY-r.top)*(H/r.height);
+});
+cv.addEventListener('pointermove',function(e){
+ if(!dragging)return;e.preventDefault();
+ var r=cv.getBoundingClientRect();
+ dragX=(e.clientX-r.left)*(W/r.width);dragY=(e.clientY-r.top)*(H/r.height);
+});
+cv.addEventListener('pointerup',function(e){
+ if(!dragging)return;e.preventDefault();
+ dragging=false;
+ var tx=tankPX,ty=tankY(tankPX);
+ var dx=dragX-tx,dy=dragY-ty;
+ var power=Math.min(100,Math.hypot(dx,dy)*0.55);
+ var ang=Math.atan2(-dy,dx)*180/Math.PI;
+ if(ang<5)ang=5;if(ang>175)ang=175;
+ if(power<12){msg('Power கம்மி! நீளமா drag பண்ணு 💪');return;}
+ fire(tx,ty,ang,power,'P');
+ msg('💣 FIRED!');
+});
+function step(){
+ if(!running||over)return;
+ if(shell){
+   shell.vy+=0.16; // gravity
+   shell.vx+=wind*0.004; // wind
+   shell.x+=shell.vx;shell.y+=shell.vy;
+   if(shell.x<0||shell.x>W||shell.y>H){msg('😅 Out of bounds!');var o=shell.owner;shell=null;turn=o==='P'?'A':'P';if(turn==='A')setTimeout(aiFire,400);}
+   else if(shell.y>=groundAt(shell.x)){explode(shell);}
+ }
+ for(var i=parts.length-1;i>=0;i--){
+   var p=parts[i];p.x+=p.vx;p.y+=p.vy;p.vy+=0.2;p.life--;
+   if(p.life<=0)parts.splice(i,1);
+ }
+}
+function drawTank(x,col,flip){
+ var y=tankY(x);
+ cx.fillStyle=col;
+ cx.fillRect(x-13,y-4,26,10); // body
+ cx.fillRect(x-8,y-11,16,8); // turret
+ cx.save();cx.translate(flip?x-8:x+8,y-8);
+ cx.rotate(flip?Math.PI*0.78:Math.PI*0.22);
+ cx.fillRect(-2,-14,4,14); // barrel
+ cx.restore();
+ cx.fillStyle='#0a0810';
+ for(var w=0;w<3;w++){cx.beginPath();cx.arc(x-8+w*8,y+7,3,0,7);cx.fill();}
+}
+function draw(){
+ cx.fillStyle='#0a0810';cx.fillRect(0,0,W,H);
+ // sky gradient
+ var g=cx.createLinearGradient(0,0,0,H);
+ g.addColorStop(0,'#1a1030');g.addColorStop(1,'#3a1a10');
+ cx.fillStyle=g;cx.fillRect(0,0,W,H);
+ // moon
+ cx.fillStyle='#ffe14d';cx.beginPath();cx.arc(W-60,50,18,0,7);cx.fill();
+ cx.fillStyle='rgba(255,225,77,.15)';cx.beginPath();cx.arc(W-60,50,30,0,7);cx.fill();
+ // terrain
+ cx.fillStyle='#2a2016';
+ cx.beginPath();cx.moveTo(0,H);
+ for(var x=0;x<W;x++){cx.lineTo(x,terrain[x]||H);}
+ cx.lineTo(W,H);cx.fill();
+ cx.strokeStyle='#4a6a2a';cx.lineWidth=2;cx.beginPath();
+ for(var x2=0;x2<W;x2++){var y2=terrain[x2]||H;if(x2===0)cx.moveTo(0,y2);else cx.lineTo(x2,y2);}
+ cx.stroke();
+ // tanks
+ if(terrain.length){drawTank(tankPX,'#2dff9b',false);drawTank(tankAX,'#ff4757',true);}
+ // drag aim line
+ if(dragging&&turn==='P'){
+   var tx=tankPX,ty=tankY(tankPX);
+   cx.strokeStyle='rgba(45,255,155,.6)';cx.setLineDash([5,5]);cx.lineWidth=2;
+   cx.beginPath();cx.moveTo(tx,ty);cx.lineTo(dragX,dragY);cx.stroke();cx.setLineDash([]);
+   var power=Math.min(100,Math.hypot(dragX-tx,dragY-ty)*0.55);
+   cx.fillStyle='#2dff9b';cx.font='bold 13px sans-serif';cx.textAlign='left';
+   cx.fillText('PWR '+Math.round(power),dragX+10,dragY-10);
+ }
+ // shell
+ if(shell){
+   cx.fillStyle='#ffe14d';cx.beginPath();cx.arc(shell.x,shell.y,5,0,7);cx.fill();
+   cx.fillStyle='#ff9f1c';cx.beginPath();cx.arc(shell.x,shell.y,2.5,0,7);cx.fill();
+ }
+ // particles
+ for(var i=0;i<parts.length;i++){
+   var p=parts[i];
+   cx.globalAlpha=p.life/35;cx.fillStyle=p.col;
+   cx.fillRect(p.x-p.r/2,p.y-p.r/2,p.r,p.r);cx.globalAlpha=1;
+ }
+ // turn indicator
+ if(running&&!over){
+   cx.fillStyle=turn==='P'?'#2dff9b':'#ff4757';
+   cx.font='bold 12px sans-serif';cx.textAlign='center';
+   cx.fillText(turn==='P'?'🫵 YOUR TURN':'🤖 AI THINKING...',W/2,20);
+ }
+ requestAnimationFrame(draw);
+}
+draw();
+var lastTick=0;
+function loop(ts){if(ts-lastTick>15){lastTick=ts;step();}requestAnimationFrame(loop);}
+requestAnimationFrame(loop);
+$('wins').textContent=wins;
+window.__TS={G:function(){return{hpP:hpP,hpA:hpA,wind:wind,turn:turn,shots:shots,hits:hits,shell:shell?{x:Math.round(shell.x),y:Math.round(shell.y),owner:shell.owner}:null,running:running,over:over,wins:wins}},
+start:startGame,step:function(n){for(var i=0;i<n;i++){step();}},
+fire:fire,aiFireNow:aiFire,
+tankPos:function(){return{px:tankPX,py:Math.round(tankY(tankPX)),ax:tankAX,ay:Math.round(tankY(tankAX))};},
+setHP:function(p,a){hpP=p;hpA=a;updateHP();},
+setWind:function(w){wind=w;$('wind').textContent=(w>0?'→ ':'← ')+Math.abs(w);},
+end:endGame};
+</script></body></html>
