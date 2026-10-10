@@ -3,329 +3,321 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>மூன்றாவது கண் — முழுமையான வழிகாட்டி | JK</title>
+<title>மூன்றாவது கண் V2 — வழிகாட்டி | JK</title>
 <style>
 :root{
- --bg:#0D0B1E;--bg2:#171233;--gold:#E8B84B;--gold2:#FFD97A;--ink:#EDE7F6;--dim:#9B92C4;
- --violet:#7C5CD6;--card:#1D1740;--line:rgba(232,184,75,.22);
+ --bg:#FBF3E4;--bg2:#F5E7CE;--saf:#E8722A;--saf2:#C4531A;--ink:#3B2A1A;--dim:#8A715A;
+ --terra:#B3402A;--card:#FFFFFF;--line:rgba(200,120,50,.28);--gold:#D9A441;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
 body{background:var(--bg);color:var(--ink);font-family:'Noto Sans Tamil','Latha','Tamil Sangam MN',sans-serif;line-height:1.85;font-size:16px}
-header{position:relative;text-align:center;padding:44px 20px 30px;background:radial-gradient(ellipse at 50% 0%,#2A1F5C 0%,var(--bg) 70%)}
-canvas#mandala{width:150px;height:150px;display:block;margin:0 auto 14px}
-h1{font-size:30px;color:var(--gold2);letter-spacing:1px;font-weight:800}
+header{position:relative;text-align:center;padding:40px 20px 26px;background:linear-gradient(180deg,#FFE8C2 0%,var(--bg) 90%)}
+.sun{width:110px;height:110px;margin:0 auto 12px;border-radius:50%;background:radial-gradient(circle at 38% 35%,#FFD97A 0%,#F0A03C 55%,#E8722A 100%);box-shadow:0 0 60px rgba(232,114,42,.45);position:relative;animation:pulse 5s ease-in-out infinite}
+.sun::after{content:'';position:absolute;inset:22px;border-radius:50%;background:radial-gradient(circle at 45% 40%,rgba(255,255,255,.55),transparent 60%)}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+h1{font-size:29px;color:var(--saf2);letter-spacing:1px;font-weight:800}
 .tag{color:var(--dim);font-size:14px;margin-top:6px}
-.ver{position:absolute;top:12px;right:14px;background:var(--card);border:1px solid var(--line);color:var(--gold);font-size:12px;padding:4px 12px;border-radius:20px;letter-spacing:1px}
-nav{position:sticky;top:0;z-index:9;background:rgba(13,11,30,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:10px 8px;display:flex;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.ver{position:absolute;top:12px;right:14px;background:#fff;border:1px solid var(--line);color:var(--saf);font-size:12px;padding:4px 12px;border-radius:20px;letter-spacing:1px}
+.new{display:inline-block;margin-top:10px;background:var(--saf);color:#fff;font-size:12.5px;padding:5px 14px;border-radius:16px;font-weight:700}
+nav{position:sticky;top:0;z-index:9;background:rgba(251,243,228,.95);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:10px 8px;display:flex;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch}
 nav::-webkit-scrollbar{display:none}
-nav a{flex:0 0 auto;color:var(--dim);text-decoration:none;font-size:13.5px;padding:7px 14px;border:1px solid var(--line);border-radius:20px;white-space:nowrap;transition:.2s}
-nav a.on,nav a:active{color:#0D0B1E;background:var(--gold);font-weight:700}
-section{max-width:680px;margin:0 auto;padding:34px 20px 10px}
-h2{font-size:22px;color:var(--gold);margin-bottom:14px;padding-left:14px;border-left:4px solid var(--gold)}
-h3{font-size:17.5px;color:var(--gold2);margin:20px 0 8px}
-p{margin-bottom:12px;color:#D8D2EE}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin:14px 0}
-.hl{color:var(--gold2);font-weight:700}
-.chak{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
-.chak div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:14px}
-.chak b{display:block;font-size:15px}
-.chak .ajna{grid-column:1/-1;border-color:var(--gold);background:linear-gradient(135deg,#2A1F5C,#1D1740)}
-ol,ul{padding-left:22px;margin-bottom:12px;color:#D8D2EE}
+nav a{flex:0 0 auto;color:var(--dim);text-decoration:none;font-size:13.5px;padding:7px 14px;border:1px solid var(--line);border-radius:20px;white-space:nowrap;background:#fff}
+nav a.on,nav a:active{color:#fff;background:var(--saf);font-weight:700}
+section{max-width:680px;margin:0 auto;padding:30px 20px 8px}
+h2{font-size:21px;color:var(--saf2);margin-bottom:14px;padding-left:14px;border-left:4px solid var(--saf)}
+h3{font-size:17px;color:var(--terra);margin:18px 0 8px}
+p{margin-bottom:12px;color:#54402E}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin:12px 0;box-shadow:0 2px 10px rgba(180,100,40,.06)}
+.hl{color:var(--saf2);font-weight:700}
+ol,ul{padding-left:22px;margin-bottom:12px;color:#54402E}
 li{margin-bottom:8px}
-.steps{counter-reset:s;list-style:none;padding-left:0}
-.steps li{counter-increment:s;position:relative;padding:10px 12px 10px 52px;background:var(--card);border:1px solid var(--line);border-radius:12px;margin-bottom:10px}
-.steps li::before{content:counter(s);position:absolute;left:12px;top:50%;transform:translateY(-50%);width:28px;height:28px;border-radius:50%;background:var(--violet);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px}
-table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14.5px}
-th,td{border:1px solid var(--line);padding:10px 12px;text-align:left}
-th{background:var(--bg2);color:var(--gold2)}
-.warn{border-left:4px solid #E0684B;background:rgba(224,104,75,.08)}
-.good{border-left:4px solid #6FBF73;background:rgba(111,191,115,.07)}
-/* breath tool */
-.tool{text-align:center;padding:26px 16px}
-#breathCircle{width:190px;height:190px;border-radius:50%;margin:16px auto;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle,#3A2A7A 0%,#1D1740 70%);border:2px solid var(--gold);transition:transform 4s ease-in-out;box-shadow:0 0 40px rgba(124,92,214,.35)}
-#breathCircle.in{transform:scale(1.22)}
-#breathCircle.out{transform:scale(.92)}
-#breathTxt{font-size:20px;font-weight:800;color:var(--gold2)}
-#breathCount{font-size:13px;color:var(--dim);margin-top:4px}
-.btn{background:var(--gold);color:#0D0B1E;border:none;padding:13px 30px;font-size:16px;font-weight:800;border-radius:12px;font-family:inherit;letter-spacing:.5px;box-shadow:0 4px 0 #9A7A28;cursor:pointer}
+/* 7-day program */
+.days{display:flex;flex-direction:column;gap:10px}
+.day{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px;cursor:pointer;transition:.15s}
+.day .dh{display:flex;align-items:center;gap:12px}
+.day .dn{width:34px;height:34px;min-width:34px;border-radius:50%;background:var(--bg2);color:var(--saf2);display:flex;align-items:center;justify-content:center;font-weight:800}
+.day.done .dn{background:var(--saf);color:#fff}
+.day .dt{font-weight:700;font-size:15.5px}
+.day .dd{display:none;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);font-size:14.5px;color:#54402E}
+.day.open .dd{display:block}
+.day.done{opacity:.75}
+/* sound tones */
+.tones{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tone{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.tone b{display:block;font-size:14.5px}
+.tone small{color:var(--dim);font-size:12.5px;display:block;margin:2px 0 8px}
+.tone button{background:var(--saf);color:#fff;border:none;padding:7px 16px;border-radius:9px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer}
+.tone button.playing{background:var(--terra)}
+/* faq */
+.faq{background:#fff;border:1px solid var(--line);border-radius:12px;margin-bottom:10px;overflow:hidden}
+.faq summary{padding:14px 16px;font-weight:700;font-size:15px;cursor:pointer;list-style:none;color:var(--saf2)}
+.faq summary::before{content:'+ ';color:var(--saf)}
+.faq[open] summary::before{content:'− '}
+.faq p{padding:0 16px 14px;font-size:14.5px}
+/* streak */
+.streakRow{display:flex;gap:12px;text-align:center}
+.streakRow>div{flex:1;background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 8px}
+.streakRow .n{font-size:26px;font-weight:800;color:var(--saf2)}
+.streakRow .l{font-size:12.5px;color:var(--dim)}
+/* breath */
+.tool{text-align:center;padding:22px 14px}
+#breathCircle{width:180px;height:180px;border-radius:50%;margin:14px auto;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle,#FFD97A 0%,#F0A03C 75%);border:3px solid #fff;transition:transform 4s ease-in-out;box-shadow:0 0 44px rgba(232,114,42,.4)}
+#breathCircle.in{transform:scale(1.22)}#breathCircle.out{transform:scale(.9)}
+#breathTxt{font-size:19px;font-weight:800;color:#7A3A10}
+#breathCount{font-size:13px;color:#8A5A28;margin-top:4px}
+.pbtns{display:flex;gap:10px;justify-content:center;margin-bottom:8px}
+.pbtns button,.tbtns button{background:#fff;color:var(--saf);border:1px solid var(--line);padding:9px 16px;border-radius:10px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer}
+.pbtns button.on,.tbtns button.on{background:var(--saf);color:#fff}
+.btn{background:var(--saf);color:#fff;border:none;padding:13px 30px;font-size:16px;font-weight:800;border-radius:12px;font-family:inherit;box-shadow:0 4px 0 var(--saf2);cursor:pointer}
 .btn:active{transform:translateY(3px);box-shadow:none}
-.btn.ghost{background:transparent;color:var(--gold);border:1px solid var(--gold);box-shadow:none;margin-left:10px}
-.tbtns{display:flex;gap:10px;justify-content:center;margin:14px 0}
-.tbtns button{background:var(--card);color:var(--gold);border:1px solid var(--line);padding:10px 18px;border-radius:10px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer}
-.tbtns button.on{background:var(--gold);color:#0D0B1E}
-#timerBig{font-size:52px;font-weight:800;color:var(--gold2);font-variant-numeric:tabular-nums;margin:8px 0}
-.check label{display:flex;gap:12px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 14px;margin-bottom:10px;cursor:pointer;font-size:15px}
-.check input{width:20px;height:20px;accent-color:var(--gold)}
+.btn.ghost{background:transparent;color:var(--saf);border:1px solid var(--saf);box-shadow:none;margin-left:10px}
+.tbtns{display:flex;gap:10px;justify-content:center;margin:12px 0}
+#timerBig{font-size:50px;font-weight:800;color:var(--saf2);font-variant-numeric:tabular-nums;margin:6px 0}
+.check label{display:flex;gap:12px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px;cursor:pointer;font-size:15px}
+.check input{width:20px;height:20px;accent-color:var(--saf)}
 .check label.done{opacity:.55;text-decoration:line-through}
-footer{text-align:center;color:var(--dim);font-size:13px;padding:30px 20px 44px}
-.om{font-size:40px;text-align:center;color:var(--gold);text-shadow:0 0 24px rgba(232,184,75,.5);margin:8px 0}
-@media(min-width:700px){body{font-size:17px}h1{font-size:34px}}
+footer{text-align:center;color:var(--dim);font-size:13px;padding:28px 20px 40px}
+.om{font-size:38px;text-align:center;color:var(--saf);margin:6px 0}
+@media(min-width:700px){body{font-size:17px}h1{font-size:33px}}
 </style>
 </head>
 <body>
 <header>
-<div class="ver">V1 • JK</div>
-<canvas id="mandala" width="300" height="300"></canvas>
+<div class="ver">V2 • JK</div>
+<div class="sun"></div>
 <h1>மூன்றாவது கண்</h1>
-<div class="tag">ஆஞ்சா சக்கர விழிப்புணர்வுக்கான முழுமையான தமிழ் வழிகாட்டி</div>
+<div class="tag">காலை வெளிச்ச பதிப்பு — வழிகாட்டுத் திட்டம் + ஒலி அலைகள்</div>
+<div class="new">V2 புதிது: 7-நாள் திட்டம் • சக்கர ஒலி • Q&amp;A • முன்னேற்ற கண்காணிப்பு</div>
 </header>
 <nav id="nav">
-<a href="#s1">அறிமுகம்</a><a href="#s2">ஆஞ்சா சக்கரம்</a><a href="#s3">ஏழு சக்கரங்கள்</a><a href="#s4">அறிகுறிகள்</a><a href="#s5">பயிற்சிகள்</a><a href="#s6">மூச்சுப் பயிற்சி</a><a href="#s7">டைமர்</a><a href="#s8">அட்டவணை</a><a href="#s9">நன்மைகள்</a><a href="#s10">எச்சரிக்கை</a>
+<a href="#s1">அடிப்படை</a><a href="#s2">7-நாள் திட்டம்</a><a href="#s3">ஒலி அலைகள்</a><a href="#s4">மூச்சு</a><a href="#s5">டைமர்</a><a href="#s6">Q&amp;A</a><a href="#s7">உணவு</a><a href="#s8">முன்னேற்றம்</a>
 </nav>
 
 <section id="s1">
-<h2>மூன்றாவது கண் என்றால் என்ன?</h2>
-<p>நம் இரு கண்களும் வெளி உலகைப் பார்க்கின்றன. ஆனால் <span class="hl">மூன்றாவது கண்</span> என்பது உள்ளுக்குள் பார்க்கும் உணர்வு — நேரடியாகக் காண முடியாத உண்மைகளை உணரும் <span class="hl">அறிவுத்திறன் (Intuition)</span>. இது ஒரு உடலுறுப்பு அல்ல; நம் புருவங்களுக்கு நடுவில், நெற்றியின் மையத்தில் இருப்பதாகக் கூறப்படும் ஒரு <span class="hl">ஆற்றல் மையம்</span>.</p>
-<p>பண்டைத் தமிழ் மரபிலும் யோக நூல்களிலும் இது <span class="hl">"நெற்றிக்கண்"</span> என அழைக்கப்படுகிறது. சிவனின் நெற்றிக்கண் அழிக்கும் சக்தியாகப் பாடப்பட்டாலும், தியான மரபில் அது <span class="hl">அறிவைத் திறக்கும் கண்</span> — தூங்கிக் கொண்டிருக்கும் நம் உயர்ந்த உணர்வின் கதவு.</p>
-<div class="card good">எளிய உதாரணம்: யாரோ பார்ப்பதைப் போல பின்னால் உணர்வது, நண்பர் அழைப்பதற்கு முன் அவர் நினைவு வருவது — இவை அனைத்தும் மூன்றாவது கண்ணின் மெல்லிய அறிகுறிகளே.</div>
+<h2>அடிப்படை — சுருக்கமாக</h2>
+<p><span class="hl">மூன்றாவது கண்</span> என்பது புருவ மையத்திலுள்ள <span class="hl">ஆஞ்சா சக்கரம்</span> — உள்ளுணர்வு, தெளிவு, நினைவாற்றலின் ஆற்றல் மையம். இரு கண்கள் வெளியைப் பார்க்க; இது உள்ளைப் பார்க்கும்.</p>
+<div class="card">
+<p style="margin:0"><span class="hl">அடிப்படை விதி:</span> மெதுவாக, தினமும், சிறிது. கீழ் சக்கரங்கள் உறுதியானால்தான் ஆஞ்சா பாதுகாப்பாகத் திறக்கும். தலைவலி/மயக்கம் நீடித்தால் ஓய்வு — இது பயிற்சி, போட்டி அல்ல.</p>
+</div>
+<p>நான்கு அடிப்படை முறைகள் (V1-ல் விரிவாக): <span class="hl">நெற்றி ஒற்றுமை தியானம்</span> (புருவ மையத்தில் ஊதா ஒளிப்புள்ளி), <span class="hl">ஓம் ஜெபம்</span> (அதிர்வை நெற்றியில் உணர), <span class="hl">திராடகம்</span> (தீபப் பார்வை), <span class="hl">சம பிராணாயாமம்</span> (மூச்சுச் சமநிலை). கீழே இவற்றை ஒரு <span class="hl">7-நாள் படிநிலைத் திட்டமாக</span> அமைத்துள்ளோம்.</p>
 </section>
 
 <section id="s2">
-<h2>ஆஞ்சா சக்கரம் — இடமும் தத்துவமும்</h2>
-<p>மூன்றாவது கண்ணின் ஆற்றல் மையம் <span class="hl">ஆஞ்சா சக்கரம் (Ajna Chakra)</span>. "ஆஞ்சா" என்றால் சம்ஸ்கிருதத்தில் <span class="hl">"கட்டளை / வழிகாட்டல்"</span>. உடலின் ஏழு முக்கிய சக்கரங்களில் ஆறாவதாக, முதுகுத்தண்டின் ஆற்றல் நெற்றிப் புருவ மையத்தில் முடிவதே இது.</p>
-<h3>அடிப்படை விவரங்கள்</h3>
-<table>
-<tr><th>அம்சம்</th><th>விவரம்</th></tr>
-<tr><td>இடம்</td><td>இரு புருவங்களுக்கு நடுவே, நெற்றி மையம்</td></tr>
-<tr><td>நிறம்</td><td>அடர் ஊதா (Indigo)</td></tr>
-<tr><td>தன்மை</td><td>உள்ளுணர்வு, தெளிவு, நினைவாற்றல், கற்பனை</td></tr>
-<tr><td>பீஜ மந்திரம்</td><td>ஓம் (ॐ)</td></tr>
-<tr><td>துளை</td><td>இரு இதள்கள் கொண்ட தாமரை</td></tr>
-<tr><td>தடையுற்றால்</td><td>குழப்பம், முடிவெடுக்க இழுக்கம், தலைவலி, மன அழுத்தம்</td></tr>
-</table>
-<p>இச்சக்கரம் சுறுசுறுப்பாக இருக்கும்போது மனம் <span class="hl">தெளிவாக</span> இருக்கும்; எது சரி என்பது உடனே புலனாகும். தியானப் பயிற்சிகள் அனைத்தும் இம்மையத்தை மெதுவாக, பாதுகாப்பாக விழிப்படையச் செய்வதே இலக்கு.</p>
+<h2>7-நாள் வழிகாட்டுத் திட்டம்</h2>
+<p>ஒவ்வொரு நாளும் ஒரு படி. நாளைத் தட்டினால் விவரம்; முடித்தவுடன் ✓ குறியிடுங்கள் (சேமிக்கப்படும்).</p>
+<div class="days" id="days">
+<div class="day" data-k="d1"><div class="dh"><div class="dn">1</div><div class="dt">மூச்சு அறிமுகம்</div></div><div class="dd">இன்று மூச்சு மட்டும். சம பிராணாயாமம் 7 சுழற்சி (4-4-6). கவனம் மூக்கின் நுனியில். 5 நிமிடம் மட்டும் — மனம் அலைந்தாலும் கவலையில்லை, திரும்ப கொண்டு வருவதே பயிற்சி.</div></div>
+<div class="day" data-k="d2"><div class="dh"><div class="dn">2</div><div class="dt">நெற்றி மையம் தொடுவது</div></div><div class="dd">மூச்சுப் பயிற்சி + நெற்றி ஒற்றுமை தியானம் 5 நிமிடம். கண்கள் மூடி, கவனம் புருவ மையத்திற்கு. ஊதா ஒளிப்புள்ளியை மென்மையாகக் கற்பனை செய்யுங்கள்.</div></div>
+<div class="day" data-k="d3"><div class="dh"><div class="dn">3</div><div class="dt">ஓம் அதிர்வு</div></div><div class="dd">மூச்சு + ஓம் ஜெபம் 21 முறை. "ஓ-ஓ-ம்" நீட்டு உச்சரிப்பில் அதிர்வு புருவ மையத்தில் எதிரொலிப்பதை உணருங்கள். பின் 3 நிமிட மௌனம்.</div></div>
+<div class="day" data-k="d4"><div class="dh"><div class="dn">4</div><div class="dt">பார்வைப் பயிற்சி</div></div><div class="dd">திராடகம்: மெழுகுவர்த்தி தீபத்தை 1 நிமிடம் பார்த்து, கண் மூடி மனக்கண்ணில் உருவத்தை நெற்றி மையத்தில் பார்க்குங்கள். 5 நிமிடம். இரவில் செய்ய சிறந்தது.</div></div>
+<div class="day" data-k="d5"><div class="dh"><div class="dn">5</div><div class="dt">இணைப்பு நாள்</div></div><div class="dd">மூச்சு (3 நிமிடம்) → ஓம் (11 முறை) → நெற்றி தியானம் (7 நிமிடம்). மூன்றையும் ஒரே அமர்வில் இணைக்கும் முதல் நாள். மொத்தம் ~12 நிமிடம்.</div></div>
+<div class="day" data-k="d6"><div class="dh"><div class="dn">6</div><div class="dt">ஆழ்ந்த அமர்வு</div></div><div class="dd">15 நிமிட நெற்றி தியானம் (கீழே உள்ள டைமர் பயன்படுத்துங்கள்). எண்ணங்கள் மேகம் போல கடந்து செல்லட்டும்; நீங்கள் வானம். உடல் உணர்வுகளை வெறும் பார்வையாளராகக் கவனியுங்கள்.</div></div>
+<div class="day" data-k="d7"><div class="dh"><div class="dn">7</div><div class="dt">முழு சுழற்சி + அனுபவ பதிவு</div></div><div class="dd">மூச்சு → ஓம் → திராடகம் → நெற்றி தியானம் (மொத்தம் 20 நிமிடம்). முடித்து ஒரு குறிப்பு எழுதுங்கள்: என்ன உணர்ந்தீர்கள்? இது உங்கள் பயிற்சியின் முதல் வாரம் — வாழ்த்துகள்!</div></div>
+</div>
+<div class="card" style="text-align:center;margin-top:14px"><button class="btn" id="dayReset" style="font-size:14px;padding:10px 22px">✓ குறிகளை மீட்டமை</button></div>
 </section>
 
 <section id="s3">
-<h2>ஏழு சக்கரங்கள் — முழு வரைபடம்</h2>
-<p>ஆஞ்சாவைப் புரிந்து கொள்ள, அது எங்கு நிற்கிறது என்பதை அறிய வேண்டும். ஆற்றல் கீழிருந்து மேலாகப் பாய்கிறது:</p>
-<div class="chak">
-<div><b style="color:#FF6B6B">7. மூலாதாரம்</b>உயிர்வாழ்வு, பாதுகாப்பு — முதுகின் அடி</div>
-<div><b style="color:#FFA94D">6. சுவாதிஷ்டானம்</b>படைப்பு, உணர்வு — கீழ்வயிறு</div>
-<div><b style="color:#FFD93D">5. மணிப்பூரகம்</b>தன்னம்பிக்கை, சக்தி — நாபி</div>
-<div><b style="color:#6FBF73">4. அனாகதம்</b>அன்பு, இரக்கம் — இதயம்</div>
-<div><b style="color:#4DC3FF">3. விசுத்தி</b>பேச்சு, உண்மை — தொண்டை</div>
-<div class="ajna"><b style="color:#B18CFF">2. ஆஞ்சா — மூன்றாவது கண் ★</b>உள்ளுணர்வு, தெளிவு — நெற்றி மையம். நம் வழிகாட்டியின் மையம் இதுவே.</div>
-<div style="grid-column:1/-1"><b style="color:#E8B84B">1. சகஸ்ராரம்</b>பேருணர்வு, இறை இணைவு — உச்சந்தலை</div>
-</div>
-<div class="card">முக்கியம்: கீழ் சக்கரங்கள் உறுதியாக இருந்தால்தான் ஆஞ்சா பாதுகாப்பாகத் திறக்கும். அதனால்தான் <span class="hl">மெதுவான, படிநிலைப் பயிற்சி</span> அவசியம்.</div>
+<h2>சக்கர ஒலி அலைகள்</h2>
+<p>ஒவ்வொரு சக்கரத்திற்கும் ஒரு அதிர்வெண். தியானத்தின்போது மெல்லிய ஒலியில் கேளுங்கள் — ஆஞ்சாவிற்கு <span class="hl">426.7 Hz</span> பாரம்பரியம்.</p>
+<div class="tones" id="tones"></div>
+<div class="card" style="font-size:13.5px;color:var(--dim)">குறிப்பு: ஒலி உங்கள் கவனத்தை ஒரே புள்ளியில் நிலைநிறுத்த உதவும் கருவி; மந்திரம் போல உச்சரிக்காமல் வெறும் கேட்பதே போதும்.</div>
 </section>
 
 <section id="s4">
-<h2>விழிப்புணர்வின் அறிகுறிகள்</h2>
-<p>பயிற்சி செய்யச் செய்ய மெல்லத் தோன்றும் மாற்றங்கள்:</p>
-<ol>
-<li>புருவ மையத்தில் <span class="hl">மெல்லிய புலிப்பு / அழுத்தம்</span> உணர்வு (பயிற்சியின்போது இயல்பு)</li>
-<li>மனம் விரைவில் <span class="hl">அமைதி</span> அடைவது; சிறு விஷயங்களில் கோபம் குறைவது</li>
-<li><span class="hl">உள்ளுணர்வு</span> தீவிரமாவது — முடிவுகள் எளிதாக, தெளிவாக வருவது</li>
-<li>கனவுகள் தெளிவாக நினைவில் நிற்பது</li>
-<li>ஒளி, நிறம், ஒலி ஆகியவற்றில் <span class="hl">உணர்திறன்</span> கூடுவது</li>
-<li>மற்றவர் உணர்வை உடனே <span class="hl">புரிந்து கொள்ளும்</span> திறன்</li>
-<li>தனிமையில் மகிழ்ச்சி; இயற்கையுடன் இணைவு உணர்வு</li>
-</ol>
-<div class="card warn">இவை அனைத்தும் <span class="hl">மெதுவாக</span> வர வேண்டும். நாளுக்குநாள் அதிகரிக்கும் தலைவலி, மயக்கம் போன்றவை இருந்தால் பயிற்சியை நிறுத்தி ஓய்வு எடுங்கள் — அது அறிகுறி அல்ல, அதிகப்படியான முயற்சியின் அடையாளம்.</div>
-</section>
-
-<section id="s5">
-<h2>நான்கு அடிப்படைப் பயிற்சிகள்</h2>
-<h3>1. நெற்றி ஒற்றுமை தியானம் (அடிப்படை)</h3>
-<ol class="steps">
-<li>முதுகு நேராக, வசதியான இடத்தில் அமருங்கள். கண்களை மெல்ல மூடுங்கள்.</li>
-<li>மூன்று முறை ஆழ்ந்து மூச்சை உள்ளிழுத்து, மெதுவாக வெளியே விடுங்கள்.</li>
-<li>கவனத்தை இரு புருவங்களுக்கு நடுவே மெதுவாகக் கொண்டு செல்லுங்கள்.</li>
-<li>அங்கே <span class="hl">அடர் ஊதா நிற ஒளிப்புள்ளி</span> ஒன்று மென்மையாகத் துள்ளதைக் கற்பனை செய்யுங்கள்.</li>
-<li>எண்ணங்கள் வந்தால் திரும்பத் திரும்ப அப்புள்ளிக்கே மீண்டும் கவனத்தைக் கொண்டு வாருங்கள்.</li>
-<li>5 நிமிடத்தில் தொடங்கி, படிப்படியாக 15 நிமிடம் வரை நீட்டியுங்கள்.</li>
-</ol>
-<h3>2. ஓம் ஜெபம் (மந்திரப் பயிற்சி)</h3>
-<ol class="steps">
-<li>மூக்கினால் ஆழ்ந்த மூச்சை உள்ளிழுங்கள்.</li>
-<li>வெளியே விடும்போது <span class="hl">"ஓம்"</span> என நீட்டு உச்சரியுங்கள் — "ஓ-ஓ-ம்" என நெற்றியில் அதிர்வை உணரும்படி.</li>
-<li>அதிர்வு புருவ மையத்தில் எதிரொலிப்பதை உணர்வதே முக்கியம்; சத்தம் அல்ல, உணர்வே பயிற்சி.</li>
-<li>ஒரு நாளைக்கு 21 முறை தொடங்கி 108 வரை செல்லலாம்.</li>
-</ol>
-<h3>3. திராடகம் (பார்வைப் பயிற்சி)</h3>
-<ol class="steps">
-<li>அறையை இருட்டாக்கி, கண் மட்டத்தில் ஒரு மெழுகுவர்த்தியை 1 மீட்டர் தொலைவில் வையுங்கள்.</li>
-<li>கண் சிமிட்டாமல், கவலையின்றி தீபத்தின் ஒளியைப் பாருங்கள் — 1 நிமிடம்.</li>
-<li>கண்களை மூடுங்கள்; மனக்கண்ணில் எஞ்சிய தீப உருவத்தைப் <span class="hl">புருவ மையத்தில்</span> பார்க்க முயற்சியுங்கள்.</li>
-<li>உருவம் மறைந்ததும் மீண்டும் பார்வை — மொத்தம் 5 நிமிடம்.</li>
-</ol>
-<h3>4. சம பிராணாயாமம் (மூச்சுச் சமநிலை)</h3>
-<ol class="steps">
-<li>4 எண்ணிக்கையில் உள்ளிழுங்கள் — 4 எண்ணிக்கையில் நிறுத்துங்கள் — 6 எண்ணிக்கையில் வெளியே விடுங்கள்.</li>
-<li>இதுவே ஒரு சுழற்சி. 7 சுழற்சி செய்தால் மனம் கடல்போல அமைதியாகும்.</li>
-<li>கீழே உள்ள <span class="hl">வழிகாட்டும் மூச்சுப் பயிற்சி</span> கருவி இதற்கானது — இப்போதே முயற்சிக்கவும்.</li>
-</ol>
-</section>
-
-<section id="s6">
 <h2>வழிகாட்டும் மூச்சுப் பயிற்சி</h2>
 <div class="card tool">
+<div class="pbtns" id="pBtns">
+<button data-p="a" class="on">சமம் 4-4-6</button>
+<button data-p="b">தூக்கம் 4-7-8</button>
+</div>
 <div id="breathCircle"><div><div id="breathTxt">தயார்</div><div id="breathCount">4 - 4 - 6</div></div></div>
-<div style="color:var(--dim);font-size:14px;margin-bottom:14px">வட்டம் பெரிதாகும்போது மூச்சை உள்ளிழுங்கள், நிலையாக இருக்கும்போது நிறுத்துங்கள், சிறிதாகும்போது வெளியே விடுங்கள்.</div>
 <button class="btn" id="breathBtn">தொடங்கு</button>
 <button class="btn ghost" id="breathStop">நிறுத்து</button>
 </div>
 </section>
 
-<section id="s7">
+<section id="s5">
 <h2>தியான டைமர்</h2>
 <div class="card tool">
 <div class="om">ॐ</div>
 <div class="tbtns" id="minBtns">
-<button data-m="5">5 நிமிடம்</button>
-<button data-m="10" class="on">10 நிமிடம்</button>
-<button data-m="15">15 நிமிடம்</button>
+<button data-m="5">5</button>
+<button data-m="10" class="on">10</button>
+<button data-m="15">15</button>
+<button data-m="20">20</button>
 </div>
 <div id="timerBig">10:00</div>
-<button class="btn" id="timerBtn">தியானம் தொடங்கு</button>
+<button class="btn" id="timerBtn">தொடங்கு</button>
 <button class="btn ghost" id="timerReset">மீட்டமை</button>
-<div style="color:var(--dim);font-size:13px;margin-top:12px">முடிவில் மெல்லிய ஓம் ஒலி எழும். நடுவில் நிறுத்த வேண்டுமானால் மீட்டமை அழுத்துங்கள்.</div>
+<div style="color:var(--dim);font-size:13px;margin-top:10px">முடிவில் ஓம் ஒலி. முடித்த அமர்வுகள் கீழே கணக்கிடப்படும்.</div>
 </div>
+</section>
+
+<section id="s6">
+<h2>அடிக்கடி கேட்கப்படும் கேள்விகள்</h2>
+<details class="faq"><summary>எத்தனை நாட்களில் மூன்றாவது கண் திறக்கும்?</summary><p>இது விதை போன்றது — தினசரி நீர் ஊற்றினால் முளைக்கும், ஆனால் நாள் கணக்கிட முடியாது. 21-40 நாட்கள் தினசரி பயிற்சியில் மன அமைதி, தெளிவு போன்ற முதல் மாற்றங்கள் பெரும்பாலும் உணரப்படும். அவசரம் பயிற்சியின் எதிரி.</p></details>
+<details class="faq"><summary>புருவ மையத்தில் அழுத்தம் உணர்வது நல்லதா?</summary><p>மெல்லிய புலிப்பு/அழுத்தம் பயிற்சியின்போது இயல்பு — கவனம் அங்கு செல்வதின் அடையாளம். ஆனால் வலி அல்லது நீடிக்கும் தலைவலி எனில் பயிற்சியை நிறுத்தி ஓய்வெடுங்கள்.</p></details>
+<details class="faq"><summary>குழந்தைகள் செய்யலாமா?</summary><p>12 வயதிற்கு மேல் எளிய மூச்சுப் பயிற்சி செய்யலாம். திராடகம், நீண்ட தியானம் போன்றவை பெரியவர்களுக்கே. குழந்தைகளுக்கு 2-3 நிமிடம் போதும்.</p></details>
+<details class="faq"><summary>கண்கள் திறந்தே தியானிக்கலாமா?</summary><p>திராடகம் போல சில பயிற்சிகள் திறந்த கண்களுடன்தான். ஆனால் நெற்றி தியானம் கண் மூடியே சிறந்தது — வெளி தகவல் குறைய, உள் கவனம் கூட.</p></details>
+<details class="faq"><summary>எந்த நேரம் சிறந்தது?</summary><p>காலை 4:30-6:00 (பிரம்ம முகூர்த்தம்) பாரம்பரிய சிறந்த நேரம். ஆனால் <span class="hl">தினமும் செய்யக்கூடிய நேரமே</span> உங்களுக்குச் சிறந்த நேரம் — இரவும் ஒரே பலன் தரும்.</p></details>
+<details class="faq"><summary>இது மதம் சார்ந்ததா?</summary><p>தியானம் ஒரு மனப் பயிற்சி; எல்லா மரபுகளிலும் உள்ளது. இங்கு கொடுக்கப்பட்ட முறைகள் யார் வேண்டுமானாலும் பயிற்சி செய்யும் பொது நுட்பங்கள்.</p></details>
+</section>
+
+<section id="s7">
+<h2>உணவும் பழக்கமும்</h2>
+<h3>உதவுவன</h3>
+<ul>
+<li>சத்துவ உணவு — காய்கறி, பழம், தானியம், பால், நெய் மிதமாக</li>
+<li>தினமும் குறிப்பிட்ட நேரத்தில் பயிற்சி — மனம் தானாகத் தயாராகும்</li>
+<li>போதிய தூக்கம் (7-8 மணி நேரம்), காலை நடை</li>
+<li>பயிற்சிக்கு முன் முகம் கழுவுதல், இளம் வெதுவெதுப்பான நீர்</li>
+</ul>
+<h3>தடை செய்வன</h3>
+<ul>
+<li>பயிற்சிக்கு முன் கன உணவு (2 மணி நேர இடைவெளி வேண்டும்)</li>
+<li>அதிக காஃபின், புகை, மது — நரம்பு அமைதியைக் குலைக்கும்</li>
+<li>பயிற்சி நேரத்தில் தொலைபேசி — ஒரே அறிவிப்பும் ரிதமை உடைக்கும்</li>
+<li>இடைவிட்ட பயிற்சி — "வாரம் 3 முறை" என்பதை விட "தினமும் 5 நிமிடம்" மேல்</li>
+</ul>
 </section>
 
 <section id="s8">
-<h2>தினசரி பயிற்சி அட்டவணை</h2>
-<table>
-<tr><th>நேரம்</th><th>பயிற்சி</th><th>காலம்</th></tr>
-<tr><td>காலை (விழித்தவுடன்)</td><td>சம பிராணாயாமம் — 7 சுழற்சி</td><td>3 நிமிடம்</td></tr>
-<tr><td>காலை</td><td>நெற்றி ஒற்றுமை தியானம்</td><td>5-10 நிமிடம்</td></tr>
-<tr><td>மாலை</td><td>ஓம் ஜெபம்</td><td>21 முறை</td></tr>
-<tr><td>இரவு (தூங்குவதற்கு முன்)</td><td>திராடகம் அல்லது நன்றியுணர்வு தியானம்</td><td>5 நிமிடம்</td></tr>
-</table>
-<h3>இன்றைய பட்டியல்</h3>
-<div class="check" id="checklist">
-<label><input type="checkbox" data-k="c1">காலை மூச்சுப் பயிற்சி முடித்தேன்</label>
-<label><input type="checkbox" data-k="c2">நெற்றி தியானம் முடித்தேன்</label>
-<label><input type="checkbox" data-k="c3">ஓம் ஜெபம் முடித்தேன்</label>
-<label><input type="checkbox" data-k="c4">இரவுப் பயிற்சி முடித்தேன்</label>
+<h2>முன்னேற்றக் கண்காணிப்பு</h2>
+<div class="streakRow">
+<div><div class="n" id="stDays">0</div><div class="l">திட்ட நாட்கள் ✓</div></div>
+<div><div class="n" id="stSessions">0</div><div class="l">டைமர் அமர்வுகள்</div></div>
+<div><div class="n" id="stBreath">0</div><div class="l">மூச்சுச் சுழற்சிகள்</div></div>
 </div>
-<div class="card good">ரகசியம் இல்லை — <span class="hl">தினமும் சிறிது</span>. 21 நாட்கள் இடைவிடாமல் செய்தால் மனம் தானாக நேரத்தை நினைவூட்டும்.</div>
-</section>
-
-<section id="s9">
-<h2>நன்மைகள்</h2>
-<ul>
-<li>மனக்குழப்பம் குறைந்து <span class="hl">தெளிவான முடிவுகள்</span></li>
-<li>கவனம், நினைவாற்றல் மேம்பாடு — படிப்பிலும் வேலையிலும்</li>
-<li>மன அழுத்தம், படபடப்பு குறைவு; ஆழ்ந்த தூக்கம்</li>
-<li>உணர்ச்சிகளை <span class="hl">கட்டுப்படுத்தும்</span> திறன் — கோபம் குறைவது</li>
-<li>படைப்பாற்றல், கற்பனைத்திறன் வளர்ச்சி</li>
-<li>தன்னம்பிக்கை; உள்ளுக்குள் அமைதியான மையம்</li>
-</ul>
-</section>
-
-<section id="s10">
-<h2>முன்னெச்சரிக்கைகள்</h2>
-<div class="card warn">
-<ul>
-<li>பயிற்சியை <span class="hl">மெதுவாக</span> தொடங்குங்கள் — 5 நிமிடம் போதும்; அதிகப்படியான ஆர்வம் தலைவலியைத் தரும்.</li>
-<li>தலைவலி, மயக்கம், எரிச்சல் நீடித்தால் பயிற்சியை நிறுத்தி சில நாட்கள் ஓய்வு எடுங்கள்.</li>
-<li>வயிறு நிறைய உணவு சாப்பிட்டவுடன் பயிற்சி வேண்டாம்; 2 மணி நேர இடைவெளி நல்லது.</li>
-<li>மனநிலைச் சிக்கலுக்கு மருத்துவ சிகிச்சை எடுப்பவர்கள் மருத்துவரிடம் கேட்டுவிட்டு தொடங்குங்கள்.</li>
-<li>இது ஒரு <span class="hl">வாழ்வியல் பயிற்சி</span>; மருத்துவ சிகிச்சைக்கு மாற்று அல்ல.</li>
-</ul>
+<div class="card" style="margin-top:14px">
+<h3 style="margin-top:0">இன்றைய பட்டியல்</h3>
+<div class="check" id="checklist">
+<label><input type="checkbox" data-k="c1">காலை மூச்சுப் பயிற்சி</label>
+<label><input type="checkbox" data-k="c2">நெற்றி தியானம்</label>
+<label><input type="checkbox" data-k="c3">ஓம் ஜெபம்</label>
+<label><input type="checkbox" data-k="c4">இரவுப் பயிற்சி</label>
+</div>
 </div>
 </section>
 
 <footer>
 <div class="om">ॐ</div>
-மூன்றாவது கண் வழிகாட்டி — V1<br>JK உரிஜினல் • அடுத்த பதிப்பில் மேலும் புதிய அம்சங்கள்
+மூன்றாவது கண் வழிகாட்டி — V2 (காலை வெளிச்ச பதிப்பு)<br>JK உரிஜினல் • V3-ல் மேலும் புதிய அம்சங்கள்
 </footer>
 
 <script>
-// mandala
-const mc=document.getElementById('mandala').getContext('2d');
-function mandala(t){
- mc.clearRect(0,0,300,300);mc.save();mc.translate(150,150);
- for(let ring=0;ring<3;ring++){
-  const n=8+ring*4,R=40+ring*38;
-  for(let i=0;i<n;i++){
-   const a=i/n*Math.PI*2+t*0.0002*(ring%2?1:-1);
-   mc.fillStyle=ring===2?'rgba(232,184,75,.85)':'rgba(124,92,214,'+(0.5+ring*0.15)+')';
-   mc.beginPath();mc.ellipse(Math.cos(a)*R,Math.sin(a)*R,ring===2?4:9-ring*2,ring===2?4:14-ring*3,a,0,Math.PI*2);mc.fill();
-  }
- }
- // third eye center
- mc.fillStyle='rgba(232,184,75,.95)';
- mc.beginPath();mc.ellipse(0,0,26,15,0,0,Math.PI*2);mc.fill();
- mc.fillStyle='#0D0B1E';mc.beginPath();mc.arc(0,0,9,0,Math.PI*2);mc.fill();
- mc.fillStyle='#E8B84B';mc.beginPath();mc.arc(0,0,4,0,Math.PI*2);mc.fill();
- mc.restore();
- requestAnimationFrame(mandala);}
-requestAnimationFrame(mandala);
 // nav highlight
 const links=[...document.querySelectorAll('nav a')];
-addEventListener('scroll',()=>{
- let cur=links[0];
+addEventListener('scroll',()=>{let cur=links[0];
  for(const a of links){const el=document.querySelector(a.getAttribute('href'));
   if(el&&el.getBoundingClientRect().top<120)cur=a;}
  links.forEach(a=>a.classList.toggle('on',a===cur));},{passive:true});
-// breathing 4-4-6
-let brTimer=null,brPhase=0;
+// local store helpers
+const LS={get:(k,d)=>{try{const v=localStorage.getItem('te2_'+k);return v===null?d:JSON.parse(v);}catch(e){return d;}},
+ set:(k,v)=>{try{localStorage.setItem('te2_'+k,JSON.stringify(v));}catch(e){}}};
+// 7-day program
+function refreshStats(){
+ document.getElementById('stDays').textContent=document.querySelectorAll('#days .day.done').length;
+ document.getElementById('stSessions').textContent=LS.get('sessions',0);
+ document.getElementById('stBreath').textContent=LS.get('breathCycles',0);}
+document.querySelectorAll('#days .day').forEach(d=>{
+ if(LS.get(d.dataset.k,false)){d.classList.add('done');}
+ d.querySelector('.dh').addEventListener('click',e=>{
+  d.classList.toggle('open');});
+ d.addEventListener('dblclick',()=>{});
+ // long area: tap the dn circle toggles done
+ d.querySelector('.dn').addEventListener('click',e=>{e.stopPropagation();
+  d.classList.toggle('done');LS.set(d.dataset.k,d.classList.contains('done'));refreshStats();});});
+document.getElementById('dayReset').addEventListener('click',()=>{
+ document.querySelectorAll('#days .day').forEach(d=>{d.classList.remove('done');LS.set(d.dataset.k,false);});refreshStats();});
+// chakra tones
+const TONES=[['மூலாதாரம்','396 Hz — உறுதி',396],['சுவாதிஷ்டானம்','417 Hz — படைப்பு',417],['மணிப்பூரகம்','528 Hz — சக்தி',528],['அனாகதம்','639 Hz — அன்பு',639],['விசுத்தி','741 Hz — உண்மை',741],['ஆஞ்சா ★','426.7 Hz — உள்ளுணர்வு',426.7],['சகஸ்ராரம்','963 Hz — இணைவு',963]];
+let ac=null,curOsc=null,curBtn=null;
+const toneBox=document.getElementById('tones');
+TONES.forEach((t,i)=>{
+ const div=document.createElement('div');div.className='tone';
+ div.innerHTML='<b style="color:'+(i===5?'#C4531A':'#3B2A1A')+'">'+t[0]+'</b><small>'+t[1]+'</small>';
+ const b=document.createElement('button');b.textContent='▶ ஒலி';
+ b.addEventListener('click',()=>{
+  if(curOsc){curOsc.stop();curOsc=null;if(curBtn){curBtn.textContent='▶ ஒலி';curBtn.classList.remove('playing');}
+   if(curBtn===b){curBtn=null;return;}}
+  try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();
+   const o=ac.createOscillator(),gn=ac.createGain();
+   o.frequency.value=t[2];o.type='sine';gn.gain.value=0.08;
+   o.connect(gn);gn.connect(ac.destination);o.start();curOsc=o;
+   b.textContent='■ நிறுத்து';b.classList.add('playing');curBtn=b;}catch(e){}});
+ div.appendChild(b);toneBox.appendChild(div);});
+// breathing with patterns
+const PATTERNS={a:{label:'4 - 4 - 6',phases:[['உள்ளிழுங்கள்',4,'in'],['நிறுத்துங்கள்',4,''],['வெளியே விடுங்கள்',6,'out']]},
+ b:{label:'4 - 7 - 8',phases:[['உள்ளிழுங்கள்',4,'in'],['நிறுத்துங்கள்',7,''],['வெளியே விடுங்கள்',8,'out']]}};
+let curPat='a',brTimer=null,brPhase=0,brCycle=0;
 const bC=document.getElementById('breathCircle'),bT=document.getElementById('breathCount'),bX=document.getElementById('breathTxt');
-const phases=[{n:'உள்ளிழுங்கள்',d:4,cls:'in'},{n:'நிறுத்துங்கள்',d:4,cls:''},{n:'வெளியே விடுங்கள்',d:6,cls:'out'}];
-let brCycle=0;
+document.querySelectorAll('#pBtns button').forEach(b=>b.addEventListener('click',()=>{
+ document.querySelectorAll('#pBtns button').forEach(x=>x.classList.remove('on'));
+ b.classList.add('on');curPat=b.dataset.p;bT.textContent=PATTERNS[curPat].label;}));
 function brStep(){
- const p=phases[brPhase];
- bX.textContent=p.n;bC.className=p.cls;
- let left=p.d;bT.textContent=left+' வினாடி';
+ const p=PATTERNS[curPat].phases[brPhase];
+ bX.textContent=p[0];bC.className=p[2];
+ let left=p[1];bT.textContent=left+' வினாடி';
  clearInterval(brTimer);
- brTimer=setInterval(()=>{
-  left--;if(left>0){bT.textContent=left+' வினாடி';return;}
+ brTimer=setInterval(()=>{left--;
+  if(left>0){bT.textContent=left+' வினாடி';return;}
   clearInterval(brTimer);
   brPhase=(brPhase+1)%3;
-  if(brPhase===0){brCycle++;bT.textContent='சுழற்சி '+brCycle+' ✓';}
-  brStep();
- },1000);
-}
+  if(brPhase===0){brCycle++;LS.set('breathCycles',LS.get('breathCycles',0)+1);refreshStats();
+   bT.textContent='சுழற்சி '+brCycle+' ✓';}
+  brStep();},1000);}
 document.getElementById('breathBtn').addEventListener('click',()=>{brPhase=0;brCycle=0;brStep();});
-document.getElementById('breathStop').addEventListener('click',()=>{clearInterval(brTimer);bX.textContent='தயார்';bT.textContent='4 - 4 - 6';bC.className='';});
+document.getElementById('breathStop').addEventListener('click',()=>{clearInterval(brTimer);brTimer=null;bX.textContent='தயார்';bT.textContent=PATTERNS[curPat].label;bC.className='';});
 // timer
 let tLeft=600,tInt=null,tMin=10;
 const tBig=document.getElementById('timerBig');
 function tShow(){const m=Math.floor(tLeft/60),s=tLeft%60;tBig.textContent=(m<10?'0':'')+m+':'+(s<10?'0':'')+s;}
 document.querySelectorAll('#minBtns button').forEach(b=>b.addEventListener('click',()=>{
  document.querySelectorAll('#minBtns button').forEach(x=>x.classList.remove('on'));
- b.classList.add('on');tMin=+b.dataset.m;tLeft=tMin*60;clearInterval(tInt);tInt=null;tShow();}));
+ b.classList.add('on');tMin=+b.dataset.m;tLeft=tMin*60;clearInterval(tInt);tInt=null;tShow();
+ document.getElementById('timerBtn').textContent='தொடங்கு';}));
 function omBell(){
- try{const ac=new (window.AudioContext||window.webkitAudioContext)();
- for(let k=0;k<3;k++){const o=ac.createOscillator(),gn=ac.createGain();
+ try{const a2=new (window.AudioContext||window.webkitAudioContext)();
+ for(let k=0;k<3;k++){const o=a2.createOscillator(),gn=a2.createGain();
   o.frequency.value=136.1*(k+1);o.type='sine';
-  gn.gain.setValueAtTime(0,ac.currentTime);
-  gn.gain.linearRampToValueAtTime(0.25/(k+1),ac.currentTime+0.05);
-  gn.gain.exponentialRampToValueAtTime(0.0001,ac.currentTime+4);
-  o.connect(gn);gn.connect(ac.destination);o.start();o.stop(ac.currentTime+4.2);}
- }catch(e){}
-}
+  gn.gain.setValueAtTime(0,a2.currentTime);
+  gn.gain.linearRampToValueAtTime(0.22/(k+1),a2.currentTime+0.05);
+  gn.gain.exponentialRampToValueAtTime(0.0001,a2.currentTime+4);
+  o.connect(gn);gn.connect(a2.destination);o.start();o.stop(a2.currentTime+4.2);}}catch(e){}}
 document.getElementById('timerBtn').addEventListener('click',()=>{
- if(tInt){clearInterval(tInt);tInt=null;document.getElementById('timerBtn').textContent='தியானம் தொடங்கு';return;}
+ if(tInt){clearInterval(tInt);tInt=null;document.getElementById('timerBtn').textContent='தொடங்கு';return;}
  document.getElementById('timerBtn').textContent='இடைநிறுத்து';
  tInt=setInterval(()=>{tLeft--;tShow();
-  if(tLeft<=0){clearInterval(tInt);tInt=null;tLeft=tMin*60;omBell();
-   document.getElementById('timerBtn').textContent='தியானம் தொடங்கு';tShow();}
- },1000);});
-document.getElementById('timerReset').addEventListener('click',()=>{clearInterval(tInt);tInt=null;tLeft=tMin*60;tShow();document.getElementById('timerBtn').textContent='தியானம் தொடங்கு';});
+  if(tLeft<=0){clearInterval(tInt);tInt=null;tLeft=tMin*60;
+   LS.set('sessions',LS.get('sessions',0)+1);refreshStats();omBell();
+   document.getElementById('timerBtn').textContent='தொடங்கு';tShow();}},1000);});
+document.getElementById('timerReset').addEventListener('click',()=>{clearInterval(tInt);tInt=null;tLeft=tMin*60;tShow();document.getElementById('timerBtn').textContent='தொடங்கு';});
 tShow();
-// checklist persistence
+// checklist
 document.querySelectorAll('#checklist input').forEach(cb=>{
- try{if(localStorage.getItem('te_'+cb.dataset.k)==='1'){cb.checked=true;cb.parentElement.classList.add('done');}}catch(e){}
+ if(LS.get(cb.dataset.k,false)){cb.checked=true;cb.parentElement.classList.add('done');}
  cb.addEventListener('change',()=>{cb.parentElement.classList.toggle('done',cb.checked);
-  try{localStorage.setItem('te_'+cb.dataset.k,cb.checked?'1':'0');}catch(e){}});});
-window.__TE={G:()=>({sections:document.querySelectorAll('section').length,
+  LS.set(cb.dataset.k,cb.checked);});});
+refreshStats();
+window.__TE2={G:()=>({sections:document.querySelectorAll('section').length,
+ daysDone:document.querySelectorAll('#days .day.done').length,
+ tones:document.querySelectorAll('#tones .tone').length,
  breathTxt:bX.textContent,breathRunning:!!brTimer,
  timerShown:tBig.textContent,timerRunning:!!tInt,
+ sessions:LS.get('sessions',0),breathCycles:LS.get('breathCycles',0),
  checked:document.querySelectorAll('#checklist input:checked').length}),
- breathStart:()=>{brPhase=0;brCycle=0;brStep();},
- breathStop:()=>{clearInterval(brTimer);bC.className='';},
- timerStart:(m)=>{tMin=m;tLeft=m*60;tShow();
-  if(tInt)clearInterval(tInt);
-  tInt=setInterval(()=>{tLeft--;tShow();if(tLeft<=0){clearInterval(tInt);tInt=null;tLeft=tMin*60;tShow();}},1000);},
+ dayToggle:(i,done)=>{const d=document.querySelectorAll('#days .day')[i];d.classList.toggle('done',done);LS.set(d.dataset.k,done);refreshStats();},
+ dayOpen:(i)=>{document.querySelectorAll('#days .day')[i].classList.add('open');},
+ breathStart:(p)=>{curPat=p||'a';brPhase=0;brCycle=0;brStep();},
+ breathStop:()=>{clearInterval(brTimer);brTimer=null;bC.className='';},
+ timerStart:(m)=>{tMin=m;tLeft=m*60;tShow();if(tInt)clearInterval(tInt);
+  tInt=setInterval(()=>{tLeft--;tShow();if(tLeft<=0){clearInterval(tInt);tInt=null;tLeft=tMin*60;LS.set('sessions',LS.get('sessions',0)+1);refreshStats();tShow();}},1000);},
  timerStop:()=>{clearInterval(tInt);tInt=null;},
  setTime:(s)=>{tLeft=s;tShow();},
- tickManual:(n)=>{for(let i=0;i<n;i++){tLeft--;tShow();}}};
+ toneAt:(i)=>{document.querySelectorAll('#tones .tone button')[i].click();},
+ tonePlaying:()=>!!curOsc};
 </script>
 </body>
 </html>
