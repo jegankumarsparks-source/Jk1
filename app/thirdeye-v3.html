@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>மூன்றாவது கண் V3 — வழிகாட்டி | JK</title>
+<style>
+:root{--bg:#0F2418;--bg2:#16301F;--leaf:#5FA85C;--leaf2:#8FCB8B;--mint:#CDE7C5;--ink:#E8F2E4;--dim:#8FA892;--gold:#E8C95B;--card:#173423;--line:rgba(143,203,139,.25)}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:'Noto Sans Tamil','Latha','Tamil Sangam MN',sans-serif;line-height:1.85;font-size:16px}
+header{position:relative;text-align:center;padding:42px 20px 28px;background:linear-gradient(180deg,#1C3D27 0%,var(--bg) 85%)}
+.leafRing{width:120px;height:120px;margin:0 auto 12px;position:relative}
+.leafRing .lf{position:absolute;left:50%;top:50%;width:14px;height:34px;background:linear-gradient(180deg,var(--leaf2),var(--leaf));border-radius:50% 50% 50% 50%/60% 60% 40% 40%;transform-origin:50% 60px;animation:sway 4s ease-in-out infinite}
+@keyframes sway{0%,100%{filter:brightness(1)}50%{filter:brightness(1.25)}}
+.leafEye{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:44px;height:26px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center}
+.leafEye::after{content:'';width:14px;height:14px;background:var(--bg);border-radius:50%}
+h1{font-size:29px;color:var(--mint);letter-spacing:1px;font-weight:800}
+.tag{color:var(--dim);font-size:14px;margin-top:6px}
+.ver{position:absolute;top:12px;right:14px;background:var(--card);border:1px solid var(--line);color:var(--leaf2);font-size:12px;padding:4px 12px;border-radius:20px}
+.new{display:inline-block;margin-top:10px;background:var(--leaf);color:#0F2418;font-size:12.5px;padding:5px 14px;border-radius:16px;font-weight:700}
+nav{position:sticky;top:0;z-index:9;background:rgba(15,36,24,.95);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:10px 8px;display:flex;gap:8px;overflow-x:auto}
+nav::-webkit-scrollbar{display:none}
+nav a{flex:0 0 auto;color:var(--dim);text-decoration:none;font-size:13.5px;padding:7px 14px;border:1px solid var(--line);border-radius:20px;white-space:nowrap}
+nav a.on{color:#0F2418;background:var(--leaf2);font-weight:700}
+section{max-width:680px;margin:0 auto;padding:30px 20px 8px}
+h2{font-size:21px;color:var(--leaf2);margin-bottom:14px;padding-left:14px;border-left:4px solid var(--leaf)}
+h3{font-size:17px;color:var(--mint);margin:18px 0 8px}
+p{margin-bottom:12px;color:#C8DCC2}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin:12px 0}
+.hl{color:var(--gold);font-weight:700}
+/* 21-day grid */
+.grid21{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin:14px 0}
+.grid21 div{aspect-ratio:1;background:var(--card);border:1px solid var(--line);border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:var(--dim);cursor:pointer}
+.grid21 div.done{background:var(--leaf);color:#0F2418}
+.grid21 div.today{border-color:var(--gold);border-width:2px}
+/* japa */
+.japa{text-align:center;padding:24px 14px}
+#japaBig{font-size:56px;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums}
+#japaSub{color:var(--dim);font-size:14px;margin-bottom:14px}
+.malaRing{width:200px;height:200px;margin:12px auto;position:relative}
+.malaRing .bead{position:absolute;width:9px;height:9px;border-radius:50%;background:var(--card);border:1px solid var(--line)}
+.malaRing .bead.on{background:var(--gold);border-color:var(--gold)}
+.jbtn{background:var(--leaf);color:#0F2418;border:none;padding:14px 36px;font-size:17px;font-weight:800;border-radius:14px;font-family:inherit;box-shadow:0 4px 0 #3A6B38;cursor:pointer}
+.jbtn:active{transform:translateY(3px);box-shadow:none}
+.jbtn.ghost{background:transparent;color:var(--leaf2);border:1px solid var(--leaf2);box-shadow:none;margin-left:10px;padding:14px 20px;font-size:14px}
+/* trataka */
+.trat{text-align:center;padding:22px 14px;background:#0A1A10}
+#flame{width:26px;height:60px;margin:16px auto 6px;background:linear-gradient(180deg,#FFE9A0 0%,#F0A03C 55%,#C4531A 100%);border-radius:50% 50% 40% 40%/70% 70% 30% 30%;transform-origin:50% 100%;animation:flick .18s ease-in-out infinite alternate;box-shadow:0 0 34px rgba(240,160,60,.75)}
+@keyframes flick{from{transform:scaleY(1) scaleX(1) rotate(-1.4deg)}to{transform:scaleY(1.08) scaleX(.94) rotate(1.6deg)}}
+.wick{width:5px;height:12px;margin:0 auto;background:#3A2A1A;border-radius:2px}
+.candleB{width:56px;height:88px;margin:0 auto;background:linear-gradient(180deg,#F5E7CE,#E0C9A0);border-radius:6px 6px 10px 10px}
+#tratMsg{color:var(--mint);font-size:14.5px;margin-top:14px;min-height:26px}
+/* journal */
+.jPrompt{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin:12px 0}
+.jPrompt .q{color:var(--mint);font-weight:700;margin-bottom:10px;font-size:15.5px}
+.jPrompt textarea{width:100%;min-height:90px;background:#0F2418;border:1px solid var(--line);border-radius:10px;color:var(--ink);font-family:inherit;font-size:14.5px;padding:12px;line-height:1.7;resize:vertical}
+.jPrompt .save{margin-top:10px;background:var(--leaf);color:#0F2418;border:none;padding:8px 20px;border-radius:9px;font-weight:700;font-size:13.5px;font-family:inherit;cursor:pointer}
+.jPrompt .ok{color:var(--leaf2);font-size:13px;margin-left:10px}
+/* myth */
+.myth{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:12px}
+.myth .m{color:#E89A8A;font-weight:700;font-size:15px}
+.myth .f{color:var(--leaf2);font-size:15px;margin-top:6px}
+footer{text-align:center;color:var(--dim);font-size:13px;padding:28px 20px 40px}
+.om{font-size:36px;text-align:center;color:var(--gold);margin:6px 0}
+</style>
+</head>
+<body>
+<header>
+<div class="ver">V3 • JK</div>
+<div class="leafRing" id="leafRing"><div class="leafEye"></div></div>
+<h1>மூன்றாவது கண்</h1>
+<div class="tag">பிரகிருதி பதிப்பு — சவால் + ஜப மாலை + திராடகம்</div>
+<div class="new">V3 புதிது: 21-நாள் சவால் • 108 ஜப மாலை • திராடக விளக்கு • சிந்தனை நாட்குறிப்பு</div>
+</header>
+<nav id="nav">
+<a href="#s1">சவால்</a><a href="#s2">ஜப மாலை</a><a href="#s3">திராடகம்</a><a href="#s4">நாட்குறிப்பு</a><a href="#s5">கட்டுக்கதை vs உண்மை</a>
+</nav>
+
+<section id="s1">
+<h2>21-நாள் சவால்</h2>
+<p>பழக்கம் உருவாக 21 நாட்கள். தினமும் குறைந்தது 10 நிமிடம் பயிற்சி — முடித்த நாளைத் தட்டுங்கள். இடையில் ஒரு நாள் விட்டாலும் வருத்தம் வேண்டாம்; அடுத்த நாள் தொடருங்கள்.</p>
+<div class="card">
+<div class="grid21" id="grid21"></div>
+<div style="display:flex;justify-content:space-between;align-items:center">
+<div style="color:var(--dim);font-size:14px">முடிந்த நாட்கள்: <b class="hl" id="done21">0</b> / 21</div>
+<button class="jbtn ghost" id="reset21" style="margin:0">மீட்டமை</button>
+</div></div>
+<div class="card" style="font-size:14px;color:var(--dim)">💡 V2-இல் உள்ள 7-நாள் திட்டத்தை மூன்று முறை சுழற்றினாலே 21 நாட்கள் — ஒவ்வொரு சுழற்சியிலும் தியான நேரத்தை 2 நிமிடம் கூட்டுங்கள்.</div>
+</section>
+
+<section id="s2">
+<h2>108 ஜப மாலை</h2>
+<p>ஓம் (அல்லது உங்கள் மந்திரம்) ஒவ்வொரு முறை உச்சரிக்கும்போதும் பொத்தானைத் தட்டுங்கள். 108 நிறைவதும் மணியொலி.</p>
+<div class="card japa">
+<div id="japaBig">0</div>
+<div id="japaSub">27 | 54 | 81 | 108 — கால், பாதி, முக்கால், நிறைவு</div>
+<div class="malaRing" id="malaRing"></div>
+<button class="jbtn" id="japaBtn">🕉 எண்ணு</button>
+<button class="jbtn ghost" id="japaReset">மீட்டமை</button>
+<div id="japaMsg" style="color:var(--gold);margin-top:12px;min-height:24px;font-weight:700"></div>
+</div>
+</section>
+
+<section id="s3">
+<h2>திராடகம் — மெய்நிகர் விளக்கு</h2>
+<p>இரவில் மெழுகுவர்த்தி இல்லையா? இந்தத் திரை விளக்கே போதும். தீபத்தை 1 நிமிடம் கண் சிமிட்டாமல் பாருங்கள்; பின் கண் மூடி மனக்கண்ணில் எஞ்சிய ஒளியை நெற்றி மையத்தில் காணுங்கள்.</p>
+<div class="card trat">
+<div id="flame"></div>
+<div class="wick"></div>
+<div class="candleB"></div>
+<div id="tratMsg">தொடங்கு அழுத்தி தீபத்தைப் பாருங்கள்</div>
+<div style="margin-top:14px">
+<button class="jbtn" id="tratBtn">தொடங்கு (60 வினாடி)</button>
+<button class="jbtn ghost" id="tratStop">நிறுத்து</button>
+</div>
+</div>
+</section>
+
+<section id="s4">
+<h2>சிந்தனை நாட்குறிப்பு</h2>
+<p>தியானத்திற்குப் பின் இரு வரி — உங்கள் முன்னேற்றத்தின் உண்மையான அளவுகோல் இதுவே. (உங்கள் சாதனத்தில் மட்டுமே சேமிக்கப்படும்.)</p>
+<div id="jList"></div>
+</section>
+
+<section id="s5">
+<h2>கட்டுக்கதை vs உண்மை</h2>
+<div class="myth"><div class="m">✗ "மூன்றாவது கண் திறந்தால் எதிர்காலம் புலனாகும்"</div><div class="f">✓ உண்மை: இது மன அமைதி, உள்ளுணர்வு, தெளிவின் பயிற்சி. மாய சக்திகளை வாக்குறுதி அளிக்கும் எவரையும் நம்பாதீர்கள்.</div></div>
+<div class="myth"><div class="m">✗ "ஒரே இரவில் திறக்கும் ரகசிய முறை இருக்கு"</div><div class="f">✓ உண்மை: விதை முளைப்பது போல மெதுவாகத்தான் வளரும். அவசர முயற்சி தலைவலி தரும், விழிப்பு தராது.</div></div>
+<div class="myth"><div class="m">✗ "இது ஆபத்தானது; திறந்தால் மூட முடியாது"</div><div class="f">✓ உண்மை: படிநிலைப் பயிற்சி பாதுகாப்பானது. உடல் அசவுகரமாக இருந்தால் நிறுத்தினால் போதும் — பயிற்சி உங்கள் கட்டுப்பாட்டில்தான் இருக்கும்.</div></div>
+<div class="myth"><div class="m">✗ "சிலருக்கு மட்டும் பிறவித் திறன் இருக்கும்"</div><div class="f">✓ உண்மை: எல்லோருக்கும் உள்ள திறன். வித்தியாசம் பயிற்சியின் தொடர்ச்சியில் மட்டுமே.</div></div>
+</section>
+
+<footer>
+<div class="om">ॐ</div>
+மூன்றாவது கண் வழிகாட்டி — V3 (பிரகிருதி பதிப்பு)<br>JK உரிஜினல் • V4-ல் மேலும் புதிய அம்சங்கள்
+</footer>
+
+<script>
+// leaf ring
+const lr=document.getElementById('leafRing');
+for(let i=0;i<12;i++){const d=document.createElement('div');d.className='lf';
+ d.style.transform='rotate('+i*30+'deg) translateY(-52px)';d.style.animationDelay=(i*0.2)+'s';
+ lr.insertBefore(d,lr.firstChild);}
+// nav
+const links=[...document.querySelectorAll('nav a')];
+addEventListener('scroll',()=>{let cur=links[0];
+ for(const a of links){const el=document.querySelector(a.getAttribute('href'));
+  if(el&&el.getBoundingClientRect().top<120)cur=a;}
+ links.forEach(a=>a.classList.toggle('on',a===cur));},{passive:true});
+const LS={get:(k,d)=>{try{const v=localStorage.getItem('te3_'+k);return v===null?d:JSON.parse(v);}catch(e){return d;}},
+ set:(k,v)=>{try{localStorage.setItem('te3_'+k,JSON.stringify(v));}catch(e){}}};
+// 21-day
+const g21=document.getElementById('grid21');let days21=LS.get('days21',[]);
+function draw21(){g21.innerHTML='';let c=0;
+ for(let i=0;i<21;i++){const d=document.createElement('div');d.textContent=i+1;
+  if(days21.includes(i)){d.classList.add('done');c++;}
+  else if(i===days21.length||c===0&&!days21.includes(0)&&i===0){d.classList.add('today');}
+  d.addEventListener('click',()=>{
+   if(days21.includes(i))days21=days21.filter(x=>x!==i);else days21.push(i);
+   LS.set('days21',days21);draw21();});
+  g21.appendChild(d);}
+ document.getElementById('done21').textContent=c;}
+document.getElementById('reset21').addEventListener('click',()=>{days21=[];LS.set('days21',days21);draw21();});
+draw21();
+// japa mala
+let japa=LS.get('japa',0);
+const jB=document.getElementById('japaBig'),jM=document.getElementById('japaMsg'),mr=document.getElementById('malaRing');
+const beads=[];
+for(let i=0;i<27;i++){const b=document.createElement('div');b.className='bead';
+ const a=i/27*Math.PI*2-Math.PI/2;
+ b.style.left=(100+Math.cos(a)*88-4.5)+'px';b.style.top=(100+Math.sin(a)*88-4.5)+'px';
+ mr.appendChild(b);beads.push(b);}
+function jShow(){jB.textContent=japa;
+ beads.forEach((b,i)=>b.classList.toggle('on',i<Math.floor(japa/4)));
+ if(japa>=108){jM.textContent='🙏 108 நிறைவு — நல்ல அமர்வு!';}
+ else if(japa>=81)jM.textContent='முக்கால் கடந்துவிட்டீர்கள்...';
+ else if(japa>=54)jM.textContent='பாதி முடிந்தது — தொடருங்கள்';
+ else if(japa>=27)jM.textContent='கால் பகுதி முடிந்தது';
+ else jM.textContent='';}
+document.getElementById('japaBtn').addEventListener('click',()=>{
+ if(japa>=108)return;japa++;LS.set('japa',japa);jShow();
+ if(japa===108){try{const a2=new (window.AudioContext||window.webkitAudioContext)();
+  const o=a2.createOscillator(),gn=a2.createGain();o.frequency.value=528;o.type='sine';
+  gn.gain.setValueAtTime(0.15,a2.currentTime);gn.gain.exponentialRampToValueAtTime(0.0001,a2.currentTime+2.5);
+  o.connect(gn);gn.connect(a2.destination);o.start();o.stop(a2.currentTime+2.6);}catch(e){}
+  if(navigator.vibrate)navigator.vibrate([80,60,80]);}});
+document.getElementById('japaReset').addEventListener('click',()=>{japa=0;LS.set('japa',japa);jShow();});
+jShow();
+// trataka
+let tInt=null,tSec=0;
+const tMsg=document.getElementById('tratMsg');
+document.getElementById('tratBtn').addEventListener('click',()=>{
+ tSec=60;tMsg.textContent='தீபத்தைப் பாருங்கள்... 60';
+ clearInterval(tInt);
+ tInt=setInterval(()=>{tSec--;tMsg.textContent=tSec>10?'தீபத்தைப் பாருங்கள்... '+tSec:'கண் மூடத் தயாராகுங்கள்... '+tSec;
+  if(tSec<=0){clearInterval(tInt);tInt=null;
+   tMsg.textContent='இப்போது கண் மூடுங்கள் — மனக்கண்ணில் எஞ்சிய ஒளியை நெற்றி மையத்தில் பாருங்கள் (1-2 நிமிடம்) 🙏';}},1000);});
+document.getElementById('tratStop').addEventListener('click',()=>{clearInterval(tInt);tInt=null;tMsg.textContent='தொடங்கு அழுத்தி தீபத்தைப் பாருங்கள்';});
+// journal
+const PROMPTS=['இன்றைய தியானத்தில் மனம் எவ்வாறு இருந்தது?','இன்று எந்த ஒரு விஷயத்தில் தெளிவு கிடைத்தது?','மூச்சின் மீது கவனம் எத்தனை முறை திரும்பியது?','இன்று நன்றியுடன் நினைக்கும் ஒரு விஷயம்?','நாளை எதை சற்றே சிறப்பாகச் செய்வீர்கள்?'];
+const jl=document.getElementById('jList');
+PROMPTS.forEach((q,i)=>{
+ const d=document.createElement('div');d.className='jPrompt';
+ d.innerHTML='<div class="q">'+(i+1)+'. '+q+'</div>';
+ const ta=document.createElement('textarea');ta.value=LS.get('journal'+i,'');
+ const sv=document.createElement('button');sv.className='save';sv.textContent='சேமி';
+ const ok=document.createElement('span');ok.className='ok';
+ sv.addEventListener('click',()=>{LS.set('journal'+i,ta.value);ok.textContent='✓ சேமிக்கப்பட்டது';
+  setTimeout(()=>ok.textContent='',2000);});
+ d.appendChild(ta);d.appendChild(sv);d.appendChild(ok);jl.appendChild(d);});
+window.__TE3={G:()=>({sections:document.querySelectorAll('section').length,
+ days21:days21.length,japa:japa,beadsLit:beads.filter(b=>b.classList.contains('on')).length,
+ tratakRunning:!!tInt,tratMsg:tMsg.textContent,
+ journals:PROMPTS.length,journal0:LS.get('journal0',''),
+ prompts:document.querySelectorAll('.jPrompt').length}),
+ mark21:(i)=>{if(!days21.includes(i))days21.push(i);LS.set('days21',days21);draw21();},
+ japaAdd:(n)=>{for(let i=0;i<n&&japa<108;i++)japa++;LS.set('japa',japa);jShow();},
+ tratakStart:()=>{document.getElementById('tratBtn').click();},
+ tratakTick:(n)=>{tSec-=n;},
+ jSave:(i,txt)=>{LS.set('journal'+i,txt);}};
+</script>
+</body>
+</html>
