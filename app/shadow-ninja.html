@@ -1,0 +1,275 @@
+<!DOCTYPE html><html lang="ta"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>JK SHADOW NINJA 2047</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:#05060e;color:#fff;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;overflow:hidden;touch-action:manipulation}
+.wrap{max-width:440px;margin:0 auto;padding:12px 12px 24px}
+h1{font-size:24px;letter-spacing:3px;text-align:center;background:linear-gradient(90deg,#00e5ff,#ff2d95);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:900}
+.sub{text-align:center;font-size:10px;letter-spacing:2px;color:#7d86b8;margin:4px 0 10px}
+.hud{display:flex;gap:8px;margin-bottom:8px}
+.hud>div{flex:1;background:#0b0e1e;border:1px solid #1e2547;border-radius:10px;padding:6px 4px;text-align:center;font-size:11px;color:#9aa3d0}
+.hud b{display:block;font-size:16px;color:#fff}
+#cv{display:block;width:100%;border-radius:14px;border:1px solid #1e2547;background:#07091a}
+.ov{position:fixed;inset:0;background:rgba(3,4,10,.93);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
+.ovCard{background:linear-gradient(160deg,#0e1230,#080a1a);border:1px solid #28336b;border-radius:20px;padding:24px 20px;width:100%;max-width:400px;text-align:center;box-shadow:0 0 40px #00e5ff33}
+.ovCard h2{font-size:22px;margin-bottom:8px;letter-spacing:1px}
+.ovCard p{font-size:13px;color:#9aa3d0;line-height:1.6;margin-bottom:12px}
+.btn{display:block;width:100%;margin:8px 0;padding:14px;border:none;border-radius:12px;font-size:16px;font-weight:800;letter-spacing:1px;cursor:pointer;background:linear-gradient(90deg,#00b3ff,#00e5ff);color:#04101e;box-shadow:0 4px 18px #00e5ff44}
+.btn:active{transform:scale(.97)}
+.hide{display:none!important}
+#msg{text-align:center;font-size:13px;color:#9aa3d0;margin-top:8px;min-height:18px;font-weight:600}
+.resRow{display:flex;justify-content:space-between;background:#0b0e1e;border:1px solid #1e2547;border-radius:10px;padding:9px 12px;margin:5px 0;font-size:13px}
+.resRow b{color:#00e5ff}
+</style></head><body>
+<div class="wrap">
+<h1>JK SHADOW NINJA</h1>
+<div class="sub">2047 STEALTH PLATFORMER • 5 LEVELS • OFFLINE</div>
+<div class="hud">
+<div>⭐ SCORE<b id="score">0</b></div>
+<div>🗺️ LEVEL<b id="lvl">1/5</b></div>
+<div>💜 LIVES<b id="lives">3</b></div>
+<div>🏆 BEST<b id="best">0</b></div>
+</div>
+<canvas id="cv" width="380" height="430"></canvas>
+<div id="msg"></div>
+</div>
+
+<div class="ov" id="ovStart"><div class="ovCard">
+<h2>🥷 SHADOW NINJA 2047</h2>
+<p>Neo-city rooftops! Auto-run நிஞ்சா — TAP பண்ணு jump, mid-air-ல மறுபடியும் TAP பண்ணு double jump! Guard-ங்களோட 👁️ vision cone-ல மாட்டாதே... shadow-ஆ போ! 💎 coins collect பண்ணு, 🏯 pagoda-அ reach பண்ணு!</p>
+<button class="btn" onclick="startGame()">🥷 START MISSION</button>
+</div></div>
+
+<div class="ov hide" id="ovEnd"><div class="ovCard">
+<h2 id="endTitle">🏯 MISSION COMPLETE!</h2>
+<div style="font-size:38px;margin:8px 0" id="endIcon">🥷</div>
+<div class="resRow"><span>⭐ Score</span><b id="rScore">0</b></div>
+<div class="resRow"><span>💎 Coins</span><b id="rCoins">0</b></div>
+<div class="resRow"><span>👻 Ghost Rounds</span><b id="rGhost">0</b></div>
+<div class="resRow"><span>🏆 Best</span><b id="rBest">0</b></div>
+<p id="endTaunt"></p>
+<button class="btn" onclick="restart()">🔄 PLAY AGAIN</button>
+</div></div>
+
+<script>
+'use strict';
+var cv=document.getElementById('cv'),cx=cv.getContext('2d');
+var W=cv.width,H=cv.height;
+var AC=window.AudioContext?new AudioContext():null;
+function beep(f,d,t){if(!AC)return;try{var o=AC.createOscillator(),g=AC.createGain();o.type=t||'square';o.frequency.value=f;g.gain.setValueAtTime(.06,AC.currentTime);g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+d);o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+d);}catch(e){}}
+function $(id){return document.getElementById(id);}
+function msg(t){$('msg').textContent=t;}
+
+// level builder helpers: P(x,y,w) platform, C(x,y) coin, G(x,y,len,range) guard, S(x,y,w) spikes, F(x,y) goal
+function L1(){return{w:1500,plats:[P(0,380,300),P(360,340,140),P(560,300,140),P(760,340,160),P(980,290,150),P(1190,340,140),P(1380,380,120)],coins:[C(420,300),C(620,260),C(830,300),C(1050,250),C(1250,300)],guards:[Gd(830,340,90,60)],spikes:[Sp(660,300,40)],goal:{x:1430,y:380}};}
+function L2(){return{w:1800,plats:[P(0,380,240),P(300,330,120),P(480,280,120),P(660,330,130),P(850,270,120),P(1030,320,140),P(1230,270,120),P(1410,320,140),P(1620,380,180)],coins:[C(350,290),C(530,240),C(720,290),C(900,230),C(1090,280),C(1280,230),C(1470,280)],guards:[Gd(720,330,90,50),Gd(1280,270,100,40)],spikes:[Sp(520,280,50),Sp(1090,320,50)],goal:{x:1700,y:380}};}
+function L3(){return{w:2100,plats:[P(0,380,220),P(280,320,110),P(450,260,110),P(620,320,110),P(790,260,110),P(960,320,120),P(1140,250,110),P(1310,300,120),P(1490,250,110),P(1660,300,120),P(1840,250,110),P(1980,380,120)],coins:[C(330,280),C(500,220),C(670,280),C(840,220),C(1010,280),C(1190,210),C(1360,260),C(1540,210),C(1710,260),C(1880,210)],guards:[Gd(670,320,90,45),Gd(1360,300,100,50),Gd(1880,250,90,0)],spikes:[Sp(490,260,40),Sp(990,320,50),Sp(1530,250,40)],goal:{x:2030,y:380}};}
+function L4(){return{w:2400,plats:[P(0,380,200),P(260,320,100),P(420,250,100),P(580,320,100),P(740,250,100),P(900,180,110),P(1070,250,100),P(1230,320,110),P(1400,250,100),P(1560,180,110),P(1730,250,100),P(1890,320,110),P(2060,250,100),P(2230,380,170)],coins:[C(310,280),C(470,210),C(630,280),C(790,210),C(950,140),C(1120,210),C(1280,280),C(1450,210),C(1610,140),C(1780,210),C(1940,280),C(2110,210)],guards:[Gd(630,320,90,40),Gd(1120,250,100,45),Gd(1610,180,90,50),Gd(2110,250,100,0)],spikes:[Sp(460,250,40),Sp(940,180,40),Sp(1440,250,40),Sp(1930,320,50)],goal:{x:2330,y:380}};}
+function L5(){return{w:2700,plats:[P(0,380,200),P(260,310,90),P(410,240,90),P(560,310,90),P(710,240,90),P(860,170,100),P(1020,240,90),P(1170,310,100),P(1330,240,90),P(1480,170,100),P(1640,240,90),P(1790,310,100),P(1950,240,90),P(2100,170,100),P(2260,240,90),P(2410,310,100),P(2560,380,140)],coins:[C(300,270),C(450,200),C(600,270),C(750,200),C(900,130),C(1060,200),C(1210,270),C(1370,200),C(1520,130),C(1680,200),C(1830,270),C(1990,200),C(2140,130),C(2300,200),C(2450,270)],guards:[Gd(600,310,90,35),Gd(1060,240,100,40),Gd(1520,170,90,45),Gd(1830,310,100,35),Gd(2140,170,90,0)],spikes:[Sp(450,240,40),Sp(900,170,40),Sp(1370,240,40),Sp(1830,310,50),Sp(2300,240,40)],goal:{x:2640,y:380}};}
+function P(x,y,w){return{x:x,y:y,w:w};}
+function C(x,y){return{x:x,y:y,got:false};}
+function Gd(x,y,len,range){return{bx:x,x:x,y:y,len:len,range:range,dir:1,phase:Math.random()*6.28,on:true};}
+function Sp(x,y,w){return{x:x,y:y,w:w};}
+var LEVELS=[L1,L2,L3,L4,L5];
+
+var lv=0,level=null,pl=null,cam=0,score=0,lives=3,coinsGot=0,ghostRounds=0,running=false,over=false,won=false;
+var rain=[],flash=0,caughtCd=0;
+var best=parseInt(localStorage.getItem('jksn_best')||'0');
+for(var i=0;i<70;i++){rain.push({x:Math.random()*W,y:Math.random()*H,s:2+Math.random()*3});}
+
+function loadLevel(n){
+ level=LEVELS[n]();
+ lv=n;
+ pl={x:30,y:300,vy:0,grounded:false,jumps:2,w:16,h:26};
+ cam=0;caughtCd=0;
+ $('lvl').textContent=(n+1)+'/5';
+ msg('LEVEL '+(n+1)+' — shadow-ஆ போ! 🥷');
+}
+function startGame(){
+ score=0;lives=3;coinsGot=0;ghostRounds=0;won=false;over=false;
+ $('score').textContent=0;$('lives').textContent=3;$('best').textContent=best;
+ loadLevel(0);
+ running=true;
+ $('ovStart').classList.add('hide');$('ovEnd').classList.add('hide');
+ if(AC&&AC.state==='suspended'){AC.resume();}
+ beep(440,.1);setTimeout(function(){beep(660,.15);},100);
+}
+function restart(){$('ovEnd').classList.add('hide');startGame();}
+
+function jump(){
+ if(!running||over)return;
+ if(pl.grounded){pl.vy=-9.2;pl.grounded=false;pl.jumps=1;beep(520,.08);}
+ else if(pl.jumps>0){pl.vy=-8.4;pl.jumps--;beep(680,.08);flash=4;}
+}
+cv.addEventListener('pointerdown',function(e){e.preventDefault();jump();});
+
+function inCone(g){
+ if(!g.on)return false;
+ var dx=(pl.x-g.x)*g.dir;
+ if(dx<4||dx>g.len)return false;
+ var dy=Math.abs((pl.y+pl.h/2)-(g.y-10));
+ return dy<14+dx*.34;
+}
+function caught(){
+ if(caughtCd>0)return;
+ lives--;$('lives').textContent=lives;
+ beep(160,.35,'sawtooth');
+ flash=8;
+ if(lives<=0){gameOver(false);return;}
+ var gx=pl.x; // respawn at level start
+ pl.x=30;pl.y=200;pl.vy=0;pl.jumps=2;cam=0;caughtCd=90;
+ msg('👁️ பிடிச்சுட்டான்! மீதி lives: '+lives);
+}
+function gameOver(win){
+ running=false;over=true;won=win;
+ if(win){score+=lives*250;$('score').textContent=score;}
+ if(score>best){best=score;localStorage.setItem('jksn_best',best);}
+ $('endTitle').textContent=win?'🏯 MISSION COMPLETE!':'💀 MISSION FAILED';
+ $('endIcon').textContent=win?'🥷':'👁️';
+ $('rScore').textContent=score;
+ $('rCoins').textContent=coinsGot;
+ $('rGhost').textContent=ghostRounds;
+ $('rBest').textContent=best;
+ $('endTaunt').textContent=win?'5 levels முடிச்சுட்ட! குயில், உன் solver இத பண்ணுமா? 😎🥷':'Guard-ங்க cone-ல மாட்டிட்ட! மறுபடியும் முயற்சி பண்ணு 🥷';
+ $('ovEnd').classList.remove('hide');
+ if(win){beep(523,.12);setTimeout(function(){beep(659,.12);},120);setTimeout(function(){beep(784,.25);},240);}
+ else{beep(200,.4,'sawtooth');}
+}
+
+function step(){
+ if(!running||over)return;
+ if(caughtCd>0)caughtCd--;
+ if(flash>0)flash--;
+ // auto-run
+ pl.vy+=0.5;if(pl.vy>12)pl.vy=12;
+ pl.x+=2.6;
+ pl.y+=pl.vy;
+ // platform land
+ pl.grounded=false;
+ for(var i=0;i<level.plats.length;i++){
+   var p=level.plats[i];
+   if(pl.x+pl.w>p.x&&pl.x<p.x+p.w){
+     if(pl.vy>=0&&pl.y+pl.h>=p.y&&pl.y+pl.h-pl.vy<=p.y+8){
+       pl.y=p.y-pl.h;pl.vy=0;pl.grounded=true;pl.jumps=2;
+     }
+   }
+ }
+ // fall off world
+ if(pl.y>H+40){caught();if(running){pl.y=200;pl.vy=0;}}
+ // coins
+ for(var c=0;c<level.coins.length;c++){
+   var cn=level.coins[c];
+   if(!cn.got&&Math.abs(pl.x+8-cn.x)<16&&Math.abs(pl.y+13-cn.y)<20){
+     cn.got=true;coinsGot++;score+=50;$('score').textContent=score;beep(880,.07);
+   }
+ }
+ // spikes
+ for(var s=0;s<level.spikes.length;s++){
+   var sp=level.spikes[s];
+   if(pl.x+pl.w>sp.x&&pl.x<sp.x+sp.w&&pl.y+pl.h>sp.y-8&&pl.y+pl.h<sp.y+10){caught();}
+ }
+ // guards
+ for(var g=0;g<level.guards.length;g++){
+   var gd=level.guards[g];
+   gd.phase+=0.05;
+   gd.on=Math.sin(gd.phase)>-0.35; // cone flickers
+   if(gd.range>0){
+     gd.x+=gd.dir*0.7;
+     if(gd.x>gd.bx+gd.range||gd.x<gd.bx-gd.range){gd.dir*=-1;gd.x+=gd.dir*0.7;}
+   }else{
+     if(Math.sin(gd.phase*0.5)>0.9)gd.dir=1;else if(Math.sin(gd.phase*0.5)<-0.9)gd.dir=-1;
+   }
+   if(inCone(gd)){caught();}
+ }
+ // goal
+ if(pl.x>level.goal.x-8){
+   score+=200;$('score').textContent=score;
+   ghostRounds+=lives===3?1:0;
+   beep(784,.12);setTimeout(function(){beep(988,.18);},120);
+   if(lv>=LEVELS.length-1){gameOver(true);return;}
+   loadLevel(lv+1);
+ }
+ cam=pl.x-110;if(cam<0)cam=0;if(cam>level.w-W)cam=level.w-W;
+ // rain
+ for(var r=0;r<rain.length;r++){rain[r].y+=rain[r].s;if(rain[r].y>H){rain[r].y=-8;rain[r].x=Math.random()*W;}}
+}
+function draw(){
+ cx.fillStyle='#07091a';cx.fillRect(0,0,W,H);
+ // skyline parallax
+ cx.fillStyle='#0c1030';
+ for(var i=0;i<12;i++){
+   var bx=((i*140-cam*0.25)%(W+140)+W+140)%(W+140)-70;
+   var bh=60+((i*67)%100);
+   cx.fillRect(bx,H-bh-40,70,bh+40);
+ }
+ // windows
+ cx.fillStyle='#1a2350';
+ for(var wn=0;wn<12;wn++){
+   var wx=((wn*140-cam*0.25)%(W+140)+W+140)%(W+140)-70;
+   for(var wy=0;wy<4;wy++){cx.fillRect(wx+10+((wn*31+wy*17)%3)*16,H-160+wy*30,8,10);}
+ }
+ // rain
+ cx.strokeStyle='rgba(120,160,255,.25)';cx.lineWidth=1;cx.beginPath();
+ for(var r2=0;r2<rain.length;r2++){cx.moveTo(rain[r2].x,rain[r2].y);cx.lineTo(rain[r2].x-2,rain[r2].y+7);}
+ cx.stroke();
+ if(!level){requestAnimationFrame(draw);return;}
+ // platforms
+ for(var p=0;p<level.plats.length;p++){
+   var pl2=level.plats[p],sx=pl2.x-cam;
+   if(sx>W||sx+pl2.w<0)continue;
+   cx.fillStyle='#131a3d';cx.fillRect(sx,pl2.y,pl2.w,H-pl2.y);
+   cx.fillStyle='#00e5ff';cx.fillRect(sx,pl2.y,pl2.w,3);
+ }
+ // spikes
+ for(var s2=0;s2<level.spikes.length;s2++){
+   var sp2=level.spikes[s2],sx2=sp2.x-cam;
+   cx.fillStyle='#ff2d5e';
+   for(var t=0;t<sp2.w;t+=10){
+     cx.beginPath();cx.moveTo(sx2+t,sp2.y);cx.lineTo(sx2+t+5,sp2.y-12);cx.lineTo(sx2+t+10,sp2.y);cx.fill();
+   }
+ }
+ // coins
+ for(var c2=0;c2<level.coins.length;c2++){
+   var cn2=level.coins[c2];if(cn2.got)continue;
+   var sx3=cn2.x-cam;
+   cx.fillStyle='#ffd60a';cx.beginPath();cx.arc(sx3,cn2.y,6,0,7);cx.fill();
+   cx.fillStyle='#fff3b0';cx.beginPath();cx.arc(sx3-2,cn2.y-2,2,0,7);cx.fill();
+ }
+ // guards + cones
+ for(var g2=0;g2<level.guards.length;g2++){
+   var gd2=level.guards[g2],gx=gd2.x-cam;
+   if(gx<-100||gx>W+100)continue;
+   if(gd2.on){
+     cx.fillStyle='rgba(255,60,100,.13)';
+     cx.beginPath();cx.moveTo(gx,gd2.y-10);
+     cx.lineTo(gx+gd2.dir*gd2.len,gd2.y-10-gd2.len*.34);
+     cx.lineTo(gx+gd2.dir*gd2.len,gd2.y-10+gd2.len*.34);
+     cx.fill();
+   }
+   cx.fillStyle='#3a0e1e';cx.fillRect(gx-7,gd2.y-24,14,24);
+   cx.fillStyle=gd2.on?'#ff2d5e':'#7a2038';cx.beginPath();cx.arc(gx+gd2.dir*4,gd2.y-18,3,0,7);cx.fill();
+ }
+ // goal pagoda
+ var glx=level.goal.x-cam;
+ cx.fillStyle='#ff9f1c';cx.fillRect(glx-14,level.goal.y-44,28,44);
+ cx.fillStyle='#ff2d95';cx.beginPath();cx.moveTo(glx-20,level.goal.y-44);cx.lineTo(glx,level.goal.y-58);cx.lineTo(glx+20,level.goal.y-44);cx.fill();
+ // player ninja
+ var px=pl.x-cam;
+ cx.fillStyle='#0a0a14';cx.fillRect(px,pl.y,pl.w,pl.h);
+ cx.fillStyle='#00e5ff';cx.fillRect(px+(2),pl.y+4,pl.w-4,3); // headband
+ cx.fillStyle='#ff2d95';cx.fillRect(px-6,pl.y+5,6,2); // scarf tail
+ if(flash>0){cx.fillStyle='rgba(255,255,255,'+(flash/16)+')';cx.fillRect(0,0,W,H);}
+ requestAnimationFrame(draw);
+}
+draw();
+var lastTick=0;
+function loop(ts){if(ts-lastTick>15){lastTick=ts;step();}requestAnimationFrame(loop);}
+requestAnimationFrame(loop);
+$('best').textContent=best;
+window.__SN={G:function(){return{score:score,lv:lv,lives:lives,coins:coinsGot,ghost:ghostRounds,running:running,over:over,won:won,pl:pl?{x:Math.round(pl.x),y:Math.round(pl.y),vy:Math.round(pl.vy*10)/10,grounded:pl.grounded,jumps:pl.jumps}:null,guardsOn:level?level.guards.map(function(g){return g.on;}):[],best:best}},
+start:startGame,jump:jump,step:function(n){for(var i=0;i<n;i++){step();}},
+tp:function(x,y){pl.x=x;pl.y=y;pl.vy=0;},
+coneAt:function(){return level.guards.map(function(g){return{x:Math.round(g.x),y:g.y,dir:g.dir,len:g.len,on:g.on};});},
+end:function(w){gameOver(w);}};
+</script></body></html>
