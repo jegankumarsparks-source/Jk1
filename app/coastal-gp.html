@@ -78,9 +78,10 @@ function nearest(px,py,from){let best=0,bd=1e9;
 for(let k=0;k<80;k++){const i=(from+k)%path.length;const dx=path[i].x-px,dy=path[i].y-py;const d=dx*dx+dy*dy;if(d<bd){bd=d;best=i;}}
 for(let k=1;k<40;k++){const i=(from-k+path.length)%path.length;const dx=path[i].x-px,dy=path[i].y-py;const d=dx*dx+dy*dy;if(d<bd){bd=d;best=i;}}
 return{i:best,d:Math.sqrt(bd)};}
-function mkCar(color,isPlayer,lane){const i0=lane*14;const p=path[i0];
-return{x:p.x+(isPlayer?0:rand(-8,8)),y:p.y-lane*0+ (isPlayer?26:26+lane*22),a:Math.atan2(path[(i0+5)%path.length].y-p.y,path[(i0+5)%path.length].x-p.x),
-v:0,color,isPlayer,ni:i0,prog:isPlayer?0:-lane*10,lap:1,passed:1,ai:rand(.80,.93),done:false,finishT:0};}
+function mkCar(color,isPlayer,lane){const i0=(path.length-40-lane*12+path.length)%path.length;const p=path[i0];const nx=path[(i0+5)%path.length];
+const ang=Math.atan2(nx.y-p.y,nx.x-p.x);const side=(lane%2===0?-1:1)*(4+lane*4);
+return{x:p.x+Math.cos(ang+Math.PI/2)*side,y:p.y+Math.sin(ang+Math.PI/2)*side,a:ang,
+v:0,color,isPlayer,ni:i0,prog:isPlayer?0:-lane*10,lap:1,passed:1,ai:rand(.80,.93),done:false,finishT:0,lastIdx:i0};}
 function setup(ci){circuit=ci;path=catmull(CIRCUITS[ci]);
 player=mkCar('#F26430',true,0);
 cars=[player,mkCar('#FFD23F',false,1),mkCar('#48CAE4',false,2),mkCar('#9B5DE5',false,3)];
