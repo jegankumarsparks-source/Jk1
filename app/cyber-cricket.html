@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>JK CYBER CRICKET 2048</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+body{background:#06120a;color:#e8ffe8;font-family:'Segoe UI',system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;min-height:100vh;overflow:hidden;touch-action:none}
+h1{font-size:22px;letter-spacing:3px;margin:10px 0 2px;color:#7cfc00;text-shadow:0 0 12px #7cfc00,0 0 40px #7cfc0088}
+.sub{font-size:10px;letter-spacing:2px;color:#8da894;margin-bottom:8px}
+.hud{display:flex;gap:8px;margin-bottom:8px;width:100%;max-width:420px;justify-content:center}
+.card{background:#0e2012;border:1px solid #7cfc0033;border-radius:10px;padding:6px 10px;text-align:center;min-width:72px}
+.card .l{font-size:9px;letter-spacing:1px;color:#8da894}
+.card .v{font-size:16px;font-weight:700}
+#wrap{position:relative}
+canvas{background:linear-gradient(180deg,#123a1e,#0a2410);border:2px solid #7cfc0044;border-radius:14px;box-shadow:0 0 30px #7cfc0022;display:block}
+#msg{margin-top:8px;font-size:13px;color:#ffd166;min-height:18px;text-align:center}
+.ov{position:absolute;inset:0;background:rgba(6,18,10,.93);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;border-radius:14px;z-index:5;backdrop-filter:blur(4px)}
+.ov.hide{display:none}
+.ov h2{font-size:26px;color:#7cfc00;text-shadow:0 0 16px #7cfc00}
+.ov p{font-size:13px;color:#b8dcc0;text-align:center;padding:0 24px;line-height:1.6}
+.btn{background:linear-gradient(90deg,#7cfc00,#00b8d4);border:none;color:#06120a;font-size:16px;font-weight:700;letter-spacing:2px;padding:13px 42px;border-radius:30px;cursor:pointer;box-shadow:0 0 20px #7cfc0066}
+.btn:active{transform:scale(.95)}
+.rs{display:flex;gap:8px;width:84%;max-width:320px}
+.rs div{flex:1;background:#0e2012;border:1px solid #7cfc0033;border-radius:10px;padding:8px;text-align:center;font-size:10px;color:#8da894}
+.rs b{display:block;font-size:16px;color:#fff;margin-top:2px}
+</style>
+</head>
+<body>
+<h1>🏏 JK CYBER CRICKET</h1>
+<div class="sub">2048 NEON PITCH • 3 WICKETS • OFFLINE</div>
+<div class="hud">
+<div class="card"><div class="l">🏃 RUNS</div><div class="v" id="rn">0</div></div>
+<div class="card"><div class="l">❌ WICKETS</div><div class="v" id="wk">0</div></div>
+<div class="card"><div class="l">🎯 BALLS</div><div class="v" id="bl">0</div></div>
+<div class="card"><div class="l">🏆 BEST</div><div class="v" id="bs">0</div></div>
+</div>
+<div id="wrap">
+<canvas id="cv" width="400" height="600"></canvas>
+<div class="ov" id="ovStart">
+<h2>🏏 CYBER CRICKET</h2>
+<p>Ball pitch-ல வரும் — GREEN zone-ல enter ஆனதும் TAP பண்ணி bat swing பண்ணு! PERFECT timing = 6 RUNS! Early/late = WICKET! Yorker, bouncer, spin variations வரும். 3 wickets = innings over!</p>
+<button class="btn" id="btnStart">▶ BATTING</button>
+</div>
+<div class="ov hide" id="ovEnd">
+<h2>🏏 INNINGS OVER!</h2>
+<div class="rs">
+<div>🏃 RUNS<b id="rRn">0</b></div>
+<div>🎯 BALLS<b id="rBl">0</b></div>
+<div>🏆 BEST<b id="rBs">0</b></div>
+</div>
+<p id="endTaunt"></p>
+<button class="btn" id="btnAgain">🔄 BAT AGAIN</button>
+</div>
+</div>
+<div id="msg">🏏 Timing தான் everything!</div>
+<script>
+'use strict';
+var cv=document.getElementById('cv'),cx=cv.getContext('2d');
+var W=cv.width,H=cv.height;
+var ZONE_Y=470,ZONE_H=60;
+var AC=window.AudioContext?new AudioContext():null;
+function beep(f,d,t){if(!AC)return;try{var o=AC.createOscillator(),g=AC.createGain();o.type=t||'square';o.frequency.value=f;g.gain.setValueAtTime(.05,AC.currentTime);g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+d);o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+d);}catch(e){}}
+function $(id){return document.getElementById(id);}
+function msg(t){$('msg').textContent=t;}
+var state='menu',runs=0,wickets=0,balls=0,tick=0;
+var ball=null,waitT=0,parts=[],floats=[],swing=0;
+var best=parseInt(localStorage.getItem('jkcc_best')||'0');
+$('bs').textContent=best;
+function bowl(spd){
+ balls++;$('bl').textContent=balls;
+ var type=Math.random();
+ ball={y:60,vy:spd||(3+Math.random()*3.5),x:W/2,vx:0,type:type<.15?'yorker':type<.3?'bouncer':type<.45?'spin':'pace',resolved:false};
+ if(ball.type==='yorker')ball.vy*=1.5;
+ if(ball.type==='bouncer')ball.vx=(Math.random()<.5?-1:1)*1.4;
+ if(ball.type==='spin')ball.vx=(Math.random()<.5?-1:1)*.8;
+ msg('🏏 '+ball.type.toUpperCase()+' ball!');
+}
+function startGame(){
+ state='play';runs=0;wickets=0;balls=0;tick=0;
+ ball=null;waitT=40;parts=[];floats=[];swing=0;
+ $('rn').textContent=0;$('wk').textContent=0;$('bl').textContent=0;
+ $('ovStart').classList.add('hide');$('ovEnd').classList.add('hide');
+ msg('🏏 Ready? Ball வரும்…');
+ if(AC&&AC.state==='suspended'){AC.resume();}
+ beep(523,.1);setTimeout(function(){beep(659,.1);},90);setTimeout(function(){beep(784,.14);},180);
+}
+function endGame(){
+ state='over';
+ if(runs>best){best=runs;try{localStorage.setItem('jkcc_best',best);}catch(e){}}
+ $('bs').textContent=best;
+ $('rRn').textContent=runs;$('rBl').textContent=balls;$('rBs').textContent=best;
+ $('endTaunt').textContent=runs>=60?'👑 CAPTAIN JK! குயிலே, pressure இல்லாம இருக்கறது homework — cricket-ல timing தான் GAME! 🏏😎':runs>=25?'நல்ல innings! Yorker-அ கவனி! 🏏':'Ball-அ green zone வர wait பண்ணு! 💪';
+ $('ovEnd').classList.remove('hide');
+ beep(160,.4,'sawtooth');
+}
+function burst(x,y,c,n){
+ for(var i=0;i<n;i++){
+   var a=Math.random()*7,s=1+Math.random()*3;
+   parts.push({x:x,y:y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,l:22+Math.random()*12,c:c});
+ }
+}
+function hit(){
+ if(state!=='play'||!ball||ball.resolved)return;
+ swing=12;
+ var diff=Math.abs(ball.y-ZONE_Y);
+ ball.resolved=true;
+ var rn,txt,col;
+ if(diff<=8){rn=6;txt='🚀 SIX! PERFECT!';col='#7cfc00';beep(880,.12);setTimeout(function(){beep(1170,.15);},100);}
+ else if(diff<=18){rn=4;txt='💥 FOUR!';col='#00e5ff';beep(740,.1);}
+ else if(diff<=30){rn=2;txt='👍 2 runs';col='#ffd166';beep(560,.08);}
+ else if(diff<=42){rn=1;txt='🏃 1 run';col='#ffd166';beep(440,.07);}
+ else{
+   wickets++;$('wk').textContent=wickets;
+   floats.push({x:W/2,y:ZONE_Y-40,txt:'💥 WICKET!',l:70,c:'#ff4d6d'});
+   msg('❌ WICKET! '+wickets+'/3 — timing miss!');
+   beep(140,.35,'sawtooth');
+   burst(W/2,ZONE_Y,'#ff4d6d',14);
+   ball=null;waitT=70;
+   if(wickets>=3){endGame();}
+   return;
+ }
+ runs+=rn;$('rn').textContent=runs;
+ floats.push({x:W/2,y:ZONE_Y-50,txt:txt,l:80,c:col});
+ burst(W/2,ZONE_Y,col,16);
+ // ball flies back
+ ball={y:ZONE_Y,vy:-6,x:W/2,vx:(Math.random()-.5)*4,type:'hit',resolved:true};
+ setTimeout(function(){if(state==='play'&&!ball){waitT=50;}},10);
+ ball=null;waitT=60;
+}
+cv.addEventListener('pointerdown',function(e){e.preventDefault();hit();});
+function step(){
+ if(state!=='play')return;
+ tick++;
+ if(swing>0)swing--;
+ if(!ball&&waitT>0){
+   waitT--;
+   if(waitT===0)bowl();
+ }
+ if(ball&&!ball.resolved){
+   ball.y+=ball.vy;ball.x+=ball.vx;
+   if(ball.type==='bouncer'&&ball.y>260)ball.vx*=-0.6;
+   if(ball.type==='spin')ball.vx*=1.02;
+   if(ball.y>ZONE_Y+ZONE_H){
+     // passed the crease untouched -> wicket
+     wickets++;$('wk').textContent=wickets;
+     floats.push({x:W/2,y:ZONE_Y-40,txt:'💥 BOWLED!',l:70,c:'#ff4d6d'});
+     msg('❌ BOWLED! Swing பண்ணல! '+wickets+'/3');
+     beep(130,.35,'sawtooth');
+     burst(W/2,H-60,'#ff4d6d',14);
+     ball=null;waitT=70;
+     if(wickets>=3){endGame();return;}
+   }
+ }
+ for(var i=parts.length-1;i>=0;i--){
+   var p=parts[i];p.x+=p.vx;p.y+=p.vy;p.l--;
+   if(p.l<=0)parts.splice(i,1);
+ }
+ for(var k=floats.length-1;k>=0;k--){
+   var f=floats[k];f.y-=.7;f.l--;
+   if(f.l<=0)floats.splice(k,1);
+ }
+}
+function draw(){
+ cx.clearRect(0,0,W,H);
+ // pitch
+ cx.fillStyle='#c2a878';cx.fillRect(W/2-46,40,92,H-120);
+ cx.fillStyle='#a8895c';
+ for(var y=40;y<H-80;y+=34)cx.fillRect(W/2-46,y,92,2);
+ // stumps
+ cx.fillStyle='#ffd166';
+ for(var s2=-1;s2<=1;s2++)cx.fillRect(W/2+s2*8-2,H-86,4,26);
+ // timing zone
+ cx.fillStyle='rgba(124,252,0,.18)';cx.fillRect(0,ZONE_Y-ZONE_H/2,W,ZONE_H);
+ cx.strokeStyle='#7cfc00';cx.lineWidth=2;cx.setLineDash([8,6]);
+ cx.strokeRect(0,ZONE_Y-ZONE_H/2,W,ZONE_H);cx.setLineDash([]);
+ cx.fillStyle='#7cfc00';cx.font='bold 11px sans-serif';cx.textAlign='center';
+ cx.fillText('⚡ HIT ZONE',W/2,ZONE_Y-ZONE_H/2-6);
+ // bowler
+ cx.fillStyle='#ff4d6d';cx.beginPath();cx.arc(W/2,44,10,0,7);cx.fill();
+ // batsman
+ cx.save();cx.translate(W/2,H-44);
+ cx.fillStyle='#00e5ff';cx.fillRect(-10,-18,20,20);
+ cx.fillStyle='#06120a';cx.fillRect(-6,-14,4,4);cx.fillRect(2,-14,4,4);
+ // bat swing
+ var sa=swing>0?-.9+((12-swing)/12)*1.8:.9;
+ cx.strokeStyle='#ffd166';cx.lineWidth=5;
+ var bx=Math.cos(sa)*26,by=-Math.sin(sa)*26-6;
+ cx.beginPath();cx.moveTo(10,-8);cx.lineTo(10+bx,-8+by);cx.stroke();
+ cx.restore();
+ // ball
+ if(ball){
+   var sc=.5+ball.y/H;
+   cx.fillStyle='#ff2d55';
+   cx.beginPath();cx.arc(ball.x,ball.y,7*sc+3,0,7);cx.fill();
+   cx.fillStyle='rgba(255,255,255,.7)';
+   cx.beginPath();cx.arc(ball.x-2,ball.y-2,2,0,7);cx.fill();
+ }
+ // particles + floats
+ for(var i=0;i<parts.length;i++){
+   var p=parts[i];
+   cx.fillStyle=p.c;cx.globalAlpha=Math.min(1,p.l/16);
+   cx.beginPath();cx.arc(p.x,p.y,3,0,7);cx.fill();
+   cx.globalAlpha=1;
+ }
+ for(var k=0;k<floats.length;k++){
+   var f=floats[k];
+   cx.globalAlpha=Math.min(1,f.l/40);
+   cx.fillStyle=f.c;cx.font='bold 22px sans-serif';cx.textAlign='center';
+   cx.fillText(f.txt,f.x,f.y);
+   cx.globalAlpha=1;
+ }
+ requestAnimationFrame(draw);
+}
+draw();
+var lastT=0,acc=0;
+function loop(ts){
+ if(!lastT)lastT=ts;
+ acc+=ts-lastT;lastT=ts;
+ var n=0;
+ while(acc>16&&n<4){step();acc-=16;n++;}
+ requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+$('btnStart').addEventListener('click',startGame);
+$('btnAgain').addEventListener('click',function(){$('ovEnd').classList.add('hide');startGame();});
+window.__CC={G:function(){return{state:state,runs:runs,wickets:wickets,balls:balls,ball:ball?{y:Math.round(ball.y),vy:+ball.vy.toFixed(1),type:ball.type}:null,waitT:waitT,best:best}},
+start:startGame,
+step:function(n){for(var i=0;i<n;i++){step();}},
+hit:hit,
+bowlNow:function(vy){bowl(vy);},
+end:endGame};
+</script>
+</body>
+</html>
