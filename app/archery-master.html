@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>JK ARCHERY MASTER 2047</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0a0814;color:#e8e8f5;min-height:100vh;overflow-x:hidden}
+.wrap{max-width:480px;margin:0 auto;padding:8px 12px 24px}
+h1{text-align:center;font-size:25px;font-weight:900;letter-spacing:2px;background:linear-gradient(90deg,#ff9f43,#ff2ea6,#00e5ff);-webkit-background-clip:text;background-clip:text;color:transparent;margin-top:4px}
+.sub{text-align:center;color:#8a8ab0;font-size:10px;letter-spacing:3px;margin:2px 0 6px}
+.hud{display:flex;justify-content:space-between;background:linear-gradient(145deg,#1a122e,#120c22);border:1px solid #3a2a5a;border-radius:12px;padding:7px 14px;margin-bottom:6px;font-size:13px;font-weight:800}
+.hud .s{color:#ffd60a}.hud .a{color:#ff9f43}.hud .w{color:#00e5ff}
+#cv{display:block;width:100%;border-radius:12px;border:1px solid #3a2a5a;touch-action:none;background:linear-gradient(180deg,#1a2a5e 0%,#3a2a6e 60%,#5a3a6e 100%)}
+.msg{text-align:center;font-size:13px;color:#c8b8e8;min-height:20px;margin-top:6px;font-weight:700}
+.ov{position:fixed;inset:0;background:rgba(5,4,10,.94);z-index:20;display:flex;align-items:center;justify-content:center;padding:20px}
+.ov.hide{display:none}
+.ovCard{background:linear-gradient(145deg,#1a122e,#0a0816);border:1px solid #3a2a5a;border-radius:20px;padding:26px 20px;max-width:380px;width:100%;text-align:center}
+.ovCard h2{font-size:24px;margin-bottom:8px}
+.ovCard p{color:#c8b8e8;font-size:13px;line-height:1.8}
+.big{font-size:38px;font-weight:900;color:#ffd60a}
+.btn{display:inline-block;margin-top:14px;padding:13px 30px;border:none;border-radius:14px;font-size:15px;font-weight:800;cursor:pointer;background:linear-gradient(90deg,#ff9f43,#ff2ea6);color:#fff}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>JK ARCHERY MASTER</h1>
+<div class="sub">2047 WIND PHYSICS ARCHERY • 10 ARROWS • OFFLINE</div>
+<div class="hud"><span class="s">⭐ <b id="score">0</b></span><span class="a">🏹 <b id="arr">10</b></span><span class="w" id="wind">💨 0</span></div>
+<canvas id="cv"></canvas>
+<div class="msg" id="msg">PULL &amp; RELEASE! Wind-அ பார்! 🎯</div>
+</div>
+<div class="ov" id="ov"><div class="ovCard">
+<h2>🏹 JK ARCHERY MASTER</h2>
+<p>REAL projectile physics!<br><br>👆 <b>Touch &amp; drag DOWN</b> — power &amp; angle set பண்ணு, release!<br>💨 <b>Wind</b> arrow-அ தள்ளும் — compensate பண்ணு!<br>🎯 Target மேல கீழ move ஆகும்<br>💛 Bullseye = 100 ⭐ + streak bonus!<br><br>10 arrows. Distance ஒவ்வொரு arrow-க்கும் மாறும்!</p>
+<button class="btn" onclick="startGame()">DRAW BOW 🏹</button>
+</div></div>
+<div class="ov hide" id="ovEnd"><div class="ovCard">
+<h2>🏹 QUIVER EMPTY!</h2>
+<div class="big" id="endScore">0</div>
+<p id="endText"></p>
+<button class="btn" onclick="startGame()">AGAIN 🏹</button>
+</div></div>
+<script>
+var cv=document.getElementById('cv'),cx=cv.getContext('2d');
+var W=0,H=0;
+function rz(){cv.width=cv.clientWidth;cv.height=Math.min(430,innerHeight*.56);W=cv.width;H=cv.height;}
+rz();addEventListener('resize',rz);
+var score=0,arrows=10,wind=0,streak=0,bestStreak=0,hits=0;
+var arrow=null,drawing=false,drawStart=null,drawCur=null;
+var target={x:0,y:0,vy:1.2,r:34,dist:0};
+var particles=[],floatTexts=[];
+var running=false,over=false,resolving=false;
+var best=parseInt(localStorage.getItem('jkam_best')||'0');
+function newTarget(){
+ target.dist=.55+Math.random()*.35; // fraction of width
+ target.x=W*target.dist;
+ target.y=H*.3+Math.random()*H*.3;
+ target.vy=(Math.random()<.5?-1:1)*(0.8+Math.random()*1.2);
+ target.r=30-Math.min(10,hits*1.2);
+ wind=Math.round((Math.random()*2-1)*10)/10;
+ document.getElementById('wind').textContent='💨 '+(wind>0?'→':'←')+Math.abs(wind);
+}
+function msg(t){document.getElementById('msg').textContent=t;}
+cv.addEventListener('pointerdown',function(e){
+ if(!running||arrow||resolving)return;
+ var r=cv.getBoundingClientRect();var x=e.clientX-r.left,y=e.clientY-r.top;
+ drawing=true;drawStart={x:x,y:y};drawCur={x:x,y:y};
+});
+cv.addEventListener('pointermove',function(e){
+ if(!drawing)return;
+ var r=cv.getBoundingClientRect();drawCur={x:e.clientX-r.left,y:e.clientY-r.top};
+});
+cv.addEventListener('pointerup',function(){
+ if(!drawing)return;drawing=false;
+ if(!running||arrow||resolving)return;
+ var dx=drawStart.x-drawCur.x,dy=drawStart.y-drawCur.y;
+ var power=Math.min(1,Math.hypot(dx,dy)/180);
+ if(power<.08)return;
+ arrows--;document.getElementById('arr').textContent=arrows;
+ arrow={x:50,y:H*.75,vx:dx/180*13*power+6*power,vy:dy/180*13*power-2*power,rot:0};
+ msg('');
+});
+function step(){
+ if(!running)return;
+ // target bob
+ target.y+=target.vy;
+ if(target.y<H*.15||target.y>H*.75)target.vy*=-1;
+ if(arrow&&!resolving){
+  arrow.vy+=.22; // gravity
+  arrow.vx+=wind*.008; // wind push
+  arrow.x+=arrow.vx;arrow.y+=arrow.vy;
+  arrow.rot=Math.atan2(arrow.vy,arrow.vx);
+  // hit?
+  var d=Math.hypot(arrow.x-target.x,arrow.y-target.y);
+  if(d<target.r){
+   resolving=true;
+   hits++;
+   var ring=d<target.r*.25?4:d<target.r*.5?3:d<target.r*.75?2:1;
+   var pts=[15,30,50,100][ring-1];
+   if(ring===4){streak++;if(streak>bestStreak)bestStreak=streak;pts+=streak*25;}
+   else streak=0;
+   score+=pts;
+   document.getElementById('score').textContent=score;
+   floatTexts.push({x:target.x,y:target.y-40,t:ring===4?'💛 BULLSEYE +'+pts:'+'+pts,life:60,col:ring===4?'#ffd60a':'#fff'});
+   msg(ring===4?'💛 BULLSEYE! 🔥x'+streak:['','+15 edge','+30 inner','+50 close!'][ring-1]);
+   for(var i=0;i<10;i++)particles.push({x:target.x,y:target.y,vx:(Math.random()-.5)*5,vy:(Math.random()-.5)*5,t:.6,col:'#ffd60a'});
+   arrow=null;
+   setTimeout(function(){
+    if(arrows<=0)endGame();
+    else{newTarget();resolving=false;}
+   },900);
+  }else if(arrow.x>W+30||arrow.y>H+20||arrow.x<-30){
+   arrow=null;streak=0;
+   msg('❌ MISS! wind-அ பார்!');
+   resolving=true;
+   setTimeout(function(){
+    if(arrows<=0)endGame();
+    else{newTarget();resolving=false;}
+   },700);
+  }
+ }
+ particles.forEach(function(p){p.x+=p.vx;p.y+=p.vy;p.t-=.02;});
+ particles=particles.filter(function(p){return p.t>0});
+ floatTexts.forEach(function(f){f.y-=.8;f.life--;});
+ floatTexts=floatTexts.filter(function(f){return f.life>0});
+ draw();
+}
+function draw(){
+ cx.clearRect(0,0,W,H);
+ // stars bg
+ cx.fillStyle='rgba(255,255,255,.4)';
+ for(var i=0;i<25;i++){cx.fillRect((i*167)%W,(i*97)%(H*.5),1.5,1.5);}
+ // ground
+ cx.fillStyle='#2a1a3e';cx.fillRect(0,H*.9,W,H*.1);
+ // wind arrow
+ cx.font='16px serif';cx.textAlign='center';
+ cx.fillStyle='#7ab8ff';cx.fillText(wind===0?'🍃 calm':(wind>0?'💨 →':'← 💨'),W/2,20);
+ // target
+ var rings=[['#fff',1],['#222',.8],['#3ddc84',.6],['#ffd60a',.4],['#ff9f43',.22]];
+ rings.forEach(function(r){
+  cx.beginPath();cx.arc(target.x,target.y,target.r*r[1],0,7);
+  cx.fillStyle=r[0];cx.fill();
+ });
+ cx.shadowColor='#ffd60a';cx.shadowBlur=6;
+ cx.strokeStyle='#ffd60a';cx.lineWidth=2;cx.beginPath();cx.arc(target.x,target.y,target.r,0,7);cx.stroke();
+ cx.shadowBlur=0;
+ // bow
+ cx.font='34px serif';cx.fillText('🏹',46,H*.75);
+ // draw line
+ if(drawing&&drawCur){
+  cx.strokeStyle='rgba(255,255,255,.5)';cx.setLineDash([5,5]);cx.lineWidth=2;
+  cx.beginPath();cx.moveTo(drawStart.x,drawStart.y);cx.lineTo(drawCur.x,drawCur.y);cx.stroke();cx.setLineDash([]);
+  var pw=Math.min(1,Math.hypot(drawStart.x-drawCur.x,drawStart.y-drawCur.y)/180);
+  cx.fillStyle='rgba(255,214,10,.3)';cx.fillRect(30,H*.9+8,(W-60)*pw,8);
+  cx.strokeStyle='#ffd60a';cx.strokeRect(30,H*.9+8,W-60,8);
+ }
+ // arrow
+ if(arrow){
+  cx.save();cx.translate(arrow.x,arrow.y);cx.rotate(arrow.rot);
+  cx.strokeStyle='#ffd6a0';cx.lineWidth=3;
+  cx.beginPath();cx.moveTo(-14,0);cx.lineTo(10,0);cx.stroke();
+  cx.fillStyle='#ff4d6d';cx.beginPath();cx.moveTo(14,0);cx.lineTo(6,-4);cx.lineTo(6,4);cx.fill();
+  cx.restore();
+ }
+ particles.forEach(function(p){cx.globalAlpha=p.t*1.6;cx.fillStyle=p.col;cx.fillRect(p.x-2,p.y-2,4,4);cx.globalAlpha=1;});
+ floatTexts.forEach(function(f){cx.globalAlpha=Math.min(1,f.life/30);cx.fillStyle=f.col;cx.font='bold 15px sans-serif';cx.fillText(f.t,f.x,f.y);cx.globalAlpha=1;});
+}
+var lastS=0;
+function loop(){var n=Date.now();if(n-lastS>16){lastS=n;step();}requestAnimationFrame(loop);}
+function startGame(){
+ document.getElementById('ov').classList.add('hide');document.getElementById('ovEnd').classList.add('hide');
+ score=0;arrows=10;streak=0;bestStreak=0;hits=0;arrow=null;resolving=false;running=true;over=false;
+ document.getElementById('score').textContent='0';document.getElementById('arr').textContent='10';
+ newTarget();msg('PULL &amp; RELEASE! 🎯');
+}
+function endGame(){
+ running=false;over=true;
+ var rec=score>best;if(rec){best=score;localStorage.setItem('jkam_best',best);}
+ document.getElementById('endScore').textContent=score+' ⭐';
+ document.getElementById('endText').innerHTML='🎯 '+hits+'/10 hits • 💛 best streak '+bestStreak+'<br>'+(rec?'🎉 NEW RECORD!':'Best: '+best)+'<br>'+(hits>=8?'👑 ARROW GOD!':hits>=5?'🏹 நல்ல aim!':'💨 wind-அ compensate பண்ணு!');
+ document.getElementById('ovEnd').classList.remove('hide');
+}
+newTarget();
+window.__AM={G:function(){return {score:score,arrows:arrows,hits:hits,streak:streak,wind:wind,running:running,over:over,best:best,target:{x:Math.round(target.x),y:Math.round(target.y),r:target.r},arrow:arrow?{x:Math.round(arrow.x),y:Math.round(arrow.y)}:null}},start:startGame,shoot:function(vx,vy){if(arrow||resolving||!running)return false;arrows--;document.getElementById('arr').textContent=arrows;arrow={x:50,y:H*.75,vx:vx,vy:vy,rot:0};return true},target:function(){return{x:Math.round(target.x),y:Math.round(target.y),r:target.r}},end:endGame};
+loop();
+</script>
+</body>
+</html>
