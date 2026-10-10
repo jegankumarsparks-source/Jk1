@@ -757,8 +757,10 @@ document.getElementById('japaBtn').addEventListener('click',()=>{
  if(japa===0){LS.set('japaStart',nw);LS.set('japaActive',0);}
  else{const gp=Math.max(0,nw-LS.get('japaLast',nw));if(gp<=15000)LS.set('japaActive',LS.get('japaActive',0)+gp);}
  LS.set('japaLast',nw);
- japa++;LS.set('japa',japa);japaRender();
- if(japa===108){bell(136.1,4);LS.set('malas',LS.get('malas',0)+1);
+ japa++;LS.set('japa',japa);
+ if(japa===108)LS.set('malas',LS.get('malas',0)+1);
+ japaRender();
+ if(japa===108){bell(136.1,4);
   const ams=LS.get('japaActive',0);
   if(ams>=6000)logSession(Math.min(1440,Math.round(ams/6000)/10));
   if(navigator.vibrate)navigator.vibrate([100,60,100]);}
