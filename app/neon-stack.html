@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>JK NEON STACK 2046</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+body{background:#0b0614;color:#f0e8ff;font-family:'Segoe UI',system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;min-height:100vh;overflow:hidden;touch-action:none}
+h1{font-size:22px;letter-spacing:3px;margin:10px 0 2px;color:#f72585;text-shadow:0 0 12px #f72585,0 0 40px #f7258588}
+.sub{font-size:10px;letter-spacing:2px;color:#a08db0;margin-bottom:8px}
+.hud{display:flex;gap:8px;margin-bottom:8px;width:100%;max-width:420px;justify-content:center}
+.card{background:#1a0f2a;border:1px solid #f7258533;border-radius:10px;padding:6px 11px;text-align:center;min-width:76px}
+.card .l{font-size:9px;letter-spacing:1px;color:#a08db0}
+.card .v{font-size:16px;font-weight:700}
+#wrap{position:relative}
+canvas{background:linear-gradient(180deg,#150a24,#0b0614);border:2px solid #f7258544;border-radius:14px;box-shadow:0 0 30px #f7258522;display:block}
+#msg{margin-top:8px;font-size:13px;color:#ffd166;min-height:18px;text-align:center}
+.ov{position:absolute;inset:0;background:rgba(11,6,20,.93);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;border-radius:14px;z-index:5;backdrop-filter:blur(4px)}
+.ov.hide{display:none}
+.ov h2{font-size:26px;color:#f72585;text-shadow:0 0 16px #f72585}
+.ov p{font-size:13px;color:#d4b8dc;text-align:center;padding:0 24px;line-height:1.6}
+.btn{background:linear-gradient(90deg,#f72585,#7209b7);border:none;color:#fff;font-size:16px;font-weight:700;letter-spacing:2px;padding:13px 42px;border-radius:30px;cursor:pointer;box-shadow:0 0 20px #f7258566}
+.btn:active{transform:scale(.95)}
+.rs{display:flex;gap:8px;width:84%;max-width:320px}
+.rs div{flex:1;background:#1a0f2a;border:1px solid #f7258533;border-radius:10px;padding:8px;text-align:center;font-size:10px;color:#a08db0}
+.rs b{display:block;font-size:16px;color:#fff;margin-top:2px}
+</style>
+</head>
+<body>
+<h1>🌆 JK NEON STACK</h1>
+<div class="sub">2046 SKY TOWER • TIMING • OFFLINE</div>
+<div class="hud">
+<div class="card"><div class="l">🏗 HEIGHT</div><div class="v" id="sc">0</div></div>
+<div class="card"><div class="l">🎯 PERFECT</div><div class="v" id="pf">x0</div></div>
+<div class="card"><div class="l">🏆 BEST</div><div class="v" id="bs">0</div></div>
+</div>
+<div id="wrap">
+<canvas id="cv" width="400" height="600"></canvas>
+<div class="ov" id="ovStart">
+<h2>🌆 NEON STACK</h2>
+<p>Block மேலே slide ஆகும் — சரியான நேரத்தில் TAP பண்ணி drop பண்ணு! Overhang slice ஆகிடும், block சின்னதாகும்! PERFECT landing = combo bonus + block grow! மிஸ் பண்ணா game over! எவ்வளவு உயரம் போக முடியும்?</p>
+<button class="btn" id="btnStart">▶ STACK</button>
+</div>
+<div class="ov hide" id="ovEnd">
+<h2>🌆 TOWER DOWN!</h2>
+<div class="rs">
+<div>🏗 HEIGHT<b id="rSc">0</b></div>
+<div>🎯 PERFECTS<b id="rPf">0</b></div>
+<div>🏆 BEST<b id="rBs">0</b></div>
+</div>
+<p id="endTaunt"></p>
+<button class="btn" id="btnAgain">🔄 STACK AGAIN</button>
+</div>
+</div>
+<div id="msg">🌆 Tap to drop!</div>
+<script>
+'use strict';
+var cv=document.getElementById('cv'),cx=cv.getContext('2d');
+var W=cv.width,H=cv.height,BH=22;
+var AC=window.AudioContext?new AudioContext():null;
+function beep(f,d,t){if(!AC)return;try{var o=AC.createOscillator(),g=AC.createGain();o.type=t||'square';o.frequency.value=f;g.gain.setValueAtTime(.05,AC.currentTime);g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+d);o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+d);}catch(e){}}
+function $(id){return document.getElementById(id);}
+function msg(t){$('msg').textContent=t;}
+var HUES=[318,280,200,160,110,45];
+var state='menu',height=0,perfects=0,combo=0,tick=0;
+var tower=[],moving=null,debris=[],camY=0,targetCamY=0;
+var best=parseInt(localStorage.getItem('jkst_best')||'0');
+$('bs').textContent=best;
+function startGame(){
+ state='play';height=0;perfects=0;combo=0;tick=0;
+ tower=[{x:W/2-60,w:120,hue:0}];
+ debris=[];camY=0;targetCamY=0;
+ spawnMoving();
+ $('sc').textContent=0;$('pf').textContent='x0';
+ $('ovStart').classList.add('hide');$('ovEnd').classList.add('hide');
+ msg('🌆 Timing-ஆ drop பண்ணு!');
+ if(AC&&AC.state==='suspended'){AC.resume();}
+ beep(440,.1);setTimeout(function(){beep(660,.12);},100);
+}
+function spawnMoving(){
+ var top=tower[tower.length-1];
+ var dir=Math.random()<.5?-1:1;
+ moving={x:dir>0?-top.w:W,w:top.w,dir:dir,spd:2.4+Math.min(3.4,height*.14),hue:height%6,dropping:false,dy:0};
+}
+function endGame(){
+ state='over';
+ if(height>best){best=height;try{localStorage.setItem('jkst_best',best);}catch(e){}}
+ $('bs').textContent=best;
+ $('rSc').textContent=height;$('rPf').textContent=perfects;$('rBs').textContent=best;
+ $('endTaunt').textContent=height>=25?'👑 SKY KING! குயிலே, உன் Tower Tide-அ விட இது REAL tower game! 🌆😎':height>=12?'நல்ல tower! Perfect combo-அ கூட்டு! 🎯':'Slide speed-அ கவனி, center-ல drop பண்ணு! 💪';
+ $('ovEnd').classList.remove('hide');
+ beep(170,.4,'sawtooth');
+}
+function drop(){
+ if(state!=='play'||!moving||moving.dropping)return;
+ moving.dropping=true;
+ beep(330,.06,'triangle');
+}
+cv.addEventListener('pointerdown',function(e){e.preventDefault();drop();});
+function step(){
+ if(state!=='play')return;
+ tick++;
+ // camera easing
+ camY+=(targetCamY-camY)*.12;
+ // debris fall
+ for(var i=debris.length-1;i>=0;i--){
+   var d=debris[i];d.y+=d.vy;d.vy+=.5;d.rot+=d.vr;
+   if(d.y-camY>H+80)debris.splice(i,1);
+ }
+ if(!moving)return;
+ if(!moving.dropping){
+   moving.x+=moving.dir*moving.spd;
+   if(moving.dir>0&&moving.x>W)moving.x=-moving.w;
+   if(moving.dir<0&&moving.x<-moving.w)moving.x=W;
+ }else{
+   // falling animation
+   moving.dy+=4;
+   var targetY=towerTopY()-BH;
+   if(moving.dy>=targetY){
+     land();
+   }
+ }
+}
+function towerTopY(){return H-70-(tower.length-1)*BH;}
+function land(){
+ var top=tower[tower.length-1];
+ var m=moving;
+ var l=Math.max(m.x,top.x),r=Math.min(m.x+m.w,top.x+top.w);
+ var ov=r-l;
+ if(ov<=0){
+   // total miss
+   debris.push({x:m.x,y:towerTopY()-BH,w:m.w,vy:2,rot:0,vr:.1,hue:m.hue});
+   moving=null;
+   endGame();return;
+ }
+ var perfect=Math.abs(m.x-top.x)<=4;
+ if(perfect){
+   l=top.x;ov=top.w;combo++;perfects++;
+   var bonus=50*combo;
+   msg('🎯 PERFECT! +'+bonus+' combo x'+combo);
+   beep(990,.1);setTimeout(function(){beep(1320,.12);},90);
+ }else{
+   combo=0;
+   // slice debris
+   if(m.x<top.x)debris.push({x:m.x,y:towerTopY()-BH,w:top.x-m.x,vy:1.5,rot:0,vr:-.08,hue:m.hue});
+   else debris.push({x:top.x+top.w,y:towerTopY()-BH,w:(m.x+m.w)-(top.x+top.w),vy:1.5,rot:0,vr:.08,hue:m.hue});
+   msg('✂ Sliced! Width '+Math.round(ov));
+   beep(500,.07);
+ }
+ tower.push({x:l,w:ov,hue:m.hue});
+ height++;
+ $('sc').textContent=height;
+ $('pf').textContent='x'+perfects;
+ targetCamY=Math.max(0,(tower.length-14)*BH);
+ spawnMoving();
+}
+function draw(){
+ cx.clearRect(0,0,W,H);
+ // skyline glow
+ var g=cx.createLinearGradient(0,H,0,0);
+ g.addColorStop(0,'#f7258518');g.addColorStop(1,'rgba(0,0,0,0)');
+ cx.fillStyle=g;cx.fillRect(0,0,W,H);
+ cx.save();cx.translate(0,-camY);
+ // ground
+ cx.fillStyle='#1a0f2a';cx.fillRect(0,H-70,W,70);
+ cx.fillStyle='#f72585';cx.fillRect(0,H-70,W,3);
+ // tower
+ for(var i=0;i<tower.length;i++){
+   var b=tower[i],by=H-70-(i+1)*BH+ (i===0?BH:0);
+   var yy=H-70-i*BH-BH+BH; // bottom block base
+   yy=H-70-(i)*BH-BH;
+   drawBlock(b.x,yy+ (i===0?BH:0),b.w,BH,b.hue);
+ }
+ // moving block
+ if(moving){
+   var my=moving.dropping?moving.dy:towerTopY()-BH;
+   drawBlock(moving.x,my,moving.w,BH,moving.hue);
+   if(!moving.dropping){
+     cx.strokeStyle='#ffffff22';cx.lineWidth=1;
+     cx.strokeRect(moving.x,towerTopY()-BH,moving.w,BH);
+   }
+ }
+ // debris
+ for(var k=0;k<debris.length;k++){
+   var dd=debris[k];
+   cx.save();cx.translate(dd.x+dd.w/2,dd.y+BH/2);cx.rotate(dd.rot);
+   drawBlock(-dd.w/2,-BH/2,dd.w,BH,dd.hue);
+   cx.restore();
+ }
+ cx.restore();
+ requestAnimationFrame(draw);
+}
+function drawBlock(x,y,w,h,hue){
+ var col='hsl('+HUES[hue%6]+',85%,55%)';
+ cx.fillStyle=col;
+ cx.fillRect(x,y,w,h);
+ cx.fillStyle='rgba(255,255,255,.25)';
+ cx.fillRect(x,y,w,4);
+ cx.strokeStyle='rgba(255,255,255,.35)';cx.lineWidth=1;
+ cx.strokeRect(x+.5,y+.5,w-1,h-1);
+}
+draw();
+var lastT=0,acc=0;
+function loop(ts){
+ if(!lastT)lastT=ts;
+ acc+=ts-lastT;lastT=ts;
+ var n=0;
+ while(acc>16&&n<4){step();acc-=16;n++;}
+ requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+$('btnStart').addEventListener('click',startGame);
+$('btnAgain').addEventListener('click',function(){$('ovEnd').classList.add('hide');startGame();});
+window.__ST={G:function(){return{state:state,height:height,perfects:perfects,combo:combo,topW:tower.length?Math.round(tower[tower.length-1].w):0,topX:tower.length?Math.round(tower[tower.length-1].x):0,moving:moving?{x:Math.round(moving.x),w:Math.round(moving.w),dropping:moving.dropping}:null,best:best}},
+start:startGame,
+step:function(n){for(var i=0;i<n;i++){step();}},
+drop:drop,
+setMovingX:function(x){if(moving&&!moving.dropping)moving.x=x;},
+end:endGame};
+</script>
+</body>
+</html>
