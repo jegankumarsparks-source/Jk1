@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>JK BEACH HOOPS 2040</title>
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;touch-action:none}
+html,body{width:100%;height:100%;overflow:hidden;background:#7EC8E3}
+#game{position:fixed;inset:0}
+canvas{display:block;width:100%;height:100%}
+#hud{position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;padding:12px 16px;z-index:5;font-family:'Lilita One',cursive;pointer-events:none;color:#fff;text-shadow:0 2px 4px rgba(0,0,0,.35)}
+#score{font-size:30px}
+#streak{font-size:17px;color:#FFD23F}
+#time{font-size:17px}
+#wind{position:fixed;top:56px;left:50%;transform:translateX(-50%);font-family:'Lilita One';color:#fff;font-size:16px;z-index:5;text-shadow:0 2px 3px rgba(0,0,0,.3)}
+.overlay{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(180deg,rgba(126,200,227,.97),rgba(255,213,140,.97));font-family:'Lilita One',cursive;text-align:center;padding:20px;color:#fff;text-shadow:0 2px 4px rgba(0,0,0,.25)}
+.overlay.hidden{display:none}
+h1{font-size:36px}
+.sub{font-size:17px;margin-top:10px;max-width:320px;line-height:1.5}
+.btn{margin-top:24px;padding:12px 40px;background:#FF6B35;color:#fff;font-family:'Lilita One';font-size:24px;border:none;border-radius:16px;cursor:pointer;box-shadow:0 5px 0 #C44A1A}
+#finalScore{font-size:54px;color:#FF6B35;margin-top:8px;text-shadow:0 3px 0 rgba(0,0,0,.15)}
+</style>
+</head>
+<body>
+<div id="game"></div>
+<div id="hud"><div id="score">0</div><div id="streak"></div><div id="time">60</div></div>
+<div id="wind"></div>
+<div class="overlay" id="start">
+<h1>🏀 BEACH HOOPS 2040 🏀</h1>
+<p class="sub">Drag BACK from the ball to aim - the dotted line shows the arc - release to shoot! Swish = 3pts, rim = 2pts. 3 swishes in a row = ON FIRE 🔥 (4pts)! Wind pushes the ball. Hoop moves every 5 makes. 60 seconds!</p>
+<button class="btn" id="startBtn">SHOOT!</button>
+</div>
+<div class="overlay hidden" id="over">
+<h1>🌴 FULL TIME! 🌴</h1>
+<div id="finalScore">0</div>
+<p class="sub" id="overSub"></p>
+<button class="btn" id="overBtn">PLAY AGAIN</button>
+</div>
+<script>
+"use strict";
+const TAU=Math.PI*2;
+const container=document.getElementById('game');
+const cv=document.createElement('canvas');container.appendChild(cv);
+const g=cv.getContext('2d');
+let W=0,H=0;
+function resize(){const dpr=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*dpr;cv.height=H*dpr;g.setTransform(dpr,0,0,dpr,0,0);}
+addEventListener('resize',resize);resize();
+const GRAV=980,RIMW=46;
+let ball,hoop,score=0,makes=0,streak=0,onFire=false,timeLeft=60,playing=false,over=false;
+let wind=0,aiming=false,aimStart=null,aimNow=null,parts=[],floats=[],swishFlag=false,acc=0;
+const rand=(a,b)=>a+Math.random()*(b-a);
+function ballStart(){return{x:W*0.28,y:H-160};}
+function reset(){ball={...ballStart(),vx:0,vy:0,flying:false,dead:false};
+hoop={x:W*0.78,y:H*0.42};
+score=0;makes=0;streak=0;onFire=false;timeLeft=60;wind=rand(-40,40);parts=[];floats=[];acc=0;}
+function moveHoop(){hoop.x=rand(W*0.6,W*0.88);hoop.y=rand(H*0.3,H*0.55);wind=rand(-70,70);}
+function shoot(vx,vy){if(ball.flying||!playing)return;ball.vx=vx;ball.vy=vy;ball.flying=true;ball.scored=false;ball.touched=false;swishFlag=true;}
+function simStep(dt){if(!playing||over)return;
+acc+=dt;if(acc>=1){acc-=1;timeLeft--;if(timeLeft<=0){playing=false;over=true;
+document.getElementById('finalScore').textContent=score;
+document.getElementById('overSub').textContent='Makes: '+makes+' | Best streak: '+bestStreak;
+document.getElementById('over').classList.remove('hidden');return;}}
+if(ball.flying){
+ball.vy+=GRAV*dt;ball.vx+=wind*dt;
+ball.x+=ball.vx*dt;ball.y+=ball.vy*dt;
+// backboard
+const bbX=hoop.x+RIMW/2+8;
+if(ball.vx>0&&ball.x+10>=bbX&&ball.x<bbX+8&&Math.abs(ball.y-hoop.y)<60){ball.x=bbX-10;ball.vx*=-0.55;swishFlag=false;}
+// rim posts
+for(const px of[hoop.x-RIMW/2,hoop.x+RIMW/2]){
+const dx=ball.x-px,dy=ball.y-hoop.y,d=Math.hypot(dx,dy);
+if(d<12){const nx=dx/(d||1),ny=dy/(d||1);const dot=ball.vx*nx+ball.vy*ny;
+ball.vx-=1.7*dot*nx;ball.vy-=1.7*dot*ny;ball.vx*=0.7;ball.vy*=0.7;swishFlag=false;
+ball.x=px+nx*12;ball.y=hoop.y+ny*12;}}
+// score: crossing rim line downward inside opening
+if(!ball.scored&&ball.vy>0&&ball.y- ball.vy*dt<hoop.y&&ball.y>=hoop.y&&Math.abs(ball.x-hoop.x)<RIMW/2-6){
+ball.scored=true;makes++;
+const pts=onFire?4:(swishFlag?3:2);score+=pts;
+if(swishFlag){streak++;bestStreak=Math.max(bestStreak,streak);if(streak>=3)onFire=true;}
+else{streak=0;onFire=false;}
+floats.push({x:hoop.x,y:hoop.y-40,text:'+'+pts+(swishFlag?' SWISH!':''),life:1.2});
+if(onFire)for(let i=0;i<8;i++)parts.push({x:ball.x,y:ball.y,vx:rand(-90,90),vy:rand(-160,-40),life:.6,c:'#FF6B35'});
+if(makes%5===0)moveHoop();}
+// out of bounds -> new ball
+if(ball.y>H+40||ball.x>W+40||ball.x<-40){if(!ball.scored){streak=0;onFire=false;}
+ball={...ballStart(),vx:0,vy:0,flying:false,dead:false};}
+if(onFire&&ball.flying)parts.push({x:ball.x,y:ball.y,vx:rand(-30,30),vy:rand(-60,0),life:.4,c:Math.random()<.5?'#FF6B35':'#FFD23F'});}
+for(let i=parts.length-1;i>=0;i--){const p=parts[i];p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=500*dt;p.life-=dt;if(p.life<=0)parts.splice(i,1);}
+for(let i=floats.length-1;i>=0;i--){const f=floats[i];f.y-=40*dt;f.life-=dt;if(f.life<=0)floats.splice(i,1);}
+document.getElementById('score').textContent=score;
+document.getElementById('time').textContent=timeLeft;
+document.getElementById('streak').textContent=onFire?'🔥 ON FIRE x'+streak:(streak>0?'Streak '+streak:'');
+document.getElementById('wind').textContent='🌬️ '+(wind>0?'→':'←')+' '+Math.abs(Math.round(wind));}
+let bestStreak=0;
+let last=performance.now();
+function frame(now){requestAnimationFrame(frame);const dt=Math.min((now-last)/1000,.05);last=now;
+simStep(dt);
+// beach bg
+const bg=g.createLinearGradient(0,0,0,H);bg.addColorStop(0,'#7EC8E3');bg.addColorStop(.6,'#B8E2F0');bg.addColorStop(.75,'#FFD58C');bg.addColorStop(1,'#EDBB6B');
+g.fillStyle=bg;g.fillRect(0,0,W,H);
+// sea band
+g.fillStyle='#4FA8C9';g.fillRect(0,H*0.52,W,H*0.1);
+g.fillStyle='rgba(255,255,255,.5)';for(let i=0;i<5;i++)g.fillRect((i*W/5+ (now/40%(W/5))),H*0.545,30,3);
+// palm
+g.strokeStyle='#8B5E34';g.lineWidth=8;g.beginPath();g.moveTo(40,H*0.78);g.quadraticCurveTo(60,H*0.6,52,H*0.52);g.stroke();
+g.fillStyle='#2E7D32';for(let k=0;k<5;k++){g.save();g.translate(52,H*0.52);g.rotate(-1.1+k*0.5);g.beginPath();g.ellipse(28,0,30,8,0,0,TAU);g.fill();g.restore();}
+// court
+g.fillStyle='#D9A05B';g.fillRect(0,H-140,W,140);
+g.strokeStyle='rgba(255,255,255,.65)';g.lineWidth=3;g.beginPath();g.arc(W*0.28,H-140,70,0,Math.PI);g.stroke();
+// hoop: pole + board + rim + net
+g.strokeStyle='#5C6B73';g.lineWidth=6;g.beginPath();g.moveTo(hoop.x+RIMW/2+22,hoop.y+80);g.lineTo(hoop.x+RIMW/2+22,H-140);g.stroke();
+g.fillStyle='rgba(255,255,255,.92)';g.fillRect(hoop.x+RIMW/2+4,hoop.y-56,10,76);
+g.strokeStyle='#FF6B35';g.lineWidth=5;g.beginPath();g.moveTo(hoop.x-RIMW/2,hoop.y);g.lineTo(hoop.x+RIMW/2,hoop.y);g.stroke();
+g.strokeStyle='rgba(255,255,255,.8)';g.lineWidth=2;
+for(let i=0;i<=4;i++){const nx=hoop.x-RIMW/2+i*(RIMW/4);g.beginPath();g.moveTo(nx,hoop.y);g.lineTo(hoop.x+(i-2)*4,hoop.y+34);g.stroke();}
+// aim preview
+if(aiming&&aimStart&&aimNow&&!ball.flying){
+const vx=(aimStart.x-aimNow.x)*4.2,vy=(aimStart.y-aimNow.y)*4.2;
+g.fillStyle='rgba(255,255,255,.85)';
+let px=ball.x,py=ball.y,pvx=vx,pvy=vy;
+for(let i=0;i<22;i++){pvy+=GRAV*0.045;pvx+=wind*0.045;px+=pvx*0.045;py+=pvy*0.045;
+g.beginPath();g.arc(px,py,3.5,0,TAU);g.fill();}
+// power ring
+const pw=Math.min(1,Math.hypot(vx,vy)/900);
+g.strokeStyle=pw>0.85?'#FF3B30':'#fff';g.lineWidth=4;g.beginPath();g.arc(ball.x,ball.y,20+pw*10,0,TAU);g.stroke();}
+// ball
+if(!ball.dead){g.save();g.translate(ball.x,ball.y);
+g.fillStyle=onFire?'#FF6B35':'#E87D2B';g.beginPath();g.arc(0,0,11,0,TAU);g.fill();
+g.strokeStyle='#8A4A1A';g.lineWidth=1.5;g.beginPath();g.arc(0,0,11,0,TAU);g.stroke();
+g.beginPath();g.moveTo(-11,0);g.lineTo(11,0);g.moveTo(0,-11);g.lineTo(0,11);g.stroke();
+g.beginPath();g.arc(-14,0,11,-0.9,0.9);g.stroke();g.beginPath();g.arc(14,0,11,Math.PI-0.9,Math.PI+0.9);g.stroke();
+g.restore();}
+for(const p of parts){g.globalAlpha=Math.min(1,p.life*3);g.fillStyle=p.c;g.fillRect(p.x-2,p.y-2,4,4);}
+g.globalAlpha=1;
+for(const f of floats){g.globalAlpha=Math.min(1,f.life);g.font='28px "Lilita One",cursive';g.textAlign='center';g.fillStyle='#fff';g.strokeStyle='rgba(0,0,0,.3)';g.lineWidth=3;g.strokeText(f.text,f.x,f.y);g.fillText(f.text,f.x,f.y);}
+g.globalAlpha=1;}
+requestAnimationFrame(frame);
+reset();
+function tog(){reset();bestStreak=0;playing=true;over=false;
+document.getElementById('start').classList.add('hidden');document.getElementById('over').classList.add('hidden');}
+document.getElementById('startBtn').addEventListener('click',tog);
+document.getElementById('overBtn').addEventListener('click',tog);
+cv.addEventListener('pointerdown',e=>{if(!playing||ball.flying)return;const r=cv.getBoundingClientRect();aiming=true;aimStart={x:e.clientX-r.left,y:e.clientY-r.top};aimNow={...aimStart};});
+cv.addEventListener('pointermove',e=>{if(!aiming)return;const r=cv.getBoundingClientRect();aimNow={x:e.clientX-r.left,y:e.clientY-r.top};});
+addEventListener('pointerup',()=>{if(!aiming)return;aiming=false;
+const vx=(aimStart.x-aimNow.x)*4.2,vy=(aimStart.y-aimNow.y)*4.2;
+if(Math.hypot(vx,vy)>80)shoot(Math.max(-900,Math.min(900,vx)),Math.max(-1100,Math.min(200,vy)));});
+window.__BB={G:()=>({score,makes,streak,onFire,timeLeft,playing,over,wind:Math.round(wind),flying:ball.flying,hoop:{x:Math.round(hoop.x),y:Math.round(hoop.y)},ball:{x:Math.round(ball.x),y:Math.round(ball.y)}}),
+start:tog,sim:(dt)=>simStep(dt),
+shoot,
+hoopRef:()=>hoop,ballRef:()=>ball,
+setWind:(v)=>{wind=v;},
+aimShot:(t)=>{ // compute a shot that lands in hoop after t seconds
+const dx=hoop.x-ball.x,dy=hoop.y-ball.y;
+const vx=dx/t-wind*0; // wind ignored in calc for simplicity
+const vy=dy/t-0.5*GRAV*t;
+shoot(vx,vy);}};
+</script>
+</body>
+</html>
