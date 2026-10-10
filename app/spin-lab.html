@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>JK Spin Lab · Family Decision Wheel</title>
+<style>
+:root{ --bg:#07090f; --card:#10141f; --card2:#161b2a; --line:#232a3d; --txt:#e8ecf5; --mut:#8a90a6; --acc:#7ee787; --neon:#22d3ee; --pink:#f472b6; --warn:#fbbf24; }
+*{ margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+body{ background:var(--bg); color:var(--txt); font-family:-apple-system,'Segoe UI',Roboto,sans-serif; max-width:480px; margin:0 auto; min-height:100vh; position:relative; overflow-x:hidden; }
+body::before{ content:''; position:fixed; inset:0; background:radial-gradient(600px 300px at 80% -5%,rgba(34,211,238,.12),transparent),radial-gradient(500px 260px at 10% 0%,rgba(244,114,182,.09),transparent); pointer-events:none; }
+.wrap{ position:relative; z-index:1; padding:14px; }
+header{ padding:12px 4px 8px; text-align:center; }
+h1{ font-size:22px; font-weight:900; letter-spacing:.5px; }
+h1 .lab{ background:linear-gradient(90deg,var(--neon),var(--pink)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.sub{ font-size:11.5px; color:var(--mut); margin-top:2px; }
+.wheel-box{ position:relative; width:min(88vw,360px); margin:14px auto 6px; }
+canvas{ width:100%; display:block; filter:drop-shadow(0 0 26px rgba(34,211,238,.18)); }
+.pointer{ position:absolute; top:-8px; left:50%; transform:translateX(-50%); font-size:27px; filter:drop-shadow(0 0 8px var(--pink)); z-index:2; }
+.center-btn{ position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:88px; height:88px; border-radius:50%; border:3px solid var(--neon); background:radial-gradient(circle at 35% 30%,#1e293b,#0b0f18); color:var(--acc); font-weight:900; font-size:15px; letter-spacing:1px; cursor:pointer; box-shadow:0 0 22px rgba(34,211,238,.4); z-index:2; }
+.center-btn:active{ transform:translate(-50%,-50%) scale(.93); }
+.center-btn:disabled{ opacity:.55; cursor:default; }
+.winner{ text-align:center; min-height:56px; margin:8px 0 2px; }
+.winner .w{ display:inline-block; font-size:23px; font-weight:900; padding:10px 24px; border-radius:99px; background:rgba(126,231,135,.1); border:1px solid rgba(126,231,135,.4); color:var(--acc); animation:pop .45s cubic-bezier(.2,1.6,.4,1); box-shadow:0 0 24px rgba(126,231,135,.25); }
+@keyframes pop{ 0%{ transform:scale(.3); opacity:0;} 100%{ transform:scale(1); opacity:1;} }
+.card{ background:var(--card); border:1px solid var(--line); border-radius:16px; padding:13px; margin-bottom:12px; }
+.sec{ font-size:13px; font-weight:800; margin:14px 2px 8px; }
+.sec span{ font-weight:400; color:var(--mut); font-size:11px; }
+.presets{ display:flex; flex-wrap:wrap; gap:7px; }
+.chip{ background:var(--card2); border:1px solid var(--line); border-radius:99px; padding:8px 13px; font-size:13px; cursor:pointer; }
+.chip:active{ border-color:var(--neon); }
+.opt{ display:flex; align-items:center; gap:9px; padding:8px 2px; border-bottom:1px solid var(--line); font-size:14.5px; }
+.opt:last-child{ border-bottom:0; }
+.opt .dot{ width:12px; height:12px; border-radius:50%; flex:0 0 auto; }
+.opt .nm{ flex:1; }
+.opt .del{ color:var(--mut); font-size:17px; padding:2px 8px; cursor:pointer; }
+.opt .del:active{ color:#f87171; }
+.addrow{ display:flex; gap:8px; margin-top:10px; }
+input[type=text]{ flex:1; background:var(--card2); border:1px solid var(--line); color:var(--txt); border-radius:12px; padding:12px; font-size:15.5px; outline:none; }
+input:focus{ border-color:var(--neon); }
+.mini{ background:linear-gradient(90deg,var(--acc),var(--neon)); border:0; color:#04120a; font-weight:900; border-radius:12px; padding:0 18px; font-size:15px; cursor:pointer; }
+.hrow{ display:flex; justify-content:space-between; font-size:12.5px; padding:7px 2px; border-bottom:1px solid var(--line); color:var(--mut); }
+.hrow:last-child{ border-bottom:0; }
+.hrow b{ color:var(--txt); }
+.confetti{ position:fixed; top:-10px; width:9px; height:14px; z-index:20; pointer-events:none; border-radius:2px; animation:fall 2.6s ease-in forwards; }
+@keyframes fall{ to{ transform:translateY(110vh) rotate(720deg); opacity:0; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header><h1>JK SPIN <span class="lab">LAB</span></h1><div class="sub">family decision wheel · spin it, settle it, done 🎡</div></header>
+<div class="wheel-box"><div class="pointer">🔻</div><canvas id="cv" width="640" height="640"></canvas><button class="center-btn" id="spinBtn" onclick="spin()">SPIN</button></div>
+<div class="winner" id="winner"></div>
+<div class="sec">Preset packs <span>tap to load</span></div>
+<div class="card"><div class="presets" id="presets"></div></div>
+<div class="sec">Your options <span id="optCount"></span></div>
+<div class="card" id="optCard"></div>
+<div class="card"><div class="addrow"><input type="text" id="newOpt" placeholder="Add your own option…" maxlength="26"><button class="mini" onclick="addOpt()">ADD</button></div></div>
+<div class="sec">Spin history <span>latest first</span></div>
+<div class="card" id="histCard"></div>
+</div>
+<script>
+const PALETTE=['#22d3ee','#f472b6','#7ee787','#fbbf24','#a78bfa','#fb7185','#34d399','#60a5fa','#f97316','#e879f9'];
+const PRESETS={
+ '🍕 Dinner tonight':['Biryani','Dosa night','Pizza','Fried rice','Chapati + paneer','Noodles','Home sambar','Order in 🛵'],
+ '🎬 Movie pick':['Action','Comedy','Thriller','Romance','Horror','Animation','Documentary'],
+ '🧹 Who does dishes':['Jegan','Divya','Together 50-50','Whoever cooked is FREE 😌'],
+ '🎲 Weekend plan':['Beach walk','Movie + snacks','Shopping','Temple visit','Just sleep 😴','Long drive']
+};
+const LS={get(k,d){try{const v=JSON.parse(localStorage.getItem('jkspin_'+k));return v==null?d:v;}catch(e){return d;}},set(k,v){localStorage.setItem('jkspin_'+k,JSON.stringify(v));}};
+let opts=LS.get('opts',['Biryani','Dosa night','Pizza','Fried rice','Chapati + paneer','Noodles']);
+let hist=LS.get('hist',[]);
+let angle=0, spinning=false, vel=0, raf=null;
+const cv=document.getElementById('cv'), ctx=cv.getContext('2d');
+const $=s=>document.querySelector(s);
+function esc(s){ return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+function draw(){
+ const n=opts.length, cx=320, cy=320, R=300;
+ ctx.clearRect(0,0,640,640);
+ if(!n){ ctx.fillStyle='#8a90a6'; ctx.font='28px sans-serif'; ctx.textAlign='center'; ctx.fillText('Add options to spin',cx,cy); return; }
+ const arc=2*Math.PI/n;
+ for(let i=0;i<n;i++){
+  const a0=angle+i*arc, a1=a0+arc;
+  ctx.beginPath(); ctx.moveTo(cx,cy); ctx.arc(cx,cy,R,a0,a1); ctx.closePath();
+  ctx.fillStyle=PALETTE[i%PALETTE.length]+'2e'; ctx.fill();
+  ctx.strokeStyle=PALETTE[i%PALETTE.length]; ctx.lineWidth=2.5; ctx.stroke();
+  ctx.save(); ctx.translate(cx,cy); ctx.rotate(a0+arc/2); ctx.textAlign='right';
+  ctx.fillStyle='#e8ecf5'; ctx.font='bold 25px sans-serif';
+  const t=opts[i].length>16?opts[i].slice(0,15)+'…':opts[i];
+  ctx.shadowColor=PALETTE[i%PALETTE.length]; ctx.shadowBlur=9;
+  ctx.fillText(t,R-18,9); ctx.restore();
+ }
+}
+function tick(){
+ angle+=vel; vel*=0.985;
+ if(vel<0.002){ spinning=false; vel=0; cancelAnimationFrame(raf); draw(); land(); return; }
+ draw(); raf=requestAnimationFrame(tick);
+}
+function spin(){
+ if(spinning||opts.length<2){ if(opts.length<2) showW('Need at least 2 options 🙂'); return; }
+ spinning=true; $('#winner').innerHTML=''; $('#spinBtn').disabled=true;
+ vel=0.28+Math.random()*0.22;
+ if(navigator.vibrate) try{ navigator.vibrate(40); }catch(e){}
+ raf=requestAnimationFrame(tick);
+}
+function land(){
+ $('#spinBtn').disabled=false;
+ const n=opts.length, arc=2*Math.PI/n;
+ let a=(-Math.PI/2-angle)%(2*Math.PI); if(a<0)a+=2*Math.PI;
+ const idx=Math.floor(a/arc)%n;
+ const w=opts[idx];
+ showW('🎉 '+esc(w));
+ hist.unshift({w,ts:Date.now()}); hist=hist.slice(0,8); LS.set('hist',hist); renderHist();
+ confetti();
+ if(navigator.vibrate) try{ navigator.vibrate([80,40,80]); }catch(e){}
+}
+function showW(h){ $('#winner').innerHTML='<span class="w">'+h+'</span>'; }
+function confetti(){ for(let i=0;i<26;i++){ const d=document.createElement('div'); d.className='confetti'; d.style.left=Math.random()*100+'vw'; d.style.background=PALETTE[i%PALETTE.length]; d.style.animationDelay=(Math.random()*0.5)+'s'; document.body.appendChild(d); setTimeout(()=>d.remove(),3200); } }
+function renderOpts(){
+ $('#optCount').textContent=opts.length+' options';
+ $('#optCard').innerHTML=opts.length?opts.map((o,i)=>'<div class="opt"><span class="dot" style="background:'+PALETTE[i%PALETTE.length]+'"></span><span class="nm">'+esc(o)+'</span><span class="del" onclick="delOpt('+i+')">×</span></div>').join(''):'<div class="opt"><span class="nm" style="color:var(--mut)">Empty - load a preset or add options</span></div>';
+}
+function renderHist(){ $('#histCard').innerHTML=hist.length?hist.map(h=>'<div class="hrow"><b>'+esc(h.w)+'</b><span>'+new Date(h.ts).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})+'</span></div>').join(''):'<div class="hrow"><span>No spins yet - hit SPIN!</span></div>'; }
+function renderPresets(){ $('#presets').innerHTML=Object.keys(PRESETS).map(k=>'<div class="chip" onclick="loadPreset(this.textContent)">'+esc(k)+'</div>').join(''); }
+function loadPreset(k){ opts=PRESETS[k].slice(); LS.set('opts',opts); renderOpts(); draw(); showW('Loaded '+esc(k)+' 🎡'); setTimeout(()=>{ if(!spinning) $('#winner').innerHTML=''; },1500); }
+function addOpt(){ const v=$('#newOpt').value.trim(); if(!v) return; if(opts.includes(v)){ showW('Already in the wheel 🙂'); return; } opts.push(v); LS.set('opts',opts); $('#newOpt').value=''; renderOpts(); draw(); }
+function delOpt(i){ opts.splice(i,1); LS.set('opts',opts); renderOpts(); draw(); }
+$('#newOpt').addEventListener('keydown',e=>{ if(e.key==='Enter') addOpt(); });
+renderPresets(); renderOpts(); renderHist(); draw();
+</script>
+</body>
+</html>
