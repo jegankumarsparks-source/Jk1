@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>JK MAZE RUNNER 2040</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#060612;color:#e8e8f5;min-height:100vh;overflow-x:hidden}
+.wrap{max-width:480px;margin:0 auto;padding:10px 12px 30px}
+h1{text-align:center;font-size:26px;font-weight:900;letter-spacing:2px;background:linear-gradient(90deg,#3ddc84,#00e5ff,#b44dff);-webkit-background-clip:text;background-clip:text;color:transparent;margin-top:4px}
+.sub{text-align:center;color:#8a8ab0;font-size:10px;letter-spacing:3px;margin:2px 0 8px}
+.hud{display:flex;justify-content:space-between;background:linear-gradient(145deg,#14142e,#0e0e22);border:1px solid #26264a;border-radius:12px;padding:8px 14px;margin-bottom:8px;font-size:13px;font-weight:800}
+.hud .l{color:#ffd60a}.hud .t{color:#00e5ff}.hud .k{color:#3ddc84}
+#cv{display:block;width:100%;background:#08081a;border-radius:14px;border:1px solid #26264a;touch-action:none}
+.pad{display:grid;grid-template-columns:repeat(3,64px);grid-template-rows:repeat(3,64px);gap:6px;justify-content:center;margin-top:10px}
+.pb{background:linear-gradient(145deg,#1a1a3e,#12122b);border:1px solid #34346a;border-radius:14px;font-size:24px;color:#e8e8f5;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.pb:active{background:#00e5ff;color:#000}
+.msg{text-align:center;font-size:12px;color:#b8b8d8;min-height:18px;margin-top:6px}
+.ov{position:fixed;inset:0;background:rgba(3,3,10,.94);z-index:20;display:flex;align-items:center;justify-content:center;padding:20px}
+.ov.hide{display:none}
+.ovCard{background:linear-gradient(145deg,#161634,#0d0d20);border:1px solid #34346a;border-radius:20px;padding:26px 20px;max-width:380px;width:100%;text-align:center}
+.ovCard h2{font-size:23px;margin-bottom:8px}
+.ovCard p{color:#b8b8d8;font-size:13px;line-height:1.8}
+.big{font-size:36px;font-weight:900;color:#ffd60a}
+.btn{display:inline-block;margin-top:14px;padding:13px 30px;border:none;border-radius:14px;font-size:15px;font-weight:800;cursor:pointer;background:linear-gradient(90deg,#3ddc84,#00e5ff);color:#04222a}
+.footer{text-align:center;color:#55557a;font-size:10px;margin-top:12px;letter-spacing:1px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>JK MAZE RUNNER</h1>
+<div class="sub">2040 NEON LABYRINTH • ஓடு! • OFFLINE</div>
+<div class="hud"><span class="l">LEVEL <b id="lvl">1</b></span><span class="t">⏱ <b id="tm">0</b>s</span><span class="k">🪙 <b id="cn">0</b></span></div>
+<canvas id="cv"></canvas>
+<div class="pad">
+<div></div><div class="pb" onclick="mv(0,-1)">⬆️</div><div></div>
+<div class="pb" onclick="mv(-1,0)">⬅️</div><div class="pb" onclick="pauseG()">⏸</div><div class="pb" onclick="mv(1,0)">➡️</div>
+<div></div><div class="pb" onclick="mv(0,1)">⬇️</div><div></div>
+</div>
+<div class="msg" id="msg">🔑 key-அ எடு, 🚪 exit-க்கு ஓடு — 👹 shadow உன்னை துரத்தும்!</div>
+<div class="footer">JK MAZE RUNNER 2040 • procedural mazes • swipe or pad • shadow AI chase</div>
+</div>
+<div class="ov" id="ov"><div class="ovCard">
+<h2>🏃 JK MAZE RUNNER</h2>
+<p>Procedural neon maze! 🔑 தங்க key-அ எடுத்து 🚪 exit திற.<br>👹 SHADOW உன்னை துரத்தும் — பிடிச்சா level reset!<br>🪙 coins சேரு. Level போக போக maze பெருசாகும், shadow வேகமாகும்!<br><br>Swipe or arrow pad.</p>
+<button class="btn" onclick="startGame()">RUN 🏃</button>
+</div></div>
+<div class="ov hide" id="ovLvl"><div class="ovCard">
+<h2 id="lvlTitle">✨ LEVEL CLEAR!</h2>
+<div class="big" id="lvlBonus">+0</div>
+<p id="lvlText"></p>
+<button class="btn" onclick="nextLevel()">NEXT LEVEL ➡️</button>
+</div></div>
+<div class="ov hide" id="ovDead"><div class="ovCard">
+<h2>👹 CAUGHT!</h2>
+<p id="deadText"></p>
+<button class="btn" onclick="retryLevel()">RETRY 🔄</button>
+</div></div>
+<script>
+var cv=document.getElementById('cv'),cx=cv.getContext('2d');
+var COLS=11,ROWS=13,cell=0;
+var maze=[],px=1,py=1,keyX=0,keyY=0,exitX=0,exitY=0,hasKey=false;
+var level=1,coins=0,totalCoins=0,shX=0,shY=0,shTimer=0,shRate=900,running=false,startT=0,elapsed=0,coinList=[];
+var DIRS=[[0,-1],[1,0],[0,1],[-1,0]];
+function genMaze(c,r){
+ var m=[];for(var y=0;y<r;y++){m.push([]);for(var x=0;x<c;x++)m[y].push(1);}
+ function carve(x,y){m[y][x]=0;var d=DIRS.slice().sort(function(){return Math.random()-.5});
+  for(var i=0;i<4;i++){var nx=x+d[i][0]*2,ny=y+d[i][1]*2;
+   if(nx>0&&nx<c-1&&ny>0&&ny<r-1&&m[ny][nx]===1){m[y+d[i][1]][x+d[i][0]]=0;carve(nx,ny);}}}
+ carve(1,1);
+ // extra loops for fairness
+ for(var i=0;i<c*r/14;i++){var x=1+Math.floor(Math.random()*(c-2)),y=1+Math.floor(Math.random()*(r-2));m[y][x]=0;}
+ return m;
+}
+function randOpen(){while(true){var x=1+Math.floor(Math.random()*(COLS-2)),y=1+Math.floor(Math.random()*(ROWS-2));if(maze[y][x]===0&&Math.abs(x-1)+Math.abs(y-1)>6)return[x,y];}}
+function setupLevel(){
+ COLS=9+Math.min(8,level*2);if(COLS%2===0)COLS++;
+ ROWS=11+Math.min(8,level*2);if(ROWS%2===0)ROWS++;
+ maze=genMaze(COLS,ROWS);
+ px=1;py=1;hasKey=false;
+ var k=randOpen();keyX=k[0];keyY=k[1];
+ exitX=COLS-2;exitY=ROWS-2;maze[exitY][exitX]=0;
+ var s=randOpen();shX=s[0];shY=s[1];
+ coinList=[];var nc=3+level;
+ for(var i=0;i<nc;i++){var c=randOpen();if(!(c[0]===keyX&&c[1]===keyY))coinList.push({x:c[0],y:c[1],got:false});}
+ shRate=Math.max(350,950-level*60);
+ startT=Date.now();elapsed=0;
+ cell=Math.floor(Math.min(cv.clientWidth/COLS,380/ROWS));
+ cv.width=cell*COLS;cv.height=cell*ROWS;
+ document.getElementById('lvl').textContent=level;
+}
+function sizeInit(){cv.width=340;cv.height=340;}
+sizeInit();
+function mv(dx,dy){
+ if(!running)return;
+ var nx=px+dx,ny=py+dy;
+ if(nx<0||ny<0||nx>=COLS||ny>=ROWS||maze[ny][nx]===1)return;
+ px=nx;py=ny;
+ coinList.forEach(function(c){if(!c.got&&c.x===px&&c.y===py){c.got=true;coins++;totalCoins++;document.getElementById('cn').textContent=totalCoins;}});
+ if(px===keyX&&py===keyY&&!hasKey){hasKey=true;msg('🔑 KEY! Exit திறந்தாச்சு — ஓடு! 🚪');}
+ if(px===exitX&&py===exitY){if(hasKey)levelClear();else msg('🔒 முதல்ல key வேணும்!');}
+ draw();
+}
+function msg(t){document.getElementById('msg').textContent=t;}
+/* shadow AI: BFS toward player */
+function bfsNext(){
+ var q=[[shX,shY]],prev={},seen={};seen[shX+','+shY]=1;
+ while(q.length){
+  var c=q.shift();
+  if(c[0]===px&&c[1]===py){// walk back
+   var cur=c,path=[cur];
+   while(prev[cur[0]+','+cur[1]]){cur=prev[cur[0]+','+cur[1]];path.push(cur);}
+   return path.length>=2?path[path.length-2]:null;
+  }
+  for(var i=0;i<4;i++){var nx=c[0]+DIRS[i][0],ny=c[1]+DIRS[i][1];
+   if(nx>=0&&ny>=0&&nx<COLS&&ny<ROWS&&maze[ny][nx]===0&&!seen[nx+','+ny]){seen[nx+','+ny]=1;prev[nx+','+ny]=c;q.push([nx,ny]);}}
+ }
+ return null;
+}
+var shIv=null;
+function shStep(){
+ if(!running)return;
+ var n=bfsNext();
+ if(n){shX=n[0];shY=n[1];}
+ if(shX===px&&shY===py){dead();return;}
+ draw();
+}
+function draw(){
+ cx.fillStyle='#08081a';cx.fillRect(0,0,cv.width,cv.height);
+ for(var y=0;y<ROWS;y++)for(var x=0;x<COLS;x++){
+  if(maze[y][x]===1){cx.fillStyle='#1a1a45';cx.fillRect(x*cell,y*cell,cell,cell);
+   cx.fillStyle='rgba(0,229,255,.12)';cx.fillRect(x*cell,y*cell,cell,2);}
+ }
+ var t=Date.now()*.004;
+ // exit
+ cx.font=Math.round(cell*.7)+'px serif';cx.textAlign='center';cx.textBaseline='middle';
+ cx.fillText(hasKey?'🚪':'🔒',exitX*cell+cell/2,exitY*cell+cell/2);
+ if(!hasKey){cx.fillText('🔑',keyX*cell+cell/2,keyY*cell+cell/2+Math.sin(t)*cell*.08);}
+ coinList.forEach(function(c){if(!c.got)cx.fillText('🪙',c.x*cell+cell/2,c.y*cell+cell/2);});
+ // player glow
+ cx.shadowColor='#3ddc84';cx.shadowBlur=12;
+ cx.fillStyle='#3ddc84';cx.beginPath();cx.arc(px*cell+cell/2,py*cell+cell/2,cell*.32,0,7);cx.fill();
+ cx.shadowBlur=0;cx.fillStyle='#04222a';cx.font=Math.round(cell*.4)+'px serif';cx.fillText('🏃',px*cell+cell/2,py*cell+cell/2);
+ // shadow
+ cx.shadowColor='#ff2ea6';cx.shadowBlur=14;
+ cx.fillStyle='#2a0a2a';cx.beginPath();cx.arc(shX*cell+cell/2,shY*cell+cell/2,cell*.34,0,7);cx.fill();
+ cx.shadowBlur=0;cx.fillText('👹',shX*cell+cell/2,shY*cell+cell/2);
+ elapsed=Math.floor((Date.now()-startT)/1000);
+ document.getElementById('tm').textContent=elapsed;
+}
+var drawIv=null;
+function startGame(){
+ document.getElementById('ov').classList.add('hide');
+ level=1;totalCoins=0;coins=0;document.getElementById('cn').textContent=0;
+ startLevel();
+}
+function startLevel(){
+ setupLevel();running=true;
+ clearInterval(shIv);shIv=setInterval(shStep,shRate);
+ clearInterval(drawIv);drawIv=setInterval(draw,120);
+ msg('🔑 key-அ எடு, 🚪 exit-க்கு ஓடு!');
+ draw();
+}
+function levelClear(){
+ running=false;clearInterval(shIv);clearInterval(drawIv);
+ var bonus=Math.max(10,120-elapsed*2)+level*10;
+ totalCoins+=Math.round(bonus/10);
+ document.getElementById('cn').textContent=totalCoins;
+ document.getElementById('lvlBonus').textContent='+'+bonus;
+ document.getElementById('lvlText').innerHTML='Time: '+elapsed+'s • Coins: 🪙'+totalCoins+'<br>அடுத்த level: maze பெருசு, shadow வேகம்! 👹💨';
+ document.getElementById('ovLvl').classList.remove('hide');
+}
+function nextLevel(){document.getElementById('ovLvl').classList.add('hide');level++;startLevel();}
+function dead(){
+ running=false;clearInterval(shIv);clearInterval(drawIv);
+ document.getElementById('deadText').innerHTML='Shadow பிடிச்சுட்டான்! 👹<br>Level '+level+' • Coins: 🪙'+totalCoins+'<br>மறுபடியும் முயற்சி பண்ணு!';
+ document.getElementById('ovDead').classList.remove('hide');
+}
+function retryLevel(){document.getElementById('ovDead').classList.add('hide');startLevel();}
+function pauseG(){if(running){running=false;msg('⏸ paused — tap ⏸ to resume');}else{running=true;msg('');draw();}}
+/* swipe */
+var tsX=0,tsY=0;
+cv.addEventListener('touchstart',function(e){tsX=e.touches[0].clientX;tsY=e.touches[0].clientY},{passive:true});
+cv.addEventListener('touchend',function(e){var dx=e.changedTouches[0].clientX-tsX,dy=e.changedTouches[0].clientY-tsY;
+ if(Math.abs(dx)<24&&Math.abs(dy)<24)return;
+ if(Math.abs(dx)>Math.abs(dy))mv(dx>0?1:-1,0);else mv(0,dy>0?1:-1);},{passive:true});
+document.addEventListener('keydown',function(e){var m={ArrowUp:[0,-1],ArrowDown:[0,1],ArrowLeft:[-1,0],ArrowRight:[1,0]}[e.key];if(m)mv(m[0],m[1]);});
+window.__MR={G:function(){return {level:level,px:px,py:py,shX:shX,shY:shY,hasKey:hasKey,coins:totalCoins,running:running,cols:COLS,rows:ROWS,elapsed:elapsed}},mv:mv,start:startGame,key:function(){return[keyX,keyY]},exit:function(){return[exitX,exitY]},maze:function(){return maze.map(function(r){return r.join('')}).join('/')},teleport:function(x,y){px=x;py=y;draw();mv(0,0)},setShRate:function(r){shRate=r;clearInterval(shIv);shIv=setInterval(shStep,r)}};
+</script>
+</body>
+</html>
