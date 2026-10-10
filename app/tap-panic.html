@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>JK TAP PANIC 2040</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;touch-action:none}
+html,body{width:100%;height:100%;overflow:hidden;background:#22223B}
+#stage{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Archivo Black',sans-serif;transition:background .15s}
+#prompt{font-size:64px;color:#fff;letter-spacing:2px;text-shadow:4px 4px 0 rgba(0,0,0,.25)}
+#sub{font-size:18px;color:rgba(255,255,255,.85);margin-top:14px;font-family:sans-serif}
+#ring{width:220px;height:14px;background:rgba(0,0,0,.3);border-radius:8px;margin-top:34px;overflow:hidden}
+#ringFill{height:100%;background:#fff;width:100%}
+#hud{position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;padding:14px 18px;z-index:5;font-family:'Archivo Black',sans-serif;pointer-events:none}
+#score{font-size:30px;color:#fff;text-shadow:3px 3px 0 rgba(0,0,0,.25)}
+#strikes{font-size:22px;color:#fff}
+.overlay{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#22223B;font-family:'Archivo Black',sans-serif;text-align:center;padding:20px}
+.overlay.hidden{display:none}
+h1{font-size:38px;color:#F2E9E4;line-height:1.2}
+.sub2{color:#C9ADA7;font-size:16px;margin-top:14px;max-width:320px;line-height:1.7;font-family:sans-serif}
+.btn{margin-top:28px;padding:14px 44px;background:#E63946;color:#fff;font-family:'Archivo Black',sans-serif;font-size:24px;border:none;border-radius:12px;cursor:pointer;box-shadow:0 6px 0 #9B2226}
+.btn:active{transform:translateY(4px);box-shadow:0 2px 0 #9B2226}
+#finalScore{font-size:60px;color:#F4A261;margin-top:10px}
+#best{font-size:18px;color:#C9ADA7;margin-top:6px;font-family:sans-serif}
+</style>
+</head>
+<body>
+<div id="stage">
+<div id="prompt">READY?</div>
+<div id="sub"></div>
+<div id="ring"><div id="ringFill"></div></div>
+</div>
+<div id="hud"><div id="score">0</div><div id="strikes">❤️❤️❤️</div></div>
+<div class="overlay" id="start">
+<h1>JK TAP PANIC<br>2040</h1>
+<p class="sub2">Commands flash on screen. TAP! = tap once. HOLD! = press and hold. DOUBLE! = tap twice fast. WAIT! = hands OFF until it clears! Too slow or wrong move = lose a heart. 3 hearts. How long can you last?</p>
+<button class="btn" id="startBtn">START</button>
+</div>
+<div class="overlay hidden" id="over">
+<h1>GAME OVER</h1>
+<div id="finalScore">0</div>
+<div id="best"></div>
+<button class="btn" id="overBtn">AGAIN!</button>
+</div>
+<script>
+"use strict";
+const stage=document.getElementById('stage'),promptEl=document.getElementById('prompt'),subEl=document.getElementById('sub'),ringFill=document.getElementById('ringFill');
+const COLORS={TAP:'#E63946',HOLD:'#457B9D',DOUBLE:'#F4A261',WAIT:'#2A9D8F',CLEAR:'#6A4C93'};
+const SUBS={TAP:'tap once, NOW!',HOLD:'press and keep holding!',DOUBLE:'tap tap - twice fast!',WAIT:'hands OFF! wait for CLEAR...',CLEAR:'NOW! tap quick!'};
+let score=0,best=0,strikes=3,playing=false,over=false;
+let cmd=null,window_=2.2,t=0,phase='idle',holdNeed=0.7,holdT=0,tapCount=0,tapTimer=0,clearT=0;
+try{best=parseInt(localStorage.getItem('jk_tp_best')||'0');}catch(e){}
+function pick(){const types=['TAP','HOLD','DOUBLE','WAIT'];return types[Math.floor(Math.random()*types.length)];}
+function newCmd(){cmd=pick();window_=Math.max(0.9,2.2-score*0.03);t=0;holdT=0;tapCount=0;phase=cmd;
+promptEl.textContent=cmd+'!';subEl.textContent=SUBS[cmd];stage.style.background=COLORS[cmd];}
+function success(){score++;newCmd();}
+function strike(reason){strikes--;holdT=0;tapCount=0;
+document.getElementById('strikes').textContent='❤️'.repeat(Math.max(0,strikes))||'💔';
+if(strikes<=0){die();}else{promptEl.textContent='MISS!';subEl.textContent=reason;stage.style.background='#22223B';phase='miss';t=0;}}
+function die(){playing=false;over=true;
+if(score>best){best=score;try{localStorage.setItem('jk_tp_best',String(best));}catch(e){}}
+document.getElementById('finalScore').textContent=score;
+document.getElementById('best').textContent='BEST: '+best;
+document.getElementById('over').classList.remove('hidden');}
+function tapDown(){if(!playing||over)return;
+if(phase==='WAIT'){strike('you touched during WAIT!');return;}
+if(phase==='CLEAR'){success();return;}
+if(phase==='TAP'){success();return;}
+if(phase==='DOUBLE'){tapCount++;if(tapCount>=2){success();}return;}
+if(phase==='HOLD'){holdT=0.0001;return;}}
+function tapUp(){if(!playing||over)return;
+if(phase==='HOLD'&&holdT>0&&holdT<holdNeed){strike('let go too soon!');}}
+function simStep(dt){if(!playing||over)return;
+t+=dt;
+if(phase==='HOLD'&&holdT>0){holdT+=dt;if(holdT>=holdNeed){success();return;}}
+if(phase==='WAIT'&&t>=window_*0.6){phase='CLEAR';clearT=0.9;promptEl.textContent='CLEAR!';subEl.textContent=SUBS.CLEAR;stage.style.background=COLORS.CLEAR;t=0;return;}
+if(phase==='miss'&&t>=0.9){newCmd();return;}
+if(t>=window_){strike('too slow!');return;}}
+let last=performance.now();
+function frame(now){requestAnimationFrame(frame);const dt=Math.min((now-last)/1000,.05);last=now;
+simStep(dt);
+const frac=phase==='CLEAR'?Math.max(0,1-t/0.9):Math.max(0,1-t/window_);
+ringFill.style.width=(frac*100)+'%';
+ringFill.style.background=frac<0.3?'#FF6B6B':'#fff';
+document.getElementById('score').textContent=score;}
+requestAnimationFrame(frame);
+function tog(){score=0;strikes=3;playing=true;over=false;
+document.getElementById('strikes').textContent='❤️❤️❤️';
+document.getElementById('start').classList.add('hidden');document.getElementById('over').classList.add('hidden');
+newCmd();}
+document.getElementById('startBtn').addEventListener('click',tog);
+document.getElementById('overBtn').addEventListener('click',tog);
+stage.addEventListener('pointerdown',tapDown);
+addEventListener('pointerup',tapUp);
+window.__TP={G:()=>({score,best,strikes,playing,over,phase,window_:+window_.toFixed(2),t:+t.toFixed(2),holdT:+holdT.toFixed(2)}),
+start:tog,
+sim:(dt)=>simStep(dt),
+down:tapDown,up:tapUp,
+setCmd:(c)=>{cmd=c;phase=c;t=0;holdT=0;tapCount=0;promptEl.textContent=c+'!';stage.style.background=COLORS[c];},
+holdNeed:()=>holdNeed};
+</script>
+</body>
+</html>
