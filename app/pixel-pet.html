@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>JK PIXEL PET 2037</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0a0a1a;color:#e8e8f5;min-height:100vh;overflow-x:hidden}
+#bg{position:fixed;inset:0;z-index:0;pointer-events:none}
+.wrap{position:relative;z-index:1;max-width:480px;margin:0 auto;padding:12px 12px 40px}
+h1{text-align:center;font-size:26px;font-weight:900;letter-spacing:2px;background:linear-gradient(90deg,#ffd60a,#ff2ea6,#00e5ff);-webkit-background-clip:text;background-clip:text;color:transparent;margin-top:6px}
+.sub{text-align:center;color:#8a8ab0;font-size:10px;letter-spacing:3px;margin:3px 0 10px}
+.topBar{display:flex;justify-content:space-between;align-items:center;background:linear-gradient(145deg,#14142e,#0e0e22);border:1px solid #26264a;border-radius:14px;padding:10px 14px;margin-bottom:10px}
+.coin{font-size:17px;font-weight:900;color:#ffd60a}
+.stage{font-size:12px;color:#00e5ff;font-weight:700}
+.petZone{background:linear-gradient(180deg,#10102a,#0a0a1a);border:1px solid #26264a;border-radius:18px;padding:10px;text-align:center;position:relative;overflow:hidden}
+#petCv{width:100%;max-width:340px;image-rendering:pixelated}
+.petName{font-size:19px;font-weight:900;color:#fff;margin:4px 0}
+.mood{font-size:12px;color:#9a9ac0}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+.stat{background:#101024;border:1px solid #26264a;border-radius:12px;padding:8px 10px}
+.stat label{font-size:10px;color:#8a8ab0;letter-spacing:1px}
+.meter{height:12px;background:#08081a;border-radius:6px;margin-top:4px;overflow:hidden}
+.mfill{height:100%;border-radius:6px;transition:width .4s}
+.mf-food{background:linear-gradient(90deg,#ff9f43,#ff6b35)}
+.mf-hap{background:linear-gradient(90deg,#ff2ea6,#ff7bd5)}
+.mf-nrg{background:linear-gradient(90deg,#00e5ff,#4d7cff)}
+.mf-hyg{background:linear-gradient(90deg,#3ddc84,#a8ff78)}
+.actions{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
+.act{background:linear-gradient(145deg,#1a1a3e,#12122b);border:1px solid #34346a;border-radius:14px;padding:12px 4px;text-align:center;cursor:pointer;font-size:22px}
+.act span{display:block;font-size:10px;color:#b8b8d8;margin-top:3px}
+.act:active{transform:scale(.93);border-color:#ffd60a}
+.act.off{opacity:.35;pointer-events:none}
+.card{background:linear-gradient(145deg,#12122b,#0d0d20);border:1px solid #26264a;border-radius:16px;padding:14px;margin-bottom:10px}
+.card h3{font-size:14px;margin-bottom:8px;color:#ffd60a}
+.shopItem{display:flex;align-items:center;justify-content:space-between;background:#101024;border:1px solid #2a2a52;border-radius:12px;padding:10px 12px;margin:7px 0}
+.shopItem .nm{font-size:13px}
+.shopItem .nm small{display:block;color:#8a8ab0;font-size:10px}
+.buy{background:linear-gradient(90deg,#ffd60a,#ff9f43);border:none;color:#3a2600;font-weight:900;border-radius:10px;padding:8px 14px;font-size:13px;cursor:pointer}
+.buy:disabled{opacity:.4}
+.hatRow{display:flex;gap:8px;flex-wrap:wrap}
+.hat{font-size:24px;padding:8px 10px;background:#101024;border:2px solid #2a2a52;border-radius:12px;cursor:pointer}
+.hat.on{border-color:#00e5ff;box-shadow:0 0 12px rgba(0,229,255,.3)}
+.hat.locked{opacity:.35}
+.miniZone{text-align:center}
+#miniCv{width:100%;max-width:340px;background:#08081a;border-radius:14px;border:1px solid #26264a;touch-action:none}
+.miniBtn{margin-top:8px;padding:11px 26px;border:none;border-radius:12px;font-weight:900;font-size:14px;background:linear-gradient(90deg,#00e5ff,#3ddc84);color:#04222a;cursor:pointer}
+.xpBar{height:10px;background:#08081a;border-radius:5px;overflow:hidden;margin-top:6px}
+.xpFill{height:100%;background:linear-gradient(90deg,#b44dff,#00e5ff);transition:width .4s}
+.ov{position:fixed;inset:0;background:rgba(4,4,14,.93);z-index:20;display:flex;align-items:center;justify-content:center;padding:20px}
+.ov.hide{display:none}
+.ovCard{background:linear-gradient(145deg,#161634,#0d0d20);border:1px solid #34346a;border-radius:20px;padding:26px 20px;max-width:380px;width:100%;text-align:center}
+.ovCard h2{font-size:23px;margin-bottom:8px}
+.ovCard p{color:#b8b8d8;font-size:13px;line-height:1.7}
+.btn{display:inline-block;margin-top:14px;padding:12px 26px;border:none;border-radius:14px;font-size:15px;font-weight:800;cursor:pointer;background:linear-gradient(90deg,#ffd60a,#ff9f43);color:#3a2600}
+.footer{text-align:center;color:#55557a;font-size:10px;margin-top:14px;letter-spacing:1px}
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#1a1a3e;border:1px solid #ffd60a;color:#ffd60a;padding:9px 18px;border-radius:12px;font-size:13px;font-weight:700;opacity:0;transition:.3s;z-index:15;pointer-events:none;white-space:nowrap}
+.nameRow{display:flex;gap:8px;margin-bottom:10px}
+.nameRow input{flex:1;background:#0b0b1c;border:2px solid #2e2e5a;border-radius:12px;padding:10px;color:#e8e8f5;font-size:15px;outline:none}
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+<div class="wrap">
+<h1>JK PIXEL PET</h1>
+<div class="sub">2037 VIRTUAL PET LAB • வளரு • உருவாகு • OFFLINE</div>
+<div class="topBar">
+<div class="coin">🪙 <span id="coins">0</span></div>
+<div class="stage" id="stageLbl">🥚 EGG</div>
+<div style="font-size:12px;color:#8a8ab0">Lv <b id="lvl" style="color:#b44dff">1</b></div>
+</div>
+<div class="nameRow"><input id="petNameIn" maxlength="12" placeholder="pet பேர்..."><button class="buy" onclick="setName()">SET</button></div>
+<div class="petZone">
+<canvas id="petCv" width="340" height="300"></canvas>
+<div class="petName" id="petName">பிக்சி</div>
+<div class="mood" id="mood">😊 நல்லா இருக்கேன்!</div>
+<div class="xpBar"><div class="xpFill" id="xpFill" style="width:0%"></div></div>
+</div>
+<div class="stats">
+<div class="stat"><label>🍔 FOOD</label><div class="meter"><div class="mfill mf-food" id="mFood" style="width:80%"></div></div></div>
+<div class="stat"><label>😄 HAPPY</label><div class="meter"><div class="mfill mf-hap" id="mHap" style="width:80%"></div></div></div>
+<div class="stat"><label>⚡ ENERGY</label><div class="meter"><div class="mfill mf-nrg" id="mNrg" style="width:80%"></div></div></div>
+<div class="stat"><label>🛁 CLEAN</label><div class="meter"><div class="mfill mf-hyg" id="mHyg" style="width:80%"></div></div></div>
+</div>
+<div class="actions">
+<div class="act" id="aFeed" onclick="doFeed()">🍔<span>FEED</span></div>
+<div class="act" id="aPlay" onclick="doPlay()">🎾<span>PLAY</span></div>
+<div class="act" id="aSleep" onclick="doSleep()">😴<span>SLEEP</span></div>
+<div class="act" id="aBath" onclick="doBath()">🛁<span>BATH</span></div>
+</div>
+<div class="card">
+<h3>🍎 FOOD SHOP</h3>
+<div id="shop"></div>
+</div>
+<div class="card">
+<h3>🎩 HAT COLLECTION</h3>
+<div class="hatRow" id="hats"></div>
+</div>
+<div class="card miniZone">
+<h3>🎮 COIN CATCHER — minigame</h3>
+<canvas id="miniCv" width="340" height="180"></canvas><br>
+<button class="miniBtn" id="miniBtn" onclick="startMini()">START (15s)</button>
+<div style="font-size:11px;color:#8a8ab0;margin-top:6px">pet-அ நகர்த்து, 🪙 பிடி, 💣 தவிர்!</div>
+</div>
+<div class="footer">JK PIXEL PET 2037 • single offline HTML • 5 evolution stages • auto-save</div>
+</div>
+<div class="toast" id="toast"></div>
+<div class="ov hide" id="ov"><div class="ovCard">
+<h2 id="ovTitle">🌟 EVOLUTION!</h2>
+<p id="ovText"></p>
+<button class="btn" onclick="document.getElementById('ov').classList.add('hide')">AWESOME 🎉</button>
+</div></div>
+<script>
+/* ================= SAVE / STATE ================= */
+var DEF={name:'பிக்சி',coins:50,xp:0,level:1,food:80,hap:80,nrg:80,hyg:80,food_stock:3,hat:-1,hatsOwned:[],lastT:Date.now(),evolveShown:0};
+var S;
+try{S=JSON.parse(localStorage.getItem('jkpp_save'))||Object.assign({},DEF);for(var k in DEF)if(!(k in S))S[k]=DEF[k];}catch(e){S=Object.assign({},DEF);}
+function save(){S.lastT=Date.now();localStorage.setItem('jkpp_save',JSON.stringify(S));}
+var STAGES=[{xp:0,label:'🥚 EGG',name:'Egg'},{xp:50,label:'🐣 BABY',name:'Baby'},{xp:150,label:'🐥 TEEN',name:'Teen'},{xp:350,label:'🦅 ADULT',name:'Adult'},{xp:800,label:'🐉 LEGEND',name:'Legend'}];
+function stageIdx(){var i=0;for(var j=0;j<STAGES.length;j++)if(S.xp>=STAGES[j].xp)i=j;return i;}
+var FOODS=[{n:'🍎 Apple',fx:'+15 food',cost:5,food:15},{n:'🍕 Pizza',fx:'+30 food',cost:12,food:30},{n:'🍰 Cake',fx:'+45 food +10 happy',cost:20,food:45,hap:10},{n:'⭐ Star Feast',fx:'FULL food +20 happy',cost:45,food:100,hap:20}];
+var HATS=[{e:'',n:'None',cost:0},{e:'🎩',n:'Top Hat',cost:30},{e:'👑',n:'Crown',cost:80},{e:'🧢',n:'Cap',cost:20},{e:'🎀',n:'Ribbon',cost:25},{e:'🚀',n:'Rocket',cost:120}];
+/* ================= BACKGROUND ================= */
+var bgc=document.getElementById('bg'),bgx=bgc.getContext('2d'),bgS=[];
+function bgz(){bgc.width=innerWidth;bgc.height=innerHeight;bgS=[];for(var i=0;i<50;i++)bgS.push({x:Math.random()*bgc.width,y:Math.random()*bgc.height,s:Math.random()*.3+.05,r:Math.random()*1.4+.3});}
+bgz();addEventListener('resize',bgz);
+(function bgl(){bgx.fillStyle='#0a0a1a';bgx.fillRect(0,0,bgc.width,bgc.height);bgx.fillStyle='#8a8aff';bgS.forEach(function(s){s.y-=s.s;if(s.y<0)s.y=bgc.height;bgx.globalAlpha=.3+.4*Math.abs(Math.sin(s.y*.008));bgx.fillRect(s.x,s.y,s.r,s.r)});bgx.globalAlpha=1;requestAnimationFrame(bgl)})();
+/* ================= PET RENDER ================= */
+var pc=document.getElementById('petCv'),pp=pc.getContext('2d'),blink=0,animT=0;
+var PALETTES=[['#ffd60a','#ffb703'],['#3ddc84','#2aa86a'],['#00b4d8','#0077b6'],['#ff2ea6','#c9184a'],['#b44dff','#7b2cbf']];
+function drawPet(){
+ pp.clearRect(0,0,340,300);
+ // ground
+ pp.fillStyle='#151535';pp.fillRect(0,240,340,60);
+ pp.fillStyle='rgba(255,255,255,.05)';for(var gx=0;gx<340;gx+=20)pp.fillRect(gx,240,10,60);
+ var st=stageIdx(),pal=PALETTES[st],bobY=Math.sin(animT*.06)*4*(st>0?1:0);
+ var cxp=170,cyp=170+bobY;
+ pp.imageSmoothingEnabled=false;
+ function px(x,y,w,h,c){pp.fillStyle=c;pp.fillRect(Math.round(cxp+x),Math.round(cyp+y),w,h);}
+ var u=8; // pixel unit
+ if(st===0){ // egg
+  pp.save();pp.translate(cxp,cyp);pp.rotate(Math.sin(animT*.04)*.1);pp.translate(-cxp,-cyp);
+  px(-2.5*u,-3*u,5*u,6*u,pal[0]);px(-1.5*u,-3*u,2*u,2*u,'#fff');px(-.5*u,1*u,1*u,1*u,pal[1]);
+  pp.restore();
+ }else{
+  var size=[0,3,4,5,6][st]*u;
+  // body
+  px(-size,-size*.7,size*2,size*1.5,pal[0]);
+  px(-size,-size*.7,size*2,u*1.2,pal[1]); // head shade
+  // eyes
+  blink=(animT%140<8)?1:0;
+  if(blink){px(-size*.5,-size*.4,u*1.4,2,'#111');px(size*.25,-size*.4,u*1.4,2,'#111');}
+  else{px(-size*.55,-size*.5,u*1.3,u*1.3,'#111');px(size*.2,-size*.5,u*1.3,u*1.3,'#111');
+   px(-size*.55+2,-size*.5+2,3,3,'#fff');px(size*.2+2,-size*.5+2,3,3,'#fff');}
+  // mouth
+  var moody=(S.food+S.hap+S.nrg+S.hyg)/4;
+  if(moody>60){px(-u,0,u*2,u*.5,'#7a1f2b');px(-u*.6,u*.5,u*1.2,u*.4,'#ff6b8a');}
+  else if(moody>30){px(-u,u*.3,u*2,3,'#7a1f2b');}
+  else{px(-u,u*.7,u*2,3,'#7a1f2b');}
+  // feet
+  var step=Math.sin(animT*.15)*u*.4;
+  px(-size*.7,size*.8,u*1.4,u*.8+step,pal[1]);px(size*.1,size*.8,u*1.4,u*.8-step,pal[1]);
+  // ears/wings by stage
+  if(st>=2){px(-size*.9,-size*1.15,u*1.2,u*1.6,pal[1]);px(size*.4,-size*1.15,u*1.2,u*1.6,pal[1]);}
+  if(st>=3){var flap=Math.sin(animT*.2)*u*.5;px(-size*1.5,-size*.4-flap,u*1.6,u*2,pal[1]+'cc');px(size*.9,-size*.4-flap,u*1.6,u*2,pal[1]+'cc');}
+  if(st>=4){pp.shadowColor='#b44dff';pp.shadowBlur=24;px(-size*.3,-size*1.4,u,u*1.2,'#ffd60a');px(size*.1,-size*1.4,u,u*1.2,'#ffd60a');pp.shadowBlur=0;}
+ }
+ // hat
+ if(S.hat>0&&HATS[S.hat].e){pp.font='28px serif';pp.textAlign='center';pp.fillText(HATS[S.hat].e,cxp,cyp-(st===0?3.2*u:([0,3,4,5,6][st])*u*.95));}
+ // sleeping Z
+ if(sleeping){pp.font='20px serif';pp.fillStyle='#8ad4ff';pp.fillText('💤',cxp+50,cyp-60-Math.sin(animT*.05)*8);}
+ // dirty flies
+ if(S.hyg<25){pp.font='14px serif';pp.fillText('🪰',cxp-55+Math.sin(animT*.3)*6,cyp-40);pp.fillText('🪰',cxp+55-Math.sin(animT*.27)*6,cyp-50);}
+ // sick
+ if((S.food<=0||S.hap<=0)){pp.font='16px serif';pp.fillText('🤒',cxp+60,cyp-20);}
+ animT++;
+ requestAnimationFrame(drawPet);
+}
+/* ================= UI ================= */
+function toast(t){var e=document.getElementById('toast');e.textContent=t;e.style.opacity=1;clearTimeout(e._t);e._t=setTimeout(function(){e.style.opacity=0},1400);}
+function refresh(){
+ document.getElementById('coins').textContent=S.coins;
+ document.getElementById('lvl').textContent=S.level;
+ document.getElementById('stageLbl').textContent=STAGES[stageIdx()].label;
+ document.getElementById('petName').textContent=S.name;
+ document.getElementById('mFood').style.width=Math.max(0,Math.min(100,S.food))+'%';
+ document.getElementById('mHap').style.width=Math.max(0,Math.min(100,S.hap))+'%';
+ document.getElementById('mNrg').style.width=Math.max(0,Math.min(100,S.nrg))+'%';
+ document.getElementById('mHyg').style.width=Math.max(0,Math.min(100,S.hyg))+'%';
+ var st=stageIdx(),nxt=STAGES[st+1];
+ var xpPct=nxt?((S.xp-STAGES[st].xp)/(nxt.xp-STAGES[st].xp)*100):100;
+ document.getElementById('xpFill').style.width=Math.min(100,xpPct)+'%';
+ var m=(S.food+S.hap+S.nrg+S.hyg)/4;
+ document.getElementById('mood').textContent=m>70?'😄 சூப்பர் மூட்!':m>45?'🙂 ஓகே வே':m>25?'😟 கொஞ்சம் கவனி...':'😢 சீக்கிரம் பார்த்துக்கோ!';
+ document.getElementById('aSleep').className='act'+(sleeping?' off':'');
+ renderShop();renderHats();
+}
+function renderShop(){
+ var s=document.getElementById('shop'),h='';
+ FOODS.forEach(function(f,i){h+='<div class="shopItem"><div class="nm">'+f.n+' <small>'+f.fx+'</small></div><button class="buy" '+(S.coins<f.cost?'disabled':'')+' onclick="buyFood('+i+')">🪙'+f.cost+'</button></div>';});
+ s.innerHTML=h+'<div style="font-size:11px;color:#8a8ab0;margin-top:6px">Stock: 🍔 x'+S.food_stock+'</div>';
+}
+function renderHats(){
+ var s=document.getElementById('hats'),h='';
+ HATS.forEach(function(ht,i){
+  var owned=i===0||S.hatsOwned.indexOf(i)>=0;
+  var cls='hat'+(S.hat===i?' on':'')+(owned?'':' locked');
+  h+='<div class="'+cls+'" onclick="hatClick('+i+')">'+(ht.e||'🚫')+(owned?'':'<div style="font-size:9px;color:#ffd60a">🪙'+ht.cost+'</div>')+'</div>';
+ });
+ s.innerHTML=h;
+}
+/* ================= ACTIONS ================= */
+var sleeping=false,sleepIv=null;
+function gainXp(n){S.xp+=n;S.level=1+Math.floor(S.xp/40);checkEvolve();save();refresh();}
+function checkEvolve(){var st=stageIdx();if(st>S.evolveShown){S.evolveShown=st;document.getElementById('ovTitle').textContent='🌟 EVOLUTION — '+STAGES[st].name.toUpperCase()+'!';document.getElementById('ovText').innerHTML=S.name+' இப்போ <b style="color:#b44dff">'+STAGES[st].label+'</b> stage!<br>அடுத்த level-க்கு இன்னும் துண்டு தூரம்! 🚀';document.getElementById('ov').classList.remove('hide');S.coins+=25;}}
+function doFeed(){
+ if(sleeping)return toast('😴 தூங்குது...');
+ if(S.food_stock<=0)return toast('🍔 Stock இல்ல! Shop-ல வாங்கு');
+ if(S.food>=100)return toast('🍔 வயிறு full!');
+ S.food_stock--;S.food=Math.min(100,S.food+25);S.hap=Math.min(100,S.hap+3);gainXp(4);toast('🍔 நம்ம் நம்ம்!');
+}
+function doPlay(){
+ if(sleeping)return toast('😴 தூங்குது...');
+ if(S.nrg<10)return toast('⚡ Energy இல்ல — sleep போடு');
+ S.hap=Math.min(100,S.hap+18);S.nrg=Math.max(0,S.nrg-12);S.food=Math.max(0,S.food-6);S.hyg=Math.max(0,S.hyg-5);gainXp(6);toast('🎾 ஜாலி!');
+}
+function doSleep(){
+ if(sleeping)return;
+ sleeping=true;toast('😴 தூக்கம்... energy ஏறும்');
+ sleepIv=setInterval(function(){S.nrg=Math.min(100,S.nrg+7);S.hap=Math.min(100,S.hap+1);save();refresh();if(S.nrg>=100){doWake();}},900);
+ refresh();
+}
+function doWake(){sleeping=false;clearInterval(sleepIv);gainXp(8);toast('☀️ விழிச்சுட்டேன்! Full energy!');}
+function doBath(){
+ if(sleeping)return toast('😴 தூங்குது...');
+ S.hyg=100;S.hap=Math.min(100,S.hap+5);gainXp(4);toast('🛁 குளிச்சுட்டேன்! நல்ல வாசனை!');
+}
+function buyFood(i){
+ var f=FOODS[i];if(S.coins<f.cost)return;
+ S.coins-=f.cost;S.food_stock++;toast(f.n+' வாங்கினாய்!');save();refresh();
+}
+function hatClick(i){
+ var owned=i===0||S.hatsOwned.indexOf(i)>=0;
+ if(!owned){if(S.coins<HATS[i].cost)return toast('🪙 போதாது!');S.coins-=HATS[i].cost;S.hatsOwned.push(i);toast(HATS[i].n+' bought!');}
+ S.hat=i;gainXp(3);save();refresh();
+}
+function setName(){var v=document.getElementById('petNameIn').value.trim();if(!v)return;S.name=v;save();refresh();toast('பேர் மாறிடுச்சு: '+v);}
+/* ================= DECAY (offline-aware) ================= */
+function applyDecay(ms){
+ var t=ms/1000;
+ S.food=Math.max(0,S.food-t*100/240);   // ~4 min to empty
+ S.hyg=Math.max(0,S.hyg-t*100/300);
+ S.hap=Math.max(0,S.hap-t*100/280);
+ if(!sleeping)S.nrg=Math.max(0,S.nrg-t*100/360);
+}
+applyDecay(Date.now()-S.lastT);
+setInterval(function(){applyDecay(3000);save();refresh();},3000);
+/* ================= MINIGAME ================= */
+var mc=document.getElementById('miniCv'),mm=mc.getContext('2d'),mini={on:false,t:0,px:170,items:[],score:0};
+mc.addEventListener('touchmove',function(e){e.preventDefault();var r=mc.getBoundingClientRect();mini.px=Math.max(20,Math.min(320,e.touches[0].clientX-r.left));},{passive:false});
+mc.addEventListener('mousemove',function(e){if(!mini.on)return;var r=mc.getBoundingClientRect();mini.px=Math.max(20,Math.min(320,e.clientX-r.left));});
+function startMini(){
+ if(mini.on)return;
+ mini={on:true,t:15,px:170,items:[],score:0};
+ document.getElementById('miniBtn').textContent='GO! 🪙x0';
+ var end=Date.now()+15000;
+ (function ml(){
+  if(!mini.on)return;
+  mini.t=Math.max(0,(end-Date.now())/1000);
+  if(Math.random()<.06)mini.items.push({x:20+Math.random()*300,y:-10,v:1.6+Math.random()*1.6,b:Math.random()<.25});
+  mini.items.forEach(function(it){it.y+=it.v;
+   if(it.y>140&&it.y<165&&Math.abs(it.x-mini.px)<26){if(it.b){mini.score=Math.max(0,mini.score-2);toast('💣 அய்யோ! -2');}else{mini.score++;}it.y=999;}
+  });
+  mini.items=mini.items.filter(function(it){return it.y<200});
+  mm.fillStyle='#08081a';mm.fillRect(0,0,340,180);
+  mm.fillStyle='#151535';mm.fillRect(0,150,340,30);
+  mm.font='26px serif';mm.textAlign='center';
+  mm.fillText(STAGES[stageIdx()].label.split(' ')[0],mini.px,145);
+  mini.items.forEach(function(it){mm.fillText(it.b?'💣':'🪙',it.x,it.y);});
+  mm.fillStyle='#ffd60a';mm.font='bold 13px sans-serif';mm.textAlign='left';mm.fillText('🪙 '+mini.score,10,18);
+  mm.textAlign='right';mm.fillText(Math.ceil(mini.t)+'s',330,18);
+  document.getElementById('miniBtn').textContent='GO! 🪙x'+mini.score;
+  if(mini.t<=0){
+   mini.on=false;S.coins+=mini.score;gainXp(mini.score*2);
+   document.getElementById('miniBtn').textContent='START (15s)';
+   toast('🪙 +'+mini.score+' coins!');save();refresh();return;
+  }
+  requestAnimationFrame(ml);
+ })();
+}
+/* ================= BOOT ================= */
+document.getElementById('petNameIn').value=S.name;
+refresh();drawPet();
+window.__PP={G:function(){return {coins:S.coins,xp:S.xp,level:S.level,food:Math.round(S.food),hap:Math.round(S.hap),nrg:Math.round(S.nrg),hyg:Math.round(S.hyg),stage:stageIdx(),hat:S.hat,sleeping:sleeping,stock:S.food_stock}},feed:doFeed,play:doPlay,sleep:doSleep,wake:doWake,bath:doBath,buy:buyFood,giveCoins:function(n){S.coins+=n;save();refresh();},setXp:function(n){S.xp=n;save();refresh();}};
+</script>
+</body>
+</html>
