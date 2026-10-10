@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>JK WORD WARRIOR 2039</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0a0714;color:#e8e8f5;min-height:100vh;overflow-x:hidden}
+.wrap{max-width:480px;margin:0 auto;padding:12px 12px 40px;position:relative;z-index:1}
+h1{text-align:center;font-size:27px;font-weight:900;letter-spacing:2px;background:linear-gradient(90deg,#ffd60a,#ff2ea6,#00e5ff);-webkit-background-clip:text;background-clip:text;color:transparent;margin-top:6px}
+.sub{text-align:center;color:#8a8ab0;font-size:10px;letter-spacing:3px;margin:3px 0 12px}
+.scoreRow{display:flex;gap:8px;margin-bottom:10px}
+.sc{flex:1;background:linear-gradient(145deg,#14142e,#0e0e22);border:1px solid #26264a;border-radius:14px;padding:10px;text-align:center}
+.sc b{font-size:22px;display:block}
+.sc.me b{color:#00e5ff}.sc.ai b{color:#ff2ea6}
+.sc span{font-size:9px;color:#8a8ab0;letter-spacing:1px}
+.sc .word{font-size:11px;color:#ffd60a;min-height:15px;display:block;margin-top:2px}
+.card{background:linear-gradient(145deg,#12122b,#0d0d20);border:1px solid #26264a;border-radius:16px;padding:14px;margin-bottom:10px}
+.roundLbl{text-align:center;font-size:12px;color:#ffd60a;letter-spacing:2px;margin-bottom:8px;font-weight:800}
+.rack{display:flex;gap:6px;justify-content:center;margin:12px 0;flex-wrap:wrap}
+.tile{width:44px;height:52px;background:linear-gradient(145deg,#2a1f4d,#1a1340);border:2px solid #4a3a8a;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;color:#ffd60a;cursor:pointer;box-shadow:0 3px 0 #0a0620}
+.tile.used{opacity:.25;transform:scale(.9);box-shadow:none}
+.tile:active{transform:scale(.92)}
+.current{min-height:54px;background:#0b0b1c;border:2px dashed #34346a;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:900;letter-spacing:6px;color:#00e5ff;margin:10px 0}
+.btnRow{display:flex;gap:8px}
+.gbtn{flex:1;padding:12px;border:none;border-radius:12px;font-size:14px;font-weight:900;cursor:pointer}
+.gbtn.go{background:linear-gradient(90deg,#00e5ff,#3ddc84);color:#04222a}
+.gbtn.clr{background:#1a1a3e;color:#9a9ac0}
+.gbtn:disabled{opacity:.35}
+.msg{text-align:center;font-size:13px;min-height:20px;margin:8px 0;color:#b8b8d8}
+.timer{height:8px;background:#08081a;border-radius:4px;overflow:hidden;margin:8px 0}
+.tfill{height:100%;background:linear-gradient(90deg,#3ddc84,#ffd60a,#ff4d6d);transition:width .5s linear}
+.hist{max-height:150px;overflow-y:auto;font-size:12px}
+.hrow{display:flex;justify-content:space-between;padding:6px 10px;border-bottom:1px solid #1a1a35;color:#b8b8d8}
+.hrow b{color:#fff}
+.hrow .me{color:#00e5ff}.hrow .ai{color:#ff2ea6}
+.ov{position:fixed;inset:0;background:rgba(4,3,12,.94);z-index:20;display:flex;align-items:center;justify-content:center;padding:20px}
+.ov.hide{display:none}
+.ovCard{background:linear-gradient(145deg,#161634,#0d0d20);border:1px solid #34346a;border-radius:20px;padding:26px 20px;max-width:380px;width:100%;text-align:center}
+.ovCard h2{font-size:24px;margin-bottom:8px}
+.ovCard p{color:#b8b8d8;font-size:13px;line-height:1.8}
+.big{font-size:40px;font-weight:900;color:#ffd60a}
+.btn{display:inline-block;margin-top:14px;padding:13px 30px;border:none;border-radius:14px;font-size:16px;font-weight:800;cursor:pointer;background:linear-gradient(90deg,#ffd60a,#ff9f43);color:#3a2600}
+.diffRow{display:flex;gap:8px;margin:10px 0}
+.diff{flex:1;text-align:center;padding:10px 4px;border-radius:12px;border:1px solid #2e2e5a;background:#101024;cursor:pointer;font-size:12px;color:#9a9ac0}
+.diff.on{border-color:#ffd60a;color:#ffd60a;background:#1c1c10}
+.footer{text-align:center;color:#55557a;font-size:10px;margin-top:14px;letter-spacing:1px}
+#fx{position:fixed;inset:0;z-index:0;pointer-events:none}
+</style>
+</head>
+<body>
+<canvas id="fx"></canvas>
+<div class="wrap">
+<h1>JK WORD WARRIOR</h1>
+<div class="sub">2039 WORD DUEL • நீ vs AI • 5 ROUNDS</div>
+<div class="scoreRow">
+<div class="sc me"><b id="meScore">0</b><span>நீ ⚔️</span><span class="word" id="meWord"></span></div>
+<div class="sc ai"><b id="aiScore">0</b><span>WORD-BOT 🤖</span><span class="word" id="aiWord"></span></div>
+</div>
+<div id="menuCard" class="card">
+<b style="font-size:14px">⚔️ AI LEVEL</b>
+<div class="diffRow">
+<div class="diff on" data-d="0" onclick="setDiff(0,this)">😴 MOKKA<br><small>easy words</small></div>
+<div class="diff" data-d="1" onclick="setDiff(1,this)">😤 STREET<br><small>decent</small></div>
+<div class="diff" data-d="2" onclick="setDiff(2,this)">🔥 KUYIL-AI<br><small>best word ever</small></div>
+</div>
+<button class="btn" style="width:100%;margin-top:4px" onclick="startMatch()">START DUEL ⚔️</button>
+<div class="footer">5 rounds • same letters for both • longest+smartest word wins • offline dictionary</div>
+</div>
+<div id="gameCard" class="card" style="display:none">
+<div class="roundLbl" id="roundLbl">ROUND 1 / 5</div>
+<div class="timer"><div class="tfill" id="tfill" style="width:100%"></div></div>
+<div class="current" id="cur">&nbsp;</div>
+<div class="rack" id="rack"></div>
+<div class="btnRow">
+<button class="gbtn clr" onclick="clearWord()">CLEAR</button>
+<button class="gbtn go" id="goBtn" onclick="submitWord()">STRIKE! ⚔️</button>
+</div>
+<div class="msg" id="msg"></div>
+</div>
+<div id="histCard" class="card" style="display:none">
+<b style="font-size:13px">📜 BATTLE LOG</b>
+<div class="hist" id="hist"></div>
+</div>
+</div>
+<div class="ov hide" id="ov"><div class="ovCard">
+<h2 id="ovTitle">🏆</h2>
+<div class="big" id="ovScore">0 - 0</div>
+<p id="ovText"></p>
+<p id="ovTaunt" style="color:#ffd60a"></p>
+<button class="btn" onclick="restart()">REMATCH ⚔️</button>
+</div></div>
+<script>
+var DICT="abstract,account,achiever,acid,acrylic,actor,actress,admiral,agent,air,alcohol,algae,algebra,alien,alkali,all,ally,alphabet,also,altar,always,amateur,amber,amethyst,amulet,anchor,ancient,angel,angry,animal,ankle,anomaly,another,ant,anvil,apex,applause,apple,april,aquatic,arch,area,argon,arm,art,artist,ascend,ash,asteroid,atlas,atoll,attic,auger,august,author,auto,autumn,avenue,average,award,axle,back,bacteria,bad,badge,baker,balance,balcony,ballet,banana,band,bandage,bandit,bang,banjo,bank,banter,bar,barn,baroque,basalt,base,basement,battery,battle,bay,bazaar,beach,beaker,beans,bear,beard,beat,bee,begin,beginner,belfry,bellhop,bellows,beloved,belt,bench,bend,berry,best,betrayer,big,bike,binder,biology,bird,birthday,bit,blink,bliss,blizzard,blogger,blood,bloom,blossom,board,boat,body,bolt,bone,booing,book,bookmark,boom,bore,borrow,both,bottom,boulder,bowl,boxer,bracelet,braid,brain,brake,branch,brave,braze,bread,break,breaker,breath,breeze,bride,bridge,bright,bromide,brooch,brush,bubble,buckle,bud,buddhist,budget,buff,build,builder,bunker,burger,burglar,burner,bus,business,butane,butler,butter,button,buyer,cab,cabin,cable,cadet,cage,cake,calamity,calculus,calm,camel,camera,camp,candy,canoe,capsule,captain,car,caravan,carbon,carnival,carrot,case,cash,cast,castle,cat,cave,ceiling,cell,cellar,cello,cemetery,ceremony,chain,chair,chalk,champion,chance,change,channel,chapter,charm,chart,cheap,cheat,cheek,cheering,cheese,chef,cheque,cherry,chick,child,chimney,chin,chisel,chloride,choir,chorus,chuckle,church,cinder,circus,city,civics,clap,clasp,clay,cliff,climate,climb,clinic,clip,cloth,cloud,clutch,coach,coast,coastal,cobbler,coffee,coffin,cog,coin,cold,colloid,column,comb,comedy,comet,company,compass,composer,compound,computer,concert,concerto,condo,content,cookie,cool,cooler,copper,coral,cord,corn,cornea,corporal,corridor,cosmic,cost,cottage,cotton,counter,country,coward,crab,crash,crave,crayon,cream,crease,create,credit,cricket,criminal,crisis,critic,crow,crown,cruise,crumple,crutch,cry,crystal,cubist,culprit,cup,current,custom,cycle,cyclist,cyclone,cylinder,dance,dancer,dark,darling,day,debit,debt,december,decimal,deer,defeat,defender,degree,delight,delta,demon,denim,deposit,deputy,descend,desert,desire,desk,destiny,device,devil,dharma,diagram,diamond,diesel,digit,dilemma,dimple,diploma,director,dirt,disaster,discover,dive,divorce,doctor,dog,dollar,dolphin,dome,door,dorm,dose,draft,dragon,drama,drawing,dream,drench,drill,drink,drip,driver,driveway,drop,drought,drum,duck,duct,duet,dungeon,duplex,dust,each,eagle,ear,early,earn,earring,earth,eat,echo,ecstasy,editor,elbow,electric,element,elephant,elevator,email,emerald,emulsion,encore,end,enemy,energy,engine,engineer,enigma,ensemble,epidemic,epilogue,eraser,eruption,essayist,ethanol,ethics,ethnic,euphoria,euro,even,every,expect,expert,explore,eye,eyebrow,eyelash,eyelid,fabric,face,fact,fade,fair,fall,fame,family,famine,fan,farce,farmer,fast,fate,father,fear,february,fence,fern,festival,fetish,fetter,few,fiance,fiber,fight,fighter,filament,file,finale,finalist,finger,fire,first,fish,fisher,fist,fizz,flake,flame,flask,flat,float,flood,floor,flower,flue,fluoride,flute,flyover,foam,fog,fold,folk,foot,force,forecast,forehead,forest,forge,fork,form,fortune,fox,fraction,fraud,freckle,freeway,friday,fridge,friend,fringe,frog,frown,fruit,fuel,fume,funeral,fungus,funny,furnace,fuse,gadget,gag,galactic,galaxy,gale,game,garage,garden,gardener,garlic,garnet,gas,gate,gaze,gear,gel,gem,general,genius,geology,geometry,germ,ghost,gift,giggle,ginger,giraffe,girl,give,glance,glare,glass,global,globe,glory,glow,goat,gold,good,goose,gothic,graduate,granite,granule,grape,graph,grass,grave,gravel,gravity,grease,great,grin,grinder,groom,ground,group,guard,guardian,guest,guide,guitar,gulf,guru,guy,gymnast,hacker,hair,hammer,hand,handcuff,handle,happy,hard,harmony,hate,haze,head,heal,health,heart,heat,heater,heel,helium,help,hen,here,heritage,hero,heroine,high,highway,hike,hill,hindu,hinge,hissing,history,holder,holiday,home,honey,honor,hook,hope,horse,hose,hospital,host,hostel,hotel,hour,house,how,humidity,humor,hunter,hurt,husband,hut,hydrogen,ice,icon,idea,idol,imagine,immerse,index,inn,interest,intern,internet,invent,invest,iodide,iris,iron,irony,islamic,island,issue,isthmus,ivory,ivy,jade,jail,jain,january,jaw,jeep,jewel,jewish,job,joint,joke,journey,joy,judge,juice,july,jump,jumper,june,jungle,jupiter,karma,kayak,keep,kerosene,kettle,key,keyboard,kid,kidney,kind,king,knee,knife,knight,knob,knock,know,koala,krypton,lace,ladder,ladybug,lagoon,lakeside,lamp,lane,laptop,laser,last,latch,late,laugh,laughter,lava,law,lawn,lawyer,leaf,learn,least,leg,legacy,legend,lemon,lend,lens,less,letter,level,lever,liar,library,lichen,life,ligament,light,line,linen,lion,lip,listen,liver,lizard,loan,lobby,lobster,local,lock,locket,lodge,logic,long,loop,lord,lorry,lose,loser,loss,lot,loud,love,lover,low,luck,lunar,lung,lycra,lyricist,machine,magic,magma,magnet,maid,make,maker,mall,man,manacle,mandolin,mango,mansion,many,map,marathon,marble,march,marine,marker,market,marriage,marrow,mars,marshal,martyr,marvel,master,may,maybe,meadow,mean,mechanic,medal,median,medicine,medieval,melody,melon,melt,member,memorial,mentor,mercury,metal,meteor,meter,methane,methanol,method,metro,microbe,mildew,milk,mime,mind,miner,minute,miracle,mirror,mist,mixer,mixture,moat,mock,mode,modern,mold,mole,moment,monday,money,monk,monkey,month,monument,moon,more,morgue,morning,mosque,moss,most,motel,moth,mother,motor,mountain,mouse,mouth,move,much,mud,muscle,mushroom,musician,mustache,mystery,nail,name,napkin,national,neck,necklace,need,needle,neighbor,neon,neptune,nerve,never,new,next,nice,night,nitrate,nitrogen,nod,noise,none,noodles,nose,not,novelist,november,novice,now,number,nurse,nut,nylon,oar,obelisk,obituary,obsidian,ocean,oceanic,octet,october,octopus,oddity,office,officer,often,oil,old,once,onion,only,opal,opera,orange,orbit,organ,other,others,outline,ovation,oven,overture,owl,own,oxide,oxygen,paddle,page,pain,painter,painting,palace,palm,pan,panda,pandemic,paper,parade,paradox,parasite,parent,parody,parrot,parsi,part,partner,party,password,pasta,paste,pasture,path,patrol,pattern,peace,peach,peacock,peak,pearl,pebble,peek,peep,pelvis,pen,pencil,pendant,people,pepper,percent,person,petal,petrol,pharmacy,phone,phrase,physics,piano,piercing,pigeon,pill,pillar,pilot,pin,pinnacle,pipe,pirate,piston,pizza,place,plague,plain,plan,plane,planet,plant,plaster,plastic,plate,plateau,play,player,pleasure,plot,plum,plumber,plunge,pluto,pocket,poem,poet,point,police,polish,politics,pollen,poor,pop,porter,portrait,pot,potato,potter,pound,pour,powder,power,prairie,prayer,preface,prelude,prepare,pressure,price,priest,printer,prison,private,prize,problem,prodigy,producer,profile,profit,program,prologue,propane,prophet,proud,pulley,pumice,pump,pun,pupil,puppet,puzzle,quandary,quartet,quartz,queen,quest,question,queue,quiet,quintet,quip,rabbit,radar,radon,raft,rain,rampart,ranch,range,ranger,rapture,rarity,rasp,ratio,rayon,razor,read,reader,realist,reason,recital,record,recruit,reef,regional,repay,reporter,rescue,research,resort,result,retina,reviewer,rhyme,rhythm,rib,ribbon,rice,rich,riddle,ridge,ridicule,right,ring,rise,ritual,rival,river,riverine,rivet,road,roam,robber,robot,rock,rocket,rococo,rod,roof,rookie,room,roommate,root,rope,row,ruby,ruler,run,runner,rupee,rural,sad,safari,sage,sail,sailor,saint,salt,same,sand,sapphire,sarcasm,satin,satire,saturday,saturn,save,savior,scale,scan,scar,scheme,scholar,school,scissors,scooter,scout,scowl,scream,screen,screw,sculptor,seascape,season,secret,seed,seller,sentence,sentry,septet,sergeant,service,setter,sextet,shackle,shaft,shake,shampoo,shape,shark,sheep,sheet,shelf,shelter,sheriff,shield,shine,ship,shoot,shop,shore,short,shoulder,shout,show,shrimp,shrine,shrug,shuttle,sick,side,sidekick,sikh,silence,silk,silly,silver,sing,singer,sink,sitar,sketch,skill,skin,skit,skull,slam,slate,sleep,slow,small,smart,smile,smirk,smog,smoke,smooth,smuggler,snail,snake,snap,snow,soak,soap,soft,soil,solar,solder,soldier,solo,solution,solvent,some,sonata,song,soon,soot,soul,soulmate,sound,soup,spandex,sparrow,speak,speaker,spend,spider,spill,spine,spire,spirit,splash,spoof,spoon,spore,spouse,spring,sprinter,sprocket,sprout,spy,stable,stair,standing,stanza,star,stare,start,state,statue,steel,steeple,stellar,stem,stencil,still,stomach,stone,stool,stop,store,storm,story,stove,strait,stranger,strap,strategy,street,string,strip,strong,student,studio,study,submerge,suburban,subway,such,sugar,suite,sulfate,summary,summer,summit,sun,sunday,surface,surgery,surreal,survivor,suspect,swan,swim,swimmer,sword,syllable,symphony,syrup,system,tabla,table,tablet,tactic,tailor,take,talent,talisman,tall,tap,tassel,tattoo,taunt,taxi,tea,teach,teacher,team,tease,template,temple,tendon,tent,terrace,test,textile,theater,then,therapy,there,thick,thief,thimble,thin,thing,think,thorn,thread,thrice,thrill,throat,thrower,thumb,thunder,thursday,tide,tiger,time,tire,tissue,title,toaster,toe,token,tomato,tomb,tongs,tongue,tooth,top,topaz,tornado,tour,tourist,towel,tower,trace,trade,tragedy,trailer,train,trainee,trainer,traitor,transfer,travel,tree,trek,tribal,trim,trio,trip,trooper,trophy,truck,truffle,trumpet,trunk,tsunami,tube,tuesday,tune,tunnel,turret,turtle,twice,twist,typhoon,universe,uranus,urban,username,vacation,vaccine,valet,valley,value,valve,van,vapor,vault,veena,velvet,vendor,vent,venus,verse,very,veteran,victim,victory,villa,villain,vine,violin,virus,visitor,vlogger,volcano,vowel,voyage,wait,waiter,wake,walk,wall,wallet,wander,want,war,ward,warm,warrior,washer,watchman,water,wave,wax,way,weak,weather,weaver,website,wedding,week,weekday,weekend,weld,whale,what,wheat,wheel,when,where,which,whisper,who,whom,whose,why,wide,wife,will,win,wind,window,wink,winner,winter,wire,wise,wish,wit,withdraw,witness,wolf,woman,wonder,wood,wool,word,work,world,worm,worst,wrestler,wrinkle,wrist,write,writer,xenon,xray,yacht,yarn,year,yearn,yeast,yell,yes,yoga,young,zebra,zenith,zipper".split(',');
+var DSET={};DICT.forEach(function(w){DSET[w]=1});
+var BGL=['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'];
+var VW={a:1,e:1,i:1,o:1,u:1};
+var diff=0,round=0,meScore=0,aiScore=0,rack=[],used=[],cur=[],hist=[],over=false,won=false,timerIv=null,timeLeft=45,locked=false;
+var fxc=document.getElementById('fx'),fxx=fxc.getContext('2d'),fxs=[];
+function fxz(){fxc.width=innerWidth;fxc.height=innerHeight;fxs=[];for(var i=0;i<40;i++)fxs.push({x:Math.random()*fxc.width,y:Math.random()*fxc.height,s:Math.random()*.3+.05,r:Math.random()*1.3+.3});}
+fxz();addEventListener('resize',fxz);
+(function fxl(){fxx.fillStyle='#0a0714';fxx.fillRect(0,0,fxc.width,fxc.height);fxx.fillStyle='#b44dff';fxs.forEach(function(s){s.y+=s.s;if(s.y>fxc.height)s.y=0;fxx.globalAlpha=.25+.4*Math.abs(Math.sin(s.y*.01));fxx.fillRect(s.x,s.y,s.r,s.r)});fxx.globalAlpha=1;requestAnimationFrame(fxl)})();
+function setDiff(d,el){diff=d;document.querySelectorAll('.diff').forEach(function(e){e.classList.remove('on')});el.classList.add('on');}
+function letterScore(w){var s=0;for(var i=0;i<w.length;i++)s+=VW[w[i]]?1:2;return s+w.length*2;}
+function canMake(w,letters){var pool=letters.slice();for(var i=0;i<w.length;i++){var j=pool.indexOf(w[i]);if(j<0)return false;pool.splice(j,1);}return true;}
+function aiPick(letters){
+ var best='',bestS=-1;
+ for(var i=0;i<DICT.length;i++){var w=DICT[i];if(w.length<3)continue;
+  if(diff===0&&w.length>5)continue;
+  if(diff===1&&w.length>6)continue;
+  if(canMake(w,letters)){var s=letterScore(w);if(s>bestS){bestS=s;best=w;}
+   if(diff<2&&Math.random()<.02)break;
+  }}
+ if(diff===0&&best.length>4&&Math.random()<.5){// mokka bot picks shorter sometimes
+  var shorts=DICT.filter(function(w){return w.length<=4&&canMake(w,letters)});
+  if(shorts.length)best=shorts[Math.floor(Math.random()*shorts.length)];
+ }
+ return best;
+}
+function genRack(){
+ // ensure at least 1 makeable word: start from a random 5-7 letter word, add randoms
+ var base='';while(base.length<5){base=DICT[Math.floor(Math.random()*DICT.length)];if(base.length>7)base='';}
+ var letters=base.split('');
+ while(letters.length<8){letters.push(BGL[Math.floor(Math.random()*26)]);}
+ // shuffle
+ for(var i=letters.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=letters[i];letters[i]=letters[j];letters[j]=t;}
+ return letters;
+}
+function startMatch(){
+ round=0;meScore=0;aiScore=0;hist=[];over=false;won=false;
+ document.getElementById('menuCard').style.display='none';
+ document.getElementById('gameCard').style.display='block';
+ document.getElementById('histCard').style.display='block';
+ document.getElementById('ov').classList.add('hide');
+ nextRound();
+}
+function nextRound(){
+ round++;
+ if(round>5){endMatch();return;}
+ rack=genRack();used=rack.map(function(){return false});cur=[];locked=false;timeLeft=45;
+ document.getElementById('roundLbl').textContent='ROUND '+round+' / 5';
+ renderRack();renderCur();msg('');
+ document.getElementById('meWord').textContent='';document.getElementById('aiWord').textContent='';
+ document.getElementById('goBtn').disabled=false;
+ clearInterval(timerIv);
+ timerIv=setInterval(function(){
+  timeLeft--;document.getElementById('tfill').style.width=(timeLeft/45*100)+'%';
+  if(timeLeft<=0){clearInterval(timerIv);submitWord();}
+ },1000);
+ document.getElementById('tfill').style.width='100%';
+}
+function renderRack(){
+ var s=document.getElementById('rack'),h='';
+ rack.forEach(function(l,i){h+='<div class="tile'+(used[i]?' used':'')+'" onclick="tapTile('+i+')">'+l.toUpperCase()+'</div>';});
+ s.innerHTML=h;
+}
+function renderCur(){document.getElementById('cur').innerHTML=cur.length?cur.map(function(c){return c.toUpperCase()}).join(''):'&nbsp;';}
+function tapTile(i){if(locked||used[i])return;used[i]=true;cur.push(rack[i]);renderRack();renderCur();}
+function clearWord(){if(locked)return;used=used.map(function(){return false});cur=[];renderRack();renderCur();msg('');}
+function msg(t){document.getElementById('msg').textContent=t;}
+function submitWord(){
+ if(locked)return;locked=true;clearInterval(timerIv);
+ var w=cur.join('');
+ var meOk=w.length>=3&&DSET[w]&&canMake(w,rack);
+ var aiW=aiPick(rack);
+ var meS=meOk?letterScore(w):0,aiS=letterScore(aiW);
+ if(w.length>0&&!meOk){msg('❌ "'+w.toUpperCase()+'" dictionary-ல இல்ல! 0 points');}
+ if(meOk){meScore+=meS;}
+ aiScore+=aiS;
+ hist.unshift({r:round,me:meOk?w:'—',meS:meS,ai:aiW,aiS:aiS});
+ var hs=document.getElementById('hist'),hh='';
+ hist.forEach(function(h){hh+='<div class="hrow"><span>R'+h.r+'</span><span class="me"><b>'+h.me.toUpperCase()+'</b> +'+h.meS+'</span><span class="ai"><b>'+h.ai.toUpperCase()+'</b> +'+h.aiS+'</span></div>';});
+ hs.innerHTML=hh;
+ document.getElementById('meScore').textContent=meScore;
+ document.getElementById('aiScore').textContent=aiScore;
+ document.getElementById('meWord').textContent=meOk?w.toUpperCase()+' +'+meS:'✗ +0';
+ document.getElementById('aiWord').textContent=aiW.toUpperCase()+' +'+aiS;
+ msg(meS>aiS?'⚔️ ரவுண்டு உன்னோடது!':meS===aiS?'🤝 Tie!':'🤖 Bot எடுத்துட்டான்!');
+ setTimeout(nextRound,2200);
+}
+function endMatch(){
+ over=true;won=meScore>aiScore;
+ var key='jkww_best';var prev=parseInt(localStorage.getItem(key)||'0');
+ if(meScore>prev)localStorage.setItem(key,meScore);
+ document.getElementById('ovTitle').textContent=won?'🏆 WORD WARRIOR!':meScore===aiScore?'🤝 EPIC TIE!':'💀 BOT WINS';
+ document.getElementById('ovScore').textContent=meScore+' - '+aiScore;
+ document.getElementById('ovText').innerHTML=(meScore>prev?'🎉 NEW RECORD! ':'Best: '+Math.max(prev,meScore))+'<br>Rounds won: '+hist.filter(function(h){return h.meS>h.aiS}).length+'/5';
+ document.getElementById('ovTaunt').textContent=won?'KUYIL-AI-அவே முழுங்கிட்டா! 👑':meScore===aiScore?'அடுத்த முறை நிச்சயம் ஜெயி! ⚔️':'Dictionary படி, திரும்ப வா! 😤';
+ document.getElementById('ov').classList.remove('hide');
+}
+function restart(){document.getElementById('ov').classList.add('hide');document.getElementById('menuCard').style.display='block';document.getElementById('gameCard').style.display='none';document.getElementById('histCard').style.display='none';meScore=0;aiScore=0;document.getElementById('meScore').textContent='0';document.getElementById('aiScore').textContent='0';}
+window.__WW={G:function(){return {round:round,meScore:meScore,aiScore:aiScore,over:over,won:won,rack:rack.join(''),best:parseInt(localStorage.getItem('jkww_best')||'0'),hist:hist.length}},start:function(d){if(typeof d==='number')diff=d;startMatch()},tapWord:function(w){clearWord();for(var i=0;i<w.length;i++){var idx=rack.findIndex(function(l,j){return l===w[i]&&!used[j]});if(idx<0)return false;used[idx]=true;cur.push(rack[idx]);}renderRack();renderCur();return true},strike:submitWord,dict:function(w){return !!DSET[w]},ai:aiPick};
+</script>
+</body>
+</html>
