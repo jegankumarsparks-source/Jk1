@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>JK ASTEROID MINER 2042</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+body{background:#020610;color:#e8f0ff;font-family:'Segoe UI',system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;min-height:100vh;overflow:hidden;touch-action:none}
+h1{font-size:22px;letter-spacing:3px;margin:10px 0 2px;color:#4cc9ff;text-shadow:0 0 12px #4cc9ff,0 0 40px #4cc9ff88}
+.sub{font-size:10px;letter-spacing:2px;color:#7d90a8;margin-bottom:8px}
+.hud{display:flex;gap:8px;margin-bottom:8px;width:100%;max-width:420px;justify-content:center}
+.card{background:#0a1424;border:1px solid #4cc9ff33;border-radius:10px;padding:6px 11px;text-align:center;min-width:70px}
+.card .l{font-size:9px;letter-spacing:1px;color:#7d90a8}
+.card .v{font-size:16px;font-weight:700}
+#wrap{position:relative}
+canvas{background:radial-gradient(ellipse at 50% 30%,#0a1628 0%,#020610 80%);border:2px solid #4cc9ff44;border-radius:14px;box-shadow:0 0 30px #4cc9ff22;display:block}
+#msg{margin-top:8px;font-size:13px;color:#ffd166;min-height:18px;text-align:center}
+.ov{position:absolute;inset:0;background:rgba(2,6,16,.93);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;border-radius:14px;z-index:5;backdrop-filter:blur(4px)}
+.ov.hide{display:none}
+.ov h2{font-size:26px;color:#4cc9ff;text-shadow:0 0 16px #4cc9ff}
+.ov p{font-size:13px;color:#b8c8dc;text-align:center;padding:0 24px;line-height:1.6}
+.btn{background:linear-gradient(90deg,#4cc9ff,#7b2dff);border:none;color:#fff;font-size:16px;font-weight:700;letter-spacing:2px;padding:13px 42px;border-radius:30px;cursor:pointer;box-shadow:0 0 20px #4cc9ff66}
+.btn:active{transform:scale(.95)}
+.rs{display:flex;gap:8px;width:86%;max-width:330px}
+.rs div{flex:1;background:#0a1424;border:1px solid #4cc9ff33;border-radius:10px;padding:8px;text-align:center;font-size:10px;color:#7d90a8}
+.rs b{display:block;font-size:16px;color:#fff;margin-top:2px}
+</style>
+</head>
+<body>
+<h1>☄️ JK ASTEROID MINER</h1>
+<div class="sub">2042 DEEP BELT • 90s ORE RUN • OFFLINE</div>
+<div class="hud">
+<div class="card"><div class="l">💎 ORE</div><div class="v" id="sc">0</div></div>
+<div class="card"><div class="l">🔥 COMBO</div><div class="v" id="cb">x1</div></div>
+<div class="card"><div class="l">🛡 SHIELD</div><div class="v" id="sh">3</div></div>
+<div class="card"><div class="l">⏱ TIME</div><div class="v" id="tm">90</div></div>
+<div class="card"><div class="l">🏆 BEST</div><div class="v" id="bs">0</div></div>
+</div>
+<div id="wrap">
+<canvas id="cv" width="400" height="600"></canvas>
+<div class="ov" id="ovStart">
+<h2>☄️ ASTEROID MINER</h2>
+<p>Screen-அ touch பண்ணா ship அங்க பறக்கும்! Auto-laser asteroids-அ உடைக்கும் — வெளியே வரும் 💎 ore crystals-அ collect பண்ணு! Chain collect = combo 🔥 Asteroid மோதினா shield குறையும்! 90 seconds ore run!</p>
+<button class="btn" id="btnStart">▶ LAUNCH</button>
+</div>
+<div class="ov hide" id="ovEnd">
+<h2>⏱ RUN COMPLETE!</h2>
+<div class="rs">
+<div>💎 ORE<b id="rSc">0</b></div>
+<div>☄️ MINED<b id="rMn">0</b></div>
+<div>🔥 MAX COMBO<b id="rCb">x1</b></div>
+<div>🏆 BEST<b id="rBs">0</b></div>
+</div>
+<p id="endTaunt"></p>
+<button class="btn" id="btnAgain">🔄 FLY AGAIN</button>
+</div>
+</div>
+<div id="msg">☄️ Launch பண்ணு, ore-அ சேகரி!</div>
+<script>
+'use strict';
+var cv=document.getElementById('cv'),cx=cv.getContext('2d');
+var W=cv.width,H=cv.height;
+var AC=window.AudioContext?new AudioContext():null;
+function beep(f,d,t){if(!AC)return;try{var o=AC.createOscillator(),g=AC.createGain();o.type=t||'square';o.frequency.value=f;g.gain.setValueAtTime(.05,AC.currentTime);g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+d);o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+d);}catch(e){}}
+function $(id){return document.getElementById(id);}
+function msg(t){$('msg').textContent=t;}
+var state='menu',score=0,combo=1,maxCombo=1,mined=0,shields=3,timeLeft=5400,tick=0,lastColT=-999,invuln=0;
+var ship,asts=[],crystals=[],parts=[],beam=null,stars=[];
+var best=parseInt(localStorage.getItem('jkam_best')||'0');
+$('bs').textContent=best;
+for(var i=0;i<60;i++)stars.push({x:Math.random()*W,y:Math.random()*H,s:Math.random()<.8?1:2,tw:Math.random()*7});
+function mkAst(x,y,vx,vy,r,hp){return{x:x,y:y,vx:vx,vy:vy,r:r,hp:hp,rot:Math.random()*7,vr:(Math.random()-.5)*.04};}
+function spawnAst(){
+ var side=Math.floor(Math.random()*4),x,y;
+ if(side===0){x=-30;y=Math.random()*H;}else if(side===1){x=W+30;y=Math.random()*H;}
+ else if(side===2){x=Math.random()*W;y=-30;}else{x=Math.random()*W;y=H+30;}
+ var tx=W/2+(Math.random()-.5)*W*.6,ty=H/2+(Math.random()-.5)*H*.6;
+ var d=Math.hypot(tx-x,ty-y)||1,sp=.4+Math.random()*.9;
+ var r=Math.random()<.6?30:16;
+ asts.push(mkAst(x,y,(tx-x)/d*sp,(ty-y)/d*sp,r,r>20?3:2));
+}
+function startGame(){
+ state='play';score=0;combo=1;maxCombo=1;mined=0;shields=3;timeLeft=5400;tick=0;lastColT=-999;invuln=0;
+ ship={x:W/2,y:H-140,vx:0,vy:0,tx:W/2,ty:H-140,ang:-Math.PI/2};
+ asts=[];crystals=[];parts=[];beam=null;
+ for(var k=0;k<4;k++)spawnAst();
+ $('sc').textContent=0;$('cb').textContent='x1';$('sh').textContent=3;$('tm').textContent=90;
+ $('ovStart').classList.add('hide');$('ovEnd').classList.add('hide');
+ msg('☄️ Ore-அ சேகரி! Asteroid-அ விட்டு தள்ளி போ!');
+ if(AC&&AC.state==='suspended'){AC.resume();}
+ beep(330,.15);setTimeout(function(){beep(495,.18);},140);
+}
+function endGame(){
+ state='over';
+ if(score>best){best=score;try{localStorage.setItem('jkam_best',best);}catch(e){}}
+ $('bs').textContent=best;
+ $('rSc').textContent=score;$('rMn').textContent=mined;
+ $('rCb').textContent='x'+maxCombo;$('rBs').textContent=best;
+ $('endTaunt').textContent=score>=1200?'👑 BELT LEGEND! குயிலே, உன் garden-ல விதை போடு — நாங்க space-ல ore அள்ளுறோம்! ☄️😎':score>=500?'நல்ல mining! Combo chain-அ நீட்டிக்கிட்டா இன்னும் ore! 💎':'Shield-அ காப்பாத்து, crystals-அ chain பண்ணு! 🛡';
+ $('ovEnd').classList.remove('hide');
+ beep(587,.25,'triangle');setTimeout(function(){beep(880,.3,'triangle');},200);
+}
+function burst(x,y,c,n){
+ for(var i=0;i<n;i++){
+   var a=Math.random()*7,s=.6+Math.random()*2.6;
+   parts.push({x:x,y:y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,l:24+Math.random()*16,c:c});
+ }
+}
+function breakAst(a,idx){
+ asts.splice(idx,1);mined++;
+ burst(a.x,a.y,'#9db2c8',14);
+ if(a.r>20){
+   score+=15;
+   for(var i=0;i<2;i++){
+     var an=Math.random()*7;
+     asts.push(mkAst(a.x,a.y,Math.cos(an)*1.4,Math.sin(an)*1.4,16,2));
+   }
+ }else{
+   score+=25;
+   var nc=2+(Math.random()<.5?1:0);
+   for(var j=0;j<nc;j++){
+     var an2=Math.random()*7;
+     crystals.push({x:a.x,y:a.y,vx:Math.cos(an2)*.9,vy:Math.sin(an2)*.9,l:900});
+   }
+ }
+ $('sc').textContent=score;
+ beep(a.r>20?196:262,.1,'sawtooth');
+}
+function step(){
+ if(state!=='play')return;
+ tick++;timeLeft--;
+ if(timeLeft<=0){endGame();return;}
+ if(invuln>0)invuln--;
+ // ship fly toward touch
+ var dx=ship.tx-ship.x,dy=ship.ty-ship.y,d=Math.hypot(dx,dy);
+ if(d>6){
+   var acc=.16;
+   ship.vx+=dx/d*acc;ship.vy+=dy/d*acc;
+ }
+ ship.vx*=.982;ship.vy*=.982;
+ var sp=Math.hypot(ship.vx,ship.vy),cap=5.2;
+ if(sp>cap){ship.vx*=cap/sp;ship.vy*=cap/sp;}
+ ship.x+=ship.vx;ship.y+=ship.vy;
+ ship.x=Math.max(14,Math.min(W-14,ship.x));
+ ship.y=Math.max(14,Math.min(H-14,ship.y));
+ if(sp>.5)ship.ang=Math.atan2(ship.vy,ship.vx);
+ // spawn pressure
+ if(tick%200===0&&asts.length<9)spawnAst();
+ // asteroids
+ for(var i=asts.length-1;i>=0;i--){
+   var a=asts[i];
+   a.x+=a.vx;a.y+=a.vy;a.rot+=a.vr;
+   if(a.x<-60||a.x>W+60||a.y<-60||a.y>H+60){asts.splice(i,1);continue;}
+   // ship collision
+   if(invuln===0&&Math.hypot(a.x-ship.x,a.y-ship.y)<a.r+11){
+     shields--;$('sh').textContent=shields;
+     combo=1;$('cb').textContent='x1';
+     invuln=100;
+     var kd=Math.hypot(ship.x-a.x,ship.y-a.y)||1;
+     ship.vx=(ship.x-a.x)/kd*5;ship.vy=(ship.y-a.y)/kd*5;
+     burst(ship.x,ship.y,'#ff5c5c',16);
+     msg('💥 Shield hit! '+shields+' left!');
+     beep(110,.3,'sawtooth');
+     if(shields<=0){endGame();return;}
+   }
+ }
+ // auto laser: nearest asteroid in range
+ beam=null;
+ if(tick%18===0){
+   var bi=-1,bd=1e9;
+   for(var j=0;j<asts.length;j++){
+     var dd=Math.hypot(asts[j].x-ship.x,asts[j].y-ship.y);
+     if(dd<230&&dd<bd){bd=dd;bi=j;}
+   }
+   if(bi>=0){
+     var ta=asts[bi];ta.hp--;
+     beam={x1:ship.x,y1:ship.y,x2:ta.x,y2:ta.y,l:9};
+     beep(1200,.04,'square');
+     if(ta.hp<=0)breakAst(ta,bi);
+   }
+ }
+ if(beam&&beam.l>0)beam.l--;
+ // crystals: drift + magnet + collect
+ for(var k=crystals.length-1;k>=0;k--){
+   var c=crystals[k];
+   c.x+=c.vx;c.y+=c.vy;c.l--;
+   if(c.l<=0){crystals.splice(k,1);continue;}
+   var cd=Math.hypot(c.x-ship.x,c.y-ship.y);
+   if(cd<80){c.vx+=(ship.x-c.x)/cd*.35;c.vy+=(ship.y-c.y)/cd*.35;}
+   if(cd<20){
+     crystals.splice(k,1);
+     var chain=tick-lastColT<170;
+     combo=chain?Math.min(6,combo+1):1;
+     if(combo>maxCombo)maxCombo=combo;
+     lastColT=tick;
+     var pts=25*combo;score+=pts;
+     msg('💎 +'+pts+(combo>1?' 🔥x'+combo:''));
+     beep(900+combo*80,.06,'sine');
+     burst(c.x,c.y,'#ffd166',8);
+     $('sc').textContent=score;$('cb').textContent='x'+combo;
+   }
+ }
+ // particles
+ for(var m=parts.length-1;m>=0;m--){
+   var p=parts[m];p.x+=p.vx;p.y+=p.vy;p.l--;
+   if(p.l<=0)parts.splice(m,1);
+ }
+ $('tm').textContent=Math.ceil(timeLeft/60);
+}
+cv.addEventListener('pointerdown',function(e){e.preventDefault();ptr(e);});
+cv.addEventListener('pointermove',function(e){if(e.buttons>0||e.pointerType==='touch')ptr(e);});
+function ptr(e){
+ var r=cv.getBoundingClientRect();
+ ship.tx=(e.clientX-r.left)*(W/r.width);ship.ty=(e.clientY-r.top)*(H/r.height);
+}
+function drawAst(a){
+ cx.save();cx.translate(a.x,a.y);cx.rotate(a.rot);
+ cx.fillStyle='#5a6b7d';cx.strokeStyle='#9db2c8';cx.lineWidth=2;
+ cx.beginPath();
+ var n=8;
+ for(var i=0;i<n;i++){
+   var an=i/n*Math.PI*2,rr=a.r*(0.8+((i*37)%10)/28);
+   if(i===0)cx.moveTo(Math.cos(an)*rr,Math.sin(an)*rr);
+   else cx.lineTo(Math.cos(an)*rr,Math.sin(an)*rr);
+ }
+ cx.closePath();cx.fill();cx.stroke();
+ cx.fillStyle='#3d4a5a';
+ cx.beginPath();cx.arc(-a.r*.25,-a.r*.2,a.r*.22,0,7);cx.fill();
+ cx.beginPath();cx.arc(a.r*.3,a.r*.25,a.r*.16,0,7);cx.fill();
+ cx.restore();
+}
+function draw(){
+ cx.clearRect(0,0,W,H);
+ // stars
+ for(var s=0;s<stars.length;s++){
+   var st=stars[s];st.tw+=.03;
+   cx.fillStyle='rgba(200,220,255,'+(.3+Math.sin(st.tw)*.25)+')';
+   cx.fillRect(st.x,st.y,st.s,st.s);
+ }
+ if(state!=='menu'){
+   // crystals
+   for(var k=0;k<crystals.length;k++){
+     var c=crystals[k],pl=4+Math.sin((tick+k)*.15)*1.5;
+     cx.fillStyle='#ffd166';
+     cx.save();cx.translate(c.x,c.y);cx.rotate(45*Math.PI/180);
+     cx.fillRect(-pl,-pl,pl*2,pl*2);
+     cx.restore();
+   }
+   // asteroids
+   for(var i=0;i<asts.length;i++)drawAst(asts[i]);
+   // beam
+   if(beam&&beam.l>0){
+     cx.strokeStyle='rgba(76,201,255,'+(beam.l/9)+')';cx.lineWidth=3;
+     cx.beginPath();cx.moveTo(beam.x1,beam.y1);cx.lineTo(beam.x2,beam.y2);cx.stroke();
+   }
+   // particles
+   for(var m=0;m<parts.length;m++){
+     var p=parts[m];
+     cx.fillStyle=p.c;cx.globalAlpha=Math.min(1,p.l/18);
+     cx.beginPath();cx.arc(p.x,p.y,2.5,0,7);cx.fill();
+     cx.globalAlpha=1;
+   }
+   // ship
+   if(!(invuln>0&&tick%8<4)){
+     cx.save();cx.translate(ship.x,ship.y);cx.rotate(ship.ang+Math.PI/2);
+     cx.fillStyle='#4cc9ff';
+     cx.beginPath();cx.moveTo(0,-15);cx.lineTo(10,11);cx.lineTo(0,5);cx.lineTo(-10,11);cx.closePath();cx.fill();
+     cx.fillStyle='#eaf6ff';cx.beginPath();cx.arc(0,-4,3.4,0,7);cx.fill();
+     if(Math.hypot(ship.vx,ship.vy)>1){
+       cx.fillStyle='rgba(255,159,28,'+(.5+Math.random()*.4)+')';
+       cx.beginPath();cx.moveTo(-5,12);cx.lineTo(0,20+Math.random()*6);cx.lineTo(5,12);cx.closePath();cx.fill();
+     }
+     cx.restore();
+   }
+ }
+ requestAnimationFrame(draw);
+}
+draw();
+var lastT=0,acc=0;
+function loop(ts){
+ if(!lastT)lastT=ts;
+ acc+=ts-lastT;lastT=ts;
+ var n=0;
+ while(acc>16&&n<4){step();acc-=16;n++;}
+ requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+$('btnStart').addEventListener('click',startGame);
+$('btnAgain').addEventListener('click',function(){$('ovEnd').classList.add('hide');startGame();});
+window.__AM={G:function(){return{state:state,score:score,combo:combo,maxCombo:maxCombo,mined:mined,shields:shields,timeLeft:timeLeft,ship:{x:Math.round(ship?ship.x:0),y:Math.round(ship?ship.y:0)},asts:asts.map(function(a){return{x:Math.round(a.x),y:Math.round(a.y),r:a.r,hp:a.hp};}),crystals:crystals.length,beam:!!beam,best:best}},
+start:startGame,
+step:function(n){for(var i=0;i<n;i++){step();}},
+target:function(x,y){ship.tx=x;ship.ty=y;},
+setShip:function(x,y){ship.x=x;ship.y=y;},
+spawnAst:function(x,y,vx,vy,r,hp){asts.push(mkAst(x,y,vx,vy,r,hp));},
+spawnCrystal:function(x,y){crystals.push({x:x,y:y,vx:0,vy:0,l:900});},
+setTime:function(t){timeLeft=t;},
+end:endGame};
+</script>
+</body>
+</html>
