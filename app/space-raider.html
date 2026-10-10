@@ -322,9 +322,9 @@ function draw(){
  /* active power indicator */
  if(ship.pow&&ship.powT>0){cx.fillStyle='rgba(0,255,208,.85)';cx.font='10px Orbitron';cx.textAlign='center';cx.fillText((ship.pow==='dbl'?'DOUBLE SHOT ':'RAPID FIRE ')+Math.ceil(ship.powT/60)+'s',W/2,H-24);}
 }
-function loop(){update();draw();requestAnimationFrame(loop);}
+function loop(){window.__SR.raf++;update();draw();requestAnimationFrame(loop);}
 loop();
-window.__SR={G:G,ship:ship,foes:foes,bullets:bullets,parts:parts,ebullets:ebullets,start:start,gameOver:gameOver,boss:function(){return boss}};
+window.__SR={G:G,ship:ship,foes:foes,bullets:bullets,parts:parts,ebullets:ebullets,start:start,gameOver:gameOver,boss:function(){return boss},waveLeft:function(){return waveLeft},spawnT:function(){return spawnT},hidden:function(){return document.hidden},raf:0};
 /* idle attract: ship parked */
 ship.x=W/2;ship.y=H-90;
 })();
