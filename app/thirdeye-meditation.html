@@ -1459,8 +1459,10 @@ function momData(){const hist=LS.get('hist',[]);const nw=new Date();
   for(const wk of weeks){if(d>=wk.ws&&d<=wk.we){wk.m+=h.m||0;break;}}});
  return weeks;}
 function todData(){const hist=LS.get('hist',[]);const nw=new Date();
+ const sun=new Date(nw);sun.setDate(nw.getDate()+((7-nw.getDay())%7));
+ const winStart=new Date(sun);winStart.setDate(sun.getDate()-83);winStart.setHours(0,0,0,0);
  const b={'காଲை':0,'மதியம்':0,'மாலை':0,'இரவு':0};
- hist.forEach(h=>{const d=new Date(h.d);if(isNaN(d)||d>nw)return;const hr=d.getHours();
+ hist.forEach(h=>{const d=new Date(h.d);if(isNaN(d)||d>nw||d<winStart)return;const hr=d.getHours();
   const k=hr>=4&&hr<11?'காଲை':hr>=11&&hr<16?'மதியம்':hr>=16&&hr<21?'மாலை':'இரவு';
   b[k]+=h.m||0;});
  return b;}
