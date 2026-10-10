@@ -108,7 +108,7 @@ tap,grid:()=>grid.map(r=>r.slice()),
 setCell:(x,y,t)=>{grid[y][x]=t;},
 swapRaw:(ax,ay,bx,by)=>swap({x:ax,y:ay},{x:bx,y:by}),
 hasMove:hasAnyMove,findMatches:()=>findMatches().size,
-step:(n)=>{for(let i=0;i<n;i++)frame(performance.now());},
+step:(n)=>{let vn=performance.now();for(let i=0;i<n;i++)frame(vn+=16);},
 expire:()=>{timeLeft=1;},
 forceResolve:resolve};
 </script>
