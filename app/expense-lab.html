@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>JK Expense Lab · Split for Two</title>
+<style>
+:root{ --bg:#07090f; --card:#10141f; --card2:#161b2a; --line:#232a3d; --txt:#e8ecf5; --mut:#8a90a6; --acc:#7ee787; --neon:#22d3ee; --pink:#f472b6; --warn:#fbbf24; --red:#f87171; }
+*{ margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+body{ background:var(--bg); color:var(--txt); font-family:-apple-system,'Segoe UI',Roboto,sans-serif; max-width:480px; margin:0 auto; min-height:100vh; padding-bottom:90px; position:relative; overflow-x:hidden; }
+body::before{ content:''; position:fixed; inset:0; background:radial-gradient(600px 300px at 80% -5%,rgba(34,211,238,.13),transparent),radial-gradient(500px 260px at 10% 0%,rgba(244,114,182,.10),transparent); pointer-events:none; z-index:0; }
+.wrap{ position:relative; z-index:1; padding:14px; }
+header{ padding:14px 4px 6px; display:flex; align-items:center; justify-content:space-between; }
+h1{ font-size:20px; font-weight:900; letter-spacing:.5px; }
+h1 .lab{ background:linear-gradient(90deg,var(--neon),var(--pink)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.sub{ font-size:11px; color:var(--mut); }
+.total-card{ background:linear-gradient(135deg,var(--card2),var(--card)); border:1px solid var(--line); border-radius:20px; padding:18px; margin:10px 0 14px; text-align:center; box-shadow:0 0 30px rgba(34,211,238,.07); }
+.total-card .t{ font-size:11px; color:var(--mut); text-transform:uppercase; letter-spacing:1.5px; }
+.total-card .v{ font-size:38px; font-weight:900; margin-top:4px; text-shadow:0 0 24px rgba(126,231,135,.35); transition:.3s; }
+.total-card .d{ font-size:12px; color:var(--mut); margin-top:4px; }
+.card{ background:var(--card); border:1px solid var(--line); border-radius:16px; padding:14px; margin-bottom:12px; }
+.sec{ font-size:13px; font-weight:800; margin:14px 2px 8px; letter-spacing:.4px; }
+.sec span{ font-weight:400; color:var(--mut); font-size:11px; }
+input[type=number],input[type=text],input[type=date]{ width:100%; background:var(--card2); border:1px solid var(--line); color:var(--txt); border-radius:12px; padding:13px 14px; font-size:17px; outline:none; }
+input:focus{ border-color:var(--neon); box-shadow:0 0 0 3px rgba(34,211,238,.15); }
+.chips{ display:flex; flex-wrap:wrap; gap:7px; margin:10px 0; }
+.chip{ background:var(--card2); border:1px solid var(--line); border-radius:99px; padding:8px 13px; font-size:13.5px; cursor:pointer; user-select:none; transition:.15s; }
+.chip.on{ background:rgba(34,211,238,.16); border-color:var(--neon); box-shadow:0 0 12px rgba(34,211,238,.25); }
+.who{ display:flex; gap:7px; }
+.who .chip{ flex:1; text-align:center; font-weight:700; padding:11px; }
+.who .chip.on{ background:rgba(244,114,182,.16); border-color:var(--pink); box-shadow:0 0 12px rgba(244,114,182,.25); }
+.btn{ width:100%; padding:14px; border:0; border-radius:14px; font-size:16px; font-weight:900; color:#04120a; background:linear-gradient(90deg,var(--acc),var(--neon)); cursor:pointer; letter-spacing:.5px; box-shadow:0 4px 22px rgba(126,231,135,.3); transition:.15s; }
+.btn:active{ transform:scale(.97); }
+.row{ display:flex; align-items:center; gap:10px; padding:10px 2px; border-bottom:1px solid var(--line); animation:slidein .25s; }
+.row:last-child{ border-bottom:0; }
+@keyframes slidein{ from{ opacity:0; transform:translateY(6px);} to{ opacity:1; transform:none;} }
+.row .ic{ font-size:19px; width:30px; text-align:center; }
+.row .inf{ flex:1; min-width:0; }
+.row .inf b{ font-size:14px; display:block; }
+.row .inf .m{ font-size:11px; color:var(--mut); }
+.row .amt{ font-weight:800; font-size:15px; white-space:nowrap; }
+.row .del{ color:var(--mut); font-size:18px; padding:4px 8px; cursor:pointer; border-radius:8px; }
+.row .del:active{ color:var(--red); background:rgba(248,113,113,.12); }
+.bar-row{ display:flex; align-items:center; gap:9px; margin:9px 0; font-size:12.5px; }
+.bar-row .nm{ width:86px; flex:0 0 auto; color:var(--mut); }
+.bar-track{ flex:1; height:10px; background:var(--card2); border-radius:99px; overflow:hidden; }
+.bar-fill{ height:100%; border-radius:99px; background:linear-gradient(90deg,var(--neon),var(--acc)); width:0; transition:width .8s cubic-bezier(.2,.8,.2,1); box-shadow:0 0 10px rgba(34,211,238,.4); }
+.bar-row .vl{ width:70px; text-align:right; font-weight:700; flex:0 0 auto; }
+.spark{ display:flex; align-items:flex-end; gap:3px; height:64px; margin-top:8px; }
+.spark .b{ flex:1; background:linear-gradient(180deg,var(--neon),rgba(34,211,238,.15)); border-radius:3px 3px 0 0; min-height:2px; position:relative; transition:.3s; }
+.spark .b.today{ background:linear-gradient(180deg,var(--pink),rgba(244,114,182,.15)); box-shadow:0 0 10px rgba(244,114,182,.5); }
+.spark-l{ display:flex; justify-content:space-between; font-size:10px; color:var(--mut); margin-top:4px; }
+.split-hero{ display:flex; gap:10px; }
+.split-hero .p{ flex:1; background:var(--card2); border:1px solid var(--line); border-radius:14px; padding:12px; text-align:center; }
+.split-hero .p b{ font-size:15px; display:block; }
+.split-hero .p .v{ font-size:19px; font-weight:900; margin-top:3px; }
+.settle{ text-align:center; padding:14px; border-radius:14px; margin-top:10px; font-weight:800; font-size:15px; }
+.settle.up{ background:rgba(126,231,135,.1); border:1px solid rgba(126,231,135,.35); color:var(--acc); }
+.settle.even{ background:var(--card2); border:1px solid var(--line); color:var(--mut); }
+nav{ position:fixed; bottom:0; left:0; right:0; max-width:480px; margin:0 auto; background:rgba(7,9,15,.92); backdrop-filter:blur(12px); border-top:1px solid var(--line); display:flex; z-index:5; }
+nav button{ flex:1; background:none; border:0; color:var(--mut); padding:12px 0 16px; font-size:12px; font-weight:700; cursor:pointer; }
+nav button.on{ color:var(--neon); text-shadow:0 0 12px rgba(34,211,238,.6); }
+nav button .i{ font-size:19px; display:block; margin-bottom:2px; }
+.toast{ position:fixed; bottom:84px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--card2); border:1px solid var(--neon); color:var(--txt); padding:10px 18px; border-radius:99px; font-size:13px; opacity:0; transition:.25s; z-index:9; pointer-events:none; box-shadow:0 4px 20px rgba(0,0,0,.5); }
+.toast.on{ opacity:1; transform:translateX(-50%) translateY(0); }
+.empty{ text-align:center; color:var(--mut); font-size:13px; padding:22px 10px; }
+.ghost{ background:none; border:1px solid var(--line); color:var(--mut); border-radius:10px; padding:8px 12px; font-size:12px; cursor:pointer; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header><div><h1>JK EXPENSE <span class="lab">LAB</span></h1><div class="sub">daily · monthly · split for two 💞</div></div><button class="ghost" onclick="copySummary()">📋 Share</button></header>
+<div class="total-card"><div class="t" id="tcLabel">This month</div><div class="v" id="tcVal">₹0</div><div class="d" id="tcSub"></div></div>
+
+<div id="pg-add">
+<div class="card">
+<input type="number" id="amt" inputmode="decimal" placeholder="₹ Amount" min="0" step="any">
+<div class="chips" id="cats"></div>
+<input type="text" id="note" placeholder="Note (optional)" maxlength="40" style="margin-bottom:10px">
+<div class="who" id="who"></div>
+<button class="btn" style="margin-top:12px" onclick="addExp()">ADD EXPENSE ⚡</button>
+</div>
+</div>
+
+<div id="pg-list" style="display:none">
+<div class="sec" id="listTitle">Today</div>
+<div class="card" id="listCard"></div>
+</div>
+
+<div id="pg-split" style="display:none">
+<div class="sec">Split for this month <span>fair 50/50 share</span></div>
+<div class="card"><div class="split-hero" id="splitHero"></div><div class="settle" id="settle"></div></div>
+<div class="sec">Category breakdown</div>
+<div class="card" id="catBars"></div>
+</div>
+
+<div class="sec" id="sparkSec">Daily pulse <span id="sparkMonth"></span></div>
+<div class="card"><div class="spark" id="spark"></div><div class="spark-l"><span>1</span><span id="sparkMid"></span><span id="sparkEnd"></span></div></div>
+</div>
+
+<nav>
+<button class="on" data-t="add" onclick="go('add')"><span class="i">⚡</span>Add</button>
+<button data-t="list" onclick="go('list')"><span class="i">📒</span>Expenses</button>
+<button data-t="split" onclick="go('split')"><span class="i">💞</span>Split</button>
+</nav>
+<div class="toast" id="toast"></div>
+
+<script>
+const CATS=[['🍜','Food'],['🚌','Travel'],['🏠','Home'],['🎮','Fun'],['💡','Bills'],['🛍️','Shop'],['💊','Health'],['✨','Other']];
+const PEOPLE=['Jegan','Divya'];
+let selCat=0, selWho=0, tab='add';
+const LS={get(k,d){try{const v=JSON.parse(localStorage.getItem('jkxl_'+k));return v===null||v===undefined?d:v;}catch(e){return d;}},set(k,v){localStorage.setItem('jkxl_'+k,JSON.stringify(v));}};
+let EXP=LS.get('exp',[]);
+const $=s=>document.querySelector(s);
+const inr=n=>'₹'+Math.round(n).toLocaleString('en-IN');
+const todayStr=()=>new Date().toISOString().slice(0,10);
+const monthStr=d=>d.slice(0,7);
+const curMonth=()=>todayStr().slice(0,7);
+const monthName=()=>new Date().toLocaleString('en',{month:'long',year:'numeric'});
+
+function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add('on'); clearTimeout(t._x); t._x=setTimeout(()=>t.classList.remove('on'),1800); }
+
+function buildChips(){
+ $('#cats').innerHTML=CATS.map((c,i)=>'<div class="chip'+(i===selCat?' on':'')+'" onclick="pickCat('+i+')">'+c[0]+' '+c[1]+'</div>').join('');
+ $('#who').innerHTML=PEOPLE.map((p,i)=>'<div class="chip'+(i===selWho?' on':'')+'" onclick="pickWho('+i+')">'+p+'</div>').join('');
+}
+function pickCat(i){ selCat=i; buildChips(); }
+function pickWho(i){ selWho=i; buildChips(); }
+
+function addExp(){
+ const a=parseFloat($('#amt').value);
+ if(!(a>0)){ toast('Enter an amount first 🙂'); $('#amt').focus(); return; }
+ const e={id:Date.now(),a,cat:selCat,note:$('#note').value.trim(),who:selWho,d:todayStr()};
+ EXP.unshift(e); LS.set('exp',EXP);
+ $('#amt').value=''; $('#note').value='';
+ toast(CATS[selCat][0]+' '+inr(a)+' added for '+PEOPLE[selWho]);
+ renderAll();
+ if(navigator.vibrate) try{ navigator.vibrate(30); }catch(e){}
+}
+function delExp(id){ EXP=EXP.filter(e=>e.id!==id); LS.set('exp',EXP); toast('Deleted'); renderAll(); }
+
+function go(t){ tab=t; for(const p of ['add','list','split']) $('#pg-'+p).style.display=p===t?'':'none';
+ document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===t)); renderAll(); }
+
+function monthExp(){ const m=curMonth(); return EXP.filter(e=>monthStr(e.d)===m); }
+function renderAll(){
+ const me=monthExp(), tot=me.reduce((s,e)=>s+e.a,0);
+ const day=new Date().getDate();
+ $('#tcVal').textContent=inr(tot);
+ $('#tcSub').textContent=monthExp().length+' expenses · avg '+inr(day?tot/day:0)+'/day · '+monthName();
+ // list (today)
+ const te=EXP.filter(e=>e.d===todayStr());
+ $('#listTitle').innerHTML='Today <span>'+te.length+' expense'+(te.length===1?'':'s')+' · '+inr(te.reduce((s,e)=>s+e.a,0))+'</span>';
+ $('#listCard').innerHTML=te.length?te.map(e=>'<div class="row"><span class="ic">'+CATS[e.cat][0]+'</span><div class="inf"><b>'+CATS[e.cat][1]+(e.note?' · '+esc(e.note):'')+'</b><span class="m">'+PEOPLE[e.who]+' paid</span></div><span class="amt">'+inr(e.a)+'</span><span class="del" onclick="delExp('+e.id+')">×</span></div>').join(''):'<div class="empty">No expenses yet today.<br>Add your first one from the ⚡ Add tab!</div>';
+ // split
+ const per=PEOPLE.map((p,i)=>me.filter(e=>e.who===i).reduce((s,e)=>s+e.a,0));
+ $('#splitHero').innerHTML=PEOPLE.map((p,i)=>'<div class="p"><b>'+p+'</b><div class="v" style="color:'+(i?'var(--pink)':'var(--neon)')+'">'+inr(per[i])+'</div></div>').join('');
+ const diff=(per[0]-per[1])/2, st=$('#settle');
+ if(tot===0){ st.className='settle even'; st.textContent='No expenses this month yet'; }
+ else if(Math.abs(diff)<1){ st.className='settle even'; st.textContent='Perfectly balanced 💚'; }
+ else if(diff>0){ st.className='settle up'; st.textContent='💸 '+PEOPLE[1]+' owes '+PEOPLE[0]+' '+inr(diff); }
+ else{ st.className='settle up'; st.textContent='💸 '+PEOPLE[0]+' owes '+PEOPLE[1]+' '+inr(-diff); }
+ // category bars
+ const byCat=CATS.map((c,i)=>({c,v:me.filter(e=>e.cat===i).reduce((s,e)=>s+e.a,0)})).filter(x=>x.v>0).sort((a,b)=>b.v-a.v);
+ const mx=byCat.length?byCat[0].v:1;
+ $('#catBars').innerHTML=byCat.length?byCat.map(x=>'<div class="bar-row"><span class="nm">'+x.c[0]+' '+x.c[1]+'</span><div class="bar-track"><div class="bar-fill" data-w="'+(x.v/mx*100)+'"></div></div><span class="vl">'+inr(x.v)+'</span></div>').join(''):'<div class="empty">Nothing to break down yet</div>';
+ requestAnimationFrame(()=>document.querySelectorAll('.bar-fill').forEach(b=>b.style.width=b.dataset.w+'%'));
+ // sparkline
+ const dim=new Date(new Date().getFullYear(),new Date().getMonth()+1,0).getDate();
+ const days=[]; for(let i=1;i<=dim;i++) days.push(me.filter(e=>+e.d.slice(8,10)===i).reduce((s,e)=>s+e.a,0));
+ const smx=Math.max(...days,1);
+ $('#spark').innerHTML=days.map((v,i)=>'<div class="b'+(i+1===day?' today':'')+'" style="height:'+Math.max(3,v/smx*100)+'%" title="Day '+(i+1)+': '+inr(v)+'"></div>').join('');
+ $('#sparkMonth').textContent=' · '+monthName();
+ $('#sparkMid').textContent=Math.ceil(dim/2)+''; $('#sparkEnd').textContent=dim+'';
+}
+function esc(s){ return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function copySummary(){
+ const me=monthExp(), tot=me.reduce((s,e)=>s+e.a,0);
+ const per=PEOPLE.map((p,i)=>p+' '+inr(me.filter(e=>e.who===i).reduce((s,e)=>s+e.a,0))).join(' · ');
+ const txt='📒 JK Expense Lab · '+monthName()+'\nTotal: '+inr(tot)+' ('+me.length+' expenses)\n'+per;
+ const done=()=>toast('Summary copied - paste it anywhere 📋');
+ if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(done).catch(()=>fallbackCopy(txt,done)); } else fallbackCopy(txt,done);
+}
+function fallbackCopy(t,cb){ const ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); cb(); }catch(e){ toast('Copy not available'); } ta.remove(); }
+$('#amt').addEventListener('keydown',e=>{ if(e.key==='Enter') addExp(); });
+buildChips(); renderAll();
+</script>
+</body>
+</html>
