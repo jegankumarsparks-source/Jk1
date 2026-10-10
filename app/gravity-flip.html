@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>JK GRAVITY FLIP 2044</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+body{background:#040c08;color:#e8fff4;font-family:'Segoe UI',system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;min-height:100vh;overflow:hidden;touch-action:none}
+h1{font-size:22px;letter-spacing:3px;margin:10px 0 2px;color:#00ffa3;text-shadow:0 0 12px #00ffa3,0 0 40px #00ffa388}
+.sub{font-size:10px;letter-spacing:2px;color:#7da894;margin-bottom:8px}
+.hud{display:flex;gap:8px;margin-bottom:8px;width:100%;max-width:420px;justify-content:center}
+.card{background:#0a1a12;border:1px solid #00ffa333;border-radius:10px;padding:6px 12px;text-align:center;min-width:80px}
+.card .l{font-size:9px;letter-spacing:1px;color:#7da894}
+.card .v{font-size:17px;font-weight:700}
+#wrap{position:relative}
+canvas{background:linear-gradient(180deg,#061410,#040c08);border:2px solid #00ffa344;border-radius:14px;box-shadow:0 0 30px #00ffa322;display:block}
+#msg{margin-top:8px;font-size:13px;color:#ffd166;min-height:18px;text-align:center}
+.ov{position:absolute;inset:0;background:rgba(4,12,8,.93);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;border-radius:14px;z-index:5;backdrop-filter:blur(4px)}
+.ov.hide{display:none}
+.ov h2{font-size:26px;color:#00ffa3;text-shadow:0 0 16px #00ffa3}
+.ov p{font-size:13px;color:#b8dcc8;text-align:center;padding:0 24px;line-height:1.6}
+.btn{background:linear-gradient(90deg,#00ffa3,#00b8d4);border:none;color:#04140c;font-size:16px;font-weight:700;letter-spacing:2px;padding:13px 42px;border-radius:30px;cursor:pointer;box-shadow:0 0 20px #00ffa366}
+.btn:active{transform:scale(.95)}
+.rs{display:flex;gap:8px;width:80%;max-width:300px}
+.rs div{flex:1;background:#0a1a12;border:1px solid #00ffa333;border-radius:10px;padding:8px;text-align:center;font-size:10px;color:#7da894}
+.rs b{display:block;font-size:16px;color:#fff;margin-top:2px}
+</style>
+</head>
+<body>
+<h1>⚡ JK GRAVITY FLIP</h1>
+<div class="sub">2044 NEON RUN • ENDLESS • OFFLINE</div>
+<div class="hud">
+<div class="card"><div class="l">🏃 DIST</div><div class="v" id="sc">0m</div></div>
+<div class="card"><div class="l">💎 ORBS</div><div class="v" id="ob">0</div></div>
+<div class="card"><div class="l">🏆 BEST</div><div class="v" id="bs">0m</div></div>
+</div>
+<div id="wrap">
+<canvas id="cv" width="400" height="600"></canvas>
+<div class="ov" id="ovStart">
+<h2>⚡ GRAVITY FLIP</h2>
+<p>Cube தானா ஓடும்! TAP பண்ணா gravity FLIP — floor-ல இருந்து ceiling-க்கு, ceiling-ல இருந்து floor-க்கு! Spikes-அ dodge பண்ணு, 💎 orbs-அ collect பண்ணு! Speed ரன் போக போக கூடும்!</p>
+<button class="btn" id="btnStart">▶ RUN</button>
+</div>
+<div class="ov hide" id="ovEnd">
+<h2>💥 CRASH!</h2>
+<div class="rs">
+<div>🏃 DIST<b id="rSc">0m</b></div>
+<div>💎 ORBS<b id="rOb">0</b></div>
+<div>🏆 BEST<b id="rBs">0m</b></div>
+</div>
+<p id="endTaunt"></p>
+<button class="btn" id="btnAgain">🔄 RUN AGAIN</button>
+</div>
+</div>
+<div id="msg">⚡ Tap to flip!</div>
+<script>
+'use strict';
+var cv=document.getElementById('cv'),cx=cv.getContext('2d');
+var W=cv.width,H=cv.height,FLOOR=H-70,CEIL=70;
+var AC=window.AudioContext?new AudioContext():null;
+function beep(f,d,t){if(!AC)return;try{var o=AC.createOscillator(),g=AC.createGain();o.type=t||'square';o.frequency.value=f;g.gain.setValueAtTime(.05,AC.currentTime);g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+d);o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+d);}catch(e){}}
+function $(id){return document.getElementById(id);}
+function msg(t){$('msg').textContent=t;}
+var state='menu',dist=0,orbs=0,tick=0;
+var cube,obs=[],parts=[],speed=4;
+var best=parseInt(localStorage.getItem('jkgf_best')||'0');
+$('bs').textContent=best+'m';
+function startGame(){
+ state='play';dist=0;orbs=0;tick=0;speed=4;
+ cube={x:80,y:FLOOR-15,vy:0,g:1,size:15,rot:0};
+ obs=[];parts=[];
+ $('sc').textContent='0m';$('ob').textContent=0;
+ $('ovStart').classList.add('hide');$('ovEnd').classList.add('hide');
+ msg('⚡ Flip பண்ணி dodge பண்ணு!');
+ if(AC&&AC.state==='suspended'){AC.resume();}
+ beep(494,.1);setTimeout(function(){beep(740,.12);},100);
+}
+function endGame(){
+ state='over';
+ var d=Math.floor(dist);
+ if(d>best){best=d;try{localStorage.setItem('jkgf_best',best);}catch(e){}}
+ $('bs').textContent=best+'m';
+ $('rSc').textContent=d+'m';$('rOb').textContent=orbs;$('rBs').textContent=best+'m';
+ $('endTaunt').textContent=d>=800?'👑 GRAVITY GOD! குயிலே, உன் Tower-அ மெதுவா நகர்த்து — நாங்க gravity-அயே flip பண்ணுறோம்! ⚡😎':d>=350?'சூப்பர் ரன்! Rhythm-அ பிடிச்சுட்டே! ⚡':'Spike pattern-அ பாத்து earlyஆ flip பண்ணு! 💪';
+ $('ovEnd').classList.remove('hide');
+ beep(160,.35,'sawtooth');
+}
+function flip(){
+ if(state!=='play')return;
+ cube.g*=-1;cube.vy=0;
+ beep(cube.g<0?700:500,.06,'triangle');
+ for(var i=0;i<6;i++)parts.push({x:cube.x,y:cube.y,vx:(Math.random()-.5)*3,vy:(Math.random()-.5)*3,l:18,c:'#00ffa3'});
+}
+cv.addEventListener('pointerdown',function(e){e.preventDefault();flip();});
+function spawnOb(){
+ var r=Math.random();
+ if(r<.55){
+   // spike on floor or ceiling
+   var fl=Math.random()<.5;
+   obs.push({type:'spike',x:W+30,y:fl?FLOOR:CEIL,fl:fl,w:26,h:34});
+ }else if(r<.8){
+   // double spike
+   var fl2=Math.random()<.5;
+   obs.push({type:'spike',x:W+30,y:fl2?FLOOR:CEIL,fl:fl2,w:44,h:30});
+ }else{
+   // orb line on random side
+   var fl3=Math.random()<.5;
+   for(var i=0;i<3;i++)obs.push({type:'orb',x:W+30+i*38,y:fl3?FLOOR-16:CEIL+16});
+ }
+}
+function step(){
+ if(state!=='play')return;
+ tick++;dist+=speed/60;speed=Math.min(9.5,speed+.0018);
+ // cube vertical physics toward current gravity side
+ cube.vy+=cube.g*.9;cube.vy*=.92;
+ cube.y+=cube.vy;
+ var restY=cube.g>0?FLOOR-cube.size:CEIL+cube.size;
+ if(cube.g>0&&cube.y>restY){cube.y=restY;cube.vy=0;}
+ if(cube.g<0&&cube.y<restY){cube.y=restY;cube.vy=0;}
+ cube.rot+=.06*cube.g;
+ // obstacles
+ if(tick%Math.max(38,Math.round(70-speed*3))===0)spawnOb();
+ for(var i=obs.length-1;i>=0;i--){
+   var o=obs[i];o.x-=speed;
+   if(o.x<-60){obs.splice(i,1);continue;}
+   if(o.type==='spike'){
+     // collision: AABB-ish
+     var inX=Math.abs(o.x-cube.x)<(o.w/2+cube.size-4);
+     var inY=cube.g>0?(cube.y+cube.size>o.y-o.h&&cube.y>o.y-o.h-30):(cube.y-cube.size<o.y+o.h&&cube.y<o.y+o.h+30);
+     if(inX&&inY&&((o.fl&&cube.g>0)||(!o.fl&&cube.g<0))){
+       endGame();return;
+     }
+   }else{
+     if(Math.hypot(o.x-cube.x,o.y-cube.y)<cube.size+9){
+       obs.splice(i,1);orbs++;
+       msg('💎 +1 orb! Total '+orbs);
+       beep(1100,.05,'sine');
+       $('ob').textContent=orbs;
+       for(var k=0;k<5;k++)parts.push({x:o.x,y:o.y,vx:(Math.random()-.5)*2.5,vy:(Math.random()-.5)*2.5,l:16,c:'#ffd166'});
+     }
+   }
+ }
+ for(var m=parts.length-1;m>=0;m--){
+   var p=parts[m];p.x+=p.vx;p.y+=p.vy;p.l--;
+   if(p.l<=0)parts.splice(m,1);
+ }
+ $('sc').textContent=Math.floor(dist)+'m';
+}
+function draw(){
+ cx.clearRect(0,0,W,H);
+ // speed lines
+ cx.strokeStyle='#00ffa311';cx.lineWidth=1;cx.beginPath();
+ for(var g=0;g<6;g++){var yy=(tick*speed*.5+g*110)%H;cx.moveTo(0,yy);cx.lineTo(W,yy);}
+ cx.stroke();
+ // floor & ceiling
+ cx.fillStyle='#0d2b1c';cx.fillRect(0,FLOOR,W,H-FLOOR);cx.fillRect(0,0,W,CEIL);
+ cx.fillStyle='#00ffa3';cx.fillRect(0,FLOOR,W,3);cx.fillRect(0,CEIL-3,W,3);
+ // obstacles
+ for(var i=0;i<obs.length;i++){
+   var o=obs[i];
+   if(o.type==='spike'){
+     cx.fillStyle='#ff2d55';
+     var n=Math.round(o.w/22);
+     for(var s=0;s<n;s++){
+       var sx=o.x-o.w/2+s*(o.w/n)+o.w/n/2;
+       cx.beginPath();
+       if(o.fl){cx.moveTo(sx-11,o.y);cx.lineTo(sx+11,o.y);cx.lineTo(sx,o.y-o.h);}
+       else{cx.moveTo(sx-11,o.y);cx.lineTo(sx+11,o.y);cx.lineTo(sx,o.y+o.h);}
+       cx.closePath();cx.fill();
+     }
+   }else{
+     var pl=7+Math.sin((tick+i)*.2)*2;
+     cx.fillStyle='#ffd166';
+     cx.save();cx.translate(o.x,o.y);cx.rotate(45*Math.PI/180);
+     cx.fillRect(-pl,-pl,pl*2,pl*2);
+     cx.restore();
+   }
+ }
+ // particles
+ for(var m=0;m<parts.length;m++){
+   var p=parts[m];
+   cx.fillStyle=p.c;cx.globalAlpha=Math.min(1,p.l/12);
+   cx.fillRect(p.x-2,p.y-2,4,4);
+   cx.globalAlpha=1;
+ }
+ // cube
+ if(state!=='menu'){
+   cx.save();cx.translate(cube.x,cube.y);cx.rotate(cube.rot);
+   var grd=cx.createLinearGradient(-15,-15,15,15);
+   grd.addColorStop(0,'#00ffa3');grd.addColorStop(1,'#00b8d4');
+   cx.fillStyle=grd;cx.fillRect(-cube.size,-cube.size,cube.size*2,cube.size*2);
+   cx.fillStyle='#04140c';
+   var ed=cube.g>0?-1:1;
+   cx.fillRect(-8,ed*3-3,6,6);cx.fillRect(2,ed*3-3,6,6);
+   cx.restore();
+ }
+ requestAnimationFrame(draw);
+}
+draw();
+var lastT=0,acc=0;
+function loop(ts){
+ if(!lastT)lastT=ts;
+ acc+=ts-lastT;lastT=ts;
+ var n=0;
+ while(acc>16&&n<4){step();acc-=16;n++;}
+ requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+$('btnStart').addEventListener('click',startGame);
+$('btnAgain').addEventListener('click',function(){$('ovEnd').classList.add('hide');startGame();});
+window.__GF={G:function(){return{state:state,dist:Math.floor(dist),orbs:orbs,speed:+speed.toFixed(2),cube:{x:cube?cube.x:0,y:cube?Math.round(cube.y):0,g:cube?cube.g:0},obs:obs.map(function(o){return{type:o.type,x:Math.round(o.x),y:o.y,fl:!!o.fl};}),best:best}},
+start:startGame,
+step:function(n){for(var i=0;i<n;i++){step();}},
+flip:flip,
+spawnSpike:function(fl){obs.push({type:'spike',x:W+30,y:fl?FLOOR:CEIL,fl:fl,w:26,h:34});},
+spawnOrb:function(x,fl){obs.push({type:'orb',x:x,y:fl?FLOOR-16:CEIL+16});},
+setSpeed:function(s){speed=s;},
+end:endGame};
+</script>
+</body>
+</html>
