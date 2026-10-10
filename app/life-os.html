@@ -122,13 +122,14 @@ function vib(p){ if(navigator.vibrate) try{ navigator.vibrate(p); }catch(e){} }
 
 /* ============ BOOT + HOME ============ */
 const bootMsgs=['initializing neural core…','loading family modules…','syncing offline vault…','polishing neon…','ready.'];
-let bootI=0;
+const FAST=location.search.indexOf('fast')>=0;
+const BOOT_MS=FAST?200:2100, bootT0=Date.now();
 const bootTimer=setInterval(()=>{
- bootI++;
- $('#bootfill').style.width=Math.min(100,bootI*22)+'%';
- $('#bootmsg').textContent=bootMsgs[Math.min(bootI-1,bootMsgs.length-1)];
- if(bootI>=5){ clearInterval(bootTimer); $('#boot').classList.remove('on'); $('#home').classList.add('on'); renderHome(); }
-},430);
+ const p=Math.min(1,(Date.now()-bootT0)/BOOT_MS);
+ $('#bootfill').style.width=(p*100)+'%';
+ $('#bootmsg').textContent=bootMsgs[Math.min(bootMsgs.length-1,Math.floor(p*bootMsgs.length))];
+ if(p>=1){ clearInterval(bootTimer); $('#boot').classList.remove('on'); $('#home').classList.add('on'); renderHome(); }
+},120);
 setInterval(()=>{ const t=new Date(); const p=n=>String(n).padStart(2,'0');
  $('#sbtime').textContent=p(t.getHours())+':'+p(t.getMinutes());
  $('#clock').textContent=p(t.getHours())+':'+p(t.getMinutes())+':'+p(t.getSeconds());
