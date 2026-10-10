@@ -1,0 +1,242 @@
+<!DOCTYPE html><html lang="ta"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>JK METEOR DEFENSE 2047</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:#04060f;color:#fff;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;overflow:hidden;touch-action:manipulation}
+.wrap{max-width:440px;margin:0 auto;padding:12px 12px 24px}
+h1{font-size:24px;letter-spacing:3px;text-align:center;background:linear-gradient(90deg,#ff9f1c,#ff2d5e,#b967ff);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:900}
+.sub{text-align:center;font-size:10px;letter-spacing:2px;color:#b88a7d;margin:4px 0 10px}
+.hud{display:flex;gap:8px;margin-bottom:8px}
+.hud>div{flex:1;background:#170d1a;border:1px solid #4a2440;border-radius:10px;padding:6px 4px;text-align:center;font-size:11px;color:#d0a8b8}
+.hud b{display:block;font-size:15px;color:#fff}
+#cv{display:block;width:100%;border-radius:14px;border:1px solid #4a2440;background:#02040c;touch-action:manipulation}
+.ov{position:fixed;inset:0;background:rgba(6,3,8,.93);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
+.ovCard{background:linear-gradient(160deg,#241026,#120818);border:1px solid #5f2e52;border-radius:20px;padding:24px 20px;width:100%;max-width:400px;text-align:center;box-shadow:0 0 40px #ff2d5e33}
+.ovCard h2{font-size:22px;margin-bottom:8px;letter-spacing:1px}
+.ovCard p{font-size:13px;color:#d0a8b8;line-height:1.6;margin-bottom:12px}
+.btn{display:block;width:100%;margin:8px 0;padding:14px;border:none;border-radius:12px;font-size:16px;font-weight:800;letter-spacing:1px;cursor:pointer;background:linear-gradient(90deg,#ff9f1c,#ff2d5e);color:#fff;box-shadow:0 4px 18px #ff2d5e44}
+.btn:active{transform:scale(.97)}
+.hide{display:none!important}
+#msg{text-align:center;font-size:13px;color:#d0a8b8;margin-top:8px;min-height:18px;font-weight:600}
+.resRow{display:flex;justify-content:space-between;background:#170d1a;border:1px solid #4a2440;border-radius:10px;padding:9px 12px;margin:5px 0;font-size:13px}
+.resRow b{color:#ff9f1c}
+</style></head><body>
+<div class="wrap">
+<h1>JK METEOR DEFENSE</h1>
+<div class="sub">2047 PLANET SHIELD • TAP TO BLAST • OFFLINE</div>
+<div class="hud">
+<div>⭐ SCORE<b id="score">0</b></div>
+<div>🌊 WAVE<b id="wave">1</b></div>
+<div>🛡️ SHIELD<b id="shield">3</b></div>
+<div>🏆 BEST<b id="best">0</b></div>
+</div>
+<canvas id="cv" width="380" height="440"></canvas>
+<div id="msg"></div>
+</div>
+
+<div class="ov" id="ovStart"><div class="ovCard">
+<h2>☄️ METEOR DEFENSE 2047</h2>
+<p>உன் planet-அ காப்பாத்து! Meteors எல்லா பக்கத்திலிருந்தும் வரும் — TAP பண்ணி blast பண்ணு! 💥 Big meteors split ஆகும்! 🛸 UFO bonus! Shields 3 — miss பண்ணா planet damage!</p>
+<button class="btn" onclick="startGame()">☄️ DEFEND PLANET</button>
+</div></div>
+
+<div class="ov hide" id="ovEnd"><div class="ovCard">
+<h2>💥 PLANET LOST!</h2>
+<div style="font-size:38px;margin:8px 0">🌍</div>
+<div class="resRow"><span>⭐ Score</span><b id="rScore">0</b></div>
+<div class="resRow"><span>☄️ Meteors Blasted</span><b id="rMet">0</b></div>
+<div class="resRow"><span>🌊 Waves Survived</span><b id="rWave">0</b></div>
+<div class="resRow"><span>🏆 Best</span><b id="rBest">0</b></div>
+<p id="endTaunt"></p>
+<button class="btn" onclick="restart()">🔄 DEFEND AGAIN</button>
+</div></div>
+
+<script>
+'use strict';
+var cv=document.getElementById('cv'),cx=cv.getContext('2d');
+var W=cv.width,H=cv.height,CX=W/2,CY=H/2;
+var AC=window.AudioContext?new AudioContext():null;
+function beep(f,d,t){if(!AC)return;try{var o=AC.createOscillator(),g=AC.createGain();o.type=t||'square';o.frequency.value=f;g.gain.setValueAtTime(.06,AC.currentTime);g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+d);o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+d);}catch(e){}}
+function $(id){return document.getElementById(id);}
+function msg(t){$('msg').textContent=t;}
+
+var running=false,over=false;
+var score=0,wave=1,shield=3,blasted=0,killStreak=0,streakT=0;
+var mets=[],blasts=[],parts=[],stars=[],spawnT=60,waveT=0;
+var best=parseInt(localStorage.getItem('jkmd_best')||'0');
+for(var i=0;i<60;i++){stars.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.5+0.5,tw:Math.random()*6.28});}
+
+function startGame(){
+ running=true;over=false;score=0;wave=1;shield=3;blasted=0;killStreak=0;streakT=0;
+ mets=[];blasts=[];parts=[];spawnT=60;waveT=0;
+ $('score').textContent=0;$('wave').textContent=1;$('shield').textContent=3;$('best').textContent=best;
+ $('ovStart').classList.add('hide');$('ovEnd').classList.add('hide');
+ msg('Planet-அ காப்பாத்து! 🌍');
+ if(AC&&AC.state==='suspended'){AC.resume();}
+ beep(440,.1);setTimeout(function(){beep(660,.15);},100);
+}
+function restart(){$('ovEnd').classList.add('hide');startGame();}
+function gameOver(){
+ running=false;over=true;
+ if(score>best){best=score;localStorage.setItem('jkmd_best',best);}
+ $('rScore').textContent=score;$('rMet').textContent=blasted;$('rWave').textContent=wave;$('rBest').textContent=best;
+ $('endTaunt').textContent=score>1500?'🌍 GALAXY GUARDIAN! குயில், letters rescue பண்றத விட planets rescue பண்றது தான் real hero வேலை! 😎':'நல்ல defense! Wave 5+ க்கு போ 🌊';
+ $('ovEnd').classList.remove('hide');
+ beep(200,.4,'sawtooth');setTimeout(function(){beep(120,.6,'sawtooth');},300);
+}
+function boom(x,y,col,n,big){
+ for(var i=0;i<n;i++){
+   var a=Math.random()*6.28,s=(Math.random()*(big?5:3))+1;
+   parts.push({x:x,y:y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:30+Math.random()*15,col:col,r:big?3:2});
+ }
+}
+function spawnMet(){
+ var big=Math.random()<0.18;
+ var ufo=!big&&Math.random()<0.08;
+ var ang=Math.random()*6.28;
+ var d=Math.max(W,H)*0.62;
+ var x=CX+Math.cos(ang)*d,y=CY+Math.sin(ang)*d;
+ var spd=(0.7+wave*0.09+Math.random()*0.4)*(ufo?1.8:1);
+ var dx=CX-x,dy=CY-y,dd=Math.hypot(dx,dy);
+ mets.push({x:x,y:y,vx:dx/dd*spd,vy:dy/dd*spd,r:big?26:ufo?12:14+Math.random()*6,big:big,ufo:ufo,rot:Math.random()*6.28,vr:(Math.random()-0.5)*0.1,hp:big?1:1});
+}
+function tap(tx,ty){
+ if(!running||over)return 0;
+ blasts.push({x:tx,y:ty,r:4,max:34,life:16});
+ beep(300,.06,'sawtooth');
+ var kills=0;
+ for(var i=mets.length-1;i>=0;i--){
+   var m=mets[i];
+   if(Math.hypot(m.x-tx,m.y-ty)<m.r+30){
+     kills++;blasted++;
+     var pts=m.ufo?150:m.big?60:30;
+     if(killStreak>=2)pts+=killStreak*10;
+     score+=pts;$('score').textContent=score;
+     boom(m.x,m.y,m.ufo?'#2dff9b':m.big?'#ff9f1c':'#ff6b81',m.big?22:12,m.big);
+     beep(600+kills*100,.08);
+     if(m.big){
+       // split into 2 small
+       for(var s2=0;s2<2;s2++){
+         var a2=Math.random()*6.28;
+         mets.push({x:m.x,y:m.y,vx:m.vx*1.3+Math.cos(a2)*0.8,vy:m.vy*1.3+Math.sin(a2)*0.8,r:13,big:false,ufo:false,rot:0,vr:0.08,hp:1});
+       }
+       msg('☄️ SPLIT! +'+pts);
+     }else if(m.ufo){msg('🛸 UFO DOWN +'+pts+'!');}
+     mets.splice(i,1);
+   }
+ }
+ if(kills>0){
+   killStreak=kills>1?killStreak+kills:killStreak+1;
+   streakT=90;
+   if(kills>=2)msg('💥 '+kills+' MULTI-BLAST!');
+ }
+ return kills;
+}
+cv.addEventListener('pointerdown',function(e){
+ e.preventDefault();
+ var r=cv.getBoundingClientRect();
+ tap((e.clientX-r.left)*(W/r.width),(e.clientY-r.top)*(H/r.height));
+});
+function planetHit(m){
+ shield--;$('shield').textContent=shield;
+ boom(CX+ (m.x-CX)*0.3,CY+(m.y-CY)*0.3,'#ff2d5e',26,true);
+ beep(100,.5,'sawtooth');
+ if(shield<=0){boom(CX,CY,'#ff9f1c',40,true);gameOver();}
+ else msg('💥 PLANET HIT! Shields: '+shield);
+}
+function step(){
+ if(!running||over)return;
+ // spawn
+ spawnT--;
+ if(spawnT<=0){
+   spawnMet();
+   if(wave>=3&&Math.random()<0.4)spawnMet();
+   spawnT=Math.max(28,80-wave*5);
+ }
+ waveT++;
+ if(waveT>900){waveT=0;wave++;$('wave').textContent=wave;msg('🌊 WAVE '+wave+'!');beep(784,.15);}
+ if(streakT>0){streakT--;if(streakT===0)killStreak=0;}
+ // meteors
+ for(var i=mets.length-1;i>=0;i--){
+   var m=mets[i];
+   m.x+=m.vx;m.y+=m.vy;m.rot+=m.vr;
+   if(Math.hypot(m.x-CX,m.y-CY)<34+m.r*0.5){
+     planetHit(m);
+     mets.splice(i,1);
+     if(!running)return;
+   }
+ }
+ // blasts
+ for(var b=blasts.length-1;b>=0;b--){
+   var bl=blasts[b];bl.life--;bl.r+=(bl.max-bl.r)*0.3;
+   if(bl.life<=0)blasts.splice(b,1);
+ }
+ // particles
+ for(var p=parts.length-1;p>=0;p--){
+   var pt=parts[p];pt.x+=pt.vx;pt.y+=pt.vy;pt.vx*=0.97;pt.vy*=0.97;pt.life--;
+   if(pt.life<=0)parts.splice(p,1);
+ }
+}
+function draw(){
+ cx.fillStyle='#02040c';cx.fillRect(0,0,W,H);
+ // stars
+ for(var s=0;s<stars.length;s++){
+   var st=stars[s];st.tw+=0.05;
+   cx.globalAlpha=0.3+Math.sin(st.tw)*0.3;
+   cx.fillStyle='#fff';cx.fillRect(st.x,st.y,st.r,st.r);
+ }
+ cx.globalAlpha=1;
+ // planet
+ var pg=cx.createRadialGradient(CX-8,CY-8,4,CX,CY,30);
+ pg.addColorStop(0,'#4dc9ff');pg.addColorStop(0.7,'#1466ff');pg.addColorStop(1,'#0a2a80');
+ cx.fillStyle=pg;cx.beginPath();cx.arc(CX,CY,28,0,7);cx.fill();
+ cx.fillStyle='#2dff9b';cx.beginPath();cx.arc(CX-8,CY-4,6,0,7);cx.fill();
+ cx.beginPath();cx.arc(CX+10,CY+8,4,0,7);cx.fill();
+ // shield ring
+ if(shield>0){
+   cx.strokeStyle='rgba(77,201,255,'+(0.15+shield*0.15)+')';cx.lineWidth=3;
+   cx.beginPath();cx.arc(CX,CY,38,0,7);cx.stroke();
+ }
+ // meteors
+ for(var i=0;i<mets.length;i++){
+   var m=mets[i];
+   cx.save();cx.translate(m.x,m.y);cx.rotate(m.rot);
+   if(m.ufo){
+     cx.fillStyle='#2dff9b';cx.beginPath();cx.ellipse(0,0,14,7,0,0,7);cx.fill();
+     cx.fillStyle='#9dffe0';cx.beginPath();cx.arc(0,-4,6,Math.PI,0);cx.fill();
+   }else{
+     cx.fillStyle=m.big?'#8a4a2a':'#6b5a6e';
+     cx.beginPath();cx.arc(0,0,m.r,0,7);cx.fill();
+     cx.fillStyle=m.big?'#a86a3a':'#857a8e';
+     cx.beginPath();cx.arc(-m.r*0.3,-m.r*0.2,m.r*0.35,0,7);cx.fill();
+     cx.beginPath();cx.arc(m.r*0.25,m.r*0.3,m.r*0.22,0,7);cx.fill();
+   }
+   cx.restore();
+ }
+ // blasts
+ for(var b2=0;b2<blasts.length;b2++){
+   var bl2=blasts[b2];
+   cx.strokeStyle='rgba(255,220,100,'+(bl2.life/16)+')';cx.lineWidth=3;
+   cx.beginPath();cx.arc(bl2.x,bl2.y,bl2.r,0,7);cx.stroke();
+ }
+ // particles
+ for(var p2=0;p2<parts.length;p2++){
+   var pt2=parts[p2];
+   cx.globalAlpha=pt2.life/40;cx.fillStyle=pt2.col;
+   cx.fillRect(pt2.x-pt2.r/2,pt2.y-pt2.r/2,pt2.r,pt2.r);cx.globalAlpha=1;
+ }
+ requestAnimationFrame(draw);
+}
+draw();
+var lastTick=0;
+function loop(ts){if(ts-lastTick>15){lastTick=ts;step();}requestAnimationFrame(loop);}
+requestAnimationFrame(loop);
+$('best').textContent=best;
+window.__MD={G:function(){return{score:score,wave:wave,shield:shield,blasted:blasted,streak:killStreak,mets:mets.map(function(m){return{x:Math.round(m.x),y:Math.round(m.y),r:m.r,big:m.big,ufo:m.ufo};}),running:running,over:over,best:best}},
+start:startGame,step:function(n){for(var i=0;i<n;i++){step();}},
+tap:tap,
+spawnAt:function(x,y,vx,vy,r,big,ufo){mets.push({x:x,y:y,vx:vx,vy:vy,r:r||15,big:!!big,ufo:!!ufo,rot:0,vr:0.05,hp:1});},
+clearMets:function(){mets=[];},
+end:gameOver};
+</script></body></html>
