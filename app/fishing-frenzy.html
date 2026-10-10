@@ -128,6 +128,7 @@ function draw(){
   if(f.t.pts>=150){cx.strokeStyle='rgba(255,214,10,.5)';cx.beginPath();cx.arc(f.x,f.y,f.t.sz*.8,0,7);cx.stroke();}
  });
 }
+function msg(t2){document.getElementById('msg').textContent=t2;}
 function refreshShop(){
  [['reel','p1'],['magnet','p2'],['radar','p3']].forEach(function(p){
   var u=p[0],el=document.getElementById(p[1]);
