@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>JK DUNGEON DASH 2043</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0a0508;color:#e8e8f5;min-height:100vh;overflow-x:hidden}
+.wrap{max-width:480px;margin:0 auto;padding:10px 12px 30px}
+h1{text-align:center;font-size:26px;font-weight:900;letter-spacing:2px;background:linear-gradient(90deg,#ff7b4d,#ff2ea6,#ffd60a);-webkit-background-clip:text;background-clip:text;color:transparent;margin-top:4px}
+.sub{text-align:center;color:#8a8ab0;font-size:10px;letter-spacing:3px;margin:2px 0 8px}
+.hud{display:flex;justify-content:space-between;background:linear-gradient(145deg,#241016,#180a0e);border:1px solid #4a2030;border-radius:12px;padding:8px 14px;margin-bottom:8px;font-size:13px;font-weight:800}
+.hud .h{color:#ff4d6d}.hud .f{color:#00e5ff}.hud .k{color:#ffd60a}
+#cv{display:block;width:100%;background:#050308;border-radius:14px;border:1px solid #4a2030;touch-action:none}
+.ctl{display:flex;gap:8px;margin-top:10px}
+.pad{flex:1;display:grid;grid-template-columns:repeat(3,52px);grid-template-rows:repeat(3,52px);gap:5px;justify-content:center}
+.pb{background:linear-gradient(145deg,#2a1420,#1c0c14);border:1px solid #5a2a3a;border-radius:12px;font-size:20px;color:#e8e8f5;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.pb:active{background:#ff7b4d;color:#000}
+.atkCol{display:flex;flex-direction:column;justify-content:center}
+.atk{width:84px;height:84px;border:none;border-radius:50%;font-size:30px;background:radial-gradient(circle at 35% 35%,#ff9f43,#c0392b);color:#fff;cursor:pointer;box-shadow:0 4px 18px rgba(255,123,77,.4)}
+.atk:active{transform:scale(.92)}
+.msg{text-align:center;font-size:12px;color:#b8b8d8;min-height:18px;margin-top:6px}
+.ov{position:fixed;inset:0;background:rgba(5,2,4,.94);z-index:20;display:flex;align-items:center;justify-content:center;padding:20px}
+.ov.hide{display:none}
+.ovCard{background:linear-gradient(145deg,#241016,#120609);border:1px solid #5a2a3a;border-radius:20px;padding:26px 20px;max-width:380px;width:100%;text-align:center}
+.ovCard h2{font-size:24px;margin-bottom:8px}
+.ovCard p{color:#b8b8d8;font-size:13px;line-height:1.8}
+.big{font-size:38px;font-weight:900;color:#ffd60a}
+.btn{display:inline-block;margin-top:14px;padding:13px 30px;border:none;border-radius:14px;font-size:15px;font-weight:800;cursor:pointer;background:linear-gradient(90deg,#ff7b4d,#ff2ea6);color:#fff}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>JK DUNGEON DASH</h1>
+<div class="sub">2043 REAL-TIME ACTION DUNGEON • turn-based அல்ல! • OFFLINE</div>
+<div class="hud"><span class="h">❤️ <b id="hp">5</b></span><span class="f">FLOOR <b id="fl">1</b>/6</span><span class="k">🪙 <b id="cn">0</b></span></div>
+<canvas id="cv"></canvas>
+<div class="ctl">
+<div class="pad">
+<div></div><div class="pb" data-d="0,-1">⬆️</div><div></div>
+<div class="pb" data-d="-1,0">⬅️</div><div class="pb" id="atkMid">⚔️</div><div class="pb" data-d="1,0">➡️</div>
+<div></div><div class="pb" data-d="0,1">⬇️</div><div></div>
+</div>
+<div class="atkCol"><button class="atk" id="atkBtn">⚔️</button></div>
+</div>
+<div class="msg" id="msg">👹 monsters-அ அடி, 🔑 key எடு, 🚪 stairs ஏறு!</div>
+</div>
+<div class="ov" id="ov"><div class="ovCard">
+<h2>⚔️ JK DUNGEON DASH</h2>
+<p>REAL-TIME action dungeon!<br><br>👾 <b>Slime</b> — slow chase<br>🦇 <b>Bat</b> — fast, random zigzag<br>👹 <b>Brute</b> — நேரா charge!<br>💀 <b>Phantom</b> — சுவர் தாண்டி வரும்!<br><br>⚔️ swing (cooldown உண்டு) • 🔑 key • 🚪 stairs • 6 floors • 💖 potions</p>
+<button class="btn" onclick="startGame()">ENTER DUNGEON ⚔️</button>
+</div></div>
+<div class="ov hide" id="ovEnd"><div class="ovCard">
+<h2 id="endTitle">💀</h2>
+<div class="big" id="endInfo"></div>
+<p id="endText"></p>
+<button class="btn" onclick="startGame()">AGAIN ⚔️</button>
+</div></div>
+<script>
+var cv=document.getElementById('cv'),cx=cv.getContext('2d');
+var TILE=0,MW=17,MH=21,map=[];
+var px=1,py=1,hp=5,floor=1,coins=0,hasKey=false,over=false,won=false,paused=false;
+var enemies=[],potions=[],keyPos=null,doorPos=null,swingT=0,swingCd=0,hurtT=0,mvQueue=[];
+var MOBS=[{e:'👾',sp:.028,hp:1,dmg:1,name:'slime'},{e:'🦇',sp:.055,hp:1,dmg:1,zig:true,name:'bat'},{e:'👹',sp:.04,hp:2,dmg:1,charge:true,name:'brute'},{e:'💀',sp:.035,hp:1,dmg:1,ghost:true,name:'phantom'}];
+function genFloor(){
+ map=[];for(var y=0;y<MH;y++){map.push([]);for(var x=0;x<MW;x++)map[y].push(1);}
+ // rooms + corridors (simple drunkard walk from center)
+ var x=Math.floor(MW/2),y=Math.floor(MH/2),steps=MW*MH/3;
+ map[y][x]=0;
+ for(var i=0;i<steps;i++){
+  var d=[[1,0],[-1,0],[0,1],[0,-1]][Math.floor(Math.random()*4)];
+  var nx=Math.max(1,Math.min(MW-2,x+d[0])),ny=Math.max(1,Math.min(MH-2,y+d[1]));
+  x=nx;y=ny;map[y][x]=0;
+  if(Math.random()<.3&&x>2&&y>2&&x<MW-3&&y<MH-3){map[y-1][x]=0;map[y+1][x]=0;map[y][x-1]=0;map[y][x+1]=0;}
+ }
+ px=1;py=1;map[1][1]=0;map[1][2]=0;map[2][1]=0;
+ function randOpen(far){while(true){var rx=1+Math.floor(Math.random()*(MW-2)),ry=1+Math.floor(Math.random()*(MH-2));if(map[ry][rx]===0&&(!far||Math.abs(rx-1)+Math.abs(ry-1)>8))return[rx,ry];}}
+ var k=randOpen(true);keyPos=k;map[k[1]][k[0]]=0;
+ var d2=randOpen(true);doorPos=d2;map[d2[1]][d2[0]]=0;
+ enemies=[];var n=2+floor;
+ for(var i=0;i<n;i++){var p=randOpen(true);var t=MOBS[Math.min(MOBS.length-1,Math.floor(Math.random()*(1+floor*.6)))];
+  enemies.push({x:p[0],y:p[1],fx:p[0],fy:p[1],t:t,hp:t.hp,cd:0,zigT:0,zigD:[0,0]});}
+ potions=[];if(Math.random()<.7){var pp=randOpen(true);potions.push({x:pp[0],y:pp[1]});}
+ hasKey=false;
+ TILE=Math.floor(cv.clientWidth/MW);cv.width=TILE*MW;cv.height=TILE*MH;
+}
+function canWalk(x,y){return x>=0&&y>=0&&x<MW&&y<MH&&map[y][x]===0;}
+function tryMove(dx,dy){
+ if(over||won||paused)return;
+ var nx=px+dx,ny=py+dy;
+ if(!canWalk(nx,ny))return;
+ // enemy collision = hit it
+ var e=enemies.find(function(e2){return e2.x===nx&&e2.y===ny&&e2.hp>0});
+ if(e){swing(dx,dy);return;}
+ px=nx;py=ny;
+ if(keyPos&&px===keyPos[0]&&py===keyPos[1]){hasKey=true;keyPos=null;msg('🔑 KEY! Stairs திற! 🚪');}
+ var pi=potions.findIndex(function(p){return p.x===px&&p.y===py});
+ if(pi>=0){potions.splice(pi,1);hp=Math.min(8,hp+2);msg('💖 +2 HP!');updHud();}
+ if(doorPos&&px===doorPos[0]&&py===doorPos[1]){
+  if(hasKey){floor++;coins+=10;
+   if(floor>6){win();}else{msg('⬇️ FLOOR '+floor+'!');genFloor();updHud();}
+  }else msg('🔒 முதல்ல key வேணும்!');
+ }
+ updHud();
+}
+function swing(dx,dy){
+ if(swingCd>0||over||won)return;
+ swingCd=350;swingT=Date.now();
+ setTimeout(function(){swingCd=0},350);
+ var tx=px+dx,ty=py+dy;
+ enemies.forEach(function(e){
+  if(e.hp>0&&((e.x===tx&&e.y===ty)||(Math.abs(e.x-px)+Math.abs(e.y-py)===1))){
+   e.hp--;e.cd=400;
+   if(e.hp<=0){coins+=2;msg('💥 '+e.t.e+' down! +2🪙');}
+  }});
+ updHud();
+}
+document.getElementById('atkBtn').addEventListener('pointerdown',function(){swing(lastD[0],lastD[1]);});
+document.getElementById('atkMid').addEventListener('pointerdown',function(){swing(lastD[0],lastD[1]);});
+var lastD=[1,0];
+document.querySelectorAll('.pb[data-d]').forEach(function(b){
+ b.addEventListener('pointerdown',function(){var d=b.dataset.d.split(',').map(Number);lastD=d;tryMove(d[0],d[1]);});
+});
+document.addEventListener('keydown',function(e){var m={ArrowUp:[0,-1],ArrowDown:[0,1],ArrowLeft:[-1,0],ArrowRight:[1,0]}[e.key];if(m){lastD=m;tryMove(m[0],m[1]);}if(e.key===' ')swing(lastD[0],lastD[1]);});
+var tsx=0,tsy=0;
+cv.addEventListener('touchstart',function(e){tsx=e.touches[0].clientX;tsy=e.touches[0].clientY},{passive:true});
+cv.addEventListener('touchend',function(e){var dx=e.changedTouches[0].clientX-tsx,dy=e.changedTouches[0].clientY-tsy;
+ if(Math.abs(dx)<20&&Math.abs(dy)<20){swing(lastD[0],lastD[1]);return;}
+ var d=Math.abs(dx)>Math.abs(dy)?[dx>0?1:-1,0]:[0,dy>0?1:-1];lastD=d;tryMove(d[0],d[1]);},{passive:true});
+/* enemy AI tick */
+function bfsDist(ex,ey){
+ // BFS from enemy to player, return next step
+ var q=[[ex,ey]],prev={},seen={};seen[ex+','+ey]=1;
+ while(q.length){var c=q.shift();
+  if(c[0]===px&&c[1]===py){var cur=c;while(prev[cur[0]+','+cur[1]]&&!(prev[cur[0]+','+cur[1]][0]===ex&&prev[cur[0]+','+cur[1]][1]===ey))cur=prev[cur[0]+','+cur[1]];return cur;}
+  for(var i=0;i<4;i++){var d=[[1,0],[-1,0],[0,1],[0,-1]][i];var nx=c[0]+d[0],ny=c[1]+d[1];
+   if(canWalk(nx,ny)&&!seen[nx+','+ny]){seen[nx+','+ny]=1;prev[nx+','+ny]=c;q.push([nx,ny]);}}}
+ return null;
+}
+var aiT=0;
+function aiStep(now){
+ if(over||won||paused||!started)return;
+ if(now-aiT<380)return;aiT=now;
+ enemies.forEach(function(e){
+  if(e.hp<=0)return;
+  if(e.cd>0){e.cd-=380;return;}
+  var dx=0,dy=0;
+  if(e.t.ghost){dx=Math.sign(px-e.x);dy=Math.sign(py-e.y);if(Math.random()<.5)dx=0;else dy=0;}
+  else if(e.t.zig){e.zigT--;if(e.zigT<=0){e.zigT=3;e.zigD=[[1,0],[-1,0],[0,1],[0,-1]][Math.floor(Math.random()*4)];}
+   dx=e.zigD[0];dy=e.zigD[1];
+   if(Math.abs(px-e.x)+Math.abs(py-e.y)<6){var n=bfsDist(e.x,e.y);if(n){dx=n[0]-e.x;dy=n[1]-e.y;}}}
+  else{var n2=bfsDist(e.x,e.y);if(n2){dx=n2[0]-e.x;dy=n2[1]-e.y;}
+   if(e.t.charge&&Math.random()<.3){dx*=1;dy*=1;}}
+  var nx=e.x+dx,ny=e.y+dy;
+  if(nx===px&&ny===py){hurtPlayer();return;}
+  var occ=enemies.some(function(o){return o!==e&&o.hp>0&&o.x===nx&&o.y===ny});
+  if(occ)return;
+  if(e.t.ghost||canWalk(nx,ny)){e.x=nx;e.y=ny;}
+ });
+}
+function hurtPlayer(){
+ if(hurtT>Date.now())return;
+ hurtT=Date.now()+800;
+ hp--;updHud();
+ msg('💔 அடி வாங்கினாய்!');
+ if(hp<=0){die();}
+}
+function updHud(){document.getElementById('hp').textContent=Math.max(0,hp);document.getElementById('fl').textContent=Math.min(6,floor);document.getElementById('cn').textContent=coins;}
+function msg(t){document.getElementById('msg').textContent=t;}
+function draw(){
+ cx.fillStyle='#050308';cx.fillRect(0,0,cv.width,cv.height);
+ var lx=px-6,ly=py-5; // camera-lite: show whole map scaled
+ for(var y=0;y<MH;y++)for(var x=0;x<MW;x++){
+  if(map[y][x]===1){cx.fillStyle='#1c0e18';cx.fillRect(x*TILE,y*TILE,TILE,TILE);cx.fillStyle='rgba(255,123,77,.08)';cx.fillRect(x*TILE,y*TILE,TILE,1);}
+  else{cx.fillStyle='#0e0710';cx.fillRect(x*TILE,y*TILE,TILE,TILE);}
+ }
+ cx.font=Math.round(TILE*.7)+'px serif';cx.textAlign='center';cx.textBaseline='middle';
+ if(doorPos)cx.fillText(hasKey?'🚪':'🔒',doorPos[0]*TILE+TILE/2,doorPos[1]*TILE+TILE/2);
+ if(keyPos)cx.fillText('🔑',keyPos[0]*TILE+TILE/2,keyPos[1]*TILE+TILE/2);
+ potions.forEach(function(p){cx.fillText('💖',p.x*TILE+TILE/2,p.y*TILE+TILE/2);});
+ enemies.forEach(function(e){if(e.hp<=0)return;
+  if(e.t.ghost){cx.globalAlpha=.7;}
+  cx.fillText(e.t.e,e.x*TILE+TILE/2,e.y*TILE+TILE/2);
+  cx.globalAlpha=1;
+  if(e.t.hp>1){cx.fillStyle='#ff4d6d';cx.fillRect(e.x*TILE+2,e.y*TILE+1,(TILE-4)*(e.hp/e.t.hp),2);}
+ });
+ // swing arc
+ if(Date.now()-swingT<150){cx.strokeStyle='#ffd60a';cx.lineWidth=3;cx.beginPath();cx.arc(px*TILE+TILE/2,py*TILE+TILE/2,TILE*1.1,0,7);cx.stroke();}
+ // player with hurt flash
+ var flash=hurtT>Date.now()&&Math.floor(Date.now()/100)%2===0;
+ if(!flash){cx.fillText('🥷',px*TILE+TILE/2,py*TILE+TILE/2);}
+}
+var started=false;
+function loop(){aiStep(Date.now());draw();requestAnimationFrame(loop);}
+function die(){over=true;document.getElementById('endTitle').textContent='💀 DUNGEON CLAIMED YOU';document.getElementById('endInfo').textContent='Floor '+floor;
+ var best=parseInt(localStorage.getItem('jkdd_best')||'0');var rec=coins>best;if(rec)localStorage.setItem('jkdd_best',coins);
+ document.getElementById('endText').innerHTML='Coins: 🪙'+coins+(rec?' 🎉 NEW RECORD!':' (best '+best+')')+'<br>Phantom-கிட்ட ஜாக்கிரதை! 💀';
+ setTimeout(function(){document.getElementById('ovEnd').classList.remove('hide')},500);}
+function win(){won=true;var best=parseInt(localStorage.getItem('jkdd_best')||'0');if(coins>best)localStorage.setItem('jkdd_best',coins);
+ document.getElementById('endTitle').textContent='👑 DUNGEON CONQUERED!';document.getElementById('endInfo').textContent='🪙 '+coins;
+ document.getElementById('endText').innerHTML='6 floors முடிஞ்சுது! 🏆<br>ராமு dungeon king! 👑';
+ setTimeout(function(){document.getElementById('ovEnd').classList.remove('hide')},500);}
+function startGame(){
+ document.getElementById('ov').classList.add('hide');document.getElementById('ovEnd').classList.add('hide');
+ hp=5;floor=1;coins=0;over=false;won=false;paused=false;started=true;
+ genFloor();updHud();msg('👹 monsters-அ அடி, 🔑 key எடு!');
+}
+genFloor();
+window.__DD={G:function(){return {hp:hp,floor:floor,coins:coins,px:px,py:py,enemies:enemies.filter(function(e){return e.hp>0}).length,hasKey:hasKey,over:over,won:won,map:map.map(function(r){return r.join('')}).join('/')}},mv:tryMove,swing:swing,start:startGame,key:function(){return keyPos},door:function(){return doorPos},setHp:function(h){hp=h},teleport:function(x,y){if(canWalk(x,y)){px=x;py=y;tryMove(0,0);updHud();}},aiTick:function(){aiT=0;aiStep(Date.now())}};
+loop();
+</script>
+</body>
+</html>
