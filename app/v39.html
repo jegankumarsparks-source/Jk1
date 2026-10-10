@@ -441,7 +441,7 @@ body{padding-bottom:calc(78px + env(safe-area-inset-bottom))}
    Simulation only. This file never connects a wallet, never signs,
    never sends a transaction. Every "buy" and "sell" is paper money.
    ===================================================================== */
-const VERSION='V24.27';
+const VERSION='V39';
 const JP='https://datapi.jup.ag', LITE='https://lite-api.jup.ag', DEX='https://api.dexscreener.com', RPC='https://solana-rpc.publicnode.com';
 const SOL_MINT='So11111111111111111111111111111111111111112';
 const BASE_MINTS=new Set([SOL_MINT,'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v','Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB','mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So','J1toso1uCk3RLmjorhTtrVwY9HJ7X8V9yYac6Y7kGCPn']);
@@ -512,8 +512,8 @@ if(!ST.walletSignal) ST.walletSignal={cash:130,start:130,pos:[],closed:[],born:D
 if(!ST.smart) ST.smart={cash:CFG.bank,start:CFG.bank,pos:[],closed:[],born:Date.now()}; // V14: SMART MONEY keeps its OWN paper wallet
 if(!ST.launch) ST.launch={cash:CFG.bank,start:CFG.bank,pos:[],closed:[],born:Date.now()}; // V13: LAUNCH AUTO keeps its OWN paper wallet
 if(!ST.closest) ST.closest={cash:CFG.bank,start:CFG.bank,pos:[],closed:[],born:Date.now()}; // V11: CLOSEST AUTO keeps its OWN paper wallet
-// owner rule: every new app version starts ALL paper bots fresh at $500 each
-const JK_VER='V39'; if(LS.get('appVer')!==JK_VER){ LS.set('appVer',JK_VER); ST.paper={cash:500,start:500,pos:[],closed:[],born:Date.now()}; ST.closest={cash:500,start:500,pos:[],closed:[],born:Date.now()}; ST.launch={cash:500,start:500,pos:[],closed:[],born:Date.now()}; ST.smart={cash:500,start:500,pos:[],closed:[],born:Date.now()}; ST.walletSignal={cash:500,start:500,pos:[],closed:[],born:Date.now()}; ST.hourly={cash:500,start:500,pos:[],closed:[],born:Date.now()}; ST.lastBuy={}; ST.lastBuyC={}; ST.lastBuyL={}; ST.lastBuyS={}; ST.lastBuyWS={}; ST.lastBuyH={}; saveBooks(); }
+// owner rule: every new app version starts ALL paper bots fresh at $500 each. The original four reset WITH archival in jkFreshUpgrade (JK_UPGRADE_ID); here we reset the two books it does not cover.
+const JK_VER='V39'; if(LS.get('appVer')!==JK_VER){ LS.set('appVer',JK_VER); ST.walletSignal={cash:500,start:500,pos:[],closed:[],born:Date.now()}; ST.hourly={cash:500,start:500,pos:[],closed:[],born:Date.now()}; ST.lastBuyWS={}; ST.lastBuyH={}; saveBooks(); }
 // V9 upgrade: sync still-open positions to the tiered rule (tier 1 = sell 50% at +30%, tier 2 = sell the rest at 2x, stop -30% from entry)
 function syncPosRule(){ for(const B of [ST.paper,ST.manual]) if(B&&B.pos) for(const p of B.pos) if(p&&p.entry>0){
   p.tp2=p.entry*CFG.tp2X; if(!p.tpDone){ p.tp=p.entry*CFG.tpX; p.stop=p.entry*(1-CFG.stopPct/100); } else if(CFG.trail==='entry'){ p.stop=p.entry*(1-CFG.stopPct/100); } } }
@@ -1202,7 +1202,7 @@ function dashBoard(){ const R=ST.res; if(!R||!R.top.length) return '';
  return '<div class="sec">\u{1F4CA} Top 10 dashboard <span class="h">ranked best right now \u00B7 5m / 1h / 24h \u00B7 tap a row for full chart + rug check</span></div><div class="card" style="padding:6px 10px">'+R.top.map((o,i)=>{ const c=o.c; const p5=num(c.s5&&c.s5.priceChange), p1=num(c.s1&&c.s1.priceChange), p24=num(c.s24&&c.s24.priceChange);
   const cls=x=>x>=0?'g':'r'; const inf=o.a&&o.a.info||{}; const edge=[]; if(inf.m15!=null)edge.push('mom '+fmtPct(inf.m15,0)); if(inf.br)edge.push('buyers '+(inf.br>=9?'9+':inf.br.toFixed(1))+'x'); if(inf.burst)edge.push('vol '+inf.burst.toFixed(1)+'x'); if(inf.ema)edge.push('EMA up'); if(inf.rsi!=null)edge.push('RSI '+inf.rsi.toFixed(0)); if(o.wl&&o.wl.n)edge.push(o.wl.n+' wallet'+(o.wl.n>1?'s':''));
   return '<div class="drow" onclick="openCoin(\''+c.m+'\')"><span class="drk">'+(i+1)+'</span><div class="dcol"><b>'+esc(c.sym||'?')+'</b> '+(o.bz?'<span class="bztag">BUY ZONE</span> ':'')+'<div class="dsub">'+esc(String(c.name||'').slice(0,16))+' \u00B7 '+fmtUsd(c.liq,0)+' liq \u00B7 '+fmtUsd(c.mcap,0)+' mc \u00B7 '+dashAge(c)+' old</div>'+(edge.length?'<div class="dsub" style="color:var(--acc,#7ee787)">'+edge.slice(0,4).join(' \u00B7 ')+'</div>':'')+'</div><div class="dcol r"><span class="dnum '+cls(p5)+'">'+fmtPct(p5,0)+'</span> <span class="dnum '+cls(p1)+'">'+fmtPct(p1,0)+'</span> <span class="dnum '+cls(p24)+'">'+fmtPct(p24,0)+'</span><div class="dsub">5m \u00B7 1h \u00B7 24h</div></div><span class="jksc">JK '+Math.round(o.sc)+'</span></div>'; }).join('')+'</div>'; }
-function raceBoard(){ const bots=[['\u{1F916} Auto pilot',ST.paper],['\u{1F3AF} Closest',ST.closest],['\u{1F680} Launch',ST.launch],['\u{1F40B} Smart money',ST.smart],['\u{1F45B} Wallet Signal',ST.walletSignal],['\u23F1 1-hour cycle',ST.hourly]];
+function raceBoard(){ const bots=[['\u{1F916} Auto pilot',ST.paper],['\u{1F3AF} Closest',ST.closest],['\u{1F680} Launch',ST.launch],['\u{1F40B} Smart money',ST.smart],['\u{1F45B} Wallet Signal',ST.walletSignal],['\u23F1 1-hour cycle',JK_HOURLY]];
  const R=bots.map(([n,B])=>({n,S:bookStats(B)})).sort((a,b)=>b.S.val-a.S.val); const medals=['\u{1F947}','\u{1F948}','\u{1F949}'];
  return '<div class="sec">\u{1F3C1} $500 race <span class="h">all six paper wallets started V39 at $500 \u00B7 live ranking</span></div><div class="card" style="padding:6px 10px">'+R.map((r,i)=>'<div class="race"><span class="rk">'+(medals[i]||(i+1)+'.')+'</span><span class="nm">'+r.n+'</span><span class="vl '+(r.S.pnl>=0?'g':'r')+'">'+money(r.S.val)+'</span><span class="xs '+(r.S.pnl>=0?'g':'r')+'">'+(r.S.pct>=0?'+':'')+r.S.pct.toFixed(1)+'%</span></div>').join('')+'</div>'; }
 function hourlyTick(){ if(CFG.hourlyAuto===false||!ST.res) return; const B=ST.hourly; const p=B.pos[0];
@@ -1250,7 +1250,7 @@ function renderHome(){ const R=ST.res, el=$('#pg-home'); let h=botsPanel()+homeS
   // Filtered
   h+='<div class="sec">🛡️ Filtered out <span class="n">'+R.filtered.length+'</span><span class="h">failed rug / honeypot check · serial-rugger devs BLOCKED</span></div>';
   h+=R.filtered.length?'<div class="card list">'+R.filtered.map(o=>'<div class="li" onclick="openCoin(\''+o.c.m+'\')" style="align-items:flex-start">'+icon(o.c,30)+'<div style="flex:1;min-width:0"><b>'+esc(o.c.sym)+'</b> <span class="xs m">'+fmtUsd(o.c.liq,0)+' liq · '+ago(o.c.created)+'</span><div class="xs r">'+o.why.map(esc).join(' · ')+'</div></div></div>').join('')+'</div>':'<div class="card"><div class="xs m">No coin failed the rug check in the last '+Object.keys(ST.an).length+' chart reads.</div></div>';
-  h+=hourlyPanel(); setHome(el,h); }
+  setHome(el,h); }
 /* V9: on a wide (desktop) screen the Home page shows the Live feed + open auto positions in a side panel */
 function isDesk(){ return window.innerWidth>=1024; }
 function setHome(el,h){ const old=el.querySelector('.dkSide'); const sc=old?old.scrollTop:0;
@@ -1437,7 +1437,7 @@ function keepScroll(fn){ const y=window.scrollY; fn(); window.scrollTo(0,y); }
 /* ---------- boot ---------- */
 function boot(){ const n=importOld(); renderNav(); go(TABS.some(t=>t[0]===ST.tab)?ST.tab:'home'); if(n) setTimeout(()=>toast('Imported '+n+' wallets from your V6 / V5 data'),1500);
   if(!ST.log.length) logA('info','V24 started · auto-pilot '+(CFG.auto?'ON':'OFF')+' · closest auto '+(CFG.closestAuto?'ON':'OFF')+' · launch auto '+(CFG.launchAuto?'ON':'OFF')+' · paper wallet '+money(ST.paper.cash));
-  discover(); setInterval(discover,25000); setInterval(hourlyTick,15000); setTimeout(hourlyTick,6000); setInterval(reprice,8000); setInterval(()=>{ if(!ST.busy.an) analyzeBatch(); },45000);
+  discover(); setInterval(discover,25000); setInterval(reprice,8000); setInterval(()=>{ if(!ST.busy.an) analyzeBatch(); },45000);
   setInterval(walletPoll,20000); setTimeout(creatorPoll,11000); setInterval(creatorPoll,30000); setTimeout(walletPoll,5000);
   setTimeout(()=>huntTick(),9000); setInterval(()=>huntTick(),45000); setTimeout(earlyScan,14000); setInterval(earlyScan,30000); setTimeout(deepBatch,20000); setInterval(deepBatch,50000); document.body.dataset.tab=ST.tab; setInterval(()=>{ netStatus(); },1000);
   setInterval(()=>{ if(['auto','closest','launch','smart','walletsignal','winners','premium','rank','paper'].indexOf(ST.tab)>=0) keepScroll(()=>renderPage(ST.tab)); },4000);
@@ -2516,7 +2516,7 @@ importData=function(f){if(!f)return;if(f.size>8*1024*1024){toast('Backup is over
 const jkBackupRenderPage=renderPage;
 renderPage=function(t){jkBackupRenderPage(t);if(t==='set'&&!document.getElementById('jkBackupNotice')){
  const el=document.createElement('div');el.id='jkBackupNotice';el.className='card';
- el.innerHTML='<b>🔒 Safe backup · V24.27</b><div class="xs m" style="margin-top:8px">Export keeps paper wallets, tracked wallets, settings and saved analysis. Bot credentials, Telegram destinations and pending post queues are excluded, including extra-bot secrets. Imports are checked before writing and require your confirmation. Existing local Telegram settings stay untouched.</div><div class="btns"><button class="btn" onclick="exportData()">Download safe backup</button></div>';document.getElementById('pg-set').prepend(el);
+ el.innerHTML='<b>🔒 Safe backup · V39</b><div class="xs m" style="margin-top:8px">Export keeps paper wallets, tracked wallets, settings and saved analysis. Bot credentials, Telegram destinations and pending post queues are excluded, including extra-bot secrets. Imports are checked before writing and require your confirmation. Existing local Telegram settings stay untouched.</div><div class="btns"><button class="btn" onclick="exportData()">Download safe backup</button></div>';document.getElementById('pg-set').prepend(el);
 }};
 
 
@@ -2822,7 +2822,7 @@ jkCoinSummary=function(c){return jkTimestampSummary(c)+'\n'+jkProviderFreshness(
 
 
 /* V24.27 owner-requested fresh original-four wallets and hourly paper dashboard. */
-const JK_UPGRADE_ID='V24.27';
+const JK_UPGRADE_ID='V39';
 let JK_RESET_ERROR='';
 function jkFreshUpgrade(){if(LS.get('freshReset','')===JK_UPGRADE_ID)return true;
  const keys=['paper','closest','launch','smart'],rollbackKeys=[...keys,'lastBuy','lastBuyC','lastBuyL','lastBuyS','cfg','freshReset','upgradeArchives'],previous=rollbackKeys.map(k=>[k,localStorage.getItem('jk7_'+k)]),oldCFG=JSON.parse(JSON.stringify(CFG)),snapshot={version:JK_UPGRADE_ID,at:Date.now(),wallets:{},cooldowns:{}};
