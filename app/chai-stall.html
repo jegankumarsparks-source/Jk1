@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>JK CHAI STALL 2040</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;touch-action:none}
+html,body{width:100%;height:100%;overflow:hidden;background:linear-gradient(180deg,#FF9A5A 0%,#FFD6A5 55%,#FFF3E4 100%);font-family:'Baloo 2',sans-serif}
+#hud{position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;padding:12px 16px;z-index:5;pointer-events:none}
+#coins{font-size:26px;color:#7B3F00;font-weight:800}
+#hearts{font-size:20px}
+#customer{position:fixed;top:12%;left:50%;transform:translateX(-50%);text-align:center;z-index:3}
+#cface{font-size:84px;filter:drop-shadow(0 6px 6px rgba(0,0,0,.2))}
+#order{display:inline-block;margin-top:6px;background:#fff;border:3px solid #7B3F00;border-radius:16px;padding:8px 14px;font-size:26px;box-shadow:0 4px 0 rgba(123,63,0,.35)}
+#patience{width:200px;height:10px;background:rgba(123,63,0,.2);border-radius:6px;margin:10px auto 0;overflow:hidden}
+#pfill{height:100%;background:#6A994E;width:100%}
+#built{position:fixed;bottom:34%;left:50%;transform:translateX(-50%);background:rgba(255,255,255,.85);border:2px dashed #7B3F00;border-radius:12px;padding:6px 14px;font-size:22px;min-width:180px;text-align:center;min-height:44px;z-index:3}
+#counter{position:fixed;bottom:0;left:0;right:0;height:32%;background:#8B5E34;border-top:8px solid #6B4423;z-index:2;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px;padding:14px 8px}
+.ing{width:64px;height:64px;border-radius:14px;background:#FFF3E4;border:3px solid #6B4423;font-size:30px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 0 #6B4423}
+.ing:active{transform:translateY(3px);box-shadow:0 1px 0 #6B4423}
+.ing span{font-size:10px;color:#6B4423;font-weight:800}
+#serve{width:110px;height:64px;border-radius:14px;background:#6A994E;border:3px solid #386641;color:#fff;font-family:'Baloo 2';font-size:20px;font-weight:800;cursor:pointer;box-shadow:0 4px 0 #386641}
+#serve:active{transform:translateY(3px);box-shadow:0 1px 0 #386641}
+#msg{position:fixed;top:44%;left:50%;transform:translateX(-50%);font-size:30px;font-weight:800;z-index:4;opacity:0;transition:opacity .2s}
+.overlay{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(180deg,#FF9A5A,#FFD6A5);text-align:center;padding:20px}
+.overlay.hidden{display:none}
+h1{font-size:36px;color:#7B3F00;font-weight:800}
+.sub{color:#8B5E34;font-size:17px;margin-top:10px;max-width:320px;line-height:1.6}
+.btn{margin-top:24px;padding:12px 40px;background:#E76F51;color:#fff;font-family:'Baloo 2';font-size:24px;font-weight:800;border:none;border-radius:14px;cursor:pointer;box-shadow:0 5px 0 #9B4226}
+#finalCoins{font-size:52px;color:#7B3F00;margin-top:8px;font-weight:800}
+</style>
+</head>
+<body>
+<div id="hud"><div id="coins">🪙 0</div><div id="hearts">❤️❤️❤️</div></div>
+<div id="customer"><div id="cface">😀</div><br><div id="order"></div><div id="patience"><div id="pfill"></div></div></div>
+<div id="built">☕ empty cup</div>
+<div id="msg"></div>
+<div id="counter">
+<button class="ing" data-i="🫚"><span>🫚</span>ginger</button>
+<button class="ing" data-i="🌿"><span>🌿</span>elaichi</button>
+<button class="ing" data-i="🥛"><span>🥛</span>milk</button>
+<button class="ing" data-i="🍬"><span>🍬</span>sugar</button>
+<button class="ing" data-i="🍋"><span>🍋</span>lemon</button>
+<button id="serve">SERVE!</button>
+</div>
+<div class="overlay" id="start">
+<h1>☕ JK CHAI STALL 2040 ☕</h1>
+<p class="sub">Customers order chai with add-ins. Tap the ingredients in ANY order, then SERVE before patience runs out! Wrong recipe or slow service = angry customer = lose a heart. 3 hearts!</p>
+<button class="btn" id="startBtn">OPEN STALL!</button>
+</div>
+<div class="overlay hidden" id="over">
+<h1>STALL CLOSED!</h1>
+<div id="finalCoins">🪙 0</div>
+<p class="sub" id="overSub"></p>
+<button class="btn" id="overBtn">REOPEN!</button>
+</div>
+<script>
+"use strict";
+const ING=['🫚','🌿','🥛','🍬','🍋'];
+const FACES=['😀','🧕','👴','👵','🧑','👩','👨','🧓'];
+let coins=0,hearts=3,served=0,playing=false,over=false;
+let order=[],built=[],patience=1,patRate=0.12,face='😀';
+const el=id=>document.getElementById(id);
+function renderOrder(){el('order').textContent='☕ + '+order.join(' + ');}
+function renderBuilt(){el('built').textContent=built.length?('☕ '+built.join(' ')):'☕ empty cup';}
+function newCustomer(){built=[];renderBuilt();
+const n=1+Math.min(3,Math.floor(served/4)+ (Math.random()<0.5?1:0));
+order=[];const pool=ING.slice();
+for(let i=0;i<n;i++){const idx=Math.floor(Math.random()*pool.length);order.push(pool.splice(idx,1)[0]);}
+face=FACES[Math.floor(Math.random()*FACES.length)];el('cface').textContent=face;
+patience=1;patRate=Math.min(0.35,0.10+served*0.012);
+renderOrder();}
+function flash(text,color){const m=el('msg');m.textContent=text;m.style.color=color;m.style.opacity=1;setTimeout(()=>m.style.opacity=0,700);}
+function serve(){if(!playing||over)return;
+const same=order.length===built.length&&order.every(i=>built.includes(i));
+if(same){const tip=order.length*10+Math.round(patience*10);coins+=tip;served++;flash('+'+tip+' 🪙 PERFECT!','#386641');newCustomer();}
+else{hearts--;flash('WRONG CHAI! 😠','#9B2226');el('hearts').textContent='❤️'.repeat(Math.max(0,hearts))||'💔';built=[];renderBuilt();patience=Math.max(0.25,patience);
+if(hearts<=0)die();}}
+function die(){playing=false;over=true;
+el('finalCoins').textContent='🪙 '+coins;
+el('overSub').textContent='Customers served: '+served;
+el('over').classList.remove('hidden');}
+function simStep(dt){if(!playing||over)return;
+patience-=patRate*dt;
+el('pfill').style.width=Math.max(0,patience*100)+'%';
+el('pfill').style.background=patience>0.4?'#6A994E':'#BC4749';
+if(patience<=0){hearts--;flash('TOO SLOW! 😤','#9B2226');el('hearts').textContent='❤️'.repeat(Math.max(0,hearts))||'💔';
+if(hearts<=0){die();return;}newCustomer();}
+el('coins').textContent='🪙 '+coins;}
+let last=performance.now();
+function frame(now){requestAnimationFrame(frame);const dt=Math.min((now-last)/1000,.05);last=now;simStep(dt);}
+requestAnimationFrame(frame);
+document.querySelectorAll('.ing').forEach(b=>b.addEventListener('click',()=>{if(!playing||over)return;if(built.length<4){built.push(b.dataset.i);renderBuilt();}}));
+el('serve').addEventListener('click',serve);
+function tog(){coins=0;hearts=3;served=0;playing=true;over=false;
+el('hearts').textContent='❤️❤️❤️';el('coins').textContent='🪙 0';
+el('start').classList.add('hidden');el('over').classList.add('hidden');
+newCustomer();}
+el('startBtn').addEventListener('click',tog);
+el('overBtn').addEventListener('click',tog);
+window.__CS={G:()=>({coins,hearts,served,playing,over,patience:+patience.toFixed(2),patRate:+patRate.toFixed(3),order:order.join(''),built:built.join('')}),
+start:tog,sim:(dt)=>simStep(dt),
+tap:(i)=>{if(built.length<4){built.push(i);renderBuilt();}},
+serve:serve,
+orderNow:()=>order.slice()};
+</script>
+</body>
+</html>
