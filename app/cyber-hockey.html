@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>JK CYBER HOCKEY 2048</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+body{background:#020208;color:#e8f4ff;font-family:'Segoe UI',system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;min-height:100vh;overflow:hidden;touch-action:none}
+h1{font-size:22px;letter-spacing:3px;margin:10px 0 2px;color:#00e5ff;text-shadow:0 0 12px #00e5ff,0 0 40px #00e5ff88}
+.sub{font-size:10px;letter-spacing:2px;color:#7d8aa0;margin-bottom:8px}
+.hud{display:flex;gap:10px;margin-bottom:8px;width:100%;max-width:420px;justify-content:center}
+.card{background:#0a0f1e;border:1px solid #00e5ff33;border-radius:10px;padding:6px 14px;text-align:center;min-width:86px}
+.card .l{font-size:9px;letter-spacing:1px;color:#7d8aa0}
+.card .v{font-size:18px;font-weight:700}
+#wrap{position:relative}
+canvas{background:radial-gradient(ellipse at 50% 50%,#071022 0%,#02020a 75%);border:2px solid #00e5ff55;border-radius:14px;box-shadow:0 0 30px #00e5ff22;display:block}
+#msg{margin-top:8px;font-size:13px;color:#ffd166;min-height:18px;text-align:center}
+.ov{position:absolute;inset:0;background:rgba(2,2,10,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;border-radius:14px;z-index:5;backdrop-filter:blur(4px)}
+.ov.hide{display:none}
+.ov h2{font-size:26px;color:#00e5ff;text-shadow:0 0 16px #00e5ff}
+.ov p{font-size:13px;color:#b8c4d8;text-align:center;padding:0 24px;line-height:1.6}
+.btn{background:linear-gradient(90deg,#00e5ff,#7b2dff);border:none;color:#fff;font-size:16px;font-weight:700;letter-spacing:2px;padding:13px 42px;border-radius:30px;cursor:pointer;box-shadow:0 0 20px #00e5ff66}
+.btn:active{transform:scale(.95)}
+.rs{display:flex;gap:10px;width:80%;max-width:300px}
+.rs div{flex:1;background:#0a0f1e;border:1px solid #00e5ff33;border-radius:10px;padding:8px;text-align:center;font-size:11px;color:#7d8aa0}
+.rs b{display:block;font-size:17px;color:#fff;margin-top:2px}
+</style>
+</head>
+<body>
+<h1>🏒 JK CYBER HOCKEY</h1>
+<div class="sub">2048 NEON ARENA • FIRST TO 5 • OFFLINE</div>
+<div class="hud">
+<div class="card"><div class="l">⭐ YOU</div><div class="v" id="meS">0</div></div>
+<div class="card"><div class="l">🤖 AI</div><div class="v" id="aiS">0</div></div>
+<div class="card"><div class="l">🏆 W-L</div><div class="v" id="rec">0-0</div></div>
+</div>
+<div id="wrap">
+<canvas id="cv" width="400" height="640"></canvas>
+<div class="ov" id="ovStart">
+<h2>🏒 CYBER HOCKEY</h2>
+<p>Paddle-அ drag பண்ணு — puck-அ AI goal-ல அடி! முதலில் 5 goals வெச்சா win. AI predict பண்ணி block பண்ணும்… fasterஆ play பண்ணு! ⚡<br><br>BOOST orb-அ touch பண்ணா super speed! 🚀</p>
+<button class="btn" id="btnStart">▶ START</button>
+</div>
+<div class="ov hide" id="ovEnd">
+<h2 id="endTitle">🏆 WIN!</h2>
+<div class="rs">
+<div>⭐ YOU<b id="rMe">0</b></div>
+<div>🤖 AI<b id="rAi">0</b></div>
+<div>🏆 RECORD<b id="rRec">0-0</b></div>
+</div>
+<p id="endTaunt"></p>
+<button class="btn" id="btnAgain">🔄 PLAY AGAIN</button>
+</div>
+</div>
+<div id="msg">🏒 Puck-அ அடி, goal பண்ணு!</div>
+<script>
+'use strict';
+var cv=document.getElementById('cv'),cx=cv.getContext('2d');
+var W=cv.width,H=cv.height,GW=120;
+var AC=window.AudioContext?new AudioContext():null;
+function beep(f,d,t){if(!AC)return;try{var o=AC.createOscillator(),g=AC.createGain();o.type=t||'square';o.frequency.value=f;g.gain.setValueAtTime(.05,AC.currentTime);g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+d);o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+d);}catch(e){}}
+function $(id){return document.getElementById(id);}
+function msg(t){$('msg').textContent=t;}
+var state='menu',meScore=0,aiScore=0,tick=0,freeze=0;
+var puck,me,ai,orb=null,trail=[];
+var rec={w:0,l:0};try{rec=JSON.parse(localStorage.getItem('jkch_rec')||'{"w":0,"l":0}');}catch(e){}
+function updRec(){$('rec').textContent=rec.w+'-'+rec.l;}
+updRec();
+function resetEntities(){
+ puck={x:W/2,y:H/2,vx:0,vy:0,r:11};
+ me={x:W/2,y:H-90,px:W/2,py:H-90,vx:0,vy:0,r:22,tx:W/2,ty:H-90,boost:0};
+ ai={x:W/2,y:90,px:W/2,py:90,vx:0,vy:0,r:22,d:.35};
+ orb=null;trail=[];
+}
+resetEntities();
+function startGame(){
+ state='play';meScore=0;aiScore=0;tick=0;freeze=40;
+ resetEntities();
+ $('meS').textContent=0;$('aiS').textContent=0;
+ $('ovStart').classList.add('hide');$('ovEnd').classList.add('hide');
+ msg('🏒 Go! AI goal-ல அடி!');
+ if(AC&&AC.state==='suspended'){AC.resume();}
+ beep(520,.1);setTimeout(function(){beep(780,.12);},100);
+}
+function serve(dir){
+ puck={x:W/2,y:H/2,vx:(Math.random()*4-2),vy:3.2*dir,r:11};
+ me.x=W/2;me.y=H-90;me.tx=W/2;me.ty=H-90;
+ ai.x=W/2;ai.y=90;
+ freeze=50;
+}
+function endMatch(){
+ state='over';
+ var win=meScore>=5;
+ if(win){rec.w++;}else{rec.l++;}
+ try{localStorage.setItem('jkch_rec',JSON.stringify(rec));}catch(e){}
+ updRec();
+ $('rMe').textContent=meScore;$('rAi').textContent=aiScore;$('rRec').textContent=rec.w+'-'+rec.l;
+ $('endTitle').textContent=win?'🏆 YOU WIN!':'🤖 AI WINS';
+ $('endTaunt').textContent=win?'குயிலே, உன் puzzle-க்கு solver வெச்சுக்க — எங்க arena-ல goal அடிக்க pure skill வேணும்! 😎🏒':'AI-அ விட fastஆ drag பண்ணு! மறுபடி try பண்ணு 💪';
+ $('ovEnd').classList.remove('hide');
+ beep(win?880:220,.4,win?'square':'sawtooth');
+ if(win){setTimeout(function(){beep(1170,.3);},150);}
+}
+function clampP(p,top){
+ p.x=Math.max(p.r,Math.min(W-p.r,p.x));
+ p.y=top?Math.max(p.r,Math.min(H/2-p.r-6,p.y)):Math.max(H/2+p.r+6,Math.min(H-p.r,p.y));
+}
+function movePaddle(p,tx,ty,maxV){
+ var dx=tx-p.x,dy=ty-p.y,d=Math.hypot(dx,dy);
+ if(d>0){var s=Math.min(d,maxV)/d;p.vx=dx*s;p.vy=dy*s;}else{p.vx=0;p.vy=0;}
+ p.px=p.x;p.py=p.y;p.x+=p.vx;p.y+=p.vy;
+}
+function aiMove(){
+ var d=ai.d,spd=4+d*7;
+ var tx,ty;
+ if(puck.y<H/2+40){
+   // attack: aim behind puck toward player goal
+   var gx=W/2,gy=H;
+   var nx=puck.x-gx,ny=puck.y-gy,nd=Math.hypot(nx,ny)||1;
+   tx=puck.x+nx/nd*20;ty=puck.y-24;
+ }else{
+   // defend goal
+   tx=W/2+(puck.x-W/2)*(.4+d*.4);ty=58;
+ }
+ tx+=(Math.random()-.5)*(1-d)*30;
+ movePaddle(ai,tx,ty,spd*(ai.boost>0?1.6:1));
+ clampP(ai,true);
+}
+function hitPaddle(p){
+ var dx=puck.x-p.x,dy=puck.y-p.y,d=Math.hypot(dx,dy),minD=puck.r+p.r;
+ if(d<minD&&d>0){
+   var nx=dx/d,ny=dy/d;
+   puck.x=p.x+nx*(minD+1);puck.y=p.y+ny*(minD+1);
+   var sp=Math.hypot(puck.vx,puck.vy);
+   var kick=Math.max(sp*0.92,4)+Math.hypot(p.vx,p.vy)*0.7;
+   kick=Math.min(kick,17);
+   puck.vx=nx*kick+p.vx*0.45;puck.vy=ny*kick+p.vy*0.45;
+   beep(300+Math.random()*120,.05,'triangle');
+ }
+}
+function step(){
+ if(state!=='play')return;
+ tick++;
+ if(freeze>0){freeze--;return;}
+ // player toward touch target
+ var pMax=me.boost>0?15:10.5;
+ movePaddle(me,me.tx,me.ty,pMax);clampP(me,false);
+ if(me.boost>0)me.boost--;
+ if(ai.boost>0)ai.boost--;
+ aiMove();
+ // puck physics
+ puck.x+=puck.vx;puck.y+=puck.vy;
+ puck.vx*=0.996;puck.vy*=0.996;
+ // side walls
+ if(puck.x<puck.r){puck.x=puck.r;puck.vx=Math.abs(puck.vx);beep(200,.03);}
+ if(puck.x>W-puck.r){puck.x=W-puck.r;puck.vx=-Math.abs(puck.vx);beep(200,.03);}
+ // top/bottom walls except goal mouth
+ var inMouth=Math.abs(puck.x-W/2)<GW/2-puck.r;
+ if(puck.y<puck.r&&!inMouth){puck.y=puck.r;puck.vy=Math.abs(puck.vy);beep(200,.03);}
+ if(puck.y>H-puck.r&&!inMouth){puck.y=H-puck.r;puck.vy=-Math.abs(puck.vy);beep(200,.03);}
+ // paddle collisions
+ hitPaddle(me);hitPaddle(ai);
+ // boost orb
+ if(!orb&&tick%1100===400){orb={x:60+Math.random()*(W-120),y:H/2-40+Math.random()*80};}
+ if(orb){
+   if(Math.hypot(me.x-orb.x,me.y-orb.y)<me.r+14){me.boost=200;orb=null;msg('🚀 BOOST! Super speed!');beep(990,.1);}
+   else if(Math.hypot(ai.x-orb.x,ai.y-orb.y)<ai.r+14){ai.boost=200;orb=null;beep(990,.1);}
+ }
+ // trail
+ trail.push({x:puck.x,y:puck.y});
+ if(trail.length>14)trail.shift();
+ // goals
+ if(puck.y<-puck.r-4){
+   meScore++;$('meS').textContent=meScore;
+   msg('⚽ GOAL! '+meScore+'-'+aiScore+' 🔥');
+   beep(880,.15);setTimeout(function(){beep(1170,.2);},120);
+   ai.d=Math.min(.95,ai.d+.07);
+   if(meScore>=5){endMatch();}else{serve(1);}
+ }else if(puck.y>H+puck.r+4){
+   aiScore++;$('aiS').textContent=aiScore;
+   msg('🤖 AI goal… '+meScore+'-'+aiScore);
+   beep(180,.25,'sawtooth');
+   if(aiScore>=5){endMatch();}else{serve(-1);}
+ }
+}
+// input
+var dragging=false;
+function ptr(e){
+ var r=cv.getBoundingClientRect();
+ var cx0=(e.clientX-r.left)*(W/r.width),cy0=(e.clientY-r.top)*(H/r.height);
+ me.tx=cx0;me.ty=cy0;
+}
+cv.addEventListener('pointerdown',function(e){e.preventDefault();dragging=true;ptr(e);});
+window.addEventListener('pointermove',function(e){if(dragging)ptr(e);});
+window.addEventListener('pointerup',function(){dragging=false;});
+// draw
+function neon(x,y,r,c1,c2){
+ var g=cx.createRadialGradient(x,y,1,x,y,r*2.2);
+ g.addColorStop(0,c1);g.addColorStop(1,'rgba(0,0,0,0)');
+ cx.fillStyle=g;cx.beginPath();cx.arc(x,y,r*2.2,0,7);cx.fill();
+ cx.fillStyle=c2;cx.beginPath();cx.arc(x,y,r,0,7);cx.fill();
+}
+function draw(){
+ cx.clearRect(0,0,W,H);
+ // center line + circle
+ cx.strokeStyle='#00e5ff33';cx.lineWidth=2;
+ cx.beginPath();cx.moveTo(0,H/2);cx.lineTo(W,H/2);cx.stroke();
+ cx.beginPath();cx.arc(W/2,H/2,55,0,7);cx.stroke();
+ // goal mouths
+ cx.fillStyle='#00e5ff';cx.fillRect(W/2-GW/2,0,GW,6);
+ cx.fillStyle='#ff2d78';cx.fillRect(W/2-GW/2,H-6,GW,6);
+ // trail
+ for(var i=0;i<trail.length;i++){
+   var t=trail[i],a=(i+1)/trail.length;
+   cx.fillStyle='rgba(255,209,102,'+(a*.35)+')';
+   cx.beginPath();cx.arc(t.x,t.y,puck.r*a*.8,0,7);cx.fill();
+ }
+ // orb
+ if(orb){var pl=10+Math.sin(tick*.15)*3;neon(orb.x,orb.y,pl,'#ffe066','#ffd166');
+   cx.fillStyle='#020208';cx.font='bold 11px sans-serif';cx.textAlign='center';cx.fillText('⚡',orb.x,orb.y+4);}
+ // puck + paddles
+ neon(puck.x,puck.y,puck.r,'#fff3b0','#ffd166');
+ neon(me.x,me.y,me.r,me.boost>0?'#a0ffe0':'#00e5ff88','#00e5ff');
+ neon(ai.x,ai.y,ai.r,ai.boost>0?'#ffc0d0':'#ff2d7888','#ff2d78');
+ // eyes on AI
+ cx.fillStyle='#020208';
+ cx.fillRect(ai.x-8,ai.y-5,5,5);cx.fillRect(ai.x+3,ai.y-5,5,5);
+ requestAnimationFrame(draw);
+}
+draw();
+var lastT=0,acc=0;
+function loop(ts){
+ if(!lastT)lastT=ts;
+ acc+=ts-lastT;lastT=ts;
+ var n=0;
+ while(acc>16&&n<4){step();acc-=16;n++;}
+ requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+$('btnStart').addEventListener('click',startGame);
+$('btnAgain').addEventListener('click',function(){$('ovEnd').classList.add('hide');startGame();});
+window.__CH={G:function(){return{state:state,meScore:meScore,aiScore:aiScore,tick:tick,freeze:freeze,puck:{x:Math.round(puck.x),y:Math.round(puck.y),vx:+puck.vx.toFixed(2),vy:+puck.vy.toFixed(2)},me:{x:Math.round(me.x),y:Math.round(me.y),boost:me.boost},ai:{x:Math.round(ai.x),y:Math.round(ai.y),d:+ai.d.toFixed(2)},rec:{w:rec.w,l:rec.l}}},
+start:startGame,
+step:function(n){for(var i=0;i<n;i++){step();}},
+tpPuck:function(x,y,vx,vy){puck.x=x;puck.y=y;puck.vx=vx;puck.vy=vy;freeze=0;},
+setMe:function(x,y){me.x=x;me.y=y;me.tx=x;me.ty=y;},
+setAi:function(x,y){ai.x=x;ai.y=y;},
+orb:function(){orb={x:W/2,y:H-160};},
+end:endMatch};
+</script>
+</body>
+</html>
