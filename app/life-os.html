@@ -121,6 +121,16 @@ function confetti(){ for(let i=0;i<24;i++){ const d=document.createElement('div'
 function vib(p){ if(navigator.vibrate) try{ navigator.vibrate(p); }catch(e){} }
 
 /* ============ BOOT + HOME ============ */
+const APPS=[
+ {id:'expense',e:'💸',n:'Expenses'},
+ {id:'bills',e:'🛡️',n:'Bill Guard'},
+ {id:'spin',e:'🎡',n:'Spin Lab'},
+ {id:'habits',e:'🔥',n:'Habits'},
+ {id:'water',e:'💧',n:'Water'},
+ {id:'focus',e:'⏳',n:'Focus'},
+ {id:'notes',e:'📝',n:'Notes'},
+ {id:'vault',e:'🗄️',n:'Data Vault'}
+];
 const bootMsgs=['initializing neural core…','loading family modules…','syncing offline vault…','polishing neon…','ready.'];
 const FAST=location.search.indexOf('fast')>=0;
 const BOOT_MS=2100, bootT0=Date.now();
@@ -135,16 +145,6 @@ setInterval(()=>{ const t=new Date(); const p=n=>String(n).padStart(2,'0');
  $('#sbtime').textContent=p(t.getHours())+':'+p(t.getMinutes());
  $('#clock').textContent=p(t.getHours())+':'+p(t.getMinutes())+':'+p(t.getSeconds());
 },1000);
-const APPS=[
- {id:'expense',e:'💸',n:'Expenses'},
- {id:'bills',e:'🛡️',n:'Bill Guard'},
- {id:'spin',e:'🎡',n:'Spin Lab'},
- {id:'habits',e:'🔥',n:'Habits'},
- {id:'water',e:'💧',n:'Water'},
- {id:'focus',e:'⏳',n:'Focus'},
- {id:'notes',e:'📝',n:'Notes'},
- {id:'vault',e:'🗄️',n:'Data Vault'}
-];
 function renderHome(){
  const h=new Date().getHours();
  $('#greetH').textContent=(h<12?'Good morning':h<17?'Good afternoon':h<21?'Good evening':'Good night')+' 👋';
