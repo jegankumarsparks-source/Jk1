@@ -172,14 +172,15 @@ function start(i){
  songIdx=i;
  var s=SONGS[i],c=chartFor(s);
  var stepDur=60/s.bpm/4; /* 16th note */
- var t0=AC.currentTime+1.2;
+ var t0=performance.now()/1000+1.2;
+ var at0=AC.currentTime+1.2;
  var notes=c.chart.map(function(n){return {t:t0+n.step*stepDur,lane:n.lane,note:n.note,hit:0}});
  /* schedule music */
  var sched={next:0};
  musTimer=setInterval(function(){
   var now=AC.currentTime;
-  while(sched.next<c.steps&&t0+sched.next*stepDur<now+.25){
-   var st=sched.next,mt=t0+st*stepDur;
+  while(sched.next<c.steps&&at0+sched.next*stepDur<now+.25){
+   var st=sched.next,mt=at0+st*stepDur;
    c.mus[st].forEach(function(k){drum(k,mt)});
    if(st%8===0)bass(s.root/2,mt,stepDur*3);
    if(st%8===4)bass(s.root/2*1.5,mt,stepDur*3);
@@ -190,7 +191,7 @@ function start(i){
  var leadSched={next:0};
  var lt=setInterval(function(){
   var now=AC.currentTime;
-  while(leadSched.next<notes.length&&notes[leadSched.next].t<now+.25){var n=notes[leadSched.next];lead(n.note,n.t,stepDur*2);leadSched.next++;}
+  while(leadSched.next<notes.length&&(notes[leadSched.next].t-t0+at0)<now+.25){var n=notes[leadSched.next];lead(n.note,n.t-t0+at0,stepDur*2);leadSched.next++;}
   if(leadSched.next>=notes.length)clearInterval(lt);
  },60);
  G={song:s,notes:notes,t0:t0,stepDur:stepDur,score:0,combo:0,maxc:0,perf:0,good:0,miss:0,playing:true,leadTimer:lt,endAt:t0+c.steps*stepDur+1};
@@ -203,7 +204,7 @@ function judgeShow(txt,col){
 }
 function hitLane(lane){
  if(!G||!G.playing)return;
- var now=AC.currentTime,best=null,bd=1e9;
+ var now=performance.now()/1000,best=null,bd=1e9;
  G.notes.forEach(function(n){if(n.lane===lane&&!n.hit){var d=Math.abs(n.t-now);if(d<bd){bd=d;best=n}}});
  var pad=document.querySelector('.pad[data-lane="'+lane+'"]');
  pad.classList.add('hit');setTimeout(function(){pad.classList.remove('hit')},110);
@@ -231,7 +232,7 @@ window.addEventListener('keydown',function(e){
 function frame(){
  if(!G||!G.playing)return;
  requestAnimationFrame(frame);
- var now=AC.currentTime;
+ var now=performance.now()/1000;
  cx.clearRect(0,0,W,H);
  /* lanes */
  for(var l=0;l<4;l++){cx.fillStyle=l%2?'rgba(255,255,255,.02)':'rgba(255,255,255,.05)';cx.fillRect(l*LANEW,0,LANEW,H);}
@@ -275,7 +276,7 @@ function finish(){
  go('res');
 }
 buildMenu();
-window.__DP={start:start,hitLane:hitLane,G:function(){return G},SONGS:SONGS,chartFor:chartFor,finish:finish,now:function(){return AC?AC.currentTime:0}};
+window.__DP={start:start,hitLane:hitLane,G:function(){return G},SONGS:SONGS,chartFor:chartFor,finish:finish,now:function(){return performance.now()/1000}};
 </script>
 </body>
 </html>
