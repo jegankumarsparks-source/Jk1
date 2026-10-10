@@ -1,0 +1,312 @@
+<!DOCTYPE html><html lang="ta"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>JK QUIZ BLITZ 2047</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:#07030f;color:#fff;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;overflow-x:hidden;touch-action:manipulation}
+.wrap{max-width:440px;margin:0 auto;padding:14px 14px 30px;min-height:100vh;display:flex;flex-direction:column}
+h1{font-size:26px;letter-spacing:3px;text-align:center;background:linear-gradient(90deg,#00e5ff,#ff2d95,#ffe14d);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:900}
+.sub{text-align:center;font-size:10px;letter-spacing:2px;color:#8a7fb8;margin:4px 0 12px}
+.hud{display:flex;gap:8px;margin-bottom:10px}
+.hud>div{flex:1;background:#120b24;border:1px solid #2a1e52;border-radius:10px;padding:7px 4px;text-align:center;font-size:11px;color:#b9aee0}
+.hud b{display:block;font-size:16px;color:#fff}
+.ov{position:fixed;inset:0;background:rgba(5,2,12,.94);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
+.ovCard{background:linear-gradient(160deg,#160d2e,#0c0720);border:1px solid #3b2a6e;border-radius:20px;padding:24px 20px;width:100%;max-width:400px;text-align:center;box-shadow:0 0 40px #7b2ff755}
+.ovCard h2{font-size:22px;margin-bottom:6px;letter-spacing:1px}
+.hide{display:none!important}
+.btn{display:block;width:100%;margin:8px 0;padding:14px;border:none;border-radius:12px;font-size:16px;font-weight:800;letter-spacing:1px;cursor:pointer;background:linear-gradient(90deg,#ff7a18,#ff2d95);color:#fff;box-shadow:0 4px 18px #ff2d9544}
+.btn:active{transform:scale(.97)}
+.cat{display:flex;align-items:center;gap:10px;background:#120b24;border:1px solid #2a1e52;border-radius:14px;padding:14px;margin:7px 0;cursor:pointer;font-size:15px;font-weight:700}
+.cat:active{transform:scale(.98)}
+.cat span{font-size:24px}
+.cat small{display:block;font-weight:400;color:#8a7fb8;font-size:11px}
+.qzone{background:#0d0722;border:1px solid #2a1e52;border-radius:16px;padding:16px;flex:1;display:flex;flex-direction:column}
+.tbar{height:8px;background:#1d1340;border-radius:6px;overflow:hidden;margin-bottom:12px}
+.tbar>div{height:100%;background:linear-gradient(90deg,#00e5ff,#7b2ff7);border-radius:6px;transition:width .2s linear}
+.tbar.low>div{background:linear-gradient(90deg,#ff2d95,#ff5e3a)}
+.meta{display:flex;justify-content:space-between;font-size:11px;color:#8a7fb8;margin-bottom:8px;letter-spacing:1px}
+.qtext{font-size:18px;font-weight:800;line-height:1.45;min-height:76px;margin-bottom:14px}
+.ans{display:block;width:100%;text-align:left;background:#160d33;border:1px solid #32235f;color:#fff;border-radius:12px;padding:13px 14px;margin:7px 0;font-size:15px;font-weight:600;cursor:pointer}
+.ans:active{transform:scale(.98)}
+.ans.right{background:#0c3b24;border-color:#2dff9b;box-shadow:0 0 16px #2dff9b55}
+.ans.wrong{background:#3b0c1c;border-color:#ff2d5e;box-shadow:0 0 16px #ff2d5e55;animation:shake .3s}
+.ans.dim{opacity:.28;pointer-events:none}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.life{display:flex;gap:8px;margin-top:12px}
+.life button{flex:1;background:#1d1340;border:1px solid #3b2a6e;color:#ffd60a;border-radius:10px;padding:9px 2px;font-size:12px;font-weight:800;cursor:pointer}
+.life button.used{opacity:.25;pointer-events:none}
+.streak{position:fixed;top:52%;left:50%;transform:translate(-50%,-50%);font-size:34px;font-weight:900;color:#ffd60a;text-shadow:0 0 24px #ff9f1c;z-index:60;pointer-events:none;animation:pop .8s forwards}
+@keyframes pop{0%{transform:translate(-50%,-50%) scale(.4);opacity:0}30%{transform:translate(-50%,-50%) scale(1.25);opacity:1}100%{transform:translate(-50%,-90%) scale(1);opacity:0}}
+.float{position:fixed;font-size:22px;font-weight:900;z-index:60;pointer-events:none;animation:rise 1s forwards}
+@keyframes rise{to{transform:translateY(-70px);opacity:0}}
+.rank{font-size:38px;margin:8px 0}
+.resRow{display:flex;justify-content:space-between;background:#120b24;border:1px solid #2a1e52;border-radius:10px;padding:9px 12px;margin:5px 0;font-size:13px}
+.resRow b{color:#ffd60a}
+#msg{text-align:center;font-size:13px;color:#b9aee0;margin-top:10px;min-height:18px;font-weight:600}
+.combo{font-size:11px;color:#ff9f1c;font-weight:800;text-align:center;min-height:14px;margin-bottom:4px;letter-spacing:1px}
+</style></head><body>
+<div class="wrap">
+<h1>JK QUIZ BLITZ</h1>
+<div class="sub">2047 SPEED TRIVIA • 15 QUESTIONS • STREAKS • OFFLINE</div>
+<div class="hud">
+<div>⭐ SCORE<b id="score">0</b></div>
+<div>❓ Q<b id="qno">-</b></div>
+<div>🔥 STREAK<b id="streak">0</b></div>
+<div>🏆 BEST<b id="best">0</b></div>
+</div>
+<div class="qzone">
+<div class="tbar" id="tbar"><div id="tfill" style="width:100%"></div></div>
+<div class="meta"><span id="catTag">READY</span><span id="timer">10s</span></div>
+<div class="combo" id="combo"></div>
+<div class="qtext" id="qtext">Category-அ choose பண்ணு! 👇</div>
+<div id="answers"></div>
+<div class="life">
+<button id="l50" onclick="useLife('fifty')">✂️ 50:50</button>
+<button id="lfr" onclick="useLife('freeze')">❄️ FREEZE</button>
+<button id="lsk" onclick="useLife('skip')">⏭️ SKIP</button>
+</div>
+</div>
+<div id="msg"></div>
+</div>
+
+<div class="ov" id="ovStart"><div class="ovCard">
+<h2>⚡ QUIZ BLITZ 2047</h2>
+<p style="font-size:13px;color:#b9aee0;margin-bottom:10px">15 questions • 10 seconds each • வேகமா answer பண்ணா அதிக points! Streak = multiplier 🔥</p>
+<div id="cats"></div>
+</div></div>
+
+<div class="ov hide" id="ovEnd"><div class="ovCard">
+<h2>🏁 BLITZ OVER!</h2>
+<div class="rank" id="rank">🎖️</div>
+<div class="resRow"><span>⭐ Final Score</span><b id="rScore">0</b></div>
+<div class="resRow"><span>✅ Correct</span><b id="rCorr">0/15</b></div>
+<div class="resRow"><span>🔥 Best Streak</span><b id="rStreak">0</b></div>
+<div class="resRow"><span>🏆 All-time Best</span><b id="rBest">0</b></div>
+<p id="endTaunt" style="font-size:12px;color:#b9aee0;margin:10px 0"></p>
+<button class="btn" onclick="toMenu()">🔄 PLAY AGAIN</button>
+</div></div>
+
+<script>
+'use strict';
+var BANK={
+science:{icon:'🧬',name:'SCIENCE',tag:'SCIENCE LAB',qs:[
+['Water-ன் chemical formula என்ன?',['H2O','CO2','O2','NaCl'],0],
+['Which planet is the RED planet?',['Venus','Mars','Jupiter','Mercury'],1],
+['Light speed per second (approx)?',['300,000 km','150,000 km','30,000 km','1,000 km'],0],
+['மனித உடம்பில் எத்தனை எலும்புகள்?',['106','206','306','406'],1],
+['Which gas do plants absorb?',['Oxygen','Nitrogen','Carbon dioxide','Hydrogen'],2],
+['Sun is a...?',['Planet','Comet','Star','Asteroid'],2],
+['DNA-ன் full form என்ன?',['Deoxyribonucleic acid','Dinucleic acid','Deoxyribose nucleic atom','Dual helix acid'],0],
+['Which organ pumps blood?',['Liver','Brain','Heart','Lung'],2],
+['Gravity-அ கண்டுபிடித்தது யார்?',['Einstein','Newton','Tesla','Edison'],1],
+['Boiling point of water (sea level)?',['90°C','100°C','110°C','120°C'],1]]},
+tamil:{icon:'🌺',name:'TAMIL',tag:'TAMIL NERAM',qs:[
+['"திருக்குறள்" எழுதியவர் யார்?',['கம்பர்','திருவள்ளுவர்','இளங்கோவடிகள்','ஔவையார்'],1],
+['Tamil Nadu-ன் தலைநகரம்?',['மதுரை','சென்னை','கோயம்புத்தூர்','திருச்சி'],1],
+['"பொங்கல்" எந்த திருவிழா?',['அறுவடை','விளையாட்டு','இசை','நடனம்'],0],
+['"யாதும் ஊரே யாவரும் கேளிர்" — எந்த நூல்?',['நாற்றிணை','புறநானூறு','குறுந்தொகை','சிலப்பதிகாரம்'],1],
+['Bharathiyar பிறந்த ஊர்?',['சென்னை','எட்டயபுரம்','மதுரை','காஞ்சிபுரம்'],1],
+['"குறிஞ்சி" நிலத்தின் தெய்வம்?',['முருகன்','மாயோன்','இந்திரன்','வருணன்'],0],
+['சிலப்பதிகாரத்தின் கதாநாயகி?',['மணிமேகலை','கண்ணகி','அன்பு','சீதை'],1],
+['Tamil new year மாதம்?',['சித்திரை','தை','ஆடி','மார்கழி'],0],
+['"மலை" என்பதன் ஆங்கில பொருள்?',['River','Mountain','Ocean','Forest'],1],
+['ஜவாஹர்லால் நேரு எழுதிய "Discovery of India" எங்கு எழுதப்பட்டது?',['வீடு','சிறை','கல்லூரி','நூலகம்'],1]]},
+sports:{icon:'🏏',name:'SPORTS',tag:'SPORTS ARENA',qs:[
+['Cricket-ல ஒரு over-ல எத்தனை balls?',['4','5','6','8'],2],
+['CSK-ன் home ground?',['Chepauk','Wankhede','Eden Gardens','Chinnaswamy'],0],
+['Football World Cup எத்தனை வருடத்துக்கு ஒருமுறை?',['2','3','4','5'],2],
+['Usain Bolt எந்த நாடு?',['USA','Jamaica','Kenya','Nigeria'],1],
+['Olympic rings எத்தனை?',['4','5','6','7'],1],
+['Sachin Tendulkar-ன் nickname?',['Little Master','Captain Cool','Hitman','Wall'],0],
+['Tennis-ல "love" என்றால்?',['1 point','0 points','Game point','Match point'],1],
+['Kabaddi எந்த மாநிலத்தின் traditional game?',['Tamil Nadu','Punjab','Kerala','Assam'],1],
+['MS Dhoni jersey number?',['7','10','18','45'],0],
+['Badminton-ல பயன்படுவது?',['Ball','Shuttlecock','Puck','Frisbee'],1]]},
+tech:{icon:'🤖',name:'TECH 2047',tag:'TECH CORE',qs:[
+['HTML என்றால் என்ன?',['Programming language','Markup language','Database','Operating system'],1],
+['AI-ன் full form?',['Automatic Internet','Artificial Intelligence','Advanced Interface','Active Input'],1],
+['RAM என்றால்?',['Read Access Memory','Random Access Memory','Rapid Action Module','Run And Move'],1],
+['WiFi கண்டுபிடிப்புக்கு முன் internet எப்படி?',['Satellite only','Cables','Radio only','Bluetooth'],1],
+['"www" என்றால்?',['World Wide Web','Web World Wide','Wide Web World','World Web Wire'],0],
+['2047-ல common-ஆ இருக்கும் tech?',['Flying taxis','Telegram','Fax machine','Floppy disk'],0],
+['Robot-க்கு brain போல வேலை செய்வது?',['Battery','CPU','Screen','Speaker'],1],
+['QR code முதலில் எங்கு உருவாக்கப்பட்டது?',['USA','Japan','India','China'],1],
+['Smartphone-ல் GPS பயன்படுவது எதற்கு?',['Calls','Location','Photos','Music'],1],
+['"Bug" என்ற சொல் எதை குறிக்கும்?',['Virus','Error in code','Hardware part','Internet speed'],1]]},
+world:{icon:'🌍',name:'WORLD',tag:'WORLD FEED',qs:[
+['India-ன் capital?',['Mumbai','New Delhi','Kolkata','Bengaluru'],1],
+['Eiffel Tower எங்கு?',['London','Paris','Rome','Berlin'],1],
+['Mount Everest எந்த நாடுகளுக்கு இடையில்?',['Nepal-China','India-Nepal','China-India','Bhutan-Nepal'],0],
+['உலகின் மிகப்பெரிய ocean?',['Atlantic','Indian','Pacific','Arctic'],2],
+['Taj Mahal எங்கு?',['Delhi','Agra','Jaipur','Mumbai'],1],
+['Japan-ன் currency?',['Won','Yen','Yuan','Ringgit'],1],
+['Pyramids எந்த நாட்டில்?',['Mexico','Egypt','Peru','Sudan only'],1],
+['Great Wall எந்த நாடு?',['Japan','Korea','China','Mongolia'],2],
+['Kangaroo எந்த நாட்டின் symbol?',['New Zealand','Australia','South Africa','Brazil'],1],
+['UN headquarters எங்கு?',['Geneva','New York','Paris','London'],1]]}};
+var CATS=Object.keys(BANK);
+var qs=[],qi=0,score=0,streak=0,bestStreak=0,correct=0,catKey='mixed';
+var timer=0,timeLeft=10,frozen=0,running=false,over=false,answered=false;
+var life={fifty:false,freeze:false,skip:false};
+var best=parseInt(localStorage.getItem('jkqb_best')||'0');
+var AC=window.AudioContext?new AudioContext():null;
+function beep(f,d,t){if(!AC)return;try{var o=AC.createOscillator(),g=AC.createGain();o.type=t||'square';o.frequency.value=f;g.gain.setValueAtTime(.08,AC.currentTime);g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+d);o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+d);}catch(e){}}
+function $(id){return document.getElementById(id);}
+function msg(t){$('msg').textContent=t;}
+function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function buildQs(key){
+ var pool=[];
+ if(key==='mixed'){CATS.forEach(function(k){BANK[k].qs.forEach(function(q){pool.push({q:q[0],o:q[1].slice(),a:q[2],cat:BANK[k].tag});});});}
+ else{BANK[key].qs.forEach(function(q){pool.push({q:q[0],o:q[1].slice(),a:q[2],cat:BANK[key].tag});});}
+ shuffle(pool);
+ var picks=pool.slice(0,Math.min(15,pool.length));
+ // pad mixed from reshuffle if short (never short: 50 total)
+ picks.forEach(function(p){
+   // shuffle options, track correct
+   var correctTxt=p.o[p.a];
+   shuffle(p.o);
+   p.a=p.o.indexOf(correctTxt);
+ });
+ return picks;
+}
+function startGame(key){
+ catKey=key;qs=buildQs(key);qi=0;score=0;streak=0;bestStreak=0;correct=0;frozen=0;
+ life={fifty:false,freeze:false,skip:false};
+ ['l50','lfr','lsk'].forEach(function(id){$(id).classList.remove('used');});
+ running=true;over=false;
+ $('ovStart').classList.add('hide');$('ovEnd').classList.add('hide');
+ $('best').textContent=best;
+ nextQ();
+ if(AC&&AC.state==='suspended'){AC.resume();}
+}
+function nextQ(){
+ if(qi>=qs.length){endGame();return;}
+ answered=false;
+ var q=qs[qi];
+ $('qno').textContent=(qi+1)+'/'+qs.length;
+ $('catTag').textContent=q.cat;
+ $('qtext').textContent=q.q;
+ var box=$('answers');box.innerHTML='';
+ q.o.forEach(function(opt,i){
+   var b=document.createElement('button');b.className='ans';b.textContent=String.fromCharCode(65+i)+') '+opt;
+   b.onclick=function(){answer(i);};
+   b.id='ans'+i;box.appendChild(b);
+ });
+ timeLeft=10;updateTimerUI();
+ msg('');
+}
+function updateTimerUI(){
+ $('timer').textContent=Math.ceil(timeLeft)+'s';
+ $('tfill').style.width=(timeLeft/10*100)+'%';
+ if(timeLeft<=3){$('tbar').classList.add('low');}else{$('tbar').classList.remove('low');}
+}
+function streakPop(n){
+ var d=document.createElement('div');d.className='streak';d.textContent='🔥 x'+mult()+' STREAK '+n+'!';
+ document.body.appendChild(d);setTimeout(function(){d.remove();},850);
+}
+function floatPts(txt,col){
+ var d=document.createElement('div');d.className='float';d.textContent=txt;d.style.color=col||'#2dff9b';
+ d.style.left=(40+Math.random()*40)+'%';d.style.top='45%';
+ document.body.appendChild(d);setTimeout(function(){d.remove();},1000);
+}
+function mult(){return streak>=6?3:streak>=3?2:1;}
+function answer(i){
+ if(!running||answered||over)return;
+ answered=true;
+ var q=qs[qi];
+ var right=i===q.a;
+ ['ans0','ans1','ans2','ans3'].forEach(function(id,idx){
+   var b=$(id);if(!b)return;
+   if(idx===q.a){b.classList.add('right');}
+   else if(idx===i){b.classList.add('wrong');}
+ });
+ if(right){
+   correct++;streak++;if(streak>bestStreak)bestStreak=streak;
+   var pts=(100+Math.ceil(timeLeft)*10)*mult();
+   score+=pts;$('score').textContent=score;$('streak').textContent=streak;
+   floatPts('+'+pts);beep(660,.12);setTimeout(function(){beep(880,.15);},110);
+   if(streak===3||streak===6){streakPop(streak);}
+   $('combo').textContent=streak>=3?('COMBO x'+mult()+' 🔥'):'';
+   msg(['சூப்பர்! 🎯','கரெக்ட்! ✅','வேகம்! ⚡','அசத்தல்! 🔥'][Math.floor(Math.random()*4)]);
+ }else{
+   streak=0;$('streak').textContent=0;$('combo').textContent='';
+   beep(180,.3,'sawtooth');
+   msg('❌ சரியான விடை: '+q.o[q.a]);
+ }
+ setTimeout(function(){qi++;nextQ();},right?900:1800);
+}
+function useLife(k){
+ if(!running||answered||over||life[k])return;
+ life[k]=true;
+ if(k==='fifty'){
+   $('l50').classList.add('used');
+   var q=qs[qi],removed=0;
+   var order=shuffle([0,1,2,3].filter(function(i){return i!==q.a;}));
+   for(var i=0;i<2;i++){var b=$('ans'+order[i]);if(b)b.classList.add('dim');}
+   msg('✂️ 2 wrong options removed!');
+   beep(500,.1);
+ }else if(k==='freeze'){
+   $('lfr').classList.add('used');
+   frozen=5;msg('❄️ Timer frozen 5s!');
+   beep(400,.15,'sine');
+ }else if(k==='skip'){
+   $('lsk').classList.add('used');
+   answered=true;streak=0;$('streak').textContent=0;$('combo').textContent='';
+   msg('⏭️ Skipped!');
+   setTimeout(function(){qi++;nextQ();},400);
+ }
+}
+function rank(s){
+ if(s>=3000)return['👑','2047 LEGEND! குயில் இத அடிக்க முடியுமா? 😎'];
+ if(s>=2200)return['💎','QUIZ MASTER! நேரு level speed!'];
+ if(s>=1500)return['🥇','SHARP! இன்னும் கொஞ்சம் வேகம்!'];
+ if(s>=900)return['🥈','GOOD RUN! Practice makes blitz!'];
+ return['🌱','ROOKIE! மறுபடியும் try பண்ணு!'];
+}
+function endGame(){
+ running=false;over=true;
+ if(score>best){best=score;localStorage.setItem('jkqb_best',best);}
+ var r=rank(score);
+ $('rank').textContent=r[0];
+ $('rScore').textContent=score;
+ $('rCorr').textContent=correct+'/'+qs.length;
+ $('rStreak').textContent=bestStreak;
+ $('rBest').textContent=best;
+ $('endTaunt').textContent=r[1];
+ $('ovEnd').classList.remove('hide');
+ beep(523,.15);setTimeout(function(){beep(659,.15);},150);setTimeout(function(){beep(784,.3);},300);
+}
+function toMenu(){$('ovEnd').classList.add('hide');$('ovStart').classList.remove('hide');}
+function tick(){
+ if(running&&!over&&!answered){
+   if(frozen>0){frozen--;}
+   else{timeLeft-=0.25;updateTimerUI();
+     if(timeLeft<=0){
+       answered=true;streak=0;$('streak').textContent=0;$('combo').textContent='';
+       var q=qs[qi];
+       var b=$('ans'+q.a);if(b)b.classList.add('right');
+       beep(150,.4,'sawtooth');
+       msg('⏰ Time up! விடை: '+q.o[q.a]);
+       setTimeout(function(){qi++;nextQ();},1600);
+     }
+   }
+ }
+ setTimeout(tick,250);
+}
+// category buttons
+(function(){
+ var box=$('cats');
+ var all=document.createElement('div');all.className='cat';
+ all.innerHTML='<span>🌈</span><div>MIXED BLITZ<small>எல்லா category-யும் mix — 15 questions</small></div>';
+ all.onclick=function(){startGame('mixed');};box.appendChild(all);
+ CATS.forEach(function(k){
+   var c=BANK[k];var d=document.createElement('div');d.className='cat';
+   d.innerHTML='<span>'+c.icon+'</span><div>'+c.name+'<small>'+c.qs.length+' questions • timer pressure ⚡</small></div>';
+   d.onclick=function(){startGame(k);};box.appendChild(d);
+ });
+ $('best').textContent=best;
+})();
+tick();
+window.__QB={G:function(){return{score:score,qi:qi,total:qs.length,streak:streak,bestStreak:bestStreak,correct:correct,timeLeft:Math.round(timeLeft*10)/10,frozen:frozen,running:running,over:over,answered:answered,best:best,cat:catKey,correctIdx:qs[qi]?qs[qi].a:-1}},
+start:startGame,answer:answer,life:useLife,end:endGame,setTime:function(t){timeLeft=t;}};
+</script></body></html>
