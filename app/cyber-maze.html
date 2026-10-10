@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>JK CYBER MAZE 2045</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+body{background:#06030f;color:#f0e8ff;font-family:'Segoe UI',system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;min-height:100vh;overflow:hidden;touch-action:none}
+h1{font-size:22px;letter-spacing:3px;margin:10px 0 2px;color:#ffe600;text-shadow:0 0 12px #ffe600,0 0 40px #ffe60088}
+.sub{font-size:10px;letter-spacing:2px;color:#a89db0;margin-bottom:8px}
+.hud{display:flex;gap:8px;margin-bottom:8px;width:100%;max-width:420px;justify-content:center}
+.card{background:#150b26;border:1px solid #ffe60033;border-radius:10px;padding:6px 10px;text-align:center;min-width:70px}
+.card .l{font-size:9px;letter-spacing:1px;color:#a89db0}
+.card .v{font-size:16px;font-weight:700}
+#wrap{position:relative}
+canvas{background:#06030f;border:2px solid #7b2dff66;border-radius:14px;box-shadow:0 0 30px #7b2dff33;display:block}
+#msg{margin-top:8px;font-size:13px;color:#ffd166;min-height:18px;text-align:center}
+.ov{position:absolute;inset:0;background:rgba(6,3,15,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;border-radius:14px;z-index:5;backdrop-filter:blur(4px)}
+.ov.hide{display:none}
+.ov h2{font-size:26px;color:#ffe600;text-shadow:0 0 16px #ffe600}
+.ov p{font-size:13px;color:#d8c8e8;text-align:center;padding:0 24px;line-height:1.6}
+.btn{background:linear-gradient(90deg,#ffe600,#ff9f1c);border:none;color:#2a1a00;font-size:16px;font-weight:700;letter-spacing:2px;padding:13px 42px;border-radius:30px;cursor:pointer;box-shadow:0 0 20px #ffe60066}
+.btn:active{transform:scale(.95)}
+.rs{display:flex;gap:8px;width:84%;max-width:320px}
+.rs div{flex:1;background:#150b26;border:1px solid #ffe60033;border-radius:10px;padding:8px;text-align:center;font-size:10px;color:#a89db0}
+.rs b{display:block;font-size:16px;color:#fff;margin-top:2px}
+</style>
+</head>
+<body>
+<h1>👾 JK CYBER MAZE</h1>
+<div class="sub">2045 NEON GRID • 3 LIVES • OFFLINE</div>
+<div class="hud">
+<div class="card"><div class="l">⭐ SCORE</div><div class="v" id="sc">0</div></div>
+<div class="card"><div class="l">❤️ LIVES</div><div class="v" id="lv">3</div></div>
+<div class="card"><div class="l">🌐 LEVEL</div><div class="v" id="lvl">1</div></div>
+<div class="card"><div class="l">🏆 BEST</div><div class="v" id="bs">0</div></div>
+</div>
+<div id="wrap">
+<canvas id="cv" width="400" height="560"></canvas>
+<div class="ov" id="ovStart">
+<h2>👾 CYBER MAZE</h2>
+<p>Dots-அ எல்லாம் சாப்பிடு! 👻 Ghost-அ விட்டு தப்பி! Touch பண்ண side-க்கு robot திரும்பும். ⚡ POWER pellet சாப்பிட்டா ghost BLUE ஆகும் — அப்போ அதையே வேட்டையாடு (+200)! Level clear ஆக speed கூடும்!</p>
+<button class="btn" id="btnStart">▶ ENTER MAZE</button>
+</div>
+<div class="ov hide" id="ovEnd">
+<h2>💥 GAME OVER!</h2>
+<div class="rs">
+<div>⭐ SCORE<b id="rSc">0</b></div>
+<div>🌐 LEVEL<b id="rLv">1</b></div>
+<div>🏆 BEST<b id="rBs">0</b></div>
+</div>
+<p id="endTaunt"></p>
+<button class="btn" id="btnAgain">🔄 RETRY</button>
+</div>
+</div>
+<div id="msg">👾 Dots-அ சாப்பிடு, ghost-அ தப்பி!</div>
+<script>
+'use strict';
+var cv=document.getElementById('cv'),cx=cv.getContext('2d');
+var W=cv.width,H=cv.height,CS=28,OX=18,OY=60,COLS_N=13,ROWS_N=15;
+var MAZE=[
+"#############",
+"#o....#....o#",
+"#.##..#..##.#",
+"#...........#",
+"#.##.###.##.#",
+"#.....G.....#",
+"##.##.#.##.##",
+"#o....#....o#",
+"#.##..#..##.#",
+"#...........#",
+"#.###.#.###.#",
+"#....P.#....#",
+"#.##.....##.#",
+"#.....#.....#",
+"#############"];
+var AC=window.AudioContext?new AudioContext():null;
+function beep(f,d,t){if(!AC)return;try{var o=AC.createOscillator(),g=AC.createGain();o.type=t||'square';o.frequency.value=f;g.gain.setValueAtTime(.045,AC.currentTime);g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+d);o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+d);}catch(e){}}
+function $(id){return document.getElementById(id);}
+function msg(t){$('msg').textContent=t;}
+var state='menu',score=0,lives=3,level=1,tick=0,scared=0,ghostHide=0,dotsLeft=0;
+var grid=[],pl,gh;
+var best=parseInt(localStorage.getItem('jkcm_best')||'0');
+$('bs').textContent=best;
+function cellAt(cx,cy){if(cy<0||cy>=ROWS_N||cx<0||cx>=COLS_N)return '#';return grid[cy][cx];}
+function isWall(cx,cy){return cellAt(cx,cy)==='#';}
+function buildGrid(){
+ grid=[];dotsLeft=0;
+ for(var y=0;y<ROWS_N;y++){
+   var row=[];
+   for(var x=0;x<COLS_N;x++){
+     var c=MAZE[y][x];
+     if(c==='.'||c==='o')dotsLeft++;
+     if(c==='P'){pl={cx:x,cy:y,px:0,py:0,dx:1,dy:0,ndx:1,ndy:0};}
+     if(c==='G'){gh={cx:x,cy:y,px:0,py:0,dx:-1,dy:0};}
+     row.push(c);
+   }
+   grid.push(row);
+ }
+}
+function centerOf(e){return{x:OX+e.cx*CS+CS/2+e.px,y:OY+e.cy*CS+CS/2+e.py};}
+function resetPositions(){
+ pl={cx:5,cy:11,px:0,py:0,dx:1,dy:0,ndx:1,ndy:0};
+ gh={cx:6,cy:5,px:0,py:0,dx:-1,dy:0};
+}
+function startGame(){
+ state='play';score=0;lives=3;level=1;tick=0;scared=0;ghostHide=0;
+ buildGrid();
+ $('sc').textContent=0;$('lv').textContent=3;$('lvl').textContent=1;
+ $('ovStart').classList.add('hide');$('ovEnd').classList.add('hide');
+ msg('👾 Go! Dots-அ சாப்பிடு!');
+ if(AC&&AC.state==='suspended'){AC.resume();}
+ beep(523,.1);setTimeout(function(){beep(659,.1);},90);setTimeout(function(){beep(784,.14);},180);
+}
+function endGame(){
+ state='over';
+ if(score>best){best=score;try{localStorage.setItem('jkcm_best',best);}catch(e){}}
+ $('bs').textContent=best;
+ $('rSc').textContent=score;$('rLv').textContent=level;$('rBs').textContent=best;
+ $('endTaunt').textContent=score>=800?'👑 MAZE MASTER! குயிலே, உன் Ninefold AI-அ விட எங்க ghost திறமையா வேட்டையாடும்! 👾😎':score>=300?'நல்ல run! Power pellet timing-அ use பண்ணு! ⚡':'Ghost pattern-அ படி — அது உன்னை follow பண்ணும்! 💪';
+ $('ovEnd').classList.remove('hide');
+ beep(180,.4,'sawtooth');
+}
+function moveEnt(e,spd,turn){
+ // at tile center: decide direction
+ if(e.px===0&&e.py===0){
+   if(turn)turn(e);
+   if(!isWall(e.cx+e.dx,e.cy+e.dy)){e.cx+=e.dx;e.cy+=e.dy;e.px=-e.dx*CS;e.py=-e.dy*CS;}
+   else{e.px=0;e.py=0;return;}
+ }else{
+   var mx=Math.sign(e.px)===0?0:-Math.sign(e.px)*spd;
+   var my=Math.sign(e.py)===0?0:-Math.sign(e.py)*spd;
+   e.px+=mx;e.py+=my;
+   if(Math.abs(e.px)<spd)e.px=0;
+   if(Math.abs(e.py)<spd)e.py=0;
+ }
+}
+function plTurn(e){
+ // try queued direction first
+ if((e.ndx!==e.dx||e.ndy!==e.dy)&&!isWall(e.cx+e.ndx,e.cy+e.ndy)){e.dx=e.ndx;e.dy=e.ndy;}
+}
+function ghTurn(e){
+ var dirs=[[1,0],[-1,0],[0,1],[0,-1]];
+ var opts=[];
+ for(var i=0;i<dirs.length;i++){
+   var d=dirs[i];
+   if(d[0]===-e.dx&&d[1]===-e.dy)continue;
+   if(!isWall(e.cx+d[0],e.cy+d[1]))opts.push(d);
+ }
+ if(!opts.length){e.dx*=-1;e.dy*=-1;return;}
+ if(scared>0){
+   e.dx=opts[Math.floor(Math.random()*opts.length)][0];
+   e.dy=opts[Math.floor(Math.random()*opts.length)][1];
+ }else{
+   var bd=1e9,bi=0;
+   for(var j=0;j<opts.length;j++){
+     var nx=e.cx+opts[j][0],ny=e.cy+opts[j][1];
+     var dd=Math.abs(nx-pl.cx)+Math.abs(ny-pl.cy);
+     if(dd<bd){bd=dd;bi=j;}
+   }
+   e.dx=opts[bi][0];e.dy=opts[bi][1];
+ }
+}
+function step(){
+ if(state!=='play')return;
+ tick++;
+ if(scared>0)scared--;
+ if(ghostHide>0)ghostHide--;
+ var spd=2+Math.min(1,level*.15);
+ // player: 2 sub-steps for smooth speed
+ for(var s=0;s<Math.round(spd);s++)moveEnt(pl,1,plTurn);
+ // ghost
+ if(ghostHide===0){
+   var gs=scared>0?1:1;
+   for(var g2=0;g2<gs;g2++)moveEnt(gh,1,ghTurn);
+ }
+ // eat dots
+ var c=cellAt(pl.cx,pl.cy);
+ if(c==='.'||c==='o'){
+   grid[pl.cy][pl.cx]=' ';
+   dotsLeft--;
+   if(c==='o'){
+     scared=360;msg('⚡ POWER! Hunt the ghost! 👻');
+     beep(300,.2,'sawtooth');
+   }else{
+     score+=10;$('sc').textContent=score;
+     if(tick%6===0)beep(880,.03,'sine');
+   }
+   if(dotsLeft<=0){
+     level++;$('lvl').textContent=level;
+     buildGrid();resetPositions();
+     msg('🌐 LEVEL '+level+'! Speed up!');
+     beep(660,.15);setTimeout(function(){beep(880,.2);},140);
+     return;
+   }
+ }
+ // ghost meets player
+ if(ghostHide===0&&pl.cx===gh.cx&&pl.cy===gh.cy){
+   if(scared>0){
+     score+=200;$('sc').textContent=score;
+     ghostHide=140;scared=0;
+     gh.cx=6;gh.cy=5;gh.px=0;gh.py=0;
+     msg('👻 GHOST EATEN +200!');
+     beep(990,.15);setTimeout(function(){beep(1320,.2);},120);
+   }else{
+     lives--;$('lv').textContent=lives;
+     beep(150,.35,'sawtooth');
+     if(lives<=0){endGame();return;}
+     msg('💥 Caught! '+lives+' lives!');
+     resetPositions();scared=0;
+   }
+ }
+}
+cv.addEventListener('pointerdown',function(e){e.preventDefault();ptr(e);});
+cv.addEventListener('pointermove',function(e){if(e.buttons>0||e.pointerType==='touch')ptr(e);});
+function ptr(e){
+ if(state!=='play')return;
+ var r=cv.getBoundingClientRect();
+ var px=(e.clientX-r.left)*(W/r.width),py=(e.clientY-r.top)*(H/r.height);
+ var pp=centerOf(pl),dx=px-pp.x,dy=py-pp.y;
+ if(Math.abs(dx)>Math.abs(dy)){pl.ndx=Math.sign(dx);pl.ndy=0;}
+ else{pl.ndx=0;pl.ndy=Math.sign(dy);}
+}
+function draw(){
+ cx.clearRect(0,0,W,H);
+ // walls
+ for(var y=0;y<ROWS_N;y++){
+   for(var x=0;x<COLS_N;x++){
+     var c=grid.length?grid[y][x]:MAZE[y][x];
+     var sx=OX+x*CS,sy=OY+y*CS;
+     if(c==='#'){
+       cx.fillStyle='#1c0f3a';
+       cx.fillRect(sx,sy,CS,CS);
+       cx.strokeStyle='#7b2dff88';cx.lineWidth=1.5;
+       cx.strokeRect(sx+1,sy+1,CS-2,CS-2);
+     }else if(c==='.'){
+       cx.fillStyle='#ffe600';
+       cx.beginPath();cx.arc(sx+CS/2,sy+CS/2,3,0,7);cx.fill();
+     }else if(c==='o'){
+       var pl2=6+Math.sin(tick*.12)*2;
+       cx.fillStyle='#ff9f1c';
+       cx.beginPath();cx.arc(sx+CS/2,sy+CS/2,pl2,0,7);cx.fill();
+     }
+   }
+ }
+ if(state==='menu'){requestAnimationFrame(draw);return;}
+ // player
+ var pp=centerOf(pl);
+ var mouth=.25+Math.abs(Math.sin(tick*.25))*.5;
+ var ang=Math.atan2(pl.dy,pl.dx);
+ cx.fillStyle='#ffe600';
+ cx.beginPath();
+ cx.arc(pp.x,pp.y,11,ang+mouth,ang-mouth+Math.PI*2);
+ cx.lineTo(pp.x,pp.y);cx.closePath();cx.fill();
+ // ghost
+ if(ghostHide===0){
+   var gp=centerOf(gh);
+   var col=scared>0?(scared<90&&tick%14<7?'#fff':'#2d5bff'):'#ff2d55';
+   cx.fillStyle=col;
+   cx.beginPath();
+   cx.arc(gp.x,gp.y-2,10,Math.PI,0);
+   cx.lineTo(gp.x+10,gp.y+10);
+   for(var wv=0;wv<3;wv++)cx.lineTo(gp.x+10-(wv*6.6+3.3),gp.y+6);
+   cx.lineTo(gp.x-10,gp.y+10);
+   cx.closePath();cx.fill();
+   cx.fillStyle='#fff';
+   cx.beginPath();cx.arc(gp.x-4,gp.y-3,3,0,7);cx.fill();
+   cx.beginPath();cx.arc(gp.x+4,gp.y-3,3,0,7);cx.fill();
+   cx.fillStyle='#06030f';
+   cx.beginPath();cx.arc(gp.x-4+gh.dx*1.6,gp.y-3+gh.dy*1.6,1.6,0,7);cx.fill();
+   cx.beginPath();cx.arc(gp.x+4+gh.dx*1.6,gp.y-3+gh.dy*1.6,1.6,0,7);cx.fill();
+ }
+ requestAnimationFrame(draw);
+}
+buildGrid();
+draw();
+var lastT=0,acc=0;
+function loop(ts){
+ if(!lastT)lastT=ts;
+ acc+=ts-lastT;lastT=ts;
+ var n=0;
+ while(acc>16&&n<4){step();acc-=16;n++;}
+ requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+$('btnStart').addEventListener('click',startGame);
+$('btnAgain').addEventListener('click',function(){$('ovEnd').classList.add('hide');startGame();});
+window.__CM={G:function(){return{state:state,score:score,lives:lives,level:level,scared:scared,dotsLeft:dotsLeft,pl:{cx:pl.cx,cy:pl.cy},gh:{cx:gh.cx,cy:gh.cy,hide:ghostHide},best:best}},
+start:startGame,
+step:function(n){for(var i=0;i<n;i++){step();}},
+setDir:function(dx,dy){pl.ndx=dx;pl.ndy=dy;},
+tpPlayer:function(cx,cy){pl.cx=cx;pl.cy=cy;pl.px=0;pl.py=0;},
+tpGhost:function(cx,cy){gh.cx=cx;gh.cy=cy;gh.px=0;gh.py=0;},
+setScared:function(t){scared=t;},
+eatMost:function(n){var k=0;for(var y=0;y<ROWS_N&&k<n;y++)for(var x=0;x<COLS_N&&k<n;x++){if(grid[y][x]==='.'){grid[y][x]=' ';dotsLeft--;k++;}}},
+end:endGame};
+</script>
+</body>
+</html>
