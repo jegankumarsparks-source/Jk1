@@ -18,9 +18,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:linear-gradient(180d
 #pfill{height:100%;background:#6A994E;width:100%}
 #built{position:fixed;bottom:34%;left:50%;transform:translateX(-50%);background:rgba(255,255,255,.85);border:2px dashed #7B3F00;border-radius:12px;padding:6px 14px;font-size:22px;min-width:180px;text-align:center;min-height:44px;z-index:3}
 #counter{position:fixed;bottom:0;left:0;right:0;height:32%;background:#8B5E34;border-top:8px solid #6B4423;z-index:2;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px;padding:14px 8px}
-.ing{width:64px;height:64px;border-radius:14px;background:#FFF3E4;border:3px solid #6B4423;font-size:30px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 0 #6B4423}
+.ing{width:66px;height:70px;border-radius:14px;background:#FFF3E4;border:3px solid #6B4423;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;box-shadow:0 4px 0 #6B4423;padding:0;overflow:hidden}
 .ing:active{transform:translateY(3px);box-shadow:0 1px 0 #6B4423}
-.ing span{font-size:10px;color:#6B4423;font-weight:800}
+.ing .em{font-size:28px;line-height:1}.ing .lb{font-size:10px;color:#6B4423;font-weight:800;line-height:1}
 #serve{width:110px;height:64px;border-radius:14px;background:#6A994E;border:3px solid #386641;color:#fff;font-family:'Baloo 2';font-size:20px;font-weight:800;cursor:pointer;box-shadow:0 4px 0 #386641}
 #serve:active{transform:translateY(3px);box-shadow:0 1px 0 #386641}
 #msg{position:fixed;top:44%;left:50%;transform:translateX(-50%);font-size:30px;font-weight:800;z-index:4;opacity:0;transition:opacity .2s}
@@ -38,11 +38,11 @@ h1{font-size:36px;color:#7B3F00;font-weight:800}
 <div id="built">☕ empty cup</div>
 <div id="msg"></div>
 <div id="counter">
-<button class="ing" data-i="🫚"><span>🫚</span>ginger</button>
-<button class="ing" data-i="🌿"><span>🌿</span>elaichi</button>
-<button class="ing" data-i="🥛"><span>🥛</span>milk</button>
-<button class="ing" data-i="🍬"><span>🍬</span>sugar</button>
-<button class="ing" data-i="🍋"><span>🍋</span>lemon</button>
+<button class="ing" data-i="🫚"><span class="em">🫚</span><span class="lb">ginger</span></button>
+<button class="ing" data-i="🌿"><span class="em">🌿</span><span class="lb">elaichi</span></button>
+<button class="ing" data-i="🥛"><span class="em">🥛</span><span class="lb">milk</span></button>
+<button class="ing" data-i="🍬"><span class="em">🍬</span><span class="lb">sugar</span></button>
+<button class="ing" data-i="🍋"><span class="em">🍋</span><span class="lb">lemon</span></button>
 <button id="serve">SERVE!</button>
 </div>
 <div class="overlay" id="start">
