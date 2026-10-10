@@ -1,0 +1,284 @@
+<!DOCTYPE html><html lang="ta"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>JK NEON SLICE 2047</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:#060212;color:#fff;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;overflow:hidden;touch-action:none}
+.wrap{max-width:440px;margin:0 auto;padding:12px 12px 24px}
+h1{font-size:24px;letter-spacing:3px;text-align:center;background:linear-gradient(90deg,#2dff9b,#00e5ff,#b967ff);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:900}
+.sub{text-align:center;font-size:10px;letter-spacing:2px;color:#7fb89a;margin:4px 0 10px}
+.hud{display:flex;gap:8px;margin-bottom:8px}
+.hud>div{flex:1;background:#0b1a12;border:1px solid #1e4a33;border-radius:10px;padding:6px 4px;text-align:center;font-size:11px;color:#9ad0b3}
+.hud b{display:block;font-size:15px;color:#fff}
+#cv{display:block;width:100%;border-radius:14px;border:1px solid #1e4a33;background:#04100a;touch-action:none}
+.ov{position:fixed;inset:0;background:rgba(2,8,5,.93);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
+.ovCard{background:linear-gradient(160deg,#0d2417,#071510);border:1px solid #1e4a33;border-radius:20px;padding:24px 20px;width:100%;max-width:400px;text-align:center;box-shadow:0 0 40px #2dff9b33}
+.ovCard h2{font-size:22px;margin-bottom:8px;letter-spacing:1px}
+.ovCard p{font-size:13px;color:#9ad0b3;line-height:1.6;margin-bottom:12px}
+.btn{display:block;width:100%;margin:8px 0;padding:14px;border:none;border-radius:12px;font-size:16px;font-weight:800;letter-spacing:1px;cursor:pointer;background:linear-gradient(90deg,#2dff9b,#00e5ff);color:#03130a;box-shadow:0 4px 18px #2dff9b44}
+.btn:active{transform:scale(.97)}
+.hide{display:none!important}
+#msg{text-align:center;font-size:13px;color:#9ad0b3;margin-top:8px;min-height:18px;font-weight:600}
+.resRow{display:flex;justify-content:space-between;background:#0b1a12;border:1px solid #1e4a33;border-radius:10px;padding:9px 12px;margin:5px 0;font-size:13px}
+.resRow b{color:#2dff9b}
+.combo{position:fixed;top:46%;left:50%;transform:translate(-50%,-50%);font-size:32px;font-weight:900;color:#2dff9b;text-shadow:0 0 24px #2dff9b;z-index:60;pointer-events:none;animation:cpop .8s forwards}
+@keyframes cpop{0%{transform:translate(-50%,-50%) scale(.4);opacity:0}30%{transform:translate(-50%,-50%) scale(1.2);opacity:1}100%{transform:translate(-50%,-90%) scale(1);opacity:0}}
+</style></head><body>
+<div class="wrap">
+<h1>JK NEON SLICE</h1>
+<div class="sub">2047 BLADE ARCADE • SWIPE TO SLICE • OFFLINE</div>
+<div class="hud">
+<div>⭐ SCORE<b id="score">0</b></div>
+<div>🔥 COMBO<b id="combo">0</b></div>
+<div>💚 LIVES<b id="lives">3</b></div>
+<div>🏆 BEST<b id="best">0</b></div>
+</div>
+<canvas id="cv" width="380" height="440"></canvas>
+<div id="msg"></div>
+</div>
+
+<div class="ov" id="ovStart"><div class="ovCard">
+<h2>⚔️ NEON SLICE 2047</h2>
+<p>Fruits மேல பறக்கும் — SWIPE பண்ணி slice பண்ணு! ⚔️ ஒரே swipe-ல 3+ fruits = COMBO bonus 🔥 💣 BOMB-அ touch பண்ணாதே! Fruit-அ miss பண்ணா life போகும்!</p>
+<button class="btn" onclick="startGame()">⚔️ BLADE READY</button>
+</div></div>
+
+<div class="ov hide" id="ovEnd"><div class="ovCard">
+<h2>🗡️ SLICE OVER!</h2>
+<div style="font-size:38px;margin:8px 0">⚔️</div>
+<div class="resRow"><span>⭐ Score</span><b id="rScore">0</b></div>
+<div class="resRow"><span>🍉 Fruits Sliced</span><b id="rFruits">0</b></div>
+<div class="resRow"><span>🔥 Best Combo</span><b id="rCombo">0</b></div>
+<div class="resRow"><span>🏆 Best</span><b id="rBest">0</b></div>
+<p id="endTaunt"></p>
+<button class="btn" onclick="restart()">🔄 SLICE AGAIN</button>
+</div></div>
+
+<script>
+'use strict';
+var cv=document.getElementById('cv'),cx=cv.getContext('2d');
+var W=cv.width,H=cv.height;
+var AC=window.AudioContext?new AudioContext():null;
+function beep(f,d,t){if(!AC)return;try{var o=AC.createOscillator(),g=AC.createGain();o.type=t||'triangle';o.frequency.value=f;g.gain.setValueAtTime(.07,AC.currentTime);g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+d);o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+d);}catch(e){}}
+function $(id){return document.getElementById(id);}
+function msg(t){$('msg').textContent=t;}
+
+var FRUITS=[
+ {col:'#ff4757',col2:'#ff6b81',r:20,name:'apple',pts:10},
+ {col:'#ffa502',col2:'#ffca3a',r:22,name:'orange',pts:10},
+ {col:'#2ed573',col2:'#7bed9f',r:26,name:'watermelon',pts:20},
+ {col:'#eccc68',col2:'#f5f6fa',r:16,name:'banana',pts:15},
+ {col:'#b967ff',col2:'#d6a4ff',r:18,name:'grape',pts:15},
+ {col:'#01cdfe',col2:'#7bed9f',r:24,name:'icefruit',pts:25}];
+var running=false,over=false,score=0,lives=3,fruitsSliced=0,bestCombo=0;
+var items=[],halves=[],juice=[],trail=[],frame=0,spawnT=0,wave=1;
+var swipeCount=0,swipeHits=0;
+var best=parseInt(localStorage.getItem('jkns_best')||'0');
+
+function startGame(){
+ running=true;over=false;score=0;lives=3;fruitsSliced=0;bestCombo=0;
+ items=[];halves=[];juice=[];trail=[];frame=0;spawnT=30;wave=1;
+ $('score').textContent=0;$('combo').textContent=0;$('lives').textContent=3;$('best').textContent=best;
+ $('ovStart').classList.add('hide');$('ovEnd').classList.add('hide');
+ msg('Slice பண்ணு! ⚔️');
+ if(AC&&AC.state==='suspended'){AC.resume();}
+ beep(440,.1);setTimeout(function(){beep(660,.15);},100);
+}
+function restart(){$('ovEnd').classList.add('hide');startGame();}
+
+function spawnItem(forceBomb){
+ var bomb=forceBomb||Math.random()<Math.min(0.22,0.08+wave*0.015);
+ var f=FRUITS[Math.floor(Math.random()*FRUITS.length)];
+ var x=40+Math.random()*(W-80);
+ var vx=(Math.random()-0.5)*3+(W/2-x)*0.008;
+ var vy=-(10.5+Math.random()*2.5+wave*0.15);
+ items.push({x:x,y:H+30,vx:vx,vy:vy,r:bomb?16:f.r,bomb:bomb,col:f.col,col2:f.col2,pts:f.pts,rot:Math.random()*6.28,vr:(Math.random()-0.5)*0.2,missed:false});
+}
+function loseLife(reason){
+ lives--;$('lives').textContent=lives;
+ beep(150,.3,'sawtooth');
+ if(lives<=0){gameOver();}
+ else msg(reason+' Lives: '+lives);
+}
+function gameOver(){
+ running=false;over=true;
+ if(score>best){best=score;localStorage.setItem('jkns_best',best);}
+ $('rScore').textContent=score;
+ $('rFruits').textContent=fruitsSliced;
+ $('rCombo').textContent=bestCombo;
+ $('rBest').textContent=best;
+ $('endTaunt').textContent=score>800?'⚔️ BLADE MASTER! குயில், seed sow பண்றது நிறுத்து — blade sharpen பண்ணு! 😎':'நல்ல slicing! Combo-வ அதிகமா பண்ணு 🔥';
+ $('ovEnd').classList.remove('hide');
+ beep(300,.2,'sawtooth');setTimeout(function(){beep(200,.35,'sawtooth');},200);
+}
+function comboPop(n,bonus){
+ var d=document.createElement('div');d.className='combo';d.textContent='🔥 '+n+' COMBO +'+bonus;
+ document.body.appendChild(d);setTimeout(function(){d.remove();},850);
+}
+// segment-circle hit
+function segHit(x1,y1,x2,y2,cx2,cy2,r){
+ var dx=x2-x1,dy=y2-y1;
+ var len2=dx*dx+dy*dy;
+ var t=len2?((cx2-x1)*dx+(cy2-y1)*dy)/len2:0;
+ t=Math.max(0,Math.min(1,t));
+ var px=x1+t*dx,py=y1+t*dy;
+ var ddx=cx2-px,ddy=cy2-py;
+ return ddx*ddx+ddy*ddy<=r*r;
+}
+function swipe(x1,y1,x2,y2){
+ if(!running||over)return 0;
+ var hits=0;
+ for(var i=items.length-1;i>=0;i--){
+   var it=items[i];
+   if(segHit(x1,y1,x2,y2,it.x,it.y,it.r+6)){
+     if(it.bomb){
+       // explosion
+       for(var p=0;p<30;p++){juice.push({x:it.x,y:it.y,vx:(Math.random()-0.5)*10,vy:(Math.random()-0.5)*10,life:45,col:Math.random()<.5?'#ff4757':'#ffa502',r:3+Math.random()*3});}
+       items.splice(i,1);
+       msg('💣 BOMB! 💥');
+       beep(90,.5,'sawtooth');
+       loseLife('💣 Bomb சுட்டுட்ட!');
+       if(!running)return -1;
+       continue;
+     }
+     // slice fruit
+     for(var h=0;h<2;h++){
+       halves.push({x:it.x,y:it.y,vx:it.vx+(h?2.2:-2.2),vy:it.vy-1,r:it.r,col:it.col,col2:it.col2,rot:it.rot,vr:it.vr+(h?0.15:-0.15),half:h});
+     }
+     for(var j=0;j<10;j++){juice.push({x:it.x,y:it.y,vx:(Math.random()-0.5)*7,vy:(Math.random()-0.5)*7-2,life:30,col:it.col,r:2+Math.random()*3});}
+     score+=it.pts;fruitsSliced++;hits++;
+     items.splice(i,1);
+     beep(600+hits*120,.06);
+   }
+ }
+ if(hits>0){
+   swipeHits=hits;
+   if(hits>=2){
+     var bonus=hits*hits*5;
+     score+=bonus;
+     comboPop(hits,bonus);
+     if(hits>bestCombo)bestCombo=hits;
+     $('combo').textContent=hits;
+   }
+   $('score').textContent=score;
+ }
+ return hits;
+}
+// pointer input
+var drawing=false,lastX=0,lastY=0;
+cv.addEventListener('pointerdown',function(e){e.preventDefault();drawing=true;var p=pos(e);lastX=p.x;lastY=p.y;});
+cv.addEventListener('pointermove',function(e){
+ if(!drawing)return;e.preventDefault();
+ var p=pos(e);
+ trail.push({x:p.x,y:p.y,life:14});
+ swipe(lastX,lastY,p.x,p.y);
+ lastX=p.x;lastY=p.y;
+});
+cv.addEventListener('pointerup',function(){drawing=false;});
+cv.addEventListener('pointercancel',function(){drawing=false;});
+function pos(e){var r=cv.getBoundingClientRect();return{x:(e.clientX-r.left)*(W/r.width),y:(e.clientY-r.top)*(H/r.height)};}
+
+function step(){
+ if(!running||over)return;
+ frame++;
+ wave=1+Math.floor(frame/600);
+ spawnT--;
+ if(spawnT<=0){
+   var n=1+(Math.random()<0.35?1:0)+(wave>3&&Math.random()<0.25?1:0);
+   for(var i=0;i<n;i++)spawnItem(false);
+   if(Math.random()<0.3)spawnItem(true);
+   spawnT=Math.max(35,75-wave*4);
+ }
+ // physics
+ for(var k=items.length-1;k>=0;k--){
+   var it=items[k];
+   it.vy+=0.28;it.x+=it.vx;it.y+=it.vy;it.rot+=it.vr;
+   if(it.y>H+50&&it.vy>0){
+     if(!it.bomb&&!it.missed){
+       it.missed=true;
+       loseLife('😅 Fruit miss!');
+       if(!running)return;
+     }
+     items.splice(k,1);
+   }
+ }
+ for(var h2=halves.length-1;h2>=0;h2--){
+   var hf=halves[h2];
+   hf.vy+=0.3;hf.x+=hf.vx;hf.y+=hf.vy;hf.rot+=hf.vr;
+   if(hf.y>H+60)halves.splice(h2,1);
+ }
+ for(var q=juice.length-1;q>=0;q--){
+   var jc=juice[q];
+   jc.vy+=0.25;jc.x+=jc.vx;jc.y+=jc.vy;jc.life--;
+   if(jc.life<=0)juice.splice(q,1);
+ }
+ for(var t=trail.length-1;t>=0;t--){
+   trail[t].life--;
+   if(trail[t].life<=0)trail.splice(t,1);
+ }
+}
+function drawFruit(it){
+ cx.save();cx.translate(it.x,it.y);cx.rotate(it.rot);
+ if(it.bomb){
+   cx.fillStyle='#1a1a24';cx.beginPath();cx.arc(0,0,it.r,0,7);cx.fill();
+   cx.fillStyle='#3a3a4a';cx.beginPath();cx.arc(-it.r*0.3,-it.r*0.3,it.r*0.35,0,7);cx.fill();
+   cx.strokeStyle='#7a7a8a';cx.lineWidth=2;cx.beginPath();cx.moveTo(0,-it.r);cx.quadraticCurveTo(6,-it.r-8,10,-it.r-6);cx.stroke();
+   cx.fillStyle='#ffa502';cx.beginPath();cx.arc(10,-it.r-6,3,0,7);cx.fill();
+ }else{
+   cx.fillStyle=it.col;cx.beginPath();cx.arc(0,0,it.r,0,7);cx.fill();
+   cx.fillStyle=it.col2;cx.beginPath();cx.arc(-it.r*0.25,-it.r*0.25,it.r*0.45,0,7);cx.fill();
+   cx.fillStyle='#2d6a4f';cx.fillRect(-2,-it.r-5,4,6);
+ }
+ cx.restore();
+}
+function draw(){
+ cx.fillStyle='#04100a';cx.fillRect(0,0,W,H);
+ // grid
+ cx.strokeStyle='rgba(45,255,155,.06)';cx.lineWidth=1;cx.beginPath();
+ for(var gx=0;gx<W;gx+=38){cx.moveTo(gx,0);cx.lineTo(gx,H);}
+ for(var gy=0;gy<H;gy+=38){cx.moveTo(0,gy);cx.lineTo(W,gy);}
+ cx.stroke();
+ // juice
+ for(var q=0;q<juice.length;q++){
+   var jc=juice[q];
+   cx.globalAlpha=jc.life/30;cx.fillStyle=jc.col;
+   cx.beginPath();cx.arc(jc.x,jc.y,jc.r,0,7);cx.fill();cx.globalAlpha=1;
+ }
+ // halves
+ for(var h=0;h<halves.length;h++){
+   var hf=halves[h];
+   cx.save();cx.translate(hf.x,hf.y);cx.rotate(hf.rot);
+   cx.fillStyle=hf.col;
+   cx.beginPath();
+   if(hf.half===0){cx.arc(0,0,hf.r,Math.PI*0.5,Math.PI*1.5);}else{cx.arc(0,0,hf.r,-Math.PI*0.5,Math.PI*0.5);}
+   cx.fill();
+   cx.fillStyle=hf.col2;cx.fillRect(hf.half===0?-2:0,-hf.r+3,2,hf.r*2-6);
+   cx.restore();
+ }
+ // items
+ for(var i=0;i<items.length;i++)drawFruit(items[i]);
+ // blade trail
+ if(trail.length>1){
+   for(var t=1;t<trail.length;t++){
+     var a=trail[t-1],b=trail[t];
+     cx.strokeStyle='rgba(45,255,155,'+(b.life/14)+')';
+     cx.lineWidth=3+(b.life/14)*4;
+     cx.lineCap='round';
+     cx.beginPath();cx.moveTo(a.x,a.y);cx.lineTo(b.x,b.y);cx.stroke();
+   }
+ }
+ requestAnimationFrame(draw);
+}
+draw();
+var lastTick=0;
+function loop(ts){if(ts-lastTick>15){lastTick=ts;step();}requestAnimationFrame(loop);}
+requestAnimationFrame(loop);
+$('best').textContent=best;
+window.__FS={G:function(){return{score:score,lives:lives,sliced:fruitsSliced,bestCombo:bestCombo,wave:wave,items:items.map(function(i){return{x:Math.round(i.x),y:Math.round(i.y),bomb:i.bomb,r:i.r};}),running:running,over:over,best:best}},
+start:startGame,step:function(n){for(var i=0;i<n;i++){step();}},
+swipe:swipe,
+spawn:function(bomb){spawnItem(bomb);},
+spawnAt:function(x,y,vx,vy,bomb){items.push({x:x,y:y,vx:vx||0,vy:vy||0,r:20,bomb:!!bomb,col:'#ff4757',col2:'#ff6b81',pts:10,rot:0,vr:0.05,missed:false});},
+clearItems:function(){items=[];},
+end:gameOver};
+</script></body></html>
