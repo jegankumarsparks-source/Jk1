@@ -72,6 +72,7 @@ function rndFood(){
  }
 }
 function onBody(s,x,y){if(!s||!s.alive)return false;return s.body.some(function(b){return b.x===x&&b.y===y;});}
+function onBodyX(s,x,y){if(!s||!s.alive)return false;return s.body.slice(1).some(function(b){return b.x===x&&b.y===y;});}
 function startGame(){
  running=true;over=false;score=0;foodGot=0;kills=0;lives=3;tick=0;speed=8;
  me=mkSnake(6,12,[1,0]);
@@ -135,7 +136,7 @@ function step(){
  var mh=moveSnake(me);
  var ah=ai.alive?moveSnake(ai):null;
  // my collisions
- if(mh.x<0||mh.x>=COLS||mh.y<0||mh.y>=ROWS||onBody(me,mh.x,mh.y)||(ai.alive&&onBody(ai,mh.x,mh.y))){
+ if(mh.x<0||mh.x>=COLS||mh.y<0||mh.y>=ROWS||onBodyX(me,mh.x,mh.y)||(ai.alive&&onBody(ai,mh.x,mh.y))){
    lives--;$('lives').textContent=lives;
    beep(150,.3,'sawtooth');
    if(lives<=0){gameOver();return;}
@@ -154,7 +155,7 @@ function step(){
  // AI collisions
  if(ai.alive&&ah){
    var aiDead=false;
-   if(ah.x<0||ah.x>=COLS||ah.y<0||ah.y>=ROWS||onBody(ai,ah.x,ah.y))aiDead=true;
+   if(ah.x<0||ah.x>=COLS||ah.y<0||ah.y>=ROWS||onBodyX(ai,ah.x,ah.y))aiDead=true;
    if(onBody(me,ah.x,ah.y))aiDead=true; // ran into me = kill!
    if(aiDead){
      kills++;score+=200;$('kills').textContent=kills;$('score').textContent=score;
