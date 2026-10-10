@@ -53,7 +53,7 @@ let score=0,wave=1,lives=3,playing=false,over=false,fireT=0,waveT=0,boss=null;
 let spread=0,rapid=0,shield=0,invuln=0,targetX=null,targetY=null,aurT=0;
 const rand=(a,b)=>a+Math.random()*(b-a);
 function reset(){ship={x:W/2,y:H-140};bullets=[];ebullets=[];enemies=[];powers=[];parts=[];
-score=0;wave=1;lives=3;fireT=0;waveT=1.5;boss=null;spread=0;rapid=0;shield=0;invuln=0;
+score=0;wave=0;lives=3;fireT=0;waveT=1.5;boss=null;spread=0;rapid=0;shield=0;invuln=0;
 stars=[];for(let i=0;i<60;i++)stars.push({x:rand(0,W),y:rand(0,H),s:rand(.3,1.4),v:rand(8,30)});}
 function boom(x,y,c,n){for(let i=0;i<n;i++)parts.push({x,y,vx:rand(-140,140),vy:rand(-140,140),life:rand(.3,.7),c});}
 function spawnWave(){
