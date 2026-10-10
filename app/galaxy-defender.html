@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>JK GALAXY DEFENDER 2038</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#05050f;color:#e8e8f5;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+#hud{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:linear-gradient(180deg,#10102a,#0a0a1c);border-bottom:1px solid #26264a;z-index:2}
+.hudItem{font-size:13px;font-weight:800}
+.hudItem small{display:block;font-size:8px;color:#8a8ab0;letter-spacing:1px;font-weight:400}
+#wave{color:#00e5ff}#lives{color:#ff4d6d}#creds{color:#ffd60a}#kills{color:#3ddc84}
+#cv{flex:1;width:100%;touch-action:none;display:block}
+#dock{background:#0a0a1c;border-top:1px solid #26264a;padding:8px;z-index:2}
+.towers{display:flex;gap:8px;justify-content:center}
+.twr{flex:1;max-width:110px;background:linear-gradient(145deg,#181836,#101024);border:2px solid #2e2e5a;border-radius:12px;padding:8px 4px;text-align:center;cursor:pointer}
+.twr .ic{font-size:22px}
+.twr .nm{font-size:10px;font-weight:800;margin-top:2px}
+.twr .cs{font-size:10px;color:#ffd60a}
+.twr.sel{border-color:#00e5ff;box-shadow:0 0 14px rgba(0,229,255,.35)}
+.twr.cant{opacity:.4}
+#msg{text-align:center;font-size:11px;color:#8a8ab0;padding:4px;min-height:18px}
+#waveBtn{width:100%;margin-top:6px;padding:12px;border:none;border-radius:12px;font-size:15px;font-weight:900;background:linear-gradient(90deg,#ff2ea6,#ff7b4d);color:#fff;cursor:pointer}
+#waveBtn:disabled{opacity:.35}
+.ov{position:fixed;inset:0;background:rgba(3,3,12,.94);z-index:20;display:flex;align-items:center;justify-content:center;padding:20px}
+.ov.hide{display:none}
+.ovCard{background:linear-gradient(145deg,#161634,#0d0d20);border:1px solid #34346a;border-radius:20px;padding:28px 22px;max-width:400px;width:100%;text-align:center}
+.ovCard h1{font-size:24px;letter-spacing:2px;background:linear-gradient(90deg,#00e5ff,#ff2ea6);-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:8px}
+.ovCard p{color:#b8b8d8;font-size:13px;line-height:1.8;margin:6px 0}
+.big{font-size:38px;font-weight:900;color:#ffd60a}
+.btn{display:inline-block;margin-top:14px;padding:13px 30px;border:none;border-radius:14px;font-size:16px;font-weight:800;cursor:pointer;background:linear-gradient(90deg,#00e5ff,#3ddc84);color:#04222a}
+.sellPop{position:fixed;z-index:10;background:#161634;border:1px solid #34346a;border-radius:12px;padding:8px;display:none;gap:6px}
+.sellPop button{padding:7px 12px;border:none;border-radius:8px;font-size:11px;font-weight:800;cursor:pointer}
+.upg{background:#00e5ff;color:#04222a}.sellB{background:#ff4d6d;color:#fff}
+</style>
+</head>
+<body>
+<div id="hud">
+<div class="hudItem" id="wave">1<small>WAVE</small></div>
+<div class="hudItem" id="lives">20 ❤️<small>BASE</small></div>
+<div class="hudItem" id="creds">180 🪙<small>CREDITS</small></div>
+<div class="hudItem" id="kills">0<small>KILLS</small></div>
+</div>
+<canvas id="cv"></canvas>
+<div id="dock">
+<div id="msg">tower-அ tap பண்ணி map-ல வை! 🗼</div>
+<div class="towers" id="twrRow"></div>
+<button id="waveBtn" onclick="nextWave()">🚀 WAVE 1 தொடங்கு!</button>
+</div>
+<div class="sellPop" id="sellPop">
+<button class="upg" onclick="upgradeSel()">⬆️ <span id="upgCost"></span></button>
+<button class="sellB" onclick="sellSel()">SELL <span id="sellVal"></span></button>
+</div>
+<div class="ov" id="ov"><div class="ovCard">
+<h1>🛸 JK GALAXY DEFENDER</h1>
+<p>2038-ல alien swarm நம்ம base-அ நோக்கி வருது!<br>🗼 <b>LASER</b> — வேகமா சுடும்<br>❄️ <b>CRYO</b> — enemy-அ slow பண்ணும்<br>💣 <b>MISSILE</b> — area damage!<br><br>Tower-அ tap பண்ணி grid-ல வை. Tap again to upgrade/sell. 15 waves தாங்கு!</p>
+<button class="btn" onclick="document.getElementById('ov').classList.add('hide')">DEFEND 🛡️</button>
+</div></div>
+<div class="ov hide" id="ovEnd"><div class="ovCard">
+<h1 id="endTitle">🏆</h1>
+<div class="big" id="endScore">0</div>
+<p id="endText"></p>
+<button class="btn" onclick="restart()">PLAY AGAIN 🔄</button>
+</div></div>
+<script>
+var cv=document.getElementById('cv'),cx=cv.getContext('2d');
+var GW=10,GH=16,cell=0,offX=0,offY=0;
+function resize(){cv.width=cv.clientWidth;cv.height=cv.clientHeight;cell=Math.min(cv.width/GW,cv.height/GH);offX=(cv.width-cell*GW)/2;offY=(cv.height-cell*GH)/2;}
+resize();addEventListener('resize',resize);
+/* path: serpentine */
+var PATH=[];
+(function(){var dirs=[[1,0],[0,1],[-1,0],[0,1],[1,0],[0,1],[-1,0],[0,1],[1,0]];
+ var x=0,y=0;PATH.push([x,y]);
+ dirs.forEach(function(d,i){var len=i%2===0?GW-1:2;for(var s=0;s<len;s++){x+=d[0];y+=d[1];if(x<0)x=0;if(x>=GW)x=GW-1;PATH.push([x,y]);}});
+ // dedupe consecutive
+ PATH=PATH.filter(function(p,i){return i===0||p[0]!==PATH[i-1][0]||p[1]!==PATH[i-1][1]});
+})();
+var pathSet={};PATH.forEach(function(p){pathSet[p[0]+','+p[1]]=1});
+function pathPx(i){return [offX+PATH[i][0]*cell+cell/2,offY+PATH[i][1]*cell+cell/2];}
+var TTYPES=[
+ {ic:'🔫',nm:'LASER',cost:60,dmg:8,rate:.35,range:2.6,col:'#00e5ff'},
+ {ic:'❄️',nm:'CRYO',cost:80,dmg:3,rate:.7,range:2.2,col:'#7bd5ff',slow:.5,slowT:1.2},
+ {ic:'💥',nm:'MISSILE',cost:130,dmg:26,rate:1.1,range:3.0,col:'#ff9f43',aoe:1.1}
+];
+var MAXWAVE=15;
+var towers=[],enemies=[],shots=[],parts=[];
+var wave=0,lives=20,creds=180,kills=0,waveOn=false,spawnQ=[],spawnT=0,selType=-1,selTower=null,over=false,won=false;
+function twrRow(){
+ var s=document.getElementById('twrRow'),h='';
+ TTYPES.forEach(function(t,i){h+='<div class="twr'+(selType===i?' sel':'')+(creds<t.cost?' cant':'')+'" onclick="pickType('+i+')"><div class="ic">'+t.ic+'</div><div class="nm">'+t.nm+'</div><div class="cs">🪙'+t.cost+'</div></div>';});
+ s.innerHTML=h;
+ document.getElementById('wave').textContent=Math.max(1,wave);
+ document.getElementById('lives').textContent=lives+' ❤️';
+ document.getElementById('creds').textContent=creds+' 🪙';
+ document.getElementById('kills').textContent=kills;
+ document.getElementById('waveBtn').disabled=waveOn||over;
+ document.getElementById('waveBtn').textContent=waveOn?('⚔️ WAVE '+wave+' ஓடுது...'):(wave>=MAXWAVE?'🏁':'🚀 WAVE '+(wave+1)+' தொடங்கு!');
+}
+function pickType(i){selType=selType===i?-1:i;selTower=null;hidePop();twrRow();msg(selType>=0?'map-ல இடம் tap பண்ணு 🗼':'சரி!');}
+function msg(t){document.getElementById('msg').textContent=t;}
+cv.addEventListener('pointerdown',function(e){
+ if(over)return;
+ var r=cv.getBoundingClientRect();
+ var gx=Math.floor((e.clientX-r.left-offX)/cell),gy=Math.floor((e.clientY-r.top-offY)/cell);
+ if(gx<0||gy<0||gx>=GW||gy>=GH)return;
+ var ex=towers.find(function(t){return t.gx===gx&&t.gy===gy});
+ if(ex){selTower=ex;selType=-1;showPop(e.clientX,e.clientY);twrRow();return;}
+ hidePop();selTower=null;
+ if(selType<0)return;
+ if(pathSet[gx+','+gy]){msg('🚫 path-ல வைக்க முடியாது!');return;}
+ var tp=TTYPES[selType];
+ if(creds<tp.cost){msg('🪙 credits போதாது!');return;}
+ creds-=tp.cost;
+ towers.push({gx:gx,gy:gy,type:selType,lvl:1,cd:0});
+ msg(tp.nm+' ready! 💪');selType=-1;twrRow();
+});
+function showPop(x,y){var p=document.getElementById('sellPop');p.style.display='flex';p.style.left=Math.min(innerWidth-170,Math.max(8,x-80))+'px';p.style.top=Math.max(60,y-70)+'px';
+ var t=selTower,tp=TTYPES[t.type];
+ var uc=Math.round(tp.cost*.7*t.lvl);
+ document.getElementById('upgCost').textContent=t.lvl>=4?'MAX':'🪙'+uc;
+ document.getElementById('sellVal').textContent='+🪙'+Math.round(tp.cost*t.lvl*.5);}
+function hidePop(){document.getElementById('sellPop').style.display='none';}
+function upgradeSel(){var t=selTower;if(!t||t.lvl>=4)return;var tp=TTYPES[t.type],uc=Math.round(tp.cost*.7*t.lvl);if(creds<uc){msg('🪙 போதாது!');return;}creds-=uc;t.lvl++;msg(tp.nm+' Lv'+t.lvl+'! ⬆️');hidePop();selTower=null;twrRow();}
+function sellSel(){var t=selTower;if(!t)return;var tp=TTYPES[t.type];creds+=Math.round(tp.cost*t.lvl*.5);towers=towers.filter(function(x){return x!==t});hidePop();selTower=null;msg('sold! 🪙');twrRow();}
+function nextWave(){
+ if(waveOn||over||wave>=MAXWAVE)return;
+ wave++;waveOn=true;spawnQ=[];spawnT=0;
+ var n=4+wave*2;
+ for(var i=0;i<n;i++){var hp=Math.round((18+wave*9)*(1+(i%3)*.15));spawnQ.push({hp:hp,sp:(0.9+wave*.06)*(i%5===4?1.5:1),boss:i===n-1&&wave%3===0});}
+ msg('WAVE '+wave+' incoming! 🛸');
+ twrRow();
+}
+function spawnE(def){
+ enemies.push({pi:0,px:pathPx(0)[0],py:pathPx(0)[1],prog:0,hp:def.hp,maxHp:def.hp,sp:def.sp,slowF:0,slowT:0,boss:def.boss,dead:false,reach:false});
+}
+var lastT=Date.now();
+function loop(){
+ var now=Date.now(),dt=Math.min(.05,(now-lastT)/1000);lastT=now;
+ // background
+ cx.fillStyle='#05050f';cx.fillRect(0,0,cv.width,cv.height);
+ // grid
+ cx.strokeStyle='rgba(40,40,80,.35)';cx.lineWidth=1;
+ for(var x=0;x<=GW;x++){cx.beginPath();cx.moveTo(offX+x*cell,offY);cx.lineTo(offX+x*cell,offY+GH*cell);cx.stroke();}
+ for(var y=0;y<=GH;y++){cx.beginPath();cx.moveTo(offX,offY+y*cell);cx.lineTo(offX+GW*cell,offY+y*cell);cx.stroke();}
+ // path
+ cx.fillStyle='rgba(60,40,120,.4)';
+ PATH.forEach(function(p){cx.fillRect(offX+p[0]*cell+1,offY+p[1]*cell+1,cell-2,cell-2);});
+ // start/end markers
+ cx.font=Math.round(cell*.6)+'px serif';cx.textAlign='center';cx.textBaseline='middle';
+ cx.fillText('🛸',offX+PATH[0][0]*cell+cell/2,offY+PATH[0][1]*cell+cell/2);
+ cx.fillText('🏰',offX+PATH[PATH.length-1][0]*cell+cell/2,offY+PATH[PATH.length-1][1]*cell+cell/2);
+ // spawn
+ if(waveOn&&spawnQ.length>0){spawnT-=dt;if(spawnT<=0){spawnE(spawnQ.shift());spawnT=.55;}}
+ // enemies
+ enemies.forEach(function(e){
+  if(e.dead||e.reach)return;
+  var sp=e.sp*(e.slowT>0?e.slowF:1);
+  e.prog+=sp*dt;
+  var idx=Math.floor(e.prog),frac=e.prog-idx;
+  if(idx>=PATH.length-1){e.reach=true;lives-=e.boss?5:1;twrRow();if(lives<=0){endGame(false);}return;}
+  var a=pathPx(idx),b=pathPx(Math.min(idx+1,PATH.length-1));
+  e.px=a[0]+(b[0]-a[0])*frac;e.py=a[1]+(b[1]-a[1])*frac;
+  if(e.slowT>0)e.slowT-=dt;
+ });
+ // towers fire
+ towers.forEach(function(t){
+  var tp=TTYPES[t.type];t.cd-=dt;
+  if(t.cd>0)return;
+  var tx=offX+t.gx*cell+cell/2,ty=offY+t.gy*cell+cell/2;
+  var best=null,bd=1e9;
+  enemies.forEach(function(e){if(e.dead||e.reach)return;var d=Math.hypot(e.px-tx,e.py-ty)/cell;if(d<tp.range&&e.prog<bd+.0001){var dd=Math.hypot(e.px-tx,e.py-ty)/cell;if(dd<bd){bd=dd;best=e;}}});
+  if(!best)return;
+  t.cd=tp.rate/(1+.25*(t.lvl-1));
+  var dmg=tp.dmg*(1+.6*(t.lvl-1));
+  shots.push({x1:tx,y1:ty,x2:best.px,y2:best.py,col:tp.col,t:.12});
+  if(tp.slow){best.slowF=tp.slow;best.slowT=tp.slowT;}
+  if(tp.aoe){
+   enemies.forEach(function(e){if(e.dead||e.reach)return;if(Math.hypot(e.px-best.px,e.py-best.py)/cell<=tp.aoe){hurt(e,dmg);}});
+  }else hurt(best,dmg);
+ });
+ function hurt(e,d){e.hp-=d;if(e.hp<=0&&!e.dead){e.dead=true;kills++;creds+=e.boss?40:8+wave;for(var i=0;i<8;i++)parts.push({x:e.px,y:e.py,vx:(Math.random()-.5)*120,vy:(Math.random()-.5)*120,t:.5,col:'#ffd60a'});twrRow();}}
+ // wave end
+ if(waveOn&&spawnQ.length===0&&enemies.every(function(e){return e.dead||e.reach})){
+  waveOn=false;enemies=[];
+  creds+=30+wave*5;
+  if(wave>=MAXWAVE){endGame(true);}else msg('WAVE '+wave+' cleared! +🪙'+(30+wave*5));
+  twrRow();
+ }
+ enemies=enemies.filter(function(e){return !e.dead&&!e.reach});
+ // draw enemies
+ enemies.forEach(function(e){
+  var r=cell*(e.boss?.42:.3);
+  cx.font=Math.round(r*2)+'px serif';
+  cx.fillText(e.boss?'👾':'👽',e.px,e.py);
+  // hp bar
+  var w=cell*.7;
+  cx.fillStyle='#400';cx.fillRect(e.px-w/2,e.py-r-7,w,4);
+  cx.fillStyle=e.slowT>0?'#7bd5ff':'#3ddc84';cx.fillRect(e.px-w/2,e.py-r-7,w*Math.max(0,e.hp/e.maxHp),4);
+ });
+ // draw towers
+ towers.forEach(function(t){
+  var tp=TTYPES[t.type];
+  var tx=offX+t.gx*cell+cell/2,ty=offY+t.gy*cell+cell/2;
+  if(t===selTower){cx.strokeStyle='rgba(0,229,255,.5)';cx.beginPath();cx.arc(tx,ty,tp.range*cell,0,7);cx.stroke();}
+  cx.fillStyle='#181836';cx.beginPath();cx.arc(tx,ty,cell*.4,0,7);cx.fill();
+  cx.strokeStyle=tp.col;cx.lineWidth=2;cx.stroke();
+  cx.font=Math.round(cell*.45)+'px serif';cx.fillText(tp.ic,tx,ty);
+  cx.fillStyle='#ffd60a';cx.font='bold '+Math.round(cell*.18)+'px sans-serif';
+  for(var i=0;i<t.lvl;i++)cx.fillRect(tx-cell*.3+i*cell*.15,ty+cell*.28,cell*.1,cell*.08);
+ });
+ // shots
+ shots.forEach(function(s){s.t-=dt;cx.strokeStyle=s.col;cx.globalAlpha=Math.max(0,s.t/.12);cx.lineWidth=2.5;cx.beginPath();cx.moveTo(s.x1,s.y1);cx.lineTo(s.x2,s.y2);cx.stroke();cx.globalAlpha=1;});
+ shots=shots.filter(function(s){return s.t>0});
+ // particles
+ parts.forEach(function(p){p.t-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;cx.globalAlpha=Math.max(0,p.t/.5);cx.fillStyle=p.col;cx.fillRect(p.x-2,p.y-2,4,4);cx.globalAlpha=1;});
+ parts=parts.filter(function(p){return p.t>0});
+ if(!over)requestAnimationFrame(loop);
+}
+function endGame(w){
+ over=true;won=w;hidePop();
+ var score=kills*10+wave*100+lives*25;
+ var best=parseInt(localStorage.getItem('jkgd_best')||'0');
+ if(score>best)localStorage.setItem('jkgd_best',score);
+ document.getElementById('endTitle').textContent=w?'🏆 GALAXY SAVED!':'💥 BASE DOWN!';
+ document.getElementById('endScore').textContent=score;
+ document.getElementById('endText').innerHTML='Waves: <b>'+wave+'/'+MAXWAVE+'</b> • Kills: <b>'+kills+'</b> • Lives left: <b>'+Math.max(0,lives)+'</b><br>'+(score>best?'🎉 NEW RECORD!':'Best: '+best)+'<br>'+(w?'ராமு galaxy-யை காப்பாத்திட்டார்! 👑':'Aliens வெச்சு செஞ்சுட்டாங்க... retry! 💪');
+ document.getElementById('ovEnd').classList.remove('hide');
+ twrRow();
+}
+function restart(){
+ wave=0;lives=20;creds=180;kills=0;waveOn=false;spawnQ=[];towers=[];enemies=[];shots=[];parts=[];selType=-1;selTower=null;over=false;won=false;lastT=Date.now();
+ document.getElementById('ovEnd').classList.add('hide');
+ msg('tower-அ tap பண்ணி map-ல வை! 🗼');twrRow();loop();
+}
+twrRow();loop();
+window.__GD={G:function(){return {wave:wave,lives:lives,creds:creds,kills:kills,towers:towers.length,enemies:enemies.length,queue:spawnQ.length,waveOn:waveOn,over:over,won:won,best:parseInt(localStorage.getItem('jkgd_best')||'0')}},place:function(t,gx,gy){var tp=TTYPES[t];if(creds<tp.cost||pathSet[gx+','+gy])return false;creds-=tp.cost;towers.push({gx:gx,gy:gy,type:t,lvl:1,cd:0});twrRow();return true},wave:nextWave,restart:restart,give:function(n){creds+=n;twrRow()}};
+</script>
+</body>
+</html>
