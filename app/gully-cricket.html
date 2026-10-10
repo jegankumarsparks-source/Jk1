@@ -44,7 +44,7 @@ function reset(){score=0;wkts=0;balls=0;fours=0;sixes=0;dots=0;ball=null;hist=[]
 function newBall(){
  const line=rand(-1,1);
  const straight=Math.random()<0.62;
- ball={x:W/2+line*W*0.10,y:-20,spd:rand(330,520)+balls*6,drift:straight?(W/2-(W/2+line*W*0.10))*rand(0.5,0.9)/1.2:line*rand(40,120),straight:straight,bounced:false,hit:false,dead:false,trail:[]};
+ ball={x:W/2+line*W*0.10,y:-20,spd:rand(330,520)+balls*6,drift:straight?(W/2-(W/2+line*W*0.10))*rand(0.85,1.1)/1.2:line*rand(40,120),straight:straight,bounced:false,hit:false,dead:false,trail:[]};
 }
 function endBall(result,runs,out){
  ball.dead=true;
@@ -99,7 +99,7 @@ function simStep(dt){
  // passed the batsman without a swing
  if(b.y>H*0.86&&!b.dead){
    const stumpX=W/2;
-   if(Math.abs(b.x-stumpX)<26&&b.straight){endBall('BOWLED! \ud83d\udca5',0,true);}
+   if(Math.abs(b.x-stumpX)<32&&b.straight){endBall('BOWLED! \ud83d\udca5',0,true);}
    else{endBall('DOT BALL',0,false);}
  }
  for(let i=parts.length-1;i>=0;i--){const p=parts[i];p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=800*dt;p.life-=dt;if(p.life<=0)parts.splice(i,1);}
@@ -185,7 +185,7 @@ cv.addEventListener('pointerdown',()=>{swing();});
 window.__GC={G:()=>({score,wkts,balls,fours,sixes,playing,over,ballY:ball?Math.round(ball.y):null,ballStraight:ball?ball.straight:null,ballDead:ball?ball.dead:null,histLen:hist.length,msg}),
  start:tog,sim:(dt)=>simStep(dt),swing:swing,
  refs:()=>({ball}),
- forceBall:(straight,spd)=>{newBall();ball.straight=straight;ball.drift=0;ball.spd=spd||420;},
+ forceBall:(straight,spd)=>{newBall();ball.straight=straight;ball.spd=spd||420;if(straight){ball.x=W/2;ball.drift=0;}else{ball.x=W/2;ball.drift=160;}},
  warpBall:(y)=>{if(ball)ball.y=y;},
  finishNow:()=>{balls=12;},
  zoneY:()=>ZONE()};
