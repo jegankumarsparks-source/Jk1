@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>JK TIFFIN TOWER 2040</title>
+<link href="https://fonts.googleapis.com/css2?family=Mukta:wght@600;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;touch-action:none}
+html,body{width:100%;height:100%;overflow:hidden;background:linear-gradient(180deg,#B5D5E8 0%,#E8F1F5 60%,#9DB4C0 100%)}
+#game{position:fixed;inset:0}
+canvas{display:block;width:100%;height:100%}
+#hud{position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;padding:12px 16px;z-index:5;font-family:'Mukta',sans-serif;pointer-events:none}
+#score{font-size:30px;font-weight:800;color:#253237}
+#perfect{font-size:16px;color:#2E7D32;font-weight:800}
+.overlay{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(180deg,#B5D5E8,#E8F1F5);font-family:'Mukta',sans-serif;text-align:center;padding:20px}
+.overlay.hidden{display:none}
+h1{font-size:34px;color:#253237;font-weight:800}
+.sub{color:#5C6B73;font-size:17px;margin-top:10px;max-width:320px;line-height:1.6}
+.btn{margin-top:24px;padding:12px 40px;background:#2E7D32;color:#fff;font-family:'Mukta';font-size:24px;font-weight:800;border:none;border-radius:14px;cursor:pointer;box-shadow:0 5px 0 #1B4D1F}
+#finalScore{font-size:52px;color:#253237;margin-top:8px;font-weight:800}
+</style>
+</head>
+<body>
+<div id="game"></div>
+<div id="hud"><div id="score">0</div><div id="perfect"></div></div>
+<div class="overlay" id="start">
+<h1>🥘 TIFFIN TOWER 2040 🥘</p></h1>
+<p class="sub">Tiffin boxes swing on the hook - TAP to drop! Land them centered or the tower topples! Perfect drops straighten the stack. How high can you go?</p>
+<button class="btn" id="startBtn">STACK!</button>
+</div>
+<div class="overlay hidden" id="over">
+<h1>💥 TOPPLED! 💥</h1>
+<div id="finalScore">0</div>
+<p class="sub" id="overSub"></p>
+<button class="btn" id="overBtn">REBUILD!</button>
+</div>
+<script>
+"use strict";
+const TAU=Math.PI*2;
+const container=document.getElementById('game');
+const cv=document.createElement('canvas');container.appendChild(cv);
+const g=cv.getContext('2d');
+let W=0,H=0;
+function resize(){const dpr=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*dpr;cv.height=H*dpr;g.setTransform(dpr,0,0,dpr,0,0);}
+addEventListener('resize',resize);resize();
+const BW=86,BH=34;
+let stack=[],falling=null,hookX=0,hookDir=1,swingT=0;
+let score=0,perfects=0,playing=false,over=false,camY=0,wobble=0,toppleAnim=null,parts=[];
+const rand=(a,b)=>a+Math.random()*(b-a);
+const hookY=()=>90;
+function stackTop(){return stack.length?stack[stack.length-1].y:H-90;}
+function reset(){stack=[{x:W/2,y:H-90,w:BW*1.5,base:true}];falling=null;hookX=W/2;hookDir=1;swingT=0;score=0;perfects=0;camY=0;wobble=0;toppleAnim=null;parts=[];}
+function drop(){if(!playing||over||falling)return;
+const sw=Math.sin(swingT*2.2)*40;
+falling={x:hookX+sw,y:hookY()+60,vy:0,w:BW};}
+function simStep(dt){
+if(!playing||over)return;
+hookX+=hookDir*(120+score*3)*dt;
+if(hookX>W-50){hookX=W-50;hookDir=-1;}
+if(hookX<50){hookX=50;hookDir=1;}
+swingT+=dt;
+if(falling){falling.vy+=1400*dt;falling.y+=falling.vy*dt;
+const top=stack[stack.length-1];
+if(falling.y+BH>=top.y&&falling.vy>0){
+const off=falling.x-top.x;
+const overlap=top.w/2+falling.w/2-Math.abs(off);
+if(overlap<top.w*0.25){// topples!
+parts.push({x:falling.x,y:falling.y,vx:off>0?150:-150,vy:-200,rot:0,rv:rand(-6,6)});
+for(let i=stack.length-1;i>Math.max(0,stack.length-4);i--){const s=stack[i];parts.push({x:s.x,y:s.y,vx:rand(-140,140)+(off>0?80:-80),vy:rand(-260,-80),rot:0,rv:rand(-8,8)});}
+die();return;}
+let nx=falling.x;
+if(Math.abs(off)<6){nx=top.x;perfects++;wobble=0;flashPerfect();}
+else wobble=Math.min(26,wobble+Math.abs(off)*0.35);
+stack.push({x:nx,y:top.y-BH,w:BW});
+score++;
+falling=null;
+const st=stackTop();
+if(st-camY<H*0.35)camY=st-H*0.35;}}
+for(let i=parts.length-1;i>=0;i--){const p=parts[i];p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=1400*dt;p.rot+=p.rv*dt;if(p.y>H+200)parts.splice(i,1);}}
+let perfectT=0;
+function flashPerfect(){perfectT=1.2;document.getElementById('perfect').textContent='PERFECT! 🌟';setTimeout(()=>document.getElementById('perfect').textContent='',900);}
+function die(){playing=false;over=true;
+document.getElementById('finalScore').textContent=score+' boxes';
+document.getElementById('overSub').textContent='Perfect drops: '+perfects+' 🌟';
+document.getElementById('over').classList.remove('hidden');}
+function drawBox(x,y,w,rot){g.save();g.translate(x,y);g.rotate(rot||0);
+g.fillStyle='#C0CDD6';g.strokeStyle='#7A8B99';g.lineWidth=2.5;
+g.beginPath();g.roundRect(-w/2,-BH,w,BH,7);g.fill();g.stroke();
+g.fillStyle='#DCE5EC';g.fillRect(-w/2+4,-BH+4,w-8,7);
+g.strokeStyle='#7A8B99';g.beginPath();g.moveTo(-w/2,-BH+14);g.lineTo(w/2,-BH+14);g.stroke();
+g.fillStyle='#5C6B73';g.beginPath();g.arc(0,-BH-4,4,0,TAU);g.fill();
+g.restore();}
+let last=performance.now();
+function frame(now){requestAnimationFrame(frame);const dt=Math.min((now-last)/1000,.05);last=now;
+simStep(dt);
+const bg=g.createLinearGradient(0,0,0,H);bg.addColorStop(0,'#B5D5E8');bg.addColorStop(.6,'#E8F1F5');bg.addColorStop(1,'#9DB4C0');
+g.fillStyle=bg;g.fillRect(0,0,W,H);
+g.save();g.translate(0,-camY);
+// banana leaf table
+g.fillStyle='#2E7D32';g.fillRect(0,H-90,W,14);
+g.fillStyle='#256A29';g.fillRect(0,H-76,W,4);
+g.save();g.translate(W/2,H-90);g.rotate(stack.length>1?(wobble*0.01*(Math.sin(swingT*3))):0);g.translate(-W/2,-(H-90));
+for(const s of stack)drawBox(s.x,s.y,s.w,0);
+g.restore();
+if(falling)drawBox(falling.x,falling.y+BH,falling.w,0);
+// hook + rope
+if(playing&&!over&&!falling){const sw=Math.sin(swingT*2.2)*40;
+g.strokeStyle='#5C6B73';g.lineWidth=3;g.beginPath();g.moveTo(hookX,0);g.lineTo(hookX+sw,hookY()+60);g.stroke();
+drawBox(hookX+sw,hookY()+60+BH,BW,Math.sin(swingT*2.2)*0.12);
+g.fillStyle='#5C6B73';g.beginPath();g.arc(hookX,6,8,0,TAU);g.fill();}
+for(const p of parts){drawBox(p.x,p.y,BW,p.rot);}
+g.restore();
+document.getElementById('score').textContent=score;}
+requestAnimationFrame(frame);
+reset();
+function tog(){reset();playing=true;over=false;
+document.getElementById('start').classList.add('hidden');document.getElementById('over').classList.add('hidden');}
+document.getElementById('startBtn').addEventListener('click',tog);
+document.getElementById('overBtn').addEventListener('click',tog);
+cv.addEventListener('pointerdown',drop);
+window.__TT={G:()=>({score,perfects,playing,over,stack:stack.length,falling:!!falling,wobble:+wobble.toFixed(1),camY:Math.round(camY),hookX:Math.round(hookX),parts:parts.length}),
+start:tog,sim:(dt)=>simStep(dt),drop,
+setHook:(x)=>{hookX=x;},
+setSwing:(t)=>{swingT=t;},
+topX:()=>stack[stack.length-1].x,
+forceFallAt:(x)=>{falling={x,y:hookY()+60,vy:0,w:BW};}};
+</script>
+</body>
+</html>
