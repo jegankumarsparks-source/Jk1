@@ -111,10 +111,10 @@ function simStep(dt){
  if(puck.x<puck.r){puck.x=puck.r;puck.vx=Math.abs(puck.vx)*0.92;}
  if(puck.x>W-puck.r){puck.x=W-puck.r;puck.vx=-Math.abs(puck.vx)*0.92;}
  if(puck.y<puck.r){
-  if(Math.abs(puck.x-W/2)<gw/2){goal(false);return;}
+  if(Math.abs(puck.x-W/2)<gw/2){goal(true);return;}
   puck.y=puck.r;puck.vy=Math.abs(puck.vy)*0.92;}
  if(puck.y>H-puck.r){
-  if(Math.abs(puck.x-W/2)<gw/2){goal(true);return;}
+  if(Math.abs(puck.x-W/2)<gw/2){goal(false);return;}
   puck.y=H-puck.r;puck.vy=-Math.abs(puck.vy)*0.92;}
  collide(me,true);collide(ai,false);
  // save detection: puck moving toward my goal fast, blocked
