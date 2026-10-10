@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>JK GRAVITY GOLF 2040</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;overflow:hidden;background:#000308;font-family:'Courier New',monospace;touch-action:none;user-select:none}
+#wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 30%,#0a1030 0%,#000308 75%)}
+canvas{display:block;box-shadow:0 0 60px #7b2fff44,0 0 120px #00e5ff22;border-radius:12px}
+#ov{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,3,12,.92);z-index:10;text-align:center;padding:20px}
+#ov h1{color:#00e5ff;font-size:25px;text-shadow:0 0 18px #00e5ff;letter-spacing:2px;margin-bottom:12px}
+#ov .sc{color:#ffe94a;font-size:38px;text-shadow:0 0 22px #ffe94a;margin-bottom:6px}
+#ov .bs{color:#ff4ad8;font-size:15px;text-shadow:0 0 12px #ff4ad8;margin-bottom:8px;white-space:pre-line}
+#ov button{background:transparent;border:2px solid #ffe94a;color:#ffe94a;font-family:inherit;font-size:18px;padding:13px 32px;border-radius:10px;letter-spacing:2px;text-shadow:0 0 10px #ffe94a;box-shadow:0 0 18px #ffe94a66;margin-top:16px}
+</style>
+</head>
+<body>
+<div id="wrap"><canvas id="cv"></canvas></div>
+<div id="ov"><h1 id="ovT">GRAVITY GOLF 2040</h1><div class="sc" id="ovS"></div><div class="bs" id="ovB"></div><button id="ovBtn">TEE OFF</button></div>
+<script>
+(function(){
+'use strict';
+var cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+var W=390,H=844;
+function fit(){var s=Math.min(innerWidth/W,innerHeight/H);var d=Math.min(devicePixelRatio||1,2);cv.width=W*d;cv.height=H*d;cv.style.width=(W*s)+'px';cv.style.height=(H*s)+'px';ctx.setTransform(d,0,0,d,0,0);}
+fit();addEventListener('resize',fit);
+var LS='jkgg_best';
+var LEVELS=[
+ {par:1,start:[60,700],hole:[330,120,16],planets:[{x:195,y:420,r:26,m:1400,c:'#7b2fff'}]},
+ {par:2,start:[50,750],hole:[340,100,16],planets:[{x:195,y:400,r:34,m:2600,c:'#ff4ad8'}]},
+ {par:2,start:[330,750],hole:[60,120,16],planets:[{x:120,y:420,r:24,m:1300,c:'#00e5ff'},{x:270,y:300,r:24,m:1300,c:'#00ff9d'}]},
+ {par:2,start:[195,780],hole:[195,110,15],planets:[{x:195,y:440,r:38,m:3200,c:'#ffe94a'}]},
+ {par:3,start:[45,420],hole:[345,420,15],planets:[{x:195,y:420,r:30,m:2400,c:'#ff6a00'},{x:195,y:200,r:20,m:900,c:'#00e5ff'},{x:195,y:640,r:20,m:900,c:'#00ff9d'}]},
+ {par:3,start:[60,760],hole:[330,90,15],planets:[{x:100,y:250,r:22,m:1100,c:'#7b2fff'},{x:290,y:550,r:26,m:1700,c:'#ff4ad8'}]},
+ {par:3,start:[340,760],hole:[50,100,14],planets:[{x:195,y:300,r:26,m:2000,c:'#00e5ff'},{x:120,y:560,r:22,m:1200,c:'#ffe94a'},{x:280,y:640,r:18,m:800,c:'#00ff9d'}]},
+ {par:4,start:[195,790],hole:[195,90,14],planets:[{x:110,y:420,r:24,m:1600,c:'#ff4ad8'},{x:280,y:420,r:24,m:1600,c:'#7b2fff'},{x:195,y:600,r:18,m:900,c:'#00e5ff'}]}
+];
+var S,ball,aim,parts,stars;
+function newGame(){S={mode:'title',lvl:0,strokes:0,total:0,msg:'',msgT:0,best:parseInt(localStorage.getItem(LS)||'0',10)||0};stars=[];ball=null;aim=null;parts=[];}
+function loadLevel(i){var L=LEVELS[i];S.lvl=i;S.strokes=0;ball={x:L.start[0],y:L.start[1],vx:0,vy:0,fly:false,t:0};aim=null;say('HOLE '+(i+1)+' - PAR '+L.par);}
+function say(t){S.msg=t;S.msgT=110;}
+function burst(x,y,c,n){for(var i=0;i<n;i++){var a=Math.random()*6.283,sp=1+Math.random()*4;parts.push({x:x,y:y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:1,c:c});}}
+function stepBall(b,L){
+ for(var k=0;k<2;k++){
+  var ax=0,ay=0;
+  for(var i=0;i<L.planets.length;i++){var p=L.planets[i];
+   var dx=p.x-b.x,dy=p.y-b.y,d2=dx*dx+dy*dy,d=Math.sqrt(d2);
+   if(d<p.r+7)return'planet';
+   var a=p.m/Math.max(d2,900);
+   ax+=a*dx/d;ay+=a*dy/d;}
+  b.vx+=ax*0.5;b.vy+=ay*0.5;
+  var sp=Math.hypot(b.vx,b.vy);if(sp>9){b.vx*=9/sp;b.vy*=9/sp;}
+  b.x+=b.vx*0.5;b.y+=b.vy*0.5;
+  var hx=L.hole[0]-b.x,hy=L.hole[1]-b.y;
+  if(Math.hypot(hx,hy)<L.hole[2]+5)return'goal';
+  if(b.x<-30||b.x>W+30||b.y<-30||b.y>H+30)return'oob';
+ }
+ return'fly';
+}
+function simShot(vx,vy){
+ var L=LEVELS[S.lvl],b={x:ball.x,y:ball.y,vx:vx,vy:vy},out;
+ for(var i=0;i<1400;i++){out=stepBall(b,L);if(out!=='fly')return{res:out,b:b};}
+ return{res:'timeout',b:b};
+}
+function launch(vx,vy){
+ if(ball.fly)return;
+ ball.vx=vx;ball.vy=vy;ball.fly=true;ball.t=0;
+ S.strokes++;S.total++;
+}
+function physics(){
+ if(S.mode!=='play'||!ball||!ball.fly)return;
+ var L=LEVELS[S.lvl];
+ var r=stepBall(ball,L);
+ ball.t+=1/60;
+ if(r==='goal'){
+  var st=S.strokes<=L.par?3:S.strokes===L.par+1?2:1;
+  stars.push(st);burst(ball.x,ball.y,'#00ff9d',20);say('HOLE IN '+S.strokes+'! '+'★'.repeat(st));
+  ball.fly=false;
+  if(S.lvl+1<LEVELS.length){setTimeoutSafe(function(){loadLevel(S.lvl+1);},900);}
+  else{victory();}
+ }else if(r!=='fly'||ball.t>12){
+  say(r==='planet'?'CRASHED ON PLANET!':r==='oob'?'LOST IN SPACE!':'OUT OF FUEL!');
+  burst(ball.x,ball.y,'#ff3355',12);
+  var Ls=LEVELS[S.lvl];ball={x:Ls.start[0],y:Ls.start[1],vx:0,vy:0,fly:false,t:0};
+ }
+}
+var timers=[];
+function setTimeoutSafe(fn,ms){timers.push({fn:fn,at:performance.now()+ms});}
+function pumpTimers(){var now=performance.now();for(var i=timers.length-1;i>=0;i--){if(now>=timers[i].at){var f=timers[i].fn;timers.splice(i,1);f();}}}
+function victory(){
+ S.mode='over';
+ if(!S.best||S.total<S.best){S.best=S.total;localStorage.setItem(LS,String(S.best));}
+ var ts=stars.reduce(function(a,b){return a+b;},0);
+ document.getElementById('ovT').textContent='TOURNAMENT COMPLETE';
+ document.getElementById('ovS').textContent=ts+' / '+(LEVELS.length*3)+' STARS';
+ document.getElementById('ovB').textContent='TOTAL STROKES '+S.total+' - BEST '+(S.best||S.total);
+ document.getElementById('ovBtn').textContent='PLAY AGAIN';
+ document.getElementById('ov').style.display='flex';
+}
+var starsBg=[];
+for(var i=0;i<90;i++)starsBg.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.4+0.3,tw:Math.random()*6.28});
+function draw(){
+ ctx.fillStyle='#020510';ctx.fillRect(0,0,W,H);
+ var now=performance.now()*0.001;
+ for(var i=0;i<starsBg.length;i++){var s=starsBg[i];ctx.globalAlpha=0.4+0.4*Math.sin(now*2+s.tw);ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,6.283);ctx.fill();}
+ ctx.globalAlpha=1;
+ if(S.mode!=='play')return;
+ var L=LEVELS[S.lvl];
+ var hx=L.hole[0],hy=L.hole[1],hr=L.hole[2];
+ var sw=now*2;
+ var grd=ctx.createRadialGradient(hx,hy,2,hx,hy,hr+16);
+ grd.addColorStop(0,'#000');grd.addColorStop(0.55,'#3d007a');grd.addColorStop(1,'rgba(255,110,0,0)');
+ ctx.fillStyle=grd;ctx.beginPath();ctx.arc(hx,hy,hr+16,0,6.283);ctx.fill();
+ ctx.strokeStyle='#ff9f1a';ctx.lineWidth=2;ctx.shadowColor='#ff9f1a';ctx.shadowBlur=14;
+ ctx.beginPath();ctx.arc(hx,hy,hr+3,sw,sw+4.6);ctx.stroke();ctx.shadowBlur=0;
+ ctx.fillStyle='#000';ctx.beginPath();ctx.arc(hx,hy,hr-3,0,6.283);ctx.fill();
+ for(var q=0;q<L.planets.length;q++){var p=L.planets[q];
+  var pg=ctx.createRadialGradient(p.x-p.r*0.3,p.y-p.r*0.3,2,p.x,p.y,p.r);
+  pg.addColorStop(0,'#fff');pg.addColorStop(0.25,p.c);pg.addColorStop(1,'#050510');
+  ctx.fillStyle=pg;ctx.shadowColor=p.c;ctx.shadowBlur=18;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,6.283);ctx.fill();ctx.shadowBlur=0;
+  ctx.strokeStyle=p.c+'44';ctx.lineWidth=1;ctx.beginPath();ctx.ellipse(p.x,p.y,p.r+9,(p.r+9)*0.35,-0.5,0,6.283);ctx.stroke();}
+ if(aim&&ball&&!ball.fly){
+  var vx=(aim.x0-aim.x1)*0.035,vy=(aim.y0-aim.y1)*0.035;
+  var sp=Math.hypot(vx,vy);if(sp>7){vx*=7/sp;vy*=7/sp;}
+  var b={x:ball.x,y:ball.y,vx:vx,vy:vy};
+  ctx.fillStyle='#00ff9daa';
+  for(var d=0;d<90;d++){var r2=stepBall(b,L);if(d%3===0){ctx.beginPath();ctx.arc(b.x,b.y,2,0,6.283);ctx.fill();}if(r2!=='fly')break;}
+  ctx.strokeStyle='#00ff9d';ctx.lineWidth=2;ctx.setLineDash([6,6]);
+  ctx.beginPath();ctx.moveTo(ball.x,ball.y);ctx.lineTo(ball.x+vx*22,ball.y+vy*22);ctx.stroke();ctx.setLineDash([]);
+ }
+ if(ball){
+  ctx.fillStyle='#fff';ctx.shadowColor='#00e5ff';ctx.shadowBlur=16;ctx.beginPath();ctx.arc(ball.x,ball.y,6,0,6.283);ctx.fill();ctx.shadowBlur=0;
+  if(!ball.fly){ctx.strokeStyle='#00e5ff';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(ball.x,ball.y,10+2*Math.sin(now*4),0,6.283);ctx.stroke();}
+ }
+ for(var p2=parts.length-1;p2>=0;p2--){var pt=parts[p2];pt.x+=pt.vx;pt.y+=pt.vy;pt.life-=0.03;if(pt.life<=0){parts.splice(p2,1);continue;}ctx.globalAlpha=pt.life;ctx.fillStyle=pt.c;ctx.fillRect(pt.x-2,pt.y-2,4,4);ctx.globalAlpha=1;}
+ ctx.fillStyle='#00e5ff';ctx.font='bold 15px Courier New';ctx.textAlign='left';ctx.fillText('HOLE '+(S.lvl+1)+'/'+LEVELS.length+'  PAR '+L.par,12,20);
+ ctx.fillStyle='#ffe94a';ctx.fillText('STROKE '+S.strokes,12,40);
+ ctx.fillStyle='#ff4ad8';ctx.textAlign='right';ctx.fillText('TOTAL '+S.total,W-12,20);
+ if(S.msgT>0){S.msgT--;ctx.globalAlpha=Math.min(1,S.msgT/40);ctx.fillStyle='#ffe94a';ctx.font='bold 19px Courier New';ctx.textAlign='center';ctx.shadowColor='#ffe94a';ctx.shadowBlur=12;ctx.fillText(S.msg,195,300);ctx.shadowBlur=0;ctx.globalAlpha=1;}
+ if(ball&&!ball.fly){ctx.fillStyle='#7bffea66';ctx.font='12px Courier New';ctx.textAlign='center';ctx.fillText('DRAG BACK & RELEASE = LAUNCH',195,H-14);}
+ ctx.textAlign='left';
+}
+var ov=document.getElementById('ov');
+document.getElementById('ovBtn').addEventListener('click',function(){newGame();S.mode='play';loadLevel(0);ov.style.display='none';});
+function tpos(e){var r=cv.getBoundingClientRect();var t=e.changedTouches?e.changedTouches[0]:e;return{x:(t.clientX-r.left)/r.width*W,y:(t.clientY-r.top)/r.height*H};}
+function down(e){if(S.mode!=='play'||!ball||ball.fly)return;var p=tpos(e);aim={x0:p.x,y0:p.y,x1:p.x,y1:p.y};}
+function move(e){if(!aim)return;var p=tpos(e);aim.x1=p.x;aim.y1=p.y;if(e.cancelable)e.preventDefault();}
+function up(){if(!aim)return;var vx=(aim.x0-aim.x1)*0.035,vy=(aim.y0-aim.y1)*0.035;var sp=Math.hypot(vx,vy);if(sp>7){vx*=7/sp;vy*=7/sp;}aim=null;if(sp>0.6)launch(vx,vy);}
+cv.addEventListener('touchstart',function(e){e.preventDefault();down(e);},{passive:false});
+cv.addEventListener('touchmove',move,{passive:false});
+cv.addEventListener('touchend',function(e){e.preventDefault();up();},{passive:false});
+cv.addEventListener('mousedown',down);
+cv.addEventListener('mousemove',move);
+addEventListener('mouseup',up);
+newGame();
+document.getElementById('ovB').textContent='SLINGSHOT AROUND PLANETS\nSINK THE BLACK HOLE IN PAR';
+ov.style.display='flex';
+function loop(){pumpTimers();physics();draw();requestAnimationFrame(loop);}
+loop();
+window.__GG={
+ G:function(){return{mode:S.mode,lvl:S.lvl,strokes:S.strokes,total:S.total,ball:ball?{x:ball.x,y:ball.y,fly:ball.fly}:null,stars:stars.slice(),best:S.best,msg:S.msg};},
+ start:function(){newGame();S.mode='play';loadLevel(0);ov.style.display='none';},
+ step:function(n){for(var i=0;i<n;i++){pumpTimers();physics();}},
+ launch:launch,
+ testShot:simShot,
+ setLevel:function(i){loadLevel(i);},
+ level:function(){var L=LEVELS[S.lvl];return{par:L.par,start:L.start.slice(),hole:L.hole.slice(),planets:L.planets.map(function(p){return{x:p.x,y:p.y,r:p.r,m:p.m};})};},
+ pump:function(ms){var now=performance.now();timers.forEach(function(t){t.at=now-1;});pumpTimers();}
+};
+})();
+</script>
+</body>
+</html>
