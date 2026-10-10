@@ -1,0 +1,265 @@
+<!DOCTYPE html><html lang="ta"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>JK TURBO RACER 2047</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:#08030f;color:#fff;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;overflow:hidden;touch-action:manipulation}
+.wrap{max-width:440px;margin:0 auto;padding:12px 12px 24px}
+h1{font-size:24px;letter-spacing:3px;text-align:center;background:linear-gradient(90deg,#ffe14d,#ff2d95,#7b2ff7);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:900}
+.sub{text-align:center;font-size:10px;letter-spacing:2px;color:#8a7fb8;margin:4px 0 10px}
+.hud{display:flex;gap:8px;margin-bottom:8px}
+.hud>div{flex:1;background:#140b26;border:1px solid #2e1d55;border-radius:10px;padding:6px 4px;text-align:center;font-size:11px;color:#b9aee0}
+.hud b{display:block;font-size:15px;color:#fff}
+#cv{display:block;width:100%;border-radius:14px;border:1px solid #2e1d55;background:#0b0618}
+.ov{position:fixed;inset:0;background:rgba(6,2,12,.93);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
+.ovCard{background:linear-gradient(160deg,#1a0f33,#0d0722);border:1px solid #3b2a6e;border-radius:20px;padding:24px 20px;width:100%;max-width:400px;text-align:center;box-shadow:0 0 40px #ff2d9544}
+.ovCard h2{font-size:22px;margin-bottom:8px;letter-spacing:1px}
+.ovCard p{font-size:13px;color:#b9aee0;line-height:1.6;margin-bottom:12px}
+.btn{display:block;width:100%;margin:8px 0;padding:14px;border:none;border-radius:12px;font-size:16px;font-weight:800;letter-spacing:1px;cursor:pointer;background:linear-gradient(90deg,#ffe14d,#ff7a18);color:#2a1500;box-shadow:0 4px 18px #ff7a1844}
+.btn:active{transform:scale(.97)}
+.hide{display:none!important}
+#msg{text-align:center;font-size:13px;color:#b9aee0;margin-top:8px;min-height:18px;font-weight:600}
+.resRow{display:flex;justify-content:space-between;background:#140b26;border:1px solid #2e1d55;border-radius:10px;padding:9px 12px;margin:5px 0;font-size:13px}
+.resRow b{color:#ffe14d}
+.nitro{height:8px;background:#1d1340;border-radius:6px;overflow:hidden;margin:6px 0 8px}
+.nitro>div{height:100%;width:0;background:linear-gradient(90deg,#00e5ff,#7b2ff7);transition:width .2s}
+</style></head><body>
+<div class="wrap">
+<h1>JK TURBO RACER</h1>
+<div class="sub">2047 NEON HIGHWAY • NEAR-MISS NITRO • OFFLINE</div>
+<div class="hud">
+<div>🏁 KM<b id="dist">0</b></div>
+<div>⚡ SPEED<b id="speed">0</b></div>
+<div>🛡️ SHIELD<b id="shield">3</b></div>
+<div>🏆 BEST<b id="best">0</b></div>
+</div>
+<div class="nitro"><div id="nfill"></div></div>
+<canvas id="cv" width="380" height="440"></canvas>
+<div id="msg"></div>
+</div>
+
+<div class="ov" id="ovStart"><div class="ovCard">
+<h2>🏎️ TURBO RACER 2047</h2>
+<p>Neon highway-ல வேகமா போ! ◀️ ▶️ lane மாத்து, traffic-அ dodge பண்ணு! Near miss = NITRO charge 🔥 Nitro full-ஆனா DOUBLE TAP — invincible boost! 💰 coins collect பண்ணு!</p>
+<button class="btn" onclick="startGame()">🏎️ START ENGINE</button>
+</div></div>
+
+<div class="ov hide" id="ovEnd"><div class="ovCard">
+<h2>💥 RACE OVER!</h2>
+<div style="font-size:38px;margin:8px 0" id="endIcon">🏎️</div>
+<div class="resRow"><span>🏁 Distance</span><b id="rDist">0 km</b></div>
+<div class="resRow"><span>😱 Near Misses</span><b id="rNear">0</b></div>
+<div class="resRow"><span>💰 Coins</span><b id="rCoins">0</b></div>
+<div class="resRow"><span>⭐ Score</span><b id="rScore">0</b></div>
+<div class="resRow"><span>🏆 Best</span><b id="rBest">0</b></div>
+<p id="endTaunt"></p>
+<button class="btn" onclick="restart()">🔄 RACE AGAIN</button>
+</div></div>
+
+<script>
+'use strict';
+var cv=document.getElementById('cv'),cx=cv.getContext('2d');
+var W=cv.width,H=cv.height;
+var LANES=4,roadL=50,roadR=W-50,laneW=(roadR-roadL)/LANES;
+var AC=window.AudioContext?new AudioContext():null;
+function beep(f,d,t){if(!AC)return;try{var o=AC.createOscillator(),g=AC.createGain();o.type=t||'square';o.frequency.value=f;g.gain.setValueAtTime(.06,AC.currentTime);g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+d);o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+d);}catch(e){}}
+function $(id){return document.getElementById(id);}
+function msg(t){$('msg').textContent=t;}
+function laneX(l){return roadL+laneW*l+laneW/2;}
+
+var running=false,over=false;
+var lane=1,speed=4,dist=0,shield=3,nitro=0,boost=0,nearMiss=0,coinsGot=0,score=0;
+var cars=[],coins=[],particles=[],roadOff=0,spawnT=0,coinT=0,frame=0;
+var best=parseInt(localStorage.getItem('jktr_best')||'0');
+var CAR_COLS=['#ff2d5e','#ff9f1c','#b967ff','#01cdfe'];
+function startGame(){
+ running=true;over=false;lane=1;speed=4;dist=0;shield=3;nitro=0;boost=0;
+ nearMiss=0;coinsGot=0;score=0;cars=[];coins=[];particles=[];roadOff=0;spawnT=0;coinT=0;frame=0;
+ $('dist').textContent=0;$('speed').textContent=Math.round(speed*20);$('shield').textContent=3;$('best').textContent=best;
+ $('ovStart').classList.add('hide');$('ovEnd').classList.add('hide');
+ msg('வேகமா போ! 🏎️💨');
+ if(AC&&AC.state==='suspended'){AC.resume();}
+ beep(330,.1);setTimeout(function(){beep(440,.1);},100);setTimeout(function(){beep(660,.2);},200);
+}
+function restart(){$('ovEnd').classList.add('hide');startGame();}
+function move(d){
+ if(!running||over)return;
+ var nl=lane+d;
+ if(nl<0||nl>=LANES)return;
+ lane=nl;beep(500,.05);
+}
+function tryBoost(){
+ if(!running||over)return;
+ if(nitro>=100&&boost<=0){boost=150;nitro=0;msg('🚀 NITRO BOOST!');beep(200,.3,'sawtooth');setTimeout(function(){beep(400,.3,'sawtooth');},100);}
+}
+var lastTap=0;
+cv.addEventListener('pointerdown',function(e){
+ e.preventDefault();
+ var now=Date.now();
+ if(now-lastTap<300){tryBoost();lastTap=0;return;}
+ lastTap=now;
+ var r=cv.getBoundingClientRect();
+ var x=(e.clientX-r.left)*(W/r.width);
+ if(x<W/2)move(-1);else move(1);
+});
+document.addEventListener('keydown',function(e){
+ if(e.key==='ArrowLeft')move(-1);
+ if(e.key==='ArrowRight')move(1);
+ if(e.key===' '||e.key==='ArrowUp')tryBoost();
+});
+function spawnCar(){
+ var l=Math.floor(Math.random()*LANES);
+ // avoid impossible walls: don't spawn if top rows already have 3 cars
+ var blocked=0;
+ cars.forEach(function(c){if(c.y<120)blocked|=(1<<c.lane);});
+ if(blocked===(1<<LANES)-1){
+   // find free lane
+   var free=[];for(var i=0;i<LANES;i++){if(!(blocked&(1<<i)))free.push(i);}
+   if(!free.length)return;
+   l=free[Math.floor(Math.random()*free.length)];
+ }
+ cars.push({lane:l,y:-60,col:CAR_COLS[Math.floor(Math.random()*CAR_COLS.length)],passed:false,nearCounted:false});
+}
+function crash(){
+ shield--;$('shield').textContent=shield;
+ beep(120,.4,'sawtooth');
+ for(var i=0;i<24;i++){particles.push({x:laneX(lane),y:H-70,vx:(Math.random()-0.5)*8,vy:-Math.random()*6,life:40,col:'#ff9f1c'});}
+ if(shield<=0){gameOver();}
+ else{msg('💥 CRASH! Shields: '+shield);cars=cars.filter(function(c){return c.y<H-140||c.y>H+20;});}
+}
+function gameOver(){
+ running=false;over=true;
+ score=Math.floor(dist*10)+nearMiss*150+coinsGot*100;
+ if(score>best){best=score;localStorage.setItem('jktr_best',best);}
+ $('rDist').textContent=(dist/10).toFixed(1)+' km';
+ $('rNear').textContent=nearMiss;
+ $('rCoins').textContent=coinsGot;
+ $('rScore').textContent=score;
+ $('rBest').textContent=best;
+ $('endTaunt').textContent=dist>500?'🏎️ TURBO KING! குயில், card guess மட்டும் போதாது — reflex வேணும்! 😎':'நல்ல try! Near miss-அ நோக்கி போ, nitro boost கிடைக்கும் 🔥';
+ $('ovEnd').classList.remove('hide');
+ beep(200,.3,'sawtooth');setTimeout(function(){beep(150,.5,'sawtooth');},250);
+}
+function step(){
+ if(!running||over)return;
+ frame++;
+ var spd=boost>0?speed*1.8:speed;
+ dist+=spd*0.02;
+ speed=Math.min(12,speed+0.0015);
+ roadOff=(roadOff+spd)%40;
+ if(boost>0){boost--;}
+ // spawn
+ spawnT-=spd;
+ if(spawnT<=0){spawnCar();spawnT=140+Math.random()*80-speed*6;}
+ coinT-=spd;
+ if(coinT<=0){coins.push({lane:Math.floor(Math.random()*LANES),y:-20,got:false});coinT=220+Math.random()*200;}
+ var py=H-90,px=laneX(lane);
+ // cars
+ for(var i=cars.length-1;i>=0;i--){
+   var c=cars[i];
+   c.y+=spd*0.9+1.2;
+   if(c.y>H+60){cars.splice(i,1);continue;}
+   var cx2=laneX(c.lane);
+   // collision
+   if(Math.abs(c.lane-lane)===0&&Math.abs(c.y-py)<52){
+     if(boost>0){
+       // smash through
+       for(var p2=0;p2<16;p2++){particles.push({x:cx2,y:c.y,vx:(Math.random()-0.5)*10,vy:-Math.random()*7,life:35,col:c.col});}
+       cars.splice(i,1);score+=25;beep(180,.2,'sawtooth');
+       continue;
+     }
+     crash();
+     if(!running)return;
+     cars.splice(i,1);continue;
+   }
+   // near miss: passed player in adjacent lane
+   if(!c.nearCounted&&c.y>py+30&&Math.abs(c.lane-lane)===1){
+     c.nearCounted=true;nearMiss++;
+     nitro=Math.min(100,nitro+18);
+     $('nfill').style.width=nitro+'%';
+     msg('😱 NEAR MISS! +NITRO');
+     beep(990,.06);
+   }
+ }
+ // coins
+ for(var k=coins.length-1;k>=0;k--){
+   var cn=coins[k];
+   cn.y+=spd*0.9+1.2;
+   if(cn.y>H+30){coins.splice(k,1);continue;}
+   if(cn.lane===lane&&Math.abs(cn.y-py)<40){
+     coins.splice(k,1);coinsGot++;score+=0;beep(1320,.06);
+     msg('💰 +100');
+   }
+ }
+ // particles
+ for(var q=particles.length-1;q>=0;q--){
+   var pt=particles[q];
+   pt.x+=pt.vx;pt.y+=pt.vy;pt.vy+=0.3;pt.life--;
+   if(pt.life<=0)particles.splice(q,1);
+ }
+ $('dist').textContent=(dist/10).toFixed(1);
+ $('speed').textContent=Math.round((boost>0?speed*1.8:speed)*20);
+}
+function draw(){
+ cx.fillStyle='#0b0618';cx.fillRect(0,0,W,H);
+ // synthwave sun
+ var grd=cx.createRadialGradient(W/2,60,10,W/2,60,120);
+ grd.addColorStop(0,'#ff2d95');grd.addColorStop(1,'transparent');
+ cx.fillStyle=grd;cx.beginPath();cx.arc(W/2,60,110,0,7);cx.fill();
+ // buildings
+ cx.fillStyle='#150c2e';
+ for(var i=0;i<8;i++){
+   var bh=50+((i*53)%70);
+   cx.fillRect(6,H-120-bh+(i%3)*20,34,bh+120);
+   cx.fillRect(W-40,H-140-bh+(i%2)*30,34,bh+140);
+ }
+ // road
+ cx.fillStyle='#1a1030';cx.fillRect(roadL,0,roadR-roadL,H);
+ cx.fillStyle='#ff2d95';cx.fillRect(roadL-4,0,4,H);cx.fillRect(roadR,0,4,H);
+ // lane dashes
+ cx.fillStyle='#ffe14d';
+ for(var l=1;l<LANES;l++){
+   var lx=roadL+laneW*l;
+   for(var y=-40+roadOff;y<H;y+=40){cx.fillRect(lx-2,y,4,20);}
+ }
+ // coins
+ for(var k=0;k<coins.length;k++){
+   var cn=coins[k];
+   cx.fillStyle='#ffd60a';cx.beginPath();cx.arc(laneX(cn.lane),cn.y,7,0,7);cx.fill();
+   cx.fillStyle='#8a6d00';cx.font='8px sans-serif';cx.fillText('$',laneX(cn.lane)-2.5,cn.y+3);
+ }
+ // traffic cars
+ for(var i2=0;i2<cars.length;i2++){
+   var c=cars[i2],x=laneX(c.lane);
+   cx.fillStyle=c.col;
+   cx.beginPath();cx.roundRect?cx.roundRect(x-14,c.y-26,28,52,6):cx.rect(x-14,c.y-26,28,52);cx.fill();
+   cx.fillStyle='#0b0618';cx.fillRect(x-10,c.y-14,20,10);cx.fillRect(x-10,c.y+6,20,8);
+   cx.fillStyle='#ffe14d';cx.fillRect(x-12,c.y+22,6,4);cx.fillRect(x+6,c.y+22,6,4);
+ }
+ // player car
+ var px=laneX(lane),py=H-90;
+ if(boost>0){cx.fillStyle='rgba(0,229,255,.25)';cx.beginPath();cx.ellipse(px,py+30,20,46,0,0,7);cx.fill();}
+ cx.fillStyle='#00e5ff';
+ cx.beginPath();cx.roundRect?cx.roundRect(px-14,py-26,28,52,6):cx.rect(px-14,py-26,28,52);cx.fill();
+ cx.fillStyle='#04101e';cx.fillRect(px-10,py-16,20,10);cx.fillRect(px-10,py+4,20,8);
+ cx.fillStyle='#ff2d5e';cx.fillRect(px-12,py-24,6,4);cx.fillRect(px+6,py-24,6,4);
+ // particles
+ for(var q2=0;q2<particles.length;q2++){
+   var pt2=particles[q2];
+   cx.fillStyle=pt2.col;cx.globalAlpha=pt2.life/40;
+   cx.fillRect(pt2.x-2,pt2.y-2,4,4);cx.globalAlpha=1;
+ }
+ requestAnimationFrame(draw);
+}
+draw();
+var lastTick=0;
+function loop(ts){if(ts-lastTick>15){lastTick=ts;step();}requestAnimationFrame(loop);}
+requestAnimationFrame(loop);
+$('best').textContent=best;
+window.__TR={G:function(){return{dist:Math.round(dist*100)/100,speed:Math.round(speed*100)/100,lane:lane,shield:shield,nitro:nitro,boost:boost,near:nearMiss,coins:coinsGot,cars:cars.map(function(c){return{lane:c.lane,y:Math.round(c.y)};}),running:running,over:over,best:best}},
+start:startGame,left:function(){move(-1);},right:function(){move(1);},boostFn:tryBoost,
+step:function(n){for(var i=0;i<n;i++){step();}},
+setNitro:function(v){nitro=v;$('nfill').style.width=v+'%';},
+forceCar:function(l,y){cars.push({lane:l,y:y,col:'#ff2d5e',passed:false,nearCounted:false});},
+end:gameOver};
+</script></body></html>
