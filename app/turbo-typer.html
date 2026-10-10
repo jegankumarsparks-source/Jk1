@@ -241,7 +241,7 @@ function loop(){
 function endGame(w){
  over=true;won=w;cancelAnimationFrame(raf);
  var el=(Date.now()-startT)/1000;
- var wpm=Math.round((correctChars/5)/(el/60));
+ var wpm=Math.round((correctChars/5)/(Math.max(el,5)/60));
  var acc=typed.length>0?Math.round(correctChars/typed.length*100):100;
  var key='jktt_best_'+modeUsed;
  var prev=parseInt(localStorage.getItem(key)||'0');
@@ -252,6 +252,7 @@ function endGame(w){
  document.getElementById('ovTaunt').textContent=w?TAUNTS_W[Math.floor(Math.random()*TAUNTS_W.length)]:TAUNTS_L[Math.floor(Math.random()*TAUNTS_L.length)];
  document.getElementById('ov').classList.remove('hide');
 }
+['eng','tam','boss'].forEach(function(k){var v=parseInt(localStorage.getItem('jktt_best_'+k)||'0');if(v>400)localStorage.setItem('jktt_best_'+k,'0')});
 window.__TT={G:function(){return {mode:modeUsed,typedLen:typed.length,targetLen:target.length,correct:correctChars,errors:errors,botProg:Math.round(botProg),over:over,won:won,streak:streak}},start:function(m,d){if(typeof d==='number'){diff=d}startGame(m)},type:function(s){for(var i=0;i<s.length;i++){feedChar(s[i]);if(over)break;}},tap:tapChar,target:function(){return target},rematch:rematch};
 </script>
 </body>
