@@ -152,6 +152,7 @@ window.__WR={
  h:h,
  speed:function(s){R.s=s;},
  place:function(x,air,vy){R.x=x;R.y=h(x)-14;R.air=!!air;R.vy=vy||0;},
+ placeXY:function(x,y,vx,vy){R.x=x;R.y=y;R.air=true;R.vx=0;R.vy=vy||0;},
  coinNext:function(){for(var i=0;i<coins.length;i++)if(!coins[i].got)return{x:coins[i].x,y:coins[i].y};return null;},
  droneNext:function(){for(var i=0;i<drones.length;i++)if(!drones[i].hit)return{x:drones[i].x,y:drones[i].y0};return null;}
 };
