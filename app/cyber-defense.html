@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>JK CYBER DEFENSE 2040</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;overflow:hidden;background:#000a14;font-family:'Courier New',monospace;touch-action:none;user-select:none}
+#wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 100%,#00304a 0%,#000a14 75%)}
+canvas{display:block;box-shadow:0 0 60px #00e5ff44,0 0 120px #ff2fd633;border-radius:12px}
+#ov{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,10,20,.92);z-index:10;text-align:center;padding:20px}
+#ov h1{color:#00e5ff;font-size:25px;text-shadow:0 0 18px #00e5ff;letter-spacing:2px;margin-bottom:12px}
+#ov .sc{color:#ffe94a;font-size:42px;text-shadow:0 0 22px #ffe94a;margin-bottom:6px}
+#ov .bs{color:#ff4ad8;font-size:15px;text-shadow:0 0 12px #ff4ad8;margin-bottom:8px;white-space:pre-line}
+#ov button{background:transparent;border:2px solid #00e5ff;color:#00e5ff;font-family:inherit;font-size:18px;padding:13px 32px;border-radius:10px;letter-spacing:2px;text-shadow:0 0 10px #00e5ff;box-shadow:0 0 18px #00e5ff66;margin-top:16px}
+</style>
+</head>
+<body>
+<div id="wrap"><canvas id="cv"></canvas></div>
+<div id="ov"><h1 id="ovT">CYBER DEFENSE 2040</h1><div class="sc" id="ovS"></div><div class="bs" id="ovB"></div><button id="ovBtn">DEFEND</button></div>
+<script>
+(function(){
+'use strict';
+var cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+var W=390,H=844,GY=H-70;
+function fit(){var s=Math.min(innerWidth/W,innerHeight/H);var d=Math.min(devicePixelRatio||1,2);cv.width=W*d;cv.height=H*d;cv.style.width=(W*s)+'px';cv.style.height=(H*s)+'px';ctx.setTransform(d,0,0,d,0,0);}
+fit();addEventListener('resize',fit);
+var LS='jkcd_best';
+var S,mets,shots,booms,parts,cities;
+function newGame(){
+ S={mode:'title',wave:0,score:0,best:parseInt(localStorage.getItem(LS)||'0',10)||0,msg:'',msgT:0,spawnLeft:0,spawnT:0,wavePause:60};
+ mets=[];shots=[];booms=[];parts=[];
+ cities=[];for(var i=0;i<6;i++)cities.push({x:40+i*62,alive:true});
+}
+function say(t){S.msg=t;S.msgT=90;}
+function burst(x,y,c,n){for(var i=0;i<n;i++){var a=Math.random()*6.283,sp=1+Math.random()*4;parts.push({x:x,y:y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:1,c:c});}}
+function startWave(w){
+ S.wave=w;S.spawnLeft=6+w*3;S.spawnT=30;
+ say('WAVE '+w);
+}
+function addScore(n){S.score+=n;if(S.score>S.best){S.best=S.score;localStorage.setItem(LS,String(S.best));}}
+function fireAt(tx,ty){
+ if(S.mode!=='play')return;
+ shots.push({x:195,y:GY-10,tx:tx,ty:ty,sp:9});
+ burst(195,GY-10,'#00e5ff',3);
+}
+function physics(){
+ if(S.mode!=='play')return;
+ var i,j;
+ if(S.spawnLeft>0){
+  if(--S.spawnT<=0){
+   S.spawnT=Math.max(24,66-S.wave*4);
+   S.spawnLeft--;
+   var tgt=cities.filter(function(c){return c.alive;});
+   var t=tgt.length?tgt[Math.floor(Math.random()*tgt.length)].x:Math.random()*W;
+   var sx=Math.random()*W;
+   var sp=0.55+S.wave*0.12+Math.random()*0.3;
+   mets.push({x:sx,y:-10,vx:(t-sx)/Math.max(200,GY)*sp*1.2,vy:sp});
+  }
+ }else if(mets.length===0&&shots.length===0){
+  if(--S.wavePause<=0){
+   var alive=cities.filter(function(c){return c.alive;}).length;
+   addScore(alive*100);say('WAVE CLEAR! +'+alive*100);
+   S.wavePause=140;startWave(S.wave+1);
+  }
+ }
+ for(i=shots.length-1;i>=0;i--){var s=shots[i];
+  var dx=s.tx-s.x,dy=s.ty-s.y,d=Math.hypot(dx,dy);
+  if(d<s.sp){booms.push({x:s.tx,y:s.ty,r:6,max:44,life:1});shots.splice(i,1);continue;}
+  s.x+=dx/d*s.sp;s.y+=dy/d*s.sp;
+ }
+ for(i=booms.length-1;i>=0;i--){var b=booms[i];
+  b.r+=0.9;if(b.r>b.max){b.life-=0.05;}
+  if(b.life<=0){booms.splice(i,1);continue;}
+  for(j=mets.length-1;j>=0;j--){var m=mets[j];
+   if(Math.hypot(m.x-b.x,m.y-b.y)<b.r+6){
+    addScore(25);burst(m.x,m.y,'#ff6a00',10);
+    if(Math.random()<0.25)booms.push({x:m.x,y:m.y,r:4,max:30,life:1});
+    mets.splice(j,1);
+   }
+  }
+ }
+ for(i=mets.length-1;i>=0;i--){var mt=mets[i];
+  mt.x+=mt.vx;mt.y+=mt.vy;
+  if(mt.y>=GY){
+   burst(mt.x,GY,'#ff3355',12);
+   for(j=0;j<cities.length;j++){if(cities[j].alive&&Math.abs(cities[j].x-mt.x)<26){cities[j].alive=false;say('CITY LOST!');}}
+   mets.splice(i,1);
+   if(cities.every(function(c){return !c.alive;})){gameOver();return;}
+  }
+ }
+}
+function gameOver(){
+ S.mode='over';
+ document.getElementById('ovT').textContent='CITIES FALLEN';
+ document.getElementById('ovS').textContent=S.score;
+ document.getElementById('ovB').textContent='BEST '+S.best+' - WAVE '+S.wave;
+ document.getElementById('ovBtn').textContent='DEFEND AGAIN';
+ document.getElementById('ov').style.display='flex';
+}
+function draw(){
+ ctx.fillStyle='#020e18';ctx.fillRect(0,0,W,H);
+ ctx.strokeStyle='#00e5ff14';ctx.lineWidth=1;for(var g=0;g<12;g++){ctx.beginPath();ctx.moveTo(0,g*76);ctx.lineTo(W,g*76);ctx.stroke();}
+ ctx.fillStyle='#06283a';ctx.fillRect(0,GY,W,H-GY);
+ ctx.strokeStyle='#00e5ff';ctx.lineWidth=2;ctx.shadowColor='#00e5ff';ctx.shadowBlur=8;ctx.beginPath();ctx.moveTo(0,GY);ctx.lineTo(W,GY);ctx.stroke();ctx.shadowBlur=0;
+ ctx.fillStyle='#00e5ff';ctx.shadowColor='#00e5ff';ctx.shadowBlur=12;
+ ctx.beginPath();ctx.moveTo(183,GY);ctx.lineTo(207,GY);ctx.lineTo(195,GY-16);ctx.closePath();ctx.fill();ctx.shadowBlur=0;
+ for(var c=0;c<cities.length;c++){var ct=cities[c];
+  if(ct.alive){ctx.fillStyle='#00ff9d';ctx.shadowColor='#00ff9d';ctx.shadowBlur=10;
+   ctx.fillRect(ct.x-16,GY-14,32,14);ctx.shadowBlur=0;
+   ctx.fillStyle='#004';ctx.fillRect(ct.x-10,GY-9,5,5);ctx.fillRect(ct.x+3,GY-9,5,5);
+  }else{ctx.fillStyle='#331116';ctx.fillRect(ct.x-14,GY-6,28,6);}
+ }
+ var i;
+ for(i=0;i<mets.length;i++){var m=mets[i];
+  ctx.strokeStyle='#ff6a00aa';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(m.x-m.vx*14,m.y-m.vy*14);ctx.lineTo(m.x,m.y);ctx.stroke();
+  ctx.fillStyle='#ffe94a';ctx.shadowColor='#ff6a00';ctx.shadowBlur=10;ctx.beginPath();ctx.arc(m.x,m.y,5,0,6.283);ctx.fill();ctx.shadowBlur=0;
+ }
+ for(i=0;i<shots.length;i++){var s=shots[i];
+  ctx.strokeStyle='#00e5ff';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(195,GY-10);ctx.lineTo(s.x,s.y);ctx.stroke();
+  ctx.fillStyle='#fff';ctx.shadowColor='#00e5ff';ctx.shadowBlur=8;ctx.beginPath();ctx.arc(s.x,s.y,3.5,0,6.283);ctx.fill();ctx.shadowBlur=0;
+  ctx.strokeStyle='#ff2fd688';ctx.lineWidth=1;ctx.beginPath();ctx.arc(s.tx,s.ty,7,0,6.283);ctx.stroke();
+ }
+ for(i=0;i<booms.length;i++){var b=booms[i];
+  ctx.globalAlpha=Math.max(0,b.life);
+  ctx.strokeStyle='#ff9f1a';ctx.lineWidth=3;ctx.shadowColor='#ff9f1a';ctx.shadowBlur=16;
+  ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,6.283);ctx.stroke();ctx.shadowBlur=0;
+  ctx.fillStyle='#ff9f1a22';ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,6.283);ctx.fill();
+  ctx.globalAlpha=1;
+ }
+ for(i=parts.length-1;i>=0;i--){var p=parts[i];p.x+=p.vx;p.y+=p.vy;p.life-=0.03;if(p.life<=0){parts.splice(i,1);continue;}ctx.globalAlpha=p.life;ctx.fillStyle=p.c;ctx.fillRect(p.x-2,p.y-2,4,4);ctx.globalAlpha=1;}
+ ctx.fillStyle='#00e5ff';ctx.font='bold 17px Courier New';ctx.textAlign='left';ctx.fillText('SCORE '+S.score,12,22);
+ ctx.fillStyle='#ff4ad8';ctx.textAlign='right';ctx.fillText('BEST '+S.best,W-12,22);
+ ctx.fillStyle='#ffe94a';ctx.textAlign='center';ctx.fillText('WAVE '+S.wave,195,22);
+ if(S.msgT>0){S.msgT--;ctx.globalAlpha=Math.min(1,S.msgT/35);ctx.fillStyle='#ffe94a';ctx.font='bold 22px Courier New';ctx.textAlign='center';ctx.shadowColor='#ffe94a';ctx.shadowBlur=12;ctx.fillText(S.msg,195,400);ctx.shadowBlur=0;ctx.globalAlpha=1;}
+ if(S.mode==='play'){ctx.fillStyle='#7bffea44';ctx.font='12px Courier New';ctx.textAlign='center';ctx.fillText('TAP SKY = INTERCEPT THERE',195,H-14);}
+ ctx.textAlign='left';
+}
+var ov=document.getElementById('ov');
+document.getElementById('ovBtn').addEventListener('click',function(){newGame();S.mode='play';startWave(1);ov.style.display='none';});
+function tap(e){if(S.mode!=='play')return;var r=cv.getBoundingClientRect();var t=e.changedTouches?e.changedTouches[0]:e;var x=(t.clientX-r.left)/r.width*W,y=(t.clientY-r.top)/r.height*H;if(y<GY-20)fireAt(x,y);}
+cv.addEventListener('touchstart',function(e){e.preventDefault();tap(e);},{passive:false});
+cv.addEventListener('mousedown',tap);
+newGame();
+document.getElementById('ovB').textContent='METEORS FALL ON YOUR 6 CITIES\nTAP TO INTERCEPT - CHAIN BLASTS';
+ov.style.display='flex';
+function loop(){physics();draw();requestAnimationFrame(loop);}
+loop();
+window.__CD={
+ G:function(){return{mode:S.mode,wave:S.wave,score:S.score,best:S.best,mets:mets.length,shots:shots.length,booms:booms.length,cities:cities.map(function(c){return c.alive?1:0;}),spawnLeft:S.spawnLeft,msg:S.msg};},
+ start:function(){newGame();S.mode='play';startWave(1);ov.style.display='none';},
+ step:function(n){for(var i=0;i<n;i++)physics();},
+ fireAt:fireAt,
+ spawnMeteor:function(x,y,vx,vy){mets.push({x:x,y:y,vx:vx,vy:vy});},
+ meteorPos:function(){return mets.length?{x:mets[0].x,y:mets[0].y}:null;}
+};
+})();
+</script>
+</body>
+</html>
