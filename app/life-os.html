@@ -123,8 +123,9 @@ function vib(p){ if(navigator.vibrate) try{ navigator.vibrate(p); }catch(e){} }
 /* ============ BOOT + HOME ============ */
 const bootMsgs=['initializing neural core…','loading family modules…','syncing offline vault…','polishing neon…','ready.'];
 const FAST=location.search.indexOf('fast')>=0;
-const BOOT_MS=FAST?200:2100, bootT0=Date.now();
-const bootTimer=setInterval(()=>{
+const BOOT_MS=2100, bootT0=Date.now();
+if(FAST){ $('#boot').classList.remove('on'); $('#home').classList.add('on'); renderHome(); }
+const bootTimer=FAST?null:setInterval(()=>{
  const p=Math.min(1,(Date.now()-bootT0)/BOOT_MS);
  $('#bootfill').style.width=(p*100)+'%';
  $('#bootmsg').textContent=bootMsgs[Math.min(bootMsgs.length-1,Math.floor(p*bootMsgs.length))];
