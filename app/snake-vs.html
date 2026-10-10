@@ -128,6 +128,16 @@ function moveSnake(s){
  if(s.growT>0){s.growT--;}else{s.body.pop();}
  return s.body[0];
 }
+function aiDie(){
+ kills++;score+=200;$('kills').textContent=kills;$('score').textContent=score;
+ beep(880,.12);setTimeout(function(){beep(1170,.15);},110);
+ msg('💀 AI KILL +200! 🎯');
+ ai.alive=false;
+ setTimeout(function(){
+   if(!running)return;
+   ai=mkSnake(Math.random()<0.5?4:COLS-5,Math.random()<0.5?4:ROWS-5,[Math.random()<0.5?1:-1,0]);
+ },1200);
+}
 function step(){
  if(!running||over)return;
  tick++;
@@ -158,14 +168,7 @@ function step(){
    if(ah.x<0||ah.x>=COLS||ah.y<0||ah.y>=ROWS||onBodyX(ai,ah.x,ah.y))aiDead=true;
    if(onBody(me,ah.x,ah.y))aiDead=true; // ran into me = kill!
    if(aiDead){
-     kills++;score+=200;$('kills').textContent=kills;$('score').textContent=score;
-     beep(880,.12);setTimeout(function(){beep(1170,.15);},110);
-     msg('💀 AI KILL +200! 🎯');
-     ai.alive=false;
-     setTimeout(function(){
-       if(!running)return;
-       ai=mkSnake(Math.random()<0.5?4:COLS-5,Math.random()<0.5?4:ROWS-5,[Math.random()<0.5?1:-1,0]);
-     },1200);
+     aiDie();
    }else{
      for(var j=foods.length-1;j>=0;j--){
        if(foods[j].x===ah.x&&foods[j].y===ah.y){
@@ -236,6 +239,6 @@ setDir:function(dx,dy){me.dir=[dx,dy];},
 tpFood:function(x,y){foods=[{x:x,y:y}];},
 tpMe:function(x,y,dx,dy){me=mkSnake(x,y,[dx,dy]);},
 tpAi:function(x,y,dx,dy){ai=mkSnake(x,y,[dx,dy]);},
-killAi:function(){if(ai)ai.alive=false;},
+killAi:function(){if(ai&&ai.alive)aiDie();},
 end:gameOver};
 </script></body></html>
