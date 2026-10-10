@@ -1,0 +1,240 @@
+<!DOCTYPE html><html lang="ta"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>JK SNAKE VS AI 2047</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:#050d05;color:#fff;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;overflow:hidden;touch-action:manipulation}
+.wrap{max-width:440px;margin:0 auto;padding:12px 12px 24px}
+h1{font-size:24px;letter-spacing:3px;text-align:center;background:linear-gradient(90deg,#2dff9b,#ffe14d);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:900}
+.sub{text-align:center;font-size:10px;letter-spacing:2px;color:#7db87d;margin:4px 0 10px}
+.hud{display:flex;gap:8px;margin-bottom:8px}
+.hud>div{flex:1;background:#0a1a0a;border:1px solid #1e4a26;border-radius:10px;padding:6px 4px;text-align:center;font-size:11px;color:#9ad0a0}
+.hud b{display:block;font-size:15px;color:#fff}
+#cv{display:block;width:100%;border-radius:14px;border:1px solid #1e4a26;background:#031003;touch-action:manipulation}
+.ov{position:fixed;inset:0;background:rgba(3,8,3,.93);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
+.ovCard{background:linear-gradient(160deg,#0f2410,#081508);border:1px solid #2a5f2e;border-radius:20px;padding:24px 20px;width:100%;max-width:400px;text-align:center;box-shadow:0 0 40px #2dff9b33}
+.ovCard h2{font-size:22px;margin-bottom:8px;letter-spacing:1px}
+.ovCard p{font-size:13px;color:#9ad0a0;line-height:1.6;margin-bottom:12px}
+.btn{display:block;width:100%;margin:8px 0;padding:14px;border:none;border-radius:12px;font-size:16px;font-weight:800;letter-spacing:1px;cursor:pointer;background:linear-gradient(90deg,#2dff9b,#ffe14d);color:#0a1a00;box-shadow:0 4px 18px #2dff9b44}
+.btn:active{transform:scale(.97)}
+.hide{display:none!important}
+#msg{text-align:center;font-size:13px;color:#9ad0a0;margin-top:8px;min-height:18px;font-weight:600}
+.resRow{display:flex;justify-content:space-between;background:#0a1a0a;border:1px solid #1e4a26;border-radius:10px;padding:9px 12px;margin:5px 0;font-size:13px}
+.resRow b{color:#2dff9b}
+</style></head><body>
+<div class="wrap">
+<h1>JK SNAKE VS AI</h1>
+<div class="sub">2047 DUAL ARENA • CUT OFF THE AI • OFFLINE</div>
+<div class="hud">
+<div>⭐ SCORE<b id="score">0</b></div>
+<div>🐍 LENGTH<b id="len">3</b></div>
+<div>💀 AI KILLS<b id="kills">0</b></div>
+<div>💚 LIVES<b id="lives">3</b></div>
+</div>
+<canvas id="cv" width="380" height="420"></canvas>
+<div id="msg"></div>
+</div>
+
+<div class="ov" id="ovStart"><div class="ovCard">
+<h2>🐍 SNAKE VS AI 2047</h2>
+<p>AI snake-க்கு எதிரா arena! Food சாப்பிட்டு வளரு — AI-யும் சாப்பிடும்! 🍎 Screen-அ TAP பண்ணி turn பண்ணு (left/right half). AI-அ உன் body-ல மோத வை = 💀 AI KILL +200! Walls + bodies = danger!</p>
+<button class="btn" onclick="startGame()">🐍 ENTER ARENA</button>
+</div></div>
+
+<div class="ov hide" id="ovEnd"><div class="ovCard">
+<h2>💀 GAME OVER!</h2>
+<div style="font-size:38px;margin:8px 0">🐍</div>
+<div class="resRow"><span>⭐ Score</span><b id="rScore">0</b></div>
+<div class="resRow"><span>🍎 Food Eaten</span><b id="rFood">0</b></div>
+<div class="resRow"><span>💀 AI Kills</span><b id="rKills">0</b></div>
+<div class="resRow"><span>🏆 Best</span><b id="rBest">0</b></div>
+<p id="endTaunt"></p>
+<button class="btn" onclick="restart()">🔄 PLAY AGAIN</button>
+</div></div>
+
+<script>
+'use strict';
+var cv=document.getElementById('cv'),cx=cv.getContext('2d');
+var COLS=24,ROWS=24,CELL=Math.floor(cv.width/COLS);
+var AC=window.AudioContext?new AudioContext():null;
+function beep(f,d,t){if(!AC)return;try{var o=AC.createOscillator(),g=AC.createGain();o.type=t||'square';o.frequency.value=f;g.gain.setValueAtTime(.06,AC.currentTime);g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+d);o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+d);}catch(e){}}
+function $(id){return document.getElementById(id);}
+function msg(t){$('msg').textContent=t;}
+
+var running=false,over=false;
+var me,ai,foods,score=0,foodGot=0,kills=0,lives=3,tick=0,speed=8;
+var best=parseInt(localStorage.getItem('jksv_best')||'0');
+function mkSnake(x,y,dir){return{body:[{x:x,y:y},{x:x-dir[0],y:y-dir[1]},{x:x-dir[0]*2,y:y-dir[1]*2}],dir:dir.slice(),alive:true,growT:0};}
+function rndFood(){
+ while(true){
+   var x=1+Math.floor(Math.random()*(COLS-2)),y=1+Math.floor(Math.random()*(ROWS-2));
+   if(!onBody(me,x,y)&&!onBody(ai,x,y)&&!foods.some(function(f){return f.x===x&&f.y===y;}))return{x:x,y:y};
+ }
+}
+function onBody(s,x,y){if(!s||!s.alive)return false;return s.body.some(function(b){return b.x===x&&b.y===y;});}
+function startGame(){
+ running=true;over=false;score=0;foodGot=0;kills=0;lives=3;tick=0;speed=8;
+ me=mkSnake(6,12,[1,0]);
+ ai=mkSnake(17,12,[-1,0]);
+ foods=[rndFood(),rndFood()];
+ $('score').textContent=0;$('len').textContent=3;$('kills').textContent=0;$('lives').textContent=3;
+ $('ovStart').classList.add('hide');$('ovEnd').classList.add('hide');
+ msg('Food-அ விட AI-அ வேட்டையாடு! 🐍');
+ if(AC&&AC.state==='suspended'){AC.resume();}
+ beep(440,.1);setTimeout(function(){beep(660,.12);},100);
+}
+function restart(){$('ovEnd').classList.add('hide');startGame();}
+function gameOver(){
+ running=false;over=true;
+ if(score>best){best=score;localStorage.setItem('jksv_best',best);}
+ $('rScore').textContent=score;$('rFood').textContent=foodGot;$('rKills').textContent=kills;$('rBest').textContent=best;
+ $('endTaunt').textContent=kills>=3?'🐍 SNAKE KING! குயில், உன் Sudoku garden-ல இந்த killer instinct வராது! 😎':'நல்ல hunt! AI-அ corner பண்ணு 💀';
+ $('ovEnd').classList.remove('hide');
+ beep(200,.4,'sawtooth');
+}
+function respawnMe(){
+ me=mkSnake(6,12,[1,0]);
+ msg('💚 Respawn! Lives: '+lives);
+}
+function aiThink(){
+ if(!ai.alive)return;
+ var head=ai.body[0];
+ // target nearest food
+ var tf=foods[0];
+ var dirs=[[1,0],[-1,0],[0,1],[0,-1]];
+ var bestD=null,bestScore=-1e9;
+ for(var i=0;i<dirs.length;i++){
+   var d=dirs[i];
+   if(d[0]===-ai.dir[0]&&d[1]===-ai.dir[1])continue; // no reverse
+   var nx=head.x+d[0],ny=head.y+d[1];
+   var sc=Math.random()*2;
+   if(nx<0||nx>=COLS||ny<0||ny>=ROWS)sc-=1000;
+   if(onBody(ai,nx,ny)||onBody(me,nx,ny))sc-=500;
+   if(tf)sc-=Math.abs(nx-tf.x)+Math.abs(ny-tf.y);
+   // slight aggression: if player head near, move toward to cut off
+   if(me.alive){
+     var md=Math.abs(nx-me.body[0].x)+Math.abs(ny-me.body[0].y);
+     if(md<5)sc+=2;
+   }
+   if(sc>bestScore){bestScore=sc;bestD=d;}
+ }
+ if(bestD)ai.dir=bestD;
+}
+function moveSnake(s){
+ var head=s.body[0];
+ var nx=head.x+s.dir[0],ny=head.y+s.dir[1];
+ s.body.unshift({x:nx,y:ny});
+ if(s.growT>0){s.growT--;}else{s.body.pop();}
+ return s.body[0];
+}
+function step(){
+ if(!running||over)return;
+ tick++;
+ aiThink();
+ // move both
+ var mh=moveSnake(me);
+ var ah=ai.alive?moveSnake(ai):null;
+ // my collisions
+ if(mh.x<0||mh.x>=COLS||mh.y<0||mh.y>=ROWS||onBody(me,mh.x,mh.y)||(ai.alive&&onBody(ai,mh.x,mh.y))){
+   lives--;$('lives').textContent=lives;
+   beep(150,.3,'sawtooth');
+   if(lives<=0){gameOver();return;}
+   respawnMe();
+ }else{
+   // food
+   for(var i=foods.length-1;i>=0;i--){
+     if(foods[i].x===mh.x&&foods[i].y===mh.y){
+       foods.splice(i,1);foods.push(rndFood());
+       me.growT+=2;foodGot++;score+=10;$('score').textContent=score;
+       $('len').textContent=me.body.length+2;
+       beep(660,.05);
+     }
+   }
+ }
+ // AI collisions
+ if(ai.alive&&ah){
+   var aiDead=false;
+   if(ah.x<0||ah.x>=COLS||ah.y<0||ah.y>=ROWS||onBody(ai,ah.x,ah.y))aiDead=true;
+   if(onBody(me,ah.x,ah.y))aiDead=true; // ran into me = kill!
+   if(aiDead){
+     kills++;score+=200;$('kills').textContent=kills;$('score').textContent=score;
+     beep(880,.12);setTimeout(function(){beep(1170,.15);},110);
+     msg('💀 AI KILL +200! 🎯');
+     ai.alive=false;
+     setTimeout(function(){
+       if(!running)return;
+       ai=mkSnake(Math.random()<0.5?4:COLS-5,Math.random()<0.5?4:ROWS-5,[Math.random()<0.5?1:-1,0]);
+     },1200);
+   }else{
+     for(var j=foods.length-1;j>=0;j--){
+       if(foods[j].x===ah.x&&foods[j].y===ah.y){
+         foods.splice(j,1);foods.push(rndFood());
+         ai.growT+=2;
+       }
+     }
+   }
+ }
+}
+cv.addEventListener('pointerdown',function(e){
+ e.preventDefault();
+ if(!running)return;
+ var r=cv.getBoundingClientRect();
+ var x=(e.clientX-r.left)*(cv.width/r.width);
+ // turn toward tapped side relative to current dir
+ if(me.dir[0]===1||me.dir[0]===-1){
+   var y=(e.clientY-r.top)*(cv.height/r.height);
+   var headY=me.body[0].y*CELL;
+   me.dir=[0,y>headY?1:-1];
+ }else{
+   var headX=me.body[0].x*CELL;
+   me.dir=[x>headX?1:-1,0];
+ }
+});
+function drawCell(x,y,col,r){
+ cx.fillStyle=col;
+ var pad=r?1:0;
+ cx.fillRect(x*CELL+pad,y*CELL+pad,CELL-pad*2,CELL-pad*2);
+}
+function drawSnake(s,head,body,glow){
+ if(!s||!s.alive)return;
+ for(var i=s.body.length-1;i>=0;i--){
+   var b=s.body[i];
+   drawCell(b.x,b.y,i===0?head:body,true);
+ }
+ var h=s.body[0];
+ cx.fillStyle='#031003';
+ var ex=h.x*CELL+CELL/2,ey=h.y*CELL+CELL/2;
+ cx.fillRect(ex-4+s.dir[0]*2,ey-4+s.dir[1]*2,3,3);
+ cx.fillRect(ex+1+s.dir[0]*2,ey-4+s.dir[1]*2,3,3);
+}
+function draw(){
+ cx.fillStyle='#031003';cx.fillRect(0,0,cv.width,cv.height);
+ // grid
+ cx.strokeStyle='rgba(45,255,155,.05)';cx.lineWidth=1;cx.beginPath();
+ for(var g=0;g<=COLS;g++){cx.moveTo(g*CELL,0);cx.lineTo(g*CELL,cv.height);}
+ for(var g2=0;g2<=ROWS;g2++){cx.moveTo(0,g2*CELL);cx.lineTo(cv.width,g2*CELL);}
+ cx.stroke();
+ // foods
+ for(var i=0;i<foods.length;i++){
+   var f=foods[i];
+   cx.fillStyle='#ff4757';
+   cx.beginPath();cx.arc(f.x*CELL+CELL/2,f.y*CELL+CELL/2,CELL/2-2,0,7);cx.fill();
+   cx.fillStyle='#2dff9b';cx.fillRect(f.x*CELL+CELL/2-1,f.y*CELL+2,2,4);
+ }
+ drawSnake(me,'#2dff9b','#1a9e5c');
+ drawSnake(ai,'#ff4757','#a02736');
+ requestAnimationFrame(draw);
+}
+draw();
+var lastTick=0;
+function loop(ts){if(ts-lastTick>120){lastTick=ts;step();}requestAnimationFrame(loop);}
+requestAnimationFrame(loop);
+window.__SV={G:function(){return{score:score,food:foodGot,kills:kills,lives:lives,meLen:me?me.body.length:0,aiAlive:ai?ai.alive:false,meHead:me?{x:me.body[0].x,y:me.body[0].y}:null,aiHead:ai&&ai.alive?{x:ai.body[0].x,y:ai.body[0].y}:null,foods:foods?foods.map(function(f){return{x:f.x,y:f.y};}):[],running:running,over:over,best:best}},
+start:startGame,step:function(n){for(var i=0;i<n;i++){step();}},
+setDir:function(dx,dy){me.dir=[dx,dy];},
+tpFood:function(x,y){foods=[{x:x,y:y}];},
+tpMe:function(x,y,dx,dy){me=mkSnake(x,y,[dx,dy]);},
+tpAi:function(x,y,dx,dy){ai=mkSnake(x,y,[dx,dy]);},
+killAi:function(){if(ai)ai.alive=false;},
+end:gameOver};
+</script></body></html>
