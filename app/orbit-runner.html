@@ -1,0 +1,205 @@
+<!DOCTYPE html><html lang="ta"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>JK ORBIT RUNNER 2047</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:#040a10;color:#fff;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;overflow:hidden;touch-action:manipulation}
+.wrap{max-width:440px;margin:0 auto;padding:12px 12px 24px}
+h1{font-size:24px;letter-spacing:3px;text-align:center;background:linear-gradient(90deg,#01cdfe,#2dff9b);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:900}
+.sub{text-align:center;font-size:10px;letter-spacing:2px;color:#7da8b8;margin:4px 0 10px}
+.hud{display:flex;gap:8px;margin-bottom:8px}
+.hud>div{flex:1;background:#081622;border:1px solid #1e4a5f;border-radius:10px;padding:6px 4px;text-align:center;font-size:11px;color:#9ac8d8}
+.hud b{display:block;font-size:15px;color:#fff}
+#cv{display:block;width:100%;border-radius:14px;border:1px solid #1e4a5f;background:#020810;touch-action:manipulation}
+.ov{position:fixed;inset:0;background:rgba(2,6,10,.93);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
+.ovCard{background:linear-gradient(160deg,#0a1e2e,#051018);border:1px solid #1e5a6e;border-radius:20px;padding:24px 20px;width:100%;max-width:400px;text-align:center;box-shadow:0 0 40px #01cdfe33}
+.ovCard h2{font-size:22px;margin-bottom:8px;letter-spacing:1px}
+.ovCard p{font-size:13px;color:#9ac8d8;line-height:1.6;margin-bottom:12px}
+.btn{display:block;width:100%;margin:8px 0;padding:14px;border:none;border-radius:12px;font-size:16px;font-weight:800;letter-spacing:1px;cursor:pointer;background:linear-gradient(90deg,#01cdfe,#2dff9b);color:#021318;box-shadow:0 4px 18px #01cdfe44}
+.btn:active{transform:scale(.97)}
+.hide{display:none!important}
+#msg{text-align:center;font-size:13px;color:#9ac8d8;margin-top:8px;min-height:18px;font-weight:600}
+.resRow{display:flex;justify-content:space-between;background:#081622;border:1px solid #1e4a5f;border-radius:10px;padding:9px 12px;margin:5px 0;font-size:13px}
+.resRow b{color:#01cdfe}
+</style></head><body>
+<div class="wrap">
+<h1>JK ORBIT RUNNER</h1>
+<div class="sub">2047 RING DODGER • TAP TO FLIP • OFFLINE</div>
+<div class="hud">
+<div>⭐ SCORE<b id="score">0</b></div>
+<div>🌀 LAPS<b id="laps">0</b></div>
+<div>🛡️ SHIELD<b id="shield">3</b></div>
+<div>🏆 BEST<b id="best">0</b></div>
+</div>
+<canvas id="cv" width="380" height="440"></canvas>
+<div id="msg"></div>
+</div>
+
+<div class="ov" id="ovStart"><div class="ovCard">
+<h2>🌀 ORBIT RUNNER 2047</h2>
+<p>Planet-அ சுற்றி வேகமா ஓடு! TAP பண்ணி inner/outer ring flip பண்ணு! ☄️ asteroids-அ dodge பண்ணு, ⭐ stars collect பண்ணு! ஒவ்வொரு lap-ஆ வேகம் ஏறும்!</p>
+<button class="btn" onclick="startGame()">🌀 START ORBIT</button>
+</div></div>
+
+<div class="ov hide" id="ovEnd"><div class="ovCard">
+<h2>💥 ORBIT CRASH!</h2>
+<div style="font-size:38px;margin:8px 0">🛰️</div>
+<div class="resRow"><span>⭐ Score</span><b id="rScore">0</b></div>
+<div class="resRow"><span>🌀 Laps</span><b id="rLaps">0</b></div>
+<div class="resRow"><span>⭐ Stars</span><b id="rStars">0</b></div>
+<div class="resRow"><span>🏆 Best</span><b id="rBest">0</b></div>
+<p id="endTaunt"></p>
+<button class="btn" onclick="restart()">🔄 ORBIT AGAIN</button>
+</div></div>
+
+<script>
+'use strict';
+var cv=document.getElementById('cv'),cx=cv.getContext('2d');
+var W=cv.width,H=cv.height,CX=W/2,CY=H/2;
+var RIN=100,ROUT=150;
+var AC=window.AudioContext?new AudioContext():null;
+function beep(f,d,t){if(!AC)return;try{var o=AC.createOscillator(),g=AC.createGain();o.type=t||'square';o.frequency.value=f;g.gain.setValueAtTime(.06,AC.currentTime);g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+d);o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+d);}catch(e){}}
+function $(id){return document.getElementById(id);}
+function msg(t){$('msg').textContent=t;}
+
+var running=false,over=false;
+var ang=0,ring=1,omega=0.024,score=0,laps=0,shield=3,starsGot=0;
+var obs=[],parts=[],flipT=0,spawnT=40,invT=0;
+var best=parseInt(localStorage.getItem('jkor_best')||'0');
+
+function startGame(){
+ running=true;over=false;
+ ang=0;ring=1;omega=0.024;score=0;laps=0;shield=3;starsGot=0;
+ obs=[];parts=[];flipT=0;spawnT=40;invT=0;
+ $('score').textContent=0;$('laps').textContent=0;$('shield').textContent=3;$('best').textContent=best;
+ $('ovStart').classList.add('hide');$('ovEnd').classList.add('hide');
+ msg('Tap = flip ring! 🌀');
+ if(AC&&AC.state==='suspended'){AC.resume();}
+ beep(440,.1);setTimeout(function(){beep(660,.12);},100);
+}
+function restart(){$('ovEnd').classList.add('hide');startGame();}
+function gameOver(){
+ running=false;over=true;
+ score+=laps*100;
+ if(score>best){best=score;localStorage.setItem('jkor_best',best);}
+ $('rScore').textContent=score;$('rLaps').textContent=laps;$('rStars').textContent=starsGot;$('rBest').textContent=best;
+ $('endTaunt').textContent=laps>=5?'🌀 ORBIT MASTER! குயில், உன் heap-ல இருந்து ember எடு... நாங்க orbit-ல asteroids dodge பண்றோம்! 😎':'நல்ல orbit! Flip timing-அ master பண்ணு 🌀';
+ $('ovEnd').classList.remove('hide');
+ beep(200,.4,'sawtooth');
+}
+function flip(){
+ if(!running||over)return;
+ ring=1-ring;flipT=8;
+ beep(ring?700:500,.05);
+}
+cv.addEventListener('pointerdown',function(e){e.preventDefault();flip();});
+function boom(x,y,col,n){
+ for(var i=0;i<n;i++){parts.push({x:x,y:y,vx:(Math.random()-0.5)*6,vy:(Math.random()-0.5)*6,life:26,col:col});}
+}
+function spawnObs(){
+ var a=Math.random()*6.28;
+ var star=Math.random()<0.35;
+ obs.push({a:a,ring:Math.random()<0.5?0:1,star:star});
+}
+function step(){
+ if(!running||over)return;
+ var prev=ang;
+ ang+=omega;
+ omega=Math.min(0.06,omega+0.00001);
+ if(ang>=6.2832){ang-=6.2832;laps++;$('laps').textContent=laps;score+=50;$('score').textContent=score;msg('🌀 LAP '+laps+'!');beep(784,.1);}
+ if(flipT>0)flipT--;
+ if(invT>0)invT--;
+ spawnT--;
+ if(spawnT<=0){spawnObs();spawnT=Math.max(24,55-laps*3);}
+ var r=ring?RIN:ROUT;
+ var px=CX+Math.cos(ang)*r,py=CY+Math.sin(ang)*r;
+ for(var i=obs.length-1;i>=0;i--){
+   var o=obs[i];
+   var da=Math.abs(o.a-ang);
+   if(da>3.14)da=6.2832-da;
+   if(o.ring===ring&&da<0.09){
+     if(o.star){
+       obs.splice(i,1);
+       starsGot++;score+=30;$('score').textContent=score;
+       boom(px,py,'#ffe14d',8);
+       beep(990,.06);
+     }else if(invT<=0){
+       obs.splice(i,1);
+       shield--;$('shield').textContent=shield;
+       invT=60;
+       boom(px,py,'#ff4757',18);
+       beep(140,.3,'sawtooth');
+       if(shield<=0){gameOver();return;}
+       msg('💥 HIT! Shields: '+shield);
+     }
+   }
+   // obstacle ages off behind player after 1.5 laps
+   if(o.age===undefined)o.age=0;
+   o.age++;
+   if(o.age>800)obs.splice(i,1);
+ }
+ for(var p=parts.length-1;p>=0;p--){
+   var pt=parts[p];pt.x+=pt.vx;pt.y+=pt.vy;pt.life--;
+   if(pt.life<=0)parts.splice(p,1);
+ }
+}
+function draw(){
+ cx.fillStyle='#020810';cx.fillRect(0,0,W,H);
+ // stars bg
+ cx.fillStyle='rgba(255,255,255,.3)';
+ for(var s=0;s<40;s++){cx.fillRect((s*67)%W,(s*97)%H,1.5,1.5);}
+ // rings
+ cx.strokeStyle='rgba(1,205,254,.18)';cx.lineWidth=18;
+ cx.beginPath();cx.arc(CX,CY,RIN,0,7);cx.stroke();
+ cx.strokeStyle='rgba(45,255,155,.15)';
+ cx.beginPath();cx.arc(CX,CY,ROUT,0,7);cx.stroke();
+ // planet
+ var g=cx.createRadialGradient(CX-6,CY-6,4,CX,CY,44);
+ g.addColorStop(0,'#ff9f6b');g.addColorStop(0.7,'#ff4757');g.addColorStop(1,'#801a3a');
+ cx.fillStyle=g;cx.beginPath();cx.arc(CX,CY,42,0,7);cx.fill();
+ // obstacles
+ for(var i=0;i<obs.length;i++){
+   var o=obs[i];
+   var r2=o.ring?RIN:ROUT;
+   var x=CX+Math.cos(o.a)*r2,y=CY+Math.sin(o.a)*r2;
+   if(o.star){
+     cx.fillStyle='#ffe14d';
+     cx.save();cx.translate(x,y);cx.rotate(o.a*3);
+     cx.fillRect(-5,-5,10,10);
+     cx.restore();
+   }else{
+     cx.fillStyle='#8a6a6e';cx.beginPath();cx.arc(x,y,10,0,7);cx.fill();
+     cx.fillStyle='#a88a8e';cx.beginPath();cx.arc(x-3,y-2,4,0,7);cx.fill();
+   }
+ }
+ // particles
+ for(var p2=0;p2<parts.length;p2++){
+   var pt2=parts[p2];
+   cx.globalAlpha=pt2.life/26;cx.fillStyle=pt2.col;
+   cx.fillRect(pt2.x-2,pt2.y-2,4,4);cx.globalAlpha=1;
+ }
+ // ship
+ var r3=ring?RIN:ROUT;
+ var px2=CX+Math.cos(ang)*r3,py2=CY+Math.sin(ang)*r3;
+ cx.save();cx.translate(px2,py2);cx.rotate(ang+Math.PI/2);
+ if(invT>0&&Math.floor(invT/6)%2===0){cx.globalAlpha=0.35;}
+ cx.fillStyle='#01cdfe';
+ cx.beginPath();cx.moveTo(0,-12);cx.lineTo(-8,8);cx.lineTo(0,4);cx.lineTo(8,8);cx.fill();
+ cx.fillStyle='#fff';cx.fillRect(-2,-4,4,6);
+ cx.restore();cx.globalAlpha=1;
+ if(flipT>0){cx.strokeStyle='rgba(255,255,255,.4)';cx.lineWidth=2;cx.beginPath();cx.arc(px2,py2,16+flipT,0,7);cx.stroke();}
+ requestAnimationFrame(draw);
+}
+draw();
+var lastTick=0;
+function loop(ts){if(ts-lastTick>15){lastTick=ts;step();}requestAnimationFrame(loop);}
+requestAnimationFrame(loop);
+$('best').textContent=best;
+window.__OR={G:function(){return{score:score,laps:laps,shield:shield,stars:starsGot,ring:ring,ang:Math.round(ang*100)/100,obs:obs.map(function(o){return{a:Math.round(o.a*100)/100,ring:o.ring,star:o.star};}),running:running,over:over,best:best}},
+start:startGame,step:function(n){for(var i=0;i<n;i++){step();}},
+flip:flip,
+setAng:function(a){ang=a;},
+spawnAt:function(a,r,star){obs.push({a:a,ring:r,star:!!star});},
+clearObs:function(){obs=[];},
+end:gameOver};
+</script></body></html>
