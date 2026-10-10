@@ -55,16 +55,15 @@ function genWorld(){
  terrain=[];stars=[];zones=[];
  var y=H*0.7,x=0;
  while(x<TERR_LEN){
-  var seg={x:x,w:80+Math.random()*160,y:y};
-  // spikes
-  if(x>300&&Math.random()<.4)seg.spikes=true;
+  var safe=x<700;
+  var seg={x:x,w:safe?240:80+Math.random()*160,y:y};
+  if(!safe&&Math.random()<.4)seg.spikes=true;
   terrain.push(seg);
-  // star above segment
-  if(Math.random()<.5)stars.push({x:x+seg.w/2,y:y-60-Math.random()*60,got:false});
-  // gravity zone
-  if(x>400&&Math.random()<.25)zones.push({x:x,w:seg.w,type:Math.random()<.5?'low':'high'});
-  x+=seg.w+(Math.random()<.3?60+Math.random()*80:0); // gaps
-  y=Math.max(H*0.35,Math.min(H*0.85,y+(Math.random()-.5)*120));
+  if(!safe&&Math.random()<.5)stars.push({x:x+seg.w/2,y:y-60-Math.random()*60,got:false});
+  if(x>800&&Math.random()<.25)zones.push({x:x,w:seg.w,type:Math.random()<.5?'low':'high'});
+  var gap=safe?0:(Math.random()<.3?50+Math.random()*40:0); // jumpable gaps only
+  x+=seg.w+gap;
+  y=Math.max(H*0.35,Math.min(H*0.85,y+(Math.random()-.5)*(safe?30:120)));
  }
 }
 function platAt(wx){
@@ -89,6 +88,7 @@ function step(){
  var z=zoneAt(px+camX);curZone=z?z.type:null;
  var gEff=G*(curZone==='low'?0.55:curZone==='high'?1.5:1)*gravDir;
  vy+=gEff;
+ if(vy>16)vy=16;if(vy<-16)vy=-16;
  py+=vy;
  var speed=vx*(curZone==='low'?1.25:1);
  camX+=speed;
