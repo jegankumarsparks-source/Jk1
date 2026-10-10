@@ -187,7 +187,7 @@ sim:(dt)=>simStep(dt),
 setInput:(o)=>{Object.assign(input,o);},
 playerRef:()=>player,
 pathLen:()=>path.length,
-warpNearFinish:()=>{player.lap=LAPS;player.ni=path.length-30;const p=path[player.ni];player.x=p.x;player.y=p.y;player.lastIdx=player.ni;}};
+warpNearFinish:()=>{player.lap=LAPS;player.ni=path.length-30;const p=path[player.ni];player.x=p.x;player.y=p.y;player.lastIdx=player.ni;player.mid=true;}};
 </script>
 </body>
 </html>
