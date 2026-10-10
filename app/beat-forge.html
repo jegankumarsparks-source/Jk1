@@ -43,12 +43,12 @@ input[type=range]{ width:100%; accent-color:var(--pink); }
 .cell.on{ border:0; }
 .cell .deg{ width:100%; background:rgba(255,255,255,.35); }
 .cell.cur{ box-shadow:0 0 0 2px var(--gold), 0 0 14px var(--gold); }
-.tr0 .cell.on{ background:var(--pink); box-shadow:0 0 10px rgba(244,114,182,.7); }
-.tr1 .cell.on{ background:var(--neon); box-shadow:0 0 10px rgba(34,211,238,.7); }
-.tr2 .cell.on{ background:var(--grn); box-shadow:0 0 10px rgba(126,231,135,.7); }
-.tr3 .cell.on{ background:var(--gold); box-shadow:0 0 10px rgba(251,191,36,.7); }
-.tr4 .cell.on{ background:var(--vio); box-shadow:0 0 10px rgba(167,139,250,.7); }
-.tr5 .cell.on{ background:#60a5fa; box-shadow:0 0 10px rgba(96,165,250,.7); }
+.cell.on.tr0{ background:var(--pink); box-shadow:0 0 10px rgba(244,114,182,.7); }
+.cell.on.tr1{ background:var(--neon); box-shadow:0 0 10px rgba(34,211,238,.7); }
+.cell.on.tr2{ background:var(--grn); box-shadow:0 0 10px rgba(126,231,135,.7); }
+.cell.on.tr3{ background:var(--gold); box-shadow:0 0 10px rgba(251,191,36,.7); }
+.cell.on.tr4{ background:var(--vio); box-shadow:0 0 10px rgba(167,139,250,.7); }
+.cell.on.tr5{ background:#60a5fa; box-shadow:0 0 10px rgba(96,165,250,.7); }
 .pats{ display:flex; gap:7px; }
 .pat{ flex:1; background:var(--glass2); border:1px solid var(--line); color:var(--mut); border-radius:11px; padding:10px 4px; font-family:'Orbitron'; font-weight:700; font-size:13px; cursor:pointer; text-align:center; }
 .pat.on{ border-color:var(--pink); color:var(--pink); box-shadow:0 0 12px rgba(244,114,182,.3); }
@@ -142,7 +142,7 @@ function drawGrid(){
   h+='<div class="tk tr'+t+'" style="grid-row:'+(t+1)+'">'+TRACKS[t]+'</div>';
   for(let s=0;s<16;s++){
    const v=pats[cur][t][s];
-   h+='<div class="cell'+(s%4===0?' beat4':'')+(v?' on':'')+'" id="c'+t+'_'+s+'" onclick="tapCell('+t+','+s+')" style="grid-row:'+(t+1)+'">'+(t>=4&&v?'<div class="deg" style="height:'+(v*16)+'%"></div>':'')+'</div>';
+   h+='<div class="cell tr'+t+(s%4===0?' beat4':'')+(v?' on':'')+'" id="c'+t+'_'+s+'" onclick="tapCell('+t+','+s+')" style="grid-row:'+(t+1)+'">'+(t>=4&&v?'<div class="deg" style="height:'+(v*16)+'%"></div>':'')+'</div>';
   }
  }
  $('#grid').innerHTML=h;
