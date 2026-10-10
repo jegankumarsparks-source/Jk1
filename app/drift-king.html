@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>JK DRIFT KING 2049</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+body{background:#0a0505;color:#fff0e8;font-family:'Segoe UI',system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;min-height:100vh;overflow:hidden;touch-action:none}
+h1{font-size:22px;letter-spacing:3px;margin:10px 0 2px;color:#ff9f1c;text-shadow:0 0 12px #ff9f1c,0 0 40px #ff9f1c88}
+.sub{font-size:10px;letter-spacing:2px;color:#a08d7d;margin-bottom:8px}
+.hud{display:flex;gap:8px;margin-bottom:8px;width:100%;max-width:420px;justify-content:center}
+.card{background:#1a0f0a;border:1px solid #ff9f1c33;border-radius:10px;padding:6px 12px;text-align:center;min-width:74px}
+.card .l{font-size:9px;letter-spacing:1px;color:#a08d7d}
+.card .v{font-size:17px;font-weight:700}
+#wrap{position:relative}
+canvas{background:#141010;border:2px solid #ff9f1c44;border-radius:14px;box-shadow:0 0 30px #ff9f1c22;display:block}
+#msg{margin-top:8px;font-size:13px;color:#ffd166;min-height:18px;text-align:center}
+.ov{position:absolute;inset:0;background:rgba(10,5,5,.93);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;border-radius:14px;z-index:5;backdrop-filter:blur(4px)}
+.ov.hide{display:none}
+.ov h2{font-size:26px;color:#ff9f1c;text-shadow:0 0 16px #ff9f1c}
+.ov p{font-size:13px;color:#d8c4b8;text-align:center;padding:0 24px;line-height:1.6}
+.btn{background:linear-gradient(90deg,#ff9f1c,#ff2d55);border:none;color:#fff;font-size:16px;font-weight:700;letter-spacing:2px;padding:13px 42px;border-radius:30px;cursor:pointer;box-shadow:0 0 20px #ff9f1c66}
+.btn:active{transform:scale(.95)}
+.rs{display:flex;gap:8px;width:84%;max-width:320px}
+.rs div{flex:1;background:#1a0f0a;border:1px solid #ff9f1c33;border-radius:10px;padding:8px;text-align:center;font-size:10px;color:#a08d7d}
+.rs b{display:block;font-size:16px;color:#fff;margin-top:2px}
+.zones{position:absolute;inset:0;display:flex;z-index:2;pointer-events:none}
+.zones div{flex:1}
+</style>
+</head>
+<body>
+<h1>💨 JK DRIFT KING</h1>
+<div class="sub">2049 NEO ARENA • 60s SCORE ATTACK • OFFLINE</div>
+<div class="hud">
+<div class="card"><div class="l">⭐ SCORE</div><div class="v" id="sc">0</div></div>
+<div class="card"><div class="l">🔥 COMBO</div><div class="v" id="cb">x1.0</div></div>
+<div class="card"><div class="l">⏱ TIME</div><div class="v" id="tm">60</div></div>
+<div class="card"><div class="l">🏆 BEST</div><div class="v" id="bs">0</div></div>
+</div>
+<div id="wrap">
+<canvas id="cv" width="400" height="600"></canvas>
+<div class="ov" id="ovStart">
+<h2>💨 DRIFT KING</h2>
+<p>Screen-ஓட left/right side-அ touch பண்ணி steer பண்ணு! Slide ஆகும் போது DRIFT score + combo கூடும் 🔥 Cones-அ near-miss பண்ணா BONUS! மோதினா combo போயிடும்! 60 seconds — maximum score அடி!</p>
+<button class="btn" id="btnStart">▶ START ENGINE</button>
+</div>
+<div class="ov hide" id="ovEnd">
+<h2>🏁 TIME UP!</h2>
+<div class="rs">
+<div>⭐ SCORE<b id="rSc">0</b></div>
+<div>🔥 MAX COMBO<b id="rCb">x1</b></div>
+<div>🎯 NEAR MISS<b id="rNm">0</b></div>
+<div>🏆 BEST<b id="rBs">0</b></div>
+</div>
+<p id="endTaunt"></p>
+<button class="btn" id="btnAgain">🔄 DRIFT AGAIN</button>
+</div>
+</div>
+<div id="msg">💨 Start பண்ணு, drift பண்ணு!</div>
+<script>
+'use strict';
+var cv=document.getElementById('cv'),cx=cv.getContext('2d');
+var W=cv.width,H=cv.height;
+var AC=window.AudioContext?new AudioContext():null;
+function beep(f,d,t){if(!AC)return;try{var o=AC.createOscillator(),g=AC.createGain();o.type=t||'sawtooth';o.frequency.value=f;g.gain.setValueAtTime(.04,AC.currentTime);g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+d);o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+d);}catch(e){}}
+function $(id){return document.getElementById(id);}
+function msg(t){$('msg').textContent=t;}
+var state='menu',score=0,combo=1,maxCombo=1,nearMiss=0,timeLeft=3600,tick=0;
+var car,skids=[],cones=[];
+var best=parseInt(localStorage.getItem('jkdk_best')||'0');
+$('bs').textContent=best;
+var steer=0;
+// seeded cones (deterministic)
+function buildCones(){
+ cones=[];var s=42;
+ function rnd(){s=(s*1103515245+12345)&0x7fffffff;return s/0x7fffffff;}
+ for(var i=0;i<7;i++){
+   cones.push({x:60+rnd()*(W-120),y:70+rnd()*(H-140),cd:0});
+ }
+}
+buildCones();
+function resetCar(){car={x:W/2,y:H-80,hx:0,hy:-1,vx:0,vy:0,sp:0};}
+resetCar();
+function startGame(){
+ state='play';score=0;combo=1;maxCombo=1;nearMiss=0;timeLeft=3600;tick=0;
+ resetCar();skids=[];buildCones();
+ $('sc').textContent=0;$('cb').textContent='x1.0';$('tm').textContent=60;
+ $('ovStart').classList.add('hide');$('ovEnd').classList.add('hide');
+ msg('💨 Drift பண்ணு! Combo கூட்டு!');
+ if(AC&&AC.state==='suspended'){AC.resume();}
+ beep(110,.3);setTimeout(function(){beep(165,.3);},150);
+}
+function endGame(){
+ state='over';
+ if(score>best){best=score;try{localStorage.setItem('jkdk_best',best);}catch(e){}}
+ $('bs').textContent=best;
+ $('rSc').textContent=score;$('rCb').textContent='x'+maxCombo.toFixed(1);
+ $('rNm').textContent=nearMiss;$('rBs').textContent=best;
+ $('endTaunt').textContent=score>=3000?'👑 DRIFT KING! குயிலே, உன் garden-ல மெதுவா போ — நாங்க drift-ல போறோம்! 💨😎':score>=1200?'நல்ல drift! இன்னும் கொஞ்சம் slide, இன்னும் score! 💨':'Cones-அ மோதாம slide பண்ணு — combo தான் secret! 🏁';
+ $('ovEnd').classList.remove('hide');
+ beep(660,.3,'square');setTimeout(function(){beep(880,.3,'square');},200);
+}
+function step(){
+ if(state!=='play')return;
+ tick++;timeLeft--;
+ if(timeLeft<=0){endGame();return;}
+ // steering
+ var steerPow=Math.min(car.sp/5,1);
+ car.hx+= -car.hy*steer*0.05*steerPow;
+ car.hy+= car.hx*steer*0.05*steerPow;
+ var hl=Math.hypot(car.hx,car.hy)||1;car.hx/=hl;car.hy/=hl;
+ // throttle + drag
+ car.vx+=car.hx*0.14;car.vy+=car.hy*0.14;
+ car.vx*=0.985;car.vy*=0.985;
+ car.sp=Math.hypot(car.vx,car.vy);
+ // drift angle
+ var drift=0;
+ if(car.sp>0.5){
+   var dot=(car.vx*car.hx+car.vy*car.hy)/car.sp;
+   drift=Math.acos(Math.max(-1,Math.min(1,dot)));
+ }
+ var drifting=drift>0.22&&car.sp>2.2;
+ if(drifting){
+   var gain=drift*car.sp*combo*0.35;
+   score+=Math.round(gain);
+   combo=Math.min(5,combo+0.004);
+   if(combo>maxCombo)maxCombo=combo;
+   skids.push({x:car.x,y:car.y,a:.5});
+   if(tick%20===0)beep(90+drift*60,.05);
+   if(tick%60===0){$('sc').textContent=score;$('cb').textContent='x'+combo.toFixed(1);}
+ }else{
+   if(combo>1)combo=Math.max(1,combo-0.01);
+ }
+ // walls
+ var M=18;
+ if(car.x<M||car.x>W-M){car.vx*=-0.5;car.x=Math.max(M,Math.min(W-M,car.x));wallHit();}
+ if(car.y<M||car.y>H-M){car.vy*=-0.5;car.y=Math.max(M,Math.min(H-M,car.y));wallHit();}
+ // cones
+ for(var i=0;i<cones.length;i++){
+   var c=cones[i],d=Math.hypot(car.x-c.x,car.y-c.y);
+   if(c.cd>0)c.cd--;
+   if(d<20){ // hit cone
+     car.vx*=0.4;car.vy*=0.4;
+     if(combo>1){msg('💥 Cone! Combo போச்சு!');}
+     combo=1;beep(140,.2);
+   }else if(d<48&&c.cd===0&&car.sp>3){
+     c.cd=400;nearMiss++;
+     var bonus=Math.round(80*combo);score+=bonus;
+     msg('🎯 NEAR MISS +'+bonus+'!');
+     beep(1200,.08,'square');
+     $('sc').textContent=score;
+   }
+ }
+ car.x+=car.vx;car.y+=car.vy;
+ // skid fade
+ for(var j=skids.length-1;j>=0;j--){skids[j].a-=0.004;if(skids[j].a<=0)skids.splice(j,1);}
+ if(skids.length>600)skids.splice(0,skids.length-600);
+ $('tm').textContent=Math.ceil(timeLeft/60);
+}
+function wallHit(){
+ if(combo>1.5){msg('💥 Wall! Combo reset!');}
+ combo=1;beep(120,.25);
+}
+// input: left/right half steer
+var touches={};
+cv.addEventListener('pointerdown',function(e){e.preventDefault();touches[e.pointerId]=e.clientX;updSteer(e);});
+window.addEventListener('pointermove',function(e){if(touches[e.pointerId]!==undefined){touches[e.pointerId]=e.clientX;updSteer(e);}});
+window.addEventListener('pointerup',function(e){delete touches[e.pointerId];updSteer();});
+window.addEventListener('pointercancel',function(e){delete touches[e.pointerId];updSteer();});
+function updSteer(e){
+ var keys=Object.keys(touches);
+ if(!keys.length){steer=0;return;}
+ var r=cv.getBoundingClientRect();
+ steer=touches[keys[0]]<r.left+r.width/2?-1:1;
+}
+// draw
+function draw(){
+ cx.clearRect(0,0,W,H);
+ // arena floor grid
+ cx.strokeStyle='#ff9f1c11';cx.lineWidth=1;cx.beginPath();
+ for(var g=0;g<W;g+=40){cx.moveTo(g,0);cx.lineTo(g,H);}
+ for(var g2=0;g2<H;g2+=40){cx.moveTo(0,g2);cx.lineTo(W,g2);}
+ cx.stroke();
+ // walls
+ cx.strokeStyle='#ff9f1c';cx.lineWidth=3;cx.strokeRect(14,14,W-28,H-28);
+ // skid marks
+ for(var i=0;i<skids.length;i++){
+   var s=skids[i];
+   cx.fillStyle='rgba(20,16,16,'+s.a+')';
+   cx.beginPath();cx.arc(s.x,s.y,5,0,7);cx.fill();
+ }
+ // cones
+ for(var k=0;k<cones.length;k++){
+   var c=cones[k];
+   cx.fillStyle='#ff5722';
+   cx.beginPath();cx.moveTo(c.x,c.y-9);cx.lineTo(c.x-7,c.y+7);cx.lineTo(c.x+7,c.y+7);cx.closePath();cx.fill();
+   cx.fillStyle='#fff';cx.fillRect(c.x-4,c.y+1,8,2);
+ }
+ // car
+ cx.save();cx.translate(car.x,car.y);cx.rotate(Math.atan2(car.hy,car.hx)+Math.PI/2);
+ cx.fillStyle='#ff2d55';
+ cx.beginPath();cx.moveTo(0,-14);cx.lineTo(8,10);cx.lineTo(-8,10);cx.closePath();cx.fill();
+ cx.fillStyle='#ffd166';cx.fillRect(-5,-6,10,5);
+ cx.fillStyle='#0a0505';cx.fillRect(-9,-10,3,7);cx.fillRect(6,-10,3,7);cx.fillRect(-9,4,3,7);cx.fillRect(6,4,3,7);
+ cx.restore();
+ // drift flame
+ var spd=car.sp;
+ if(spd>2.2){
+   var dott=(car.vx*car.hx+car.vy*car.hy)/(spd||1);
+   if(Math.abs(dott)<0.97){
+     cx.fillStyle='rgba(255,159,28,'+(0.4+Math.random()*0.3)+')';
+     cx.beginPath();cx.arc(car.x-car.hx*16,car.y-car.hy*16,5+Math.random()*4,0,7);cx.fill();
+   }
+ }
+ requestAnimationFrame(draw);
+}
+draw();
+var lastT=0,acc=0;
+function loop(ts){
+ if(!lastT)lastT=ts;
+ acc+=ts-lastT;lastT=ts;
+ var n=0;
+ while(acc>16&&n<4){step();acc-=16;n++;}
+ requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+$('btnStart').addEventListener('click',startGame);
+$('btnAgain').addEventListener('click',function(){$('ovEnd').classList.add('hide');startGame();});
+window.__DK={G:function(){return{state:state,score:score,combo:+combo.toFixed(2),maxCombo:+maxCombo.toFixed(2),nearMiss:nearMiss,timeLeft:timeLeft,car:{x:Math.round(car.x),y:Math.round(car.y),sp:+car.sp.toFixed(2),hx:+car.hx.toFixed(2),hy:+car.hy.toFixed(2)},cones:cones.map(function(c){return{x:Math.round(c.x),y:Math.round(c.y)};}),skids:skids.length,best:best}},
+start:startGame,
+step:function(n){for(var i=0;i<n;i++){step();}},
+setSteer:function(s){steer=s;},
+tpCar:function(x,y){car.x=x;car.y=y;},
+setVel:function(vx,vy){car.vx=vx;car.vy=vy;},
+setTime:function(t){timeLeft=t;},
+end:endGame};
+</script>
+</body>
+</html>
