@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>JK BLOCK BLAST 2041</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0c0614;color:#e8e8f5;min-height:100vh;overflow-x:hidden;user-select:none}
+.wrap{max-width:480px;margin:0 auto;padding:10px 12px 30px}
+h1{text-align:center;font-size:27px;font-weight:900;letter-spacing:2px;background:linear-gradient(90deg,#ff2ea6,#ffd60a,#3ddc84);-webkit-background-clip:text;background-clip:text;color:transparent;margin-top:4px}
+.sub{text-align:center;color:#8a8ab0;font-size:10px;letter-spacing:3px;margin:2px 0 8px}
+.hud{display:flex;justify-content:space-around;background:linear-gradient(145deg,#1c1030,#120a24);border:1px solid #3a2060;border-radius:12px;padding:8px;margin-bottom:8px;font-size:14px;font-weight:800}
+.hud .s{color:#ffd60a}.hud .b{color:#8a8ab0;font-weight:400}
+#board{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;background:#150b28;border:1px solid #3a2060;border-radius:14px;padding:6px;margin-bottom:10px}
+.cell{aspect-ratio:1;border-radius:8px;background:#0f0820;cursor:pointer;transition:transform .12s;position:relative}
+.cell.gem{box-shadow:inset 0 -4px 0 rgba(0,0,0,.3),0 2px 6px rgba(0,0,0,.4)}
+.cell.sel{transform:scale(1.12);outline:3px solid #fff;z-index:2}
+.cell.pop{animation:pop .3s forwards}
+@keyframes pop{to{transform:scale(0);opacity:0}}
+#msg{text-align:center;font-size:13px;color:#b8b8d8;min-height:20px}
+#combo{text-align:center;font-size:20px;font-weight:900;color:#ffd60a;min-height:28px;text-shadow:0 0 16px rgba(255,214,10,.6)}
+.ov{position:fixed;inset:0;background:rgba(6,3,12,.94);z-index:20;display:flex;align-items:center;justify-content:center;padding:20px}
+.ov.hide{display:none}
+.ovCard{background:linear-gradient(145deg,#1c1030,#0d0620);border:1px solid #4a2a7a;border-radius:20px;padding:26px 20px;max-width:380px;width:100%;text-align:center}
+.ovCard h2{font-size:24px;margin-bottom:8px}
+.ovCard p{color:#b8b8d8;font-size:13px;line-height:1.8}
+.big{font-size:40px;font-weight:900;color:#ffd60a}
+.btn{display:inline-block;margin-top:14px;padding:13px 30px;border:none;border-radius:14px;font-size:15px;font-weight:800;cursor:pointer;background:linear-gradient(90deg,#ff2ea6,#ffd60a);color:#3a0a22}
+.footer{text-align:center;color:#55557a;font-size:10px;margin-top:12px;letter-spacing:1px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>JK BLOCK BLAST</h1>
+<div class="sub">2041 MATCH-3 MANIA • 60 வினாடி • OFFLINE</div>
+<div class="hud"><span class="s">⭐ <b id="score">0</b></span><span>⏱ <b id="tm">60</b>s</span><span class="b">BEST: <b id="best">0</b></span></div>
+<div id="board"></div>
+<div id="combo"></div>
+<div id="msg">gem-அ tap பண்ணி பக்கத்து gem-ஓட swap பண்ணு — 3+ match!</div>
+<div class="footer">JK BLOCK BLAST 2041 • cascades + combos • 8x8 board • single HTML</div>
+</div>
+<div class="ov" id="ov"><div class="ovCard">
+<h2>💎 JK BLOCK BLAST</h2>
+<p>அடுத்தடுத்த gem-அ swap பண்ணி 3 அல்லது அதுக்கு மேல match பண்ணு!<br>Cascade-கள் COMBO multiplier தரும் 🔥<br>60 வினாடி — அதிக score அடி!</p>
+<button class="btn" onclick="startGame()">BLAST 💥</button>
+</div></div>
+<div class="ov hide" id="ovEnd"><div class="ovCard">
+<h2>⏱ TIME UP!</h2>
+<div class="big" id="endScore">0</div>
+<p id="endText"></p>
+<button class="btn" onclick="startGame()">AGAIN 💥</button>
+</div></div>
+<script>
+var GEMS=['💎','🔥','⭐','🍀','💜','🔺'];
+var GCOLS=['#00e5ff','#ff7b4d','#ffd60a','#3ddc84','#b44dff','#ff4d6d'];
+var N=8,board=[],score=0,best=parseInt(localStorage.getItem('jkbb_best')||'0'),sel=null,t=60,iv=null,running=false,combo=0,busy=false;
+document.getElementById('best').textContent=best;
+function ri(n){return Math.floor(Math.random()*n);}
+function newBoard(){
+ board=[];for(var y=0;y<N;y++){board.push([]);for(var x=0;x<N;x++){var g;do{g=ri(GEMS.length)}while((x>=2&&board[y][x-1]===g&&board[y][x-2]===g)||(y>=2&&board[y-1][x]===g&&board[y-2][x]===g));board[y].push(g);}}
+}
+function render(){
+ var b=document.getElementById('board'),h='';
+ for(var y=0;y<N;y++)for(var x=0;x<N;x++){
+  var g=board[y][x];
+  var sty=g<0?'':'background:'+GCOLS[g];
+  h+='<div class="cell'+(g>=0?' gem':'')+(sel&&sel[0]===x&&sel[1]===y?' sel':'')+'" data-x="'+x+'" data-y="'+y+'" style="'+sty+'"></div>';
+ }
+ b.innerHTML=h;
+ b.querySelectorAll('.cell').forEach(function(c){c.addEventListener('pointerdown',function(){tap(parseInt(c.dataset.x),parseInt(c.dataset.y))});});
+}
+function tap(x,y){
+ if(!running||busy)return;
+ if(board[y][x]<0)return;
+ if(!sel){sel=[x,y];render();return;}
+ if(sel[0]===x&&sel[1]===y){sel=null;render();return;}
+ if(Math.abs(sel[0]-x)+Math.abs(sel[1]-y)!==1){sel=[x,y];render();return;}
+ // try swap
+ swap(sel[0],sel[1],x,y);
+ var m=findMatches();
+ if(m.size===0){swap(sel[0],sel[1],x,y);msg('❌ match இல்ல!');}
+ else{combo=0;resolve();}
+ sel=null;render();
+}
+function swap(x1,y1,x2,y2){var t2=board[y1][x1];board[y1][x1]=board[y2][x2];board[y2][x2]=t2;}
+function findMatches(){
+ var s=new Set();
+ for(var y=0;y<N;y++)for(var x=0;x<N-2;x++){var g=board[y][x];if(g>=0&&board[y][x+1]===g&&board[y][x+2]===g){s.add(x+','+y);s.add((x+1)+','+y);s.add((x+2)+','+y);}}
+ for(var x=0;x<N;x++)for(var y=0;y<N-2;y++){var g2=board[y][x];if(g2>=0&&board[y+1][x]===g2&&board[y+2][x]===g2){s.add(x+','+y);s.add(x+','+(y+1));s.add(x+','+(y+2));}}
+ return s;
+}
+function resolve(){
+ busy=true;
+ var chain=function(){
+  var m=findMatches();
+  if(m.size===0){busy=false;render();return;}
+  combo++;
+  var pts=m.size*10*combo;
+  score+=pts;document.getElementById('score').textContent=score;
+  if(combo>1){document.getElementById('combo').textContent='🔥 COMBO x'+combo+'  +'+pts;setTimeout(function(){document.getElementById('combo').textContent=''},1200);}
+  m.forEach(function(k){var p=k.split(',');board[parseInt(p[1])][parseInt(p[0])]=-1;});
+  render();
+  setTimeout(function(){
+   // gravity
+   for(var x=0;x<N;x++){var col=[];for(var y=N-1;y>=0;y--)if(board[y][x]>=0)col.push(board[y][x]);
+    for(var y=N-1;y>=0;y--)board[y][x]=col.length?col.shift():ri(GEMS.length);}
+   render();setTimeout(chain,220);
+  },220);
+ };
+ chain();
+}
+function msg(t){document.getElementById('msg').textContent=t;}
+function startGame(){
+ document.getElementById('ov').classList.add('hide');document.getElementById('ovEnd').classList.add('hide');
+ score=0;t=60;running=true;combo=0;sel=null;busy=false;
+ document.getElementById('score').textContent='0';document.getElementById('tm').textContent='60';
+ newBoard();render();
+ clearInterval(iv);
+ iv=setInterval(function(){t--;document.getElementById('tm').textContent=t;if(t<=0){endGame();}},1000);
+ msg('gem-அ tap பண்ணி swap பண்ணு!');
+}
+function endGame(){
+ running=false;clearInterval(iv);
+ var rec=score>best;
+ if(rec){best=score;localStorage.setItem('jkbb_best',best);}
+ document.getElementById('best').textContent=best;
+ document.getElementById('endScore').textContent=score;
+ document.getElementById('endText').innerHTML=(rec?'🎉 NEW RECORD!':'Best: '+best)+'<br>'+(score>800?'💎 BLAST MASTER!':score>400?'🔥 நல்ல வேலை!':'💪 இன்னும் வேகமா swap பண்ணு!');
+ document.getElementById('ovEnd').classList.remove('hide');
+}
+newBoard();render();
+window.__BB={G:function(){return {score:score,t:t,running:running,best:best,busy:busy}},start:startGame,tap:tap,cell:function(x,y){return board[y][x]},boardStr:function(){return board.map(function(r){return r.join('')}).join('/')},find:findMatches,end:endGame};
+</script>
+</body>
+</html>
