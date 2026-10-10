@@ -92,16 +92,22 @@ function draw(){
   ctx.fillText(t,R-18,9); ctx.restore();
  }
 }
+let spinT0=0, spinDur=0, spinFrom=0, spinTo=0, watchdog=null;
 function tick(){
- angle+=vel; vel*=0.985;
- if(vel<0.002){ spinning=false; vel=0; cancelAnimationFrame(raf); draw(); land(); return; }
+ const p=Math.min(1,(performance.now()-spinT0)/spinDur);
+ const e=1-Math.pow(1-p,3.2);
+ angle=spinFrom+(spinTo-spinFrom)*e;
+ if(p>=1){ finishSpin(); return; }
  draw(); raf=requestAnimationFrame(tick);
 }
+function finishSpin(){ if(!spinning) return; spinning=false; if(watchdog){clearTimeout(watchdog); watchdog=null;} if(raf) cancelAnimationFrame(raf); angle=spinTo; draw(); land(); }
 function spin(){
  if(spinning||opts.length<2){ if(opts.length<2) showW('Need at least 2 options 🙂'); return; }
  spinning=true; $('#winner').innerHTML=''; $('#spinBtn').disabled=true;
- vel=0.28+Math.random()*0.22;
+ spinT0=performance.now(); spinDur=4200+Math.random()*2000;
+ spinFrom=angle; spinTo=angle+(14+Math.random()*10)*Math.PI*2;
  if(navigator.vibrate) try{ navigator.vibrate(40); }catch(e){}
+ watchdog=setTimeout(finishSpin, spinDur+1500);
  raf=requestAnimationFrame(tick);
 }
 function land(){
