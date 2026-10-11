@@ -14,3 +14,8 @@
 - Cycle cadence 60s; scan-now button overrides pause for a manual cycle.
 - Carried over from the fixed build: RPC 3-endpoint fallback (PublicNode ->
   mainnet-beta -> OnFinality) and RugCheck top-holders snapshots.
+
+## v1.1-mobile (JK-WR2-MOBILE-V1) - 2026-10-11
+- Packaging change per owner: single self-contained HTML for mobile (laptop cockpit dropped).
+- Green-screen blink alert on every ENTRY; stronger blink + banner for CONFLUENCE.
+- Sticky green entry banner shows the latest alert for 15s.
