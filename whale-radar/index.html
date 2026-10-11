@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#07090a"><title>JK Whale Radar 2.0 | Entry catcher</title><!-- JK-WR2-V1: entry catcher, seed tiers, pause/resume, desktop cockpit --><style>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#07090a"><title>JK Whale Radar 2.0 | Entry catcher</title><!-- JK-WR2-MOBILE-V1: single-file mobile entry catcher, green-blink alerts, seed tiers, pause/resume --><style>
 /* V24 visual language retained from the user-supplied reference. Local cockpit rules below specialize it. */
 
 :root{--bg:#07090a;--bg2:#0d1113;--card:#11171a;--card2:#161e22;--line:#1f2a2f;--line2:#2a383e;--tx:#e8f0ec;--mut:#8a9a94;--dim:#5d6b66;--lime:#b6ff3b;--lime2:#8fd61a;--limeg:rgba(182,255,59,.14);--red:#ff5a5f;--redg:rgba(255,90,95,.13);--amb:#ffc23b;--ambg:rgba(255,194,59,.13);--cyan:#3be3ff;--cyang:rgba(59,227,255,.12);--vio:#b48bff;--r:14px}
@@ -352,30 +352,26 @@ body{background:radial-gradient(750px 400px at 50% -110px,#b6ff3b1c,transparent 
 /* Namespaced fallback for candidate cells: explicit layout avoids host-CSS collisions. */
 #candidateList{padding:10px!important;overflow:hidden}#candidateList .candidate{display:grid!important;grid-template-columns:36px minmax(0,1fr) 92px!important;gap:8px!important;align-items:center!important;width:100%!important;min-height:70px!important;padding:10px 0!important}#candidateList .candidateBadge{width:35px!important;min-width:35px!important}#candidateList .title{display:block!important;position:static!important;width:auto!important;min-width:0!important;max-width:100%!important;overflow:hidden!important}#candidateList .title b,#candidateList .title small{display:block!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;text-align:left!important}#candidateList .title b{font-weight:800!important;font-size:12px!important;color:#e8f0ec!important}#candidateList .title small{font-size:10px!important;color:#92a39b!important}#candidateList .mini{display:block!important;width:92px!important;overflow:hidden!important;text-align:right!important;white-space:nowrap!important;font-size:10px!important}#candidateList .status{display:inline-block!important;overflow:hidden!important;max-width:92px!important;text-overflow:ellipsis!important}#candidateList .bars{width:100%!important}
 
-/* JK-WR2-V1 desktop cockpit */
-@media (min-width:1024px){
-  main.wrap{max-width:1560px;display:grid;grid-template-columns:380px minmax(0,1fr) 380px;gap:14px;align-items:start}
-  header .wrap{max-width:1560px}
-  main.wrap>.hero,main.wrap>.metrics,main.wrap>.cockpit{grid-column:1/-1}
-  main.wrap>#scannerPage{grid-column:1;grid-row:4}
-  main.wrap>#signalsPage{grid-column:2;grid-row:4}
-  main.wrap>#whalesPage{grid-column:3;grid-row:4}
-  main.wrap>#paperPage{grid-column:1/3;grid-row:5}
-  main.wrap>#settingsPage{grid-column:3;grid-row:5}
-  main.wrap>section.hidden{display:block!important}
-  main.wrap>section{margin-top:0}
-  nav.nav{display:none}
-  body{padding-bottom:24px}
-}
 .runBtn{border:1px solid var(--line,#263447);background:#0f2a12;color:var(--lime);border-radius:999px;padding:6px 16px;font-weight:800;letter-spacing:1.2px;cursor:pointer;font-family:inherit;font-size:12px}
 .runBtn.off{background:#2a1608;color:#f0b000}
 .badge.seed{background:rgba(240,176,0,.16);color:#f0b000;border:1px solid rgba(240,176,0,.4)}
 .chip.conf{background:rgba(183,255,0,.16);color:var(--lime);border:1px solid rgba(183,255,0,.45)}
 @keyframes freshflash{0%{box-shadow:0 0 0 0 rgba(105,240,255,.55)}100%{box-shadow:0 0 0 16px rgba(105,240,255,0)}}
 .card.signal.fresh{animation:freshflash 1.1s ease-out 3;border-color:rgba(105,240,255,.65)}
+
+/* JK-WR2-MOBILE-V1 green entry alerts */
+@keyframes greenblink{0%,100%{background-color:transparent}50%{background-color:rgba(57,255,20,.30)}}
+body.entryBlink{animation:greenblink .7s ease-in-out 6}
+body.confBlink{animation:greenblink .45s ease-in-out 12}
+@keyframes bannerpulse{0%,100%{box-shadow:0 0 0 0 rgba(57,255,20,.7)}50%{box-shadow:0 0 22px 6px rgba(57,255,20,.55)}}
+#entryBanner{display:none;position:sticky;top:0;z-index:60;background:#0c3312;border:2px solid #39ff14;color:#c8ffb8;border-radius:14px;padding:10px 12px;font-weight:800;letter-spacing:.4px;margin:8px 0;animation:bannerpulse .8s ease-in-out infinite}
+#entryBanner.show{display:block}
+#entryBanner.conf{background:#14520a;border-width:3px;font-size:15px}
+.card.signal.fresh{border:2px solid #39ff14;animation:freshflash 1.1s ease-out 3}
 </style></head><body><header class="header"><div class="wrap brand"><div class="brandIcon">◉</div><div><strong>JK WHALE RADAR <span style="color:var(--lime)">2.0</span></strong><small>ENTRY CATCHER / SOLANA / PAPER ONLY</small></div><div class="live"><button id="runToggle" class="runBtn" type="button">PAUSE</button><span id="netDot" class="dot"></span><span id="netText">Starting</span></div></div></header>
 <main class="wrap"><section class="hero"><div class="eyebrow">◉ LIVE DISCOVERY COCKPIT</div><h1>Catch the whale.<br>Before the hype.</h1><p>Watched wallets are polled for fresh on-chain entries. An alert posts only when a tracked wallet actually gains a token in a confirmed transaction. Seed-tier wallets are labeled UNVERIFIED; proven wallets earned their tier from an observed 2x.</p></section>
 <div class="metrics"><div class="metric"><b id="mCandidates">0</b><span>Coins watched</span></div><div class="metric"><b id="mWhales">0</b><span>Wallets watched</span></div><div class="metric"><b id="mSignals">0</b><span>Real entries</span></div></div>
+<div id="entryBanner" role="alert"></div>
 <section class="cockpit" aria-live="polite"><div class="cockpitHead"><div id="radar" class="radar"></div><div><div class="eyebrow">SCANNER / LIVE STATE</div><div class="scanTitle" id="scanStage">Starting the scanner</div><div class="scanSub" id="scanTime">Waiting for first response</div></div></div><div class="scanTarget" id="scanTarget">Initializing local state...</div><div class="pipeline" id="pipeline"><div class="stage">INTAKE</div><div class="stage">PAIRS</div><div class="stage">HOLDERS</div><div class="stage">WALLETS</div><div class="stage">PRICES</div></div><div class="scanNumbers"><div class="scanNum"><b id="nCoins">0</b><span>Coins scanned</span></div><div class="scanNum"><b id="nHolders">0</b><span>Holders pulled</span></div><div class="scanNum"><b id="nWhales">0</b><span>Wallets watched</span></div><div class="scanNum"><b id="nSigs">0</b><span>Signatures parsed</span></div></div><div class="footnote">Counters track work completed on this device. The browser must stay open and visible. Network errors appear in the log; they do not create signals.</div></section>
 <section id="scannerPage"><div class="toolbar"><h2>Discovery feed</h2><span class="badge" id="candidateTotal">0 TRACKED</span></div><div class="sectionCaption">Candidates are not buys or signals. Intake combines recent profiles, boosts and Solana pair search results. The public feeds are sampled, not a complete market stream.</div><div class="tabs" id="feedTabs"><button class="active" data-feed="all">All coins</button><button data-feed="holders">Holder snapshot</button><button data-feed="doubled">2x watch</button></div><div id="candidateList" class="card"></div><div class="row pageTools"><button id="candidatePrev" class="button secondary">Previous</button><span id="candidatePage" class="tiny muted"></span><button id="candidateNext" class="button secondary">Next</button></div><div class="toolbar"><h2>Activity log</h2><span class="badge" id="logCount">0 EVENTS</span></div><div class="card feed" id="activityLog" aria-live="polite"></div><button id="downloadLog" class="button secondary">Export activity log</button></section>
 <section id="signalsPage" class="hidden"><div class="toolbar"><h2>ENTRY ALERTS</h2><span class="badge">ON-CHAIN ONLY</span></div><div class="sectionCaption">An acquisition means a positive token balance change in a confirmed transaction. It may be a transfer, not a market buy. Verify before trading.</div><div class="seg" id="filters"><button data-filter="1" class="active">0-1h</button><button data-filter="5">1-5h</button><button data-filter="24">5-24h</button><button data-filter="all">All</button></div><div id="signalsList"></div></section>
@@ -413,7 +409,8 @@ function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){lastErr
 function notice(x){let e=$('toast');e.textContent=x;e.classList.remove('hidden');clearTimeout(timer);timer=setTimeout(()=>e.classList.add('hidden'),3500)}
 function healthUpdate(label,ok,detail){health[label]={ok,detail:String(detail||''),at:now()};drawHealth()}
 function drawHealth(){let e=$('healthList');if(!e)return;e.innerHTML=Object.entries(health).length?Object.entries(health).map(([k,v])=>'<div class="feedrow"><span class="time">'+new Date(v.at).toLocaleTimeString()+'</span><b>'+esc(k)+'</b><span class="type" style="color:'+(v.ok?'var(--lime)':'var(--red)')+'">'+(v.ok?'OK':'ERROR')+'</span></div><div class="footnote">'+esc(v.detail)+'</div>').join(''):'<div class="footnote">No response yet. Open the scanner and wait for a cycle.</div>'}
-function event(kind,text,t='info'){S.events.unshift({kind,text,at:now(),t});S.events=S.events.slice(0,220);save();drawActivity()}
+function event(kind,text,t='info'){S.events.unshift({kind,text,at:now(),t});S.events=S.events.slice(0,220);save();drawActivity();if(kind==='ENTRY'||kind==='CONFLUENCE')blinkGreen(kind,text)}
+function blinkGreen(kind,text){let b=$('entryBanner');if(b){b.textContent=(kind==='CONFLUENCE'?'🟢🟢 CONFLUENCE ENTRY: ':'🟢 WHALE ENTRY: ')+text;b.className=kind==='CONFLUENCE'?'show conf':'show';clearTimeout(window.__ebT);window.__ebT=setTimeout(()=>{b.className=''},15000)}document.body.classList.remove('entryBlink','confBlink');void document.body.offsetWidth;document.body.classList.add(kind==='CONFLUENCE'?'confBlink':'entryBlink')}
 function stage(name,target,index){engineStage=name;engineTarget=target;engineAt=now();$('scanStage').textContent=name;$('scanTarget').textContent=target;$('scanTime').textContent=new Date(engineAt).toLocaleTimeString()+' · '+(busy?'Working':'Idle');document.querySelectorAll('.stage').forEach((e,i)=>e.classList.toggle('active',i===index));drawNumbers()}
 function drawNumbers(){for(let [id,k] of [['nCoins','coins'],['nHolders','holders'],['nWhales','whales'],['nSigs','sigs']])$(id).textContent=Number(S.stats[k]||0).toLocaleString()}
 function drawActivity(){let e=$('activityLog');if(!e)return;$('logCount').textContent=S.events.length+' EVENTS';e.innerHTML=S.events.length?S.events.slice(0,110).map(x=>'<div class="feedrow '+(x.t==='error'?'error':'')+'"><span class="time">'+new Date(x.at).toLocaleTimeString()+'</span><b title="'+esc(x.text)+'">'+esc(x.text)+'</b><span class="type">'+esc(x.kind)+'</span></div>').join(''):'<div class="empty">Activity appears as each source responds. No simulated coins or transactions.</div>'}
