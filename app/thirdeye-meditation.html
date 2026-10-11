@@ -15,7 +15,7 @@ header{position:relative;text-align:center;padding:40px 20px 26px;background:lin
 h1{font-size:29px;background:linear-gradient(90deg,#F87AA2,#F05A8A,#D85080);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:800;letter-spacing:1px}
 .tag{color:var(--dim);font-size:14px;margin-top:6px}
 .ver{position:absolute;top:12px;right:14px;background:var(--card);border:1px solid var(--line);color:var(--teal2);font-size:12px;padding:4px 12px;border-radius:20px}
-.new{display:inline-block;margin-top:10px;background:linear-gradient(90deg,#FFFFFF,#331625);color:var(--gold2);font-size:12.5px;padding:5px 14px;border-radius:16px;font-weight:700;border:1px solid var(--line);max-width:94%}
+.new{display:inline-block;margin-top:10px;background:linear-gradient(90deg,#331625,#4A2035);color:var(--gold2);font-size:12.5px;padding:5px 14px;border-radius:16px;font-weight:700;border:1px solid var(--line);max-width:94%}
 nav{position:sticky;top:0;z-index:9;background:rgba(26,10,18,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:10px 8px;display:flex;gap:8px;overflow-x:auto}
 nav::-webkit-scrollbar{display:none}
 nav a{flex:0 0 auto;color:var(--dim);text-decoration:none;font-size:13.5px;padding:7px 14px;border:1px solid var(--line);border-radius:20px;white-space:nowrap}
@@ -1357,7 +1357,7 @@ window.__TE14={goal:()=>({min:goalMin,week:weekMinutes(),met:window.__goalMet===
 // ---- V15: weekly card (canvas PNG) ----
 function wcDraw(){const c=document.getElementById('wcCanvas');if(!c)return false;
  const x=c.getContext('2d');const W=c.width,H=c.height;
- const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'#FFFFFF');g.addColorStop(1,'#1A0A12');
+ const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'#331625');g.addColorStop(1,'#1A0A12');
  x.fillStyle=g;x.fillRect(0,0,W,H);
  x.textAlign='center';
  x.fillStyle='#F05A8A';x.font='800 36px "Noto Sans Tamil",sans-serif';
