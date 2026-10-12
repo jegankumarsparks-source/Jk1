@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "generatedAt": "2026-10-12T17:27:27.746466+00:00",
-  "lastCheckedAt": "2026-10-12T17:27:23.866Z",
+  "generatedAt": "2026-10-12T18:05:54.788441+00:00",
+  "lastCheckedAt": "2026-10-12T18:05:52.378Z",
   "paperOnly": true,
   "bank": 200,
   "cash": 158.08,
@@ -385,6 +385,19 @@
       "signalLiquidity": 76282.53,
       "cancelledAt": 1791822054314,
       "cancelReason": "60-minute signal expiry"
+    },
+    {
+      "id": "limit_sig_mv5kc4fml1bpwz",
+      "signalId": "sig_mv5kc4fml1bpwz",
+      "mint": "98AG3zJUawbvDnpgbDhmxpMKva43vtgPLLPSXqo1pump",
+      "symbol": "HIRE",
+      "signalPrice": 0.000562,
+      "limitPrice": 0.00044960000000000003,
+      "createdAt": 1791828351346,
+      "expiresAt": 1791831951346,
+      "status": "PENDING",
+      "score": 72,
+      "signalLiquidity": 73231.95
     }
   ],
   "rulesVersion": "dip-limit-v2",
@@ -634,6 +647,16 @@
       "price": 0.0001212,
       "usd": 9.94,
       "reason": "-50% exit (-50.0%) \u2014 auto exit"
+    },
+    {
+      "t": 1791828351347,
+      "type": "LIMIT_PLACED",
+      "mint": "98AG3zJUawbvDnpgbDhmxpMKva43vtgPLLPSXqo1pump",
+      "symbol": "HIRE",
+      "price": 0.00044960000000000003,
+      "signalPrice": 0.000562,
+      "usd": 20,
+      "reason": "v2: -20% limit, expires in 60 minutes; no cash/slot consumed"
     }
   ],
   "sourceHealth": [
@@ -642,12 +665,12 @@
       "label": "Dexscreener (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791826043778,
+      "lastSuccess": 1791828352286,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
       "rateLimitCount": 0,
-      "requestCount": 21,
+      "requestCount": 20,
       "note": "REST market feed \u2014 not a complete historical on-chain feed. Rate limits apply.",
       "backoffUntil": 0
     },
@@ -656,7 +679,7 @@
       "label": "RugCheck (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791826043182,
+      "lastSuccess": 1791828351670,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
@@ -670,7 +693,7 @@
       "label": "Solana JSON-RPC (PublicNode)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791826043659,
+      "lastSuccess": 1791828352218,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
