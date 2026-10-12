@@ -901,7 +901,7 @@ class PersistenceEngine{
         const rq=indexedDB.open('jk_solana_radar_db',SCHEMA_VERSION);
         rq.onupgradeneeded=e=>{ const db=e.target.result;
           for(const name of ['settings','candidates','wallets','clusters','signals','positions','trades','scores','diag'])
-            if(!db.objectStoreNames.contains(name))db.objectStoreNames.createObjectStore(name); };
+            if(!db.objectStoreNames.contains(name))db.createObjectStore(name); };
         rq.onsuccess=e=>res(e.target.result); rq.onerror=e=>rej(e.target.error); });
       this.mode='idb'; S.diag.idbAvailable=true; S.diag.storage='IndexedDB (browser-local — can be lost on data clear; not a server backup)';
     }catch(e){
