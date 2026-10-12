@@ -1,0 +1,106 @@
+{
+  "schema": 1,
+  "generatedAt": "2026-10-12T06:54:25.528905+00:00",
+  "lastCheckedAt": "2026-10-12T06:53:25.858Z",
+  "paperOnly": true,
+  "bank": 200,
+  "cash": 179.9,
+  "equity": 204.28,
+  "realizedPnl": 0,
+  "slotsUsed": 1,
+  "maxSlots": 6,
+  "positions": [
+    {
+      "id": "ap_mv4w49a0k5sr7f",
+      "mint": "GmDjFweCHd1FaDUV6TiUreVZa24KMeQMCBA18d5opump",
+      "symbol": "DOGCOIN",
+      "signalId": "sig_mv4w499zobr5lc",
+      "entryAt": 1791787673592,
+      "entryRate": 0.0001027,
+      "entrySizeUsd": 20,
+      "feeUsd": 0.1,
+      "qty": 194741.9668938656,
+      "entryLiquidity": 28561.01,
+      "status": "OPEN",
+      "lastPrice": 0.0001252,
+      "lastPriceAt": 1791788000931,
+      "priceState": "LIVE",
+      "exitAt": null,
+      "exitPrice": null,
+      "exitReason": null,
+      "exitValueUsd": null,
+      "realizedPnl": null,
+      "rules": "auto-exit at 1.5x / -50% / rug (liquidity gone). no time limit. PAPER ONLY.",
+      "currentX": 1.2190847127555988,
+      "exitInfo": null
+    }
+  ],
+  "historyTail": [
+    {
+      "t": 1791787673592,
+      "type": "AUTO_ENTRY",
+      "symbol": "DOGCOIN",
+      "mint": "GmDjFweCHd1FaDUV6TiUreVZa24KMeQMCBA18d5opump",
+      "price": 0.0001027,
+      "usd": 20,
+      "fee": 0.1,
+      "reason": "auto entry at signal-time price"
+    }
+  ],
+  "sourceHealth": [
+    {
+      "id": "dexscreener",
+      "label": "Dexscreener (public, keyless)",
+      "kind": "rest",
+      "status": "LIVE",
+      "lastSuccess": 1791788005851,
+      "lastError": null,
+      "errorCount": 0,
+      "timeoutCount": 0,
+      "rateLimitCount": 0,
+      "requestCount": 21,
+      "note": "REST market feed \u2014 not a complete historical on-chain feed. Rate limits apply.",
+      "backoffUntil": 0
+    },
+    {
+      "id": "rugcheck",
+      "label": "RugCheck (public, keyless)",
+      "kind": "rest",
+      "status": "LIVE",
+      "lastSuccess": 1791788005334,
+      "lastError": null,
+      "errorCount": 0,
+      "timeoutCount": 0,
+      "rateLimitCount": 0,
+      "requestCount": 6,
+      "note": "Token risk report: authorities, holders, liquidity. topHolders may be null on mega-caps.",
+      "backoffUntil": 0
+    },
+    {
+      "id": "solanarpc",
+      "label": "Solana JSON-RPC (PublicNode)",
+      "kind": "rest",
+      "status": "LIVE",
+      "lastSuccess": 1791788005818,
+      "lastError": null,
+      "errorCount": 0,
+      "timeoutCount": 0,
+      "rateLimitCount": 0,
+      "requestCount": 30,
+      "note": "Keyless public RPC. Browser polling is not a backend indexer or persistent WebSocket.",
+      "backoffUntil": 0
+    }
+  ],
+  "rules": {
+    "entryUsd": 20,
+    "feePct": 0.5,
+    "slippagePct": 0,
+    "takeProfitMultiple": 1.5,
+    "stopMultiple": 0.5,
+    "rugLiquidityUsd": 500,
+    "rugDropPct": 90,
+    "holdLimit": null,
+    "checkIntervalMinutes": 5
+  },
+  "valuationNote": "Last observed market prices, not guaranteed executable fills. Unavailable prices retain explicitly stale last marks. Five-minute polling does not prove the exact crossing tick."
+}
