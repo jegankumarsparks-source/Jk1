@@ -1,13 +1,13 @@
 {
   "schema": 1,
-  "generatedAt": "2026-10-12T11:45:25.088911+00:00",
-  "lastCheckedAt": "2026-10-12T11:45:21.671Z",
+  "generatedAt": "2026-10-12T12:18:38.081042+00:00",
+  "lastCheckedAt": "2026-10-12T12:18:35.199Z",
   "paperOnly": true,
   "bank": 200,
-  "cash": 179.29,
-  "equity": 179.29,
+  "cash": 159.19,
+  "equity": 179.19,
   "realizedPnl": -20.71,
-  "slotsUsed": 0,
+  "slotsUsed": 1,
   "maxSlots": 6,
   "positions": [
     {
@@ -255,6 +255,33 @@
         "netUsd": 24.3,
         "pnl": 4.2
       }
+    },
+    {
+      "id": "ap_mv57x82sbm1062",
+      "mint": "HT1hPomeMjNM81XebDHLgiBr3upQCHSgWLmeoyU7pump",
+      "symbol": "OVERDRIVE",
+      "signalId": "sig_mv56qoka87soeq",
+      "entryAt": 1791807500836,
+      "entryRate": 0.0002426,
+      "entrySizeUsd": 20,
+      "feeUsd": 0.1,
+      "qty": 82440.23083264634,
+      "entryLiquidity": 46181.15,
+      "status": "OPEN",
+      "lastPrice": 0.0002426,
+      "lastPriceAt": 1791807500836,
+      "priceState": "LIVE",
+      "exitAt": null,
+      "exitPrice": null,
+      "exitReason": null,
+      "exitValueUsd": null,
+      "realizedPnl": null,
+      "rules": "auto-exit at 1.5x / -50% / rug (liquidity gone). no time limit. PAPER ONLY.",
+      "limitOrderId": "limit_sig_mv56qoka87soeq",
+      "signalReferencePrice": 0.0003209,
+      "limitPrice": 0.00025672,
+      "currentX": 1.0,
+      "exitInfo": null
     }
   ],
   "pendingOrders": [
@@ -267,9 +294,12 @@
       "limitPrice": 0.00025672,
       "createdAt": 1791805515994,
       "expiresAt": 1791809115994,
-      "status": "PENDING",
+      "status": "FILLED",
       "score": 76.5,
-      "signalLiquidity": 52877.64
+      "signalLiquidity": 52877.64,
+      "filledAt": 1791807500836,
+      "fillPrice": 0.0002426,
+      "positionId": "ap_mv57x82sbm1062"
     }
   ],
   "rulesVersion": "dip-limit-v2",
@@ -435,6 +465,16 @@
       "signalPrice": 0.0003209,
       "usd": 20,
       "reason": "v2: -20% limit, expires in 60 minutes; no cash/slot consumed"
+    },
+    {
+      "t": 1791807500836,
+      "type": "AUTO_ENTRY",
+      "symbol": "OVERDRIVE",
+      "mint": "HT1hPomeMjNM81XebDHLgiBr3upQCHSgWLmeoyU7pump",
+      "price": 0.0002426,
+      "usd": 20,
+      "fee": 0.1,
+      "reason": "limit fill at later real check price <= -20% signal limit"
     }
   ],
   "sourceHealth": [
@@ -443,7 +483,7 @@
       "label": "Dexscreener (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791805521625,
+      "lastSuccess": 1791807515159,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
@@ -457,7 +497,7 @@
       "label": "RugCheck (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791805520777,
+      "lastSuccess": 1791807514545,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
@@ -471,7 +511,7 @@
       "label": "Solana JSON-RPC (PublicNode)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791805521605,
+      "lastSuccess": 1791807515073,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
