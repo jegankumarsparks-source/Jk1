@@ -769,7 +769,7 @@ const QUAL=new SignalQualificationEngine();
 class PaperPortfolioEngine{
   cash(){ return this._cash==null?S.settings.startCapital:this._cash; }
   setCash(v){ this._cash=Math.round(v*100)/100; }
-  reset(){ this._cash=null; }
+  reset(){ this._cash=null; this._peakEq=null; }
   openCount(){ return [...S.positions.values()].filter(p=>p.status==='OPEN').length; }
   openPositions(){ return [...S.positions.values()].filter(p=>p.status==='OPEN'); }
   cost(){ return (S.settings.entrySizeUsd)*(1+(S.settings.feePct+S.settings.slippagePct)/100); }
