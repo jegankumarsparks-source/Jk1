@@ -67,7 +67,7 @@ th{color:var(--dim);text-transform:uppercase;font-size:9.5px;letter-spacing:.4px
 .empty b{color:var(--txt)}
 .flash{animation:flashg 1s ease 3}
 @keyframes flashg{0%,100%{box-shadow:none}50%{box-shadow:0 0 18px var(--grn)}}
-#sigBanner{display:none;position:sticky;top:58px;z-index:40;background:linear-gradient(90deg,#063d22,#0a5c34);border:1px solid var(--grn);color:var(--grn);font-weight:800;text-align:center;padding:10px;border-radius:12px;margin-bottom:10px;animation:blinkbg 1s step-start infinite}
+#sigBanner{display:none;position:sticky;top:58px;z-index:40;cursor:pointer;background:linear-gradient(90deg,#063d22,#0a5c34);border:1px solid var(--grn);color:var(--grn);font-weight:800;text-align:center;padding:10px;border-radius:12px;margin-bottom:10px;animation:blinkbg 1s step-start infinite}
 #sigBanner.show{display:block}
 @keyframes blinkbg{50%{background:#02180d}}
 #targetBanner{display:none;position:sticky;top:58px;z-index:40;background:linear-gradient(90deg,#3a2c06,#5c440a);border:1px solid var(--amb);color:var(--amb);font-weight:800;text-align:center;padding:10px;border-radius:12px;margin-bottom:10px}
@@ -1059,6 +1059,8 @@ class DashboardRenderer{
   links(c){ const mint=c.mint; let h='';
     h+='<a class="btn sm" target="_blank" href="https://solscan.io/token/'+mint+'">solscan</a>';
     if(c.market&&c.market.pairAddress)h+='<a class="btn sm" target="_blank" href="https://dexscreener.com/solana/'+c.market.pairAddress+'">dexscreener</a>';
+    h+='<a class="btn sm" target="_blank" href="https://gmgn.ai/sol/token/'+mint+'">gmgn</a>';
+    h+='<a class="btn sm" target="_blank" href="https://www.binance.com/en/markets" title="Binance main markets page - brand-new DEX meme coins are usually NOT listed on Binance; this is an honest main-site link, not a per-token page">binance*</a>';
     return h; }
   /* ---------------- 1. OVERVIEW ---------------- */
   overview(){
@@ -1119,7 +1121,7 @@ class DashboardRenderer{
       +'<select onchange="S.ui.radarSort=this.value;RENDER.radar()">'
       +[['score','Sort: score'],['age','Sort: newest'],['liq','Sort: liquidity'],['vol','Sort: volume'],['risk','Sort: risk']]
         .map(([v,l])=>'<option value="'+v+'"'+(so===v?' selected':'')+'>'+l+'</option>').join('')+'</select></div>';
-    h+='<div class="small" style="margin-bottom:8px">'+list.length+' candidates · page '+(page+1)+'/'+pages+' · first-seen is our observation time, NOT verified launch time</div>';
+    h+='<div class="small" style="margin-bottom:8px">'+list.length+' candidates · page '+(page+1)+'/'+pages+' · first-seen is our observation time, NOT verified launch time · *binance opens Binance main markets (new DEX coins are usually not listed there - honest main-site link, not a per-token page)</div>';
     if(!slice.length)h+='<div class="empty"><b>No candidates yet.</b><br>Start the scanner on Overview — discovery pulls real tokens from Dexscreener public feeds.</div>';
     for(const c of slice)h+=this.tokenCard(c);
     if(pages>1)h+='<div class="pager"><button class="btn sm" '+(page===0?'disabled':'')+' onclick="S.ui.radarPage--;RENDER.radar()">◀ prev</button><button class="btn sm" '+(page>=pages-1?'disabled':'')+' onclick="S.ui.radarPage++;RENDER.radar()">next ▶</button></div>';
@@ -1216,7 +1218,7 @@ DashboardRenderer.prototype.signals=function(){
   if(!list.length)h+='<div class="empty"><b>NO QUALIFIED SIGNAL</b><br>No candidate has passed every mandatory gate yet. This is an honest empty state, not a missing feature. The scanner keeps evaluating new discoveries.</div>';
   for(const g of list){
     const c=S.candidates.get(g.mint)||{}; const ev=g.evidence||{};
-    h+='<div class="card tok s-sig"><div class="row"><b style="font-size:15px">'+U.esc(g.symbol||'(no symbol)')+'</b>'+this.badge('PAPER_SIGNAL','b-pur')+(g.consumed?this.badge('POSITION OPENED','b-live'):'')+'<span class="sp"></span><span class="scorebig">'+g.score+'</span></div>'
+    h+='<div class="card tok s-sig" id="sig-'+g.id+'"><div class="row"><b style="font-size:15px">'+U.esc(g.symbol||'(no symbol)')+'</b>'+this.badge('PAPER_SIGNAL','b-pur')+(g.consumed?this.badge('POSITION OPENED','b-live'):'')+'<span class="sp"></span><span class="scorebig">'+g.score+'</span></div>'
       +'<div class="mint">'+g.mint+'</div>'
       +'<div class="kv"><span class="k">created</span><span class="v">'+new Date(g.createdAt).toLocaleString()+' ('+U.age(g.createdAt)+' ago)</span></div>'
       +'<div class="kv"><span class="k">liquidity / vol24</span><span class="v">'+U.fmt$(ev.liquidityUsd)+' / '+U.fmt$(ev.volume24)+'</span></div>'
@@ -1348,9 +1350,7 @@ const BOOT={
     await DB.loadAll();
     RENDER.all();
     // signal + target banners
-    S.on('signal',g=>{ const b=document.getElementById('sigBanner');
-      b.textContent='⚡ NEW PAPER SIGNAL: '+(g.symbol||U.short(g.mint))+' — score '+g.score+'/100 (PAPER ONLY)';
-      b.classList.add('show'); setTimeout(()=>b.classList.remove('show'),15000); });
+    S.on('signal',g=>BOOT.showSigBanner(g));
     S.on('target',()=>{ const b=document.getElementById('targetBanner');
       b.textContent='🏁 TARGET_REACHED — verified paper equity ≥ $'+S.settings.targetEquity+'. Entries frozen. (Simulation result, not profit.)';
       b.classList.add('show'); });
@@ -1364,6 +1364,14 @@ const BOOT={
       if(!document.hidden&&S.scanTimer){ console.log('resumed — revalidating'); BOOT.scanNow(); }
     });
     console.log(BUILD_MARKER,'init ok, storage:',DB.mode);
+  },
+  showSigBanner(g){ const b=document.getElementById('sigBanner');
+    b.innerHTML='⚡ NEW PAPER SIGNAL: '+U.esc(g.symbol||U.short(g.mint))+' — score '+g.score+'/100 · PAPER ONLY · tap to view'
+      +'<span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);cursor:pointer;font-weight:900;padding:2px 8px" onclick="event.stopPropagation();document.getElementById(\'sigBanner\').classList.remove(\'show\')">✕</span>';
+    b.classList.add('show');
+    b.onclick=()=>{ b.classList.remove('show'); S.ui.page='signals'; RENDER.all();
+      setTimeout(()=>{ const el=document.getElementById('sig-'+g.id);
+        if(el){ el.classList.add('flash'); el.scrollIntoView({behavior:'smooth',block:'center'}); } },200); };
   },
   start(){
     if(S.scanTimer)return;
