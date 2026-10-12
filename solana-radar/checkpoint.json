@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "cash": 120.37,
+  "cash": 120.7,
   "positions": [
     {
       "id": "ap_mv4w49a0k5sr7f",
@@ -320,15 +320,15 @@
       "feeUsd": 0.1,
       "qty": 41330.8534821244,
       "entryLiquidity": 62924.68,
-      "status": "OPEN",
-      "lastPrice": 0.0004839,
-      "lastPriceAt": 1791845217139,
+      "status": "CLOSED",
+      "lastPrice": 8.03e-06,
+      "lastPriceAt": 1791846207699,
       "priceState": "LIVE",
-      "exitAt": null,
-      "exitPrice": null,
-      "exitReason": null,
-      "exitValueUsd": null,
-      "realizedPnl": null,
+      "exitAt": 1791846207699,
+      "exitPrice": 8.03e-06,
+      "exitReason": "-50% exit (-98.3%) \u2014 auto exit",
+      "exitValueUsd": 0.33,
+      "realizedPnl": -19.77,
       "rules": "auto-exit at 1.5x / -50% / rug (liquidity gone). no time limit. PAPER ONLY.",
       "limitOrderId": "limit_sig_mv5tleqq0l6wvj",
       "signalReferencePrice": 0.0008806,
@@ -752,6 +752,15 @@
       "signalPrice": 0.0002661,
       "usd": 20,
       "reason": "v2: -20% limit, expires in 60 minutes; no cash/slot consumed"
+    },
+    {
+      "t": 1791846207699,
+      "type": "AUTO_EXIT",
+      "symbol": "LILANSEM",
+      "mint": "HQgMPJbGctpP9P27DdJW5f8rncz7gvg4vEL3hT7hpump",
+      "price": 8.03e-06,
+      "usd": 0.33,
+      "reason": "-50% exit (-98.3%) \u2014 auto exit"
     }
   ],
   "pendingOrders": [
@@ -949,10 +958,10 @@
     "minVolume24Usd": 50000
   },
   "limitExpiryMinutes": 60,
-  "eventsReported": 42,
-  "analysisCursor": 20,
-  "v2ScansCompleted": 155,
-  "asOf": "2026-10-12T22:47:10.121Z",
-  "equity": 140.37,
-  "realizedPnl": -59.53
+  "eventsReported": 44,
+  "analysisCursor": 38,
+  "v2ScansCompleted": 158,
+  "asOf": "2026-10-12T23:03:40.412Z",
+  "equity": 120.7,
+  "realizedPnl": -79.3
 }
