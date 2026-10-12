@@ -1,11 +1,11 @@
 {
   "schema": 1,
-  "generatedAt": "2026-10-12T21:29:58.303389+00:00",
-  "lastCheckedAt": "2026-10-12T21:29:55.382Z",
+  "generatedAt": "2026-10-12T21:35:31.869447+00:00",
+  "lastCheckedAt": "2026-10-12T21:35:26.769Z",
   "paperOnly": true,
   "bank": 200,
   "cash": 97.78,
-  "equity": 130.74,
+  "equity": 130.14,
   "realizedPnl": -62.02,
   "slotsUsed": 2,
   "maxSlots": 6,
@@ -334,8 +334,8 @@
       "qty": 44752.741105392706,
       "entryLiquidity": 64865.13,
       "status": "OPEN",
-      "lastPrice": 0.0002897,
-      "lastPriceAt": 1791840583255,
+      "lastPrice": 0.000277,
+      "lastPriceAt": 1791840914469,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -346,7 +346,7 @@
       "limitOrderId": "limit_sig_mv5kc4fml1bpwz",
       "signalReferencePrice": 0.000562,
       "limitPrice": 0.00044960000000000003,
-      "currentX": 0.6482434549116133,
+      "currentX": 0.619825464309689,
       "exitInfo": null
     },
     {
@@ -394,8 +394,8 @@
       "qty": 27292.576419213972,
       "entryLiquidity": 75373.74,
       "status": "OPEN",
-      "lastPrice": 0.0007328,
-      "lastPriceAt": 1791840585201,
+      "lastPrice": 0.0007316,
+      "lastPriceAt": 1791840914492,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -406,7 +406,7 @@
       "limitOrderId": "limit_sig_mv5rfb5wy9o03x",
       "signalReferencePrice": 0.00103,
       "limitPrice": 0.0008240000000000001,
-      "currentX": 1.0,
+      "currentX": 0.9983624454148471,
       "exitInfo": null
     }
   ],
@@ -550,6 +550,19 @@
       "filledAt": 1791840585201,
       "fillPrice": 0.0007328,
       "positionId": "ap_mv5rmc4x053lib"
+    },
+    {
+      "id": "limit_sig_mv5rtjl8x8em31",
+      "signalId": "sig_mv5rtjl8x8em31",
+      "mint": "CQCDTp8rsFV3PhaPeYjcCW5LdGTxi6jFx7eC3UXnpump",
+      "symbol": "CRAWLER",
+      "signalPrice": 0.002845,
+      "limitPrice": 0.002276,
+      "createdAt": 1791840921452,
+      "expiresAt": 1791844521452,
+      "status": "PENDING",
+      "score": 85,
+      "signalLiquidity": 151331.79
     }
   ],
   "rulesVersion": "dip-limit-v2",
@@ -904,6 +917,16 @@
       "usd": 20,
       "fee": 0.1,
       "reason": "limit fill at later real check price <= -20% signal limit"
+    },
+    {
+      "t": 1791840921452,
+      "type": "LIMIT_PLACED",
+      "mint": "CQCDTp8rsFV3PhaPeYjcCW5LdGTxi6jFx7eC3UXnpump",
+      "symbol": "CRAWLER",
+      "price": 0.002276,
+      "signalPrice": 0.002845,
+      "usd": 20,
+      "reason": "v2: -20% limit, expires in 60 minutes; no cash/slot consumed"
     }
   ],
   "sourceHealth": [
@@ -912,7 +935,7 @@
       "label": "Dexscreener (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791840595247,
+      "lastSuccess": 1791840926604,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
@@ -926,12 +949,12 @@
       "label": "RugCheck (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791840594590,
+      "lastSuccess": 1791840925661,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
       "rateLimitCount": 0,
-      "requestCount": 4,
+      "requestCount": 6,
       "note": "Token risk report: authorities, holders, liquidity. topHolders may be null on mega-caps.",
       "backoffUntil": 0
     },
@@ -940,7 +963,7 @@
       "label": "Solana JSON-RPC (PublicNode)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791840595165,
+      "lastSuccess": 1791840926527,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
