@@ -246,8 +246,8 @@
       "qty": 44752.741105392706,
       "entryLiquidity": 64865.13,
       "status": "OPEN",
-      "lastPrice": 0.0004469,
-      "lastPriceAt": 1791829003306,
+      "lastPrice": 0.0003629,
+      "lastPriceAt": 1791834627003,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -526,6 +526,16 @@
       "usd": 20,
       "fee": 0.1,
       "reason": "limit fill at later real check price <= -20% signal limit"
+    },
+    {
+      "t": 1791834629747,
+      "type": "LIMIT_PLACED",
+      "mint": "4hsJNmPComjTsbrDtoLjDMmsyZ1g2T1xy1xHnEE2pump",
+      "symbol": "BATONA",
+      "price": 0.0008448000000000002,
+      "signalPrice": 0.001056,
+      "usd": 20,
+      "reason": "v2: -20% limit, expires in 60 minutes; no cash/slot consumed"
     }
   ],
   "pendingOrders": [
@@ -606,6 +616,19 @@
       "filledAt": 1791829003306,
       "fillPrice": 0.0004469,
       "positionId": "ap_mv5kq3hmgwoz4c"
+    },
+    {
+      "id": "limit_sig_mv5o2ovn5fnht6",
+      "signalId": "sig_mv5o2ovn5fnht6",
+      "mint": "4hsJNmPComjTsbrDtoLjDMmsyZ1g2T1xy1xHnEE2pump",
+      "symbol": "BATONA",
+      "signalPrice": 0.001056,
+      "limitPrice": 0.0008448000000000002,
+      "createdAt": 1791834629747,
+      "expiresAt": 1791838229747,
+      "status": "PENDING",
+      "score": 81,
+      "signalLiquidity": 90371.79
     }
   ],
   "rulesVersion": "dip-limit-v2",
@@ -617,10 +640,10 @@
     "minVolume24Usd": 50000
   },
   "limitExpiryMinutes": 60,
-  "eventsReported": 27,
-  "analysisCursor": 183,
-  "v2ScansCompleted": 106,
-  "asOf": "2026-10-12T18:16:56.577Z",
-  "equity": 157.98,
+  "eventsReported": 28,
+  "analysisCursor": 285,
+  "v2ScansCompleted": 123,
+  "asOf": "2026-10-12T19:50:35.271Z",
+  "equity": 154.22,
   "realizedPnl": -41.92
 }
