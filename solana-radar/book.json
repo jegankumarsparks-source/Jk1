@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "generatedAt": "2026-10-12T23:03:43.917969+00:00",
-  "lastCheckedAt": "2026-10-12T23:03:40.412Z",
+  "generatedAt": "2026-10-12T23:47:44.080895+00:00",
+  "lastCheckedAt": "2026-10-12T23:47:41.440Z",
   "paperOnly": true,
   "bank": 200,
   "cash": 120.7,
@@ -636,9 +636,11 @@
       "limitPrice": 0.00021288000000000004,
       "createdAt": 1791845218216,
       "expiresAt": 1791848818216,
-      "status": "PENDING",
+      "status": "CANCELLED",
       "score": 72.5,
-      "signalLiquidity": 46782.23
+      "signalLiquidity": 46782.23,
+      "cancelledAt": 1791848854827,
+      "cancelReason": "60-minute signal expiry"
     }
   ],
   "rulesVersion": "dip-limit-v2",
@@ -1068,6 +1070,14 @@
       "price": 8.03e-06,
       "usd": 0.33,
       "reason": "-50% exit (-98.3%) \u2014 auto exit"
+    },
+    {
+      "t": 1791848854827,
+      "type": "LIMIT_CANCELLED",
+      "mint": "EH4cP8K1qDYZZH5ezVJFCnTQmsXXPjhF6Tbx8w6Kpump",
+      "symbol": "Dogcoin",
+      "price": 0.00021288000000000004,
+      "reason": "60-minute signal expiry"
     }
   ],
   "sourceHealth": [
@@ -1076,12 +1086,12 @@
       "label": "Dexscreener (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791846220253,
+      "lastSuccess": 1791848861281,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
       "rateLimitCount": 0,
-      "requestCount": 21,
+      "requestCount": 20,
       "note": "REST market feed \u2014 not a complete historical on-chain feed. Rate limits apply.",
       "backoffUntil": 0
     },
@@ -1090,7 +1100,7 @@
       "label": "RugCheck (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791846219651,
+      "lastSuccess": 1791848860692,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
@@ -1104,7 +1114,7 @@
       "label": "Solana JSON-RPC (PublicNode)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791846220121,
+      "lastSuccess": 1791848861182,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
