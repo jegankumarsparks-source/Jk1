@@ -1,13 +1,13 @@
 {
   "schema": 1,
-  "generatedAt": "2026-10-12T22:36:12.530917+00:00",
-  "lastCheckedAt": "2026-10-12T22:36:09.432Z",
+  "generatedAt": "2026-10-12T22:47:12.664665+00:00",
+  "lastCheckedAt": "2026-10-12T22:47:10.121Z",
   "paperOnly": true,
   "bank": 200,
-  "cash": 140.47,
-  "equity": 140.47,
+  "cash": 120.37,
+  "equity": 140.37,
   "realizedPnl": -59.53,
-  "slotsUsed": 0,
+  "slotsUsed": 1,
   "maxSlots": 6,
   "positions": [
     {
@@ -420,6 +420,33 @@
         "netUsd": 33.46,
         "pnl": 13.36
       }
+    },
+    {
+      "id": "ap_mv5udm5v3kqagh",
+      "mint": "HQgMPJbGctpP9P27DdJW5f8rncz7gvg4vEL3hT7hpump",
+      "symbol": "LILANSEM",
+      "signalId": "sig_mv5tleqq0l6wvj",
+      "entryAt": 1791845217139,
+      "entryRate": 0.0004839,
+      "entrySizeUsd": 20,
+      "feeUsd": 0.1,
+      "qty": 41330.8534821244,
+      "entryLiquidity": 62924.68,
+      "status": "OPEN",
+      "lastPrice": 0.0004839,
+      "lastPriceAt": 1791845217139,
+      "priceState": "LIVE",
+      "exitAt": null,
+      "exitPrice": null,
+      "exitReason": null,
+      "exitValueUsd": null,
+      "realizedPnl": null,
+      "rules": "auto-exit at 1.5x / -50% / rug (liquidity gone). no time limit. PAPER ONLY.",
+      "limitOrderId": "limit_sig_mv5tleqq0l6wvj",
+      "signalReferencePrice": 0.0008806,
+      "limitPrice": 0.0007044800000000001,
+      "currentX": 1.0,
+      "exitInfo": null
     }
   ],
   "pendingOrders": [
@@ -587,9 +614,25 @@
       "limitPrice": 0.0007044800000000001,
       "createdAt": 1791843901154,
       "expiresAt": 1791847501154,
-      "status": "PENDING",
+      "status": "FILLED",
       "score": 75,
-      "signalLiquidity": 87549.59
+      "signalLiquidity": 87549.59,
+      "filledAt": 1791845217139,
+      "fillPrice": 0.0004839,
+      "positionId": "ap_mv5udm5v3kqagh"
+    },
+    {
+      "id": "limit_sig_mv5udmzslucpjo",
+      "signalId": "sig_mv5udmzslucpjo",
+      "mint": "EH4cP8K1qDYZZH5ezVJFCnTQmsXXPjhF6Tbx8w6Kpump",
+      "symbol": "Dogcoin",
+      "signalPrice": 0.0002661,
+      "limitPrice": 0.00021288000000000004,
+      "createdAt": 1791845218216,
+      "expiresAt": 1791848818216,
+      "status": "PENDING",
+      "score": 72.5,
+      "signalLiquidity": 46782.23
     }
   ],
   "rulesVersion": "dip-limit-v2",
@@ -990,6 +1033,26 @@
       "symbol": "CRAWLER",
       "price": 0.002276,
       "reason": "60-minute signal expiry"
+    },
+    {
+      "t": 1791845217139,
+      "type": "AUTO_ENTRY",
+      "symbol": "LILANSEM",
+      "mint": "HQgMPJbGctpP9P27DdJW5f8rncz7gvg4vEL3hT7hpump",
+      "price": 0.0004839,
+      "usd": 20,
+      "fee": 0.1,
+      "reason": "limit fill at later real check price <= -20% signal limit"
+    },
+    {
+      "t": 1791845218216,
+      "type": "LIMIT_PLACED",
+      "mint": "EH4cP8K1qDYZZH5ezVJFCnTQmsXXPjhF6Tbx8w6Kpump",
+      "symbol": "Dogcoin",
+      "price": 0.00021288000000000004,
+      "signalPrice": 0.0002661,
+      "usd": 20,
+      "reason": "v2: -20% limit, expires in 60 minutes; no cash/slot consumed"
     }
   ],
   "sourceHealth": [
@@ -998,7 +1061,7 @@
       "label": "Dexscreener (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791844569238,
+      "lastSuccess": 1791845229890,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
@@ -1012,12 +1075,12 @@
       "label": "RugCheck (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791844568647,
+      "lastSuccess": 1791845229288,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
       "rateLimitCount": 0,
-      "requestCount": 4,
+      "requestCount": 6,
       "note": "Token risk report: authorities, holders, liquidity. topHolders may be null on mega-caps.",
       "backoffUntil": 0
     },
@@ -1026,7 +1089,7 @@
       "label": "Solana JSON-RPC (PublicNode)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791844569161,
+      "lastSuccess": 1791845229746,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
