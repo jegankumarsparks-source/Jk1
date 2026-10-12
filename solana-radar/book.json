@@ -1,13 +1,13 @@
 {
   "schema": 1,
-  "generatedAt": "2026-10-12T21:51:55.877120+00:00",
-  "lastCheckedAt": "2026-10-12T21:51:53.097Z",
+  "generatedAt": "2026-10-12T22:03:07.185547+00:00",
+  "lastCheckedAt": "2026-10-12T22:03:04.277Z",
   "paperOnly": true,
   "bank": 200,
-  "cash": 107.01,
-  "equity": 131.87,
-  "realizedPnl": -72.89,
-  "slotsUsed": 1,
+  "cash": 140.47,
+  "equity": 140.47,
+  "realizedPnl": -59.53,
+  "slotsUsed": 0,
   "maxSlots": 6,
   "positions": [
     {
@@ -399,21 +399,27 @@
       "feeUsd": 0.1,
       "qty": 27292.576419213972,
       "entryLiquidity": 75373.74,
-      "status": "OPEN",
-      "lastPrice": 0.000911,
-      "lastPriceAt": 1791841905771,
+      "status": "CLOSED",
+      "lastPrice": 0.001232,
+      "lastPriceAt": 1791842567751,
       "priceState": "LIVE",
-      "exitAt": null,
-      "exitPrice": null,
-      "exitReason": null,
-      "exitValueUsd": null,
-      "realizedPnl": null,
+      "exitAt": 1791842567751,
+      "exitPrice": 0.001232,
+      "exitReason": "1.5x target hit (1.68x) \u2014 auto sell",
+      "exitValueUsd": 33.46,
+      "realizedPnl": 13.36,
       "rules": "auto-exit at 1.5x / -50% / rug (liquidity gone). no time limit. PAPER ONLY.",
       "limitOrderId": "limit_sig_mv5rfb5wy9o03x",
       "signalReferencePrice": 0.00103,
       "limitPrice": 0.0008240000000000001,
-      "currentX": 1.2431768558951966,
-      "exitInfo": null
+      "currentX": 1.6812227074235808,
+      "exitInfo": {
+        "at": 1791842567751,
+        "price": 0.001232,
+        "reason": "1.5x target hit (1.68x) \u2014 auto sell",
+        "netUsd": 33.46,
+        "pnl": 13.36
+      }
     }
   ],
   "pendingOrders": [
@@ -942,6 +948,15 @@
       "price": 0.0002073,
       "usd": 9.23,
       "reason": "-50% exit (-53.6%) \u2014 auto exit"
+    },
+    {
+      "t": 1791842567751,
+      "type": "AUTO_EXIT",
+      "symbol": "DOGGO",
+      "mint": "AjpPZo85HmHrGTcC4hrVRwMR4WteBywRqZWZEkdFpump",
+      "price": 0.001232,
+      "usd": 33.46,
+      "reason": "1.5x target hit (1.68x) \u2014 auto sell"
     }
   ],
   "sourceHealth": [
@@ -950,12 +965,12 @@
       "label": "Dexscreener (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791841912949,
+      "lastSuccess": 1791842584119,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
       "rateLimitCount": 0,
-      "requestCount": 22,
+      "requestCount": 20,
       "note": "REST market feed \u2014 not a complete historical on-chain feed. Rate limits apply.",
       "backoffUntil": 0
     },
@@ -964,10 +979,10 @@
       "label": "RugCheck (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791841912365,
+      "lastSuccess": 1791842583641,
       "lastError": null,
-      "errorCount": 0,
-      "timeoutCount": 0,
+      "errorCount": 1,
+      "timeoutCount": 1,
       "rateLimitCount": 0,
       "requestCount": 5,
       "note": "Token risk report: authorities, holders, liquidity. topHolders may be null on mega-caps.",
@@ -978,12 +993,12 @@
       "label": "Solana JSON-RPC (PublicNode)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791841912877,
+      "lastSuccess": 1791842584102,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
       "rateLimitCount": 0,
-      "requestCount": 30,
+      "requestCount": 25,
       "note": "Keyless public RPC. Browser polling is not a backend indexer or persistent WebSocket.",
       "backoffUntil": 0
     }
