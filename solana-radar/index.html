@@ -81,12 +81,16 @@ th{color:var(--dim);text-transform:uppercase;font-size:9.5px;letter-spacing:.4px
 .h-scroll{overflow-x:auto}
 a{color:var(--blu);text-decoration:none}
 @media(min-width:760px){body{font-size:15px}.kpis{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}header h1{font-size:19px}}
+.dov{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:60;overflow-y:auto;padding:10px;-webkit-overflow-scrolling:touch}
+.dov-panel{max-width:640px;margin:0 auto;background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:12px}
+.tappable{cursor:pointer}
+.tappable:active{opacity:.85}
 </style>
 </head>
 <body>
 <header>
 <h1>⚡ SOLANA EARLY-WALLET RADAR</h1>
-<span class="hdr-pill b-dim" style="border:none">MAXIMUM EDITION · v1.4.0</span>
+<span class="hdr-pill b-dim" style="border:none">MAXIMUM EDITION · v1.5.0</span>
 <span id="scanPill" class="hdr-pill off">SCANNER IDLE</span>
 <span class="hdr-pill b-dim" style="border:none">PAPER ONLY</span>
 <div class="sub">Research + paper trading only. No real money, no wallet signing, no keys. Public keyless data — every field labelled by source &amp; freshness.</div>
@@ -110,6 +114,7 @@ a{color:var(--blu);text-decoration:none}
 </main>
 <nav id="mainNav"></nav>
 <div class="toast" id="toast"></div>
+<div id="detailOverlay"></div>
 
 <script>
 'use strict';
@@ -119,7 +124,7 @@ a{color:var(--blu);text-decoration:none}
    Modules A–Q as separated classes in one file. No frameworks.
    ============================================================ */
 const BUILD_MARKER='JK-SR-MAX-V1';
-const APP_VERSION='1.4.0';
+const APP_VERSION='1.5.0';
 const SCORE_VERSION='score-v1.0';
 const RISK_POLICY_VERSION='risk-v1.0';
 const THRESHOLDS_VERSION='thresh-v1.0';
@@ -1064,6 +1069,7 @@ class DashboardRenderer{
     ({overview:()=>this.overview(),radar:()=>this.radar(),wallets:()=>this.wallets(),clusters:()=>this.clusters(),
       risk:()=>this.risk(),signals:()=>this.signals(),portfolio:()=>this.portfolio(),trades:()=>this.trades(),
       learning:()=>this.learning(),autotrade:()=>this.autotrade(),health:()=>this.health(),settings:()=>this.settings()})[S.ui.page]();
+    if(window.DETAILUI&&S.ui.detail)DETAILUI.render();
     this.scanPill();
   }
   scanPill(){ const p=document.getElementById('scanPill');
@@ -1078,10 +1084,10 @@ class DashboardRenderer{
   freshness(ts){ if(!ts)return this.badge('NO DATA','b-dim'); const a=U.now()-ts;
     if(a<3*60*1000)return this.badge('LIVE '+U.age(ts),'b-live');
     if(a<15*60*1000)return this.badge('CACHED '+U.age(ts),'b-cached'); return this.badge('STALE '+U.age(ts),'b-stale'); }
-  copyBtn(txt){ return '<button class="btn sm" onclick="navigator.clipboard.writeText(\''+txt+'\');U.toast(\'copied\')">copy</button>'; }
+  copyBtn(txt){ return '<button class="btn sm" onclick="event.stopPropagation();navigator.clipboard.writeText(\''+txt+'\');U.toast(\'copied\')">copy</button>'; }
   links(c){ const mint=c.mint; let h='';
     h+='<a class="btn sm" target="_blank" href="https://solscan.io/token/'+mint+'">solscan</a>';
-    if(c.market&&c.market.pairAddress)h+='<a class="btn sm" target="_blank" href="https://dexscreener.com/solana/'+c.market.pairAddress+'">dexscreener</a>';
+    h+='<a class="btn sm" target="_blank" href="https://dexscreener.com/solana/'+(c.market&&c.market.pairAddress?c.market.pairAddress:mint)+'">dexscreener</a>';
     h+='<a class="btn sm" target="_blank" href="https://gmgn.ai/sol/token/'+mint+'">gmgn</a>';
     h+='<a class="btn sm" target="_blank" href="https://www.binance.com/en/markets" title="Binance main markets page - brand-new DEX meme coins are usually NOT listed on Binance; this is an honest main-site link, not a per-token page">binance*</a>';
     return h; }
@@ -1153,7 +1159,7 @@ class DashboardRenderer{
   tokenCard(c){
     const m=c.market||{};
     const sideCls=c.state==='REJECTED'?'s-fail':(c.state==='PAPER_SIGNAL'||c.state==='PAPER_POSITION_OPEN')?'s-sig':(c.state==='DATA_INCOMPLETE'||c.state==='RISK_REVIEW')?'s-unk':'s-pass';
-    let h='<div class="card tok '+sideCls+'">';
+    let h='<div class="card tok tappable '+sideCls+'" onclick="openDetail(\'candidate\',\''+c.mint+'\')">';
     h+='<div class="row"><b style="font-size:15px">'+U.esc(m.symbol||'(no symbol)')+'</b><span class="small">'+U.esc(m.name||'')+'</span><span class="sp"></span>'
       +this.stateBadge(c.state)+this.riskBadge(c.risk&&c.risk.verdict)+this.freshness(m.observedAt)+'</div>';
     h+='<div class="row" style="margin:4px 0"><span class="mint">'+c.mint+'</span>'+this.copyBtn(c.mint)+'</div>';
@@ -1164,7 +1170,7 @@ class DashboardRenderer{
       +'<div class="kpi"><div class="v" style="font-size:14px">'+U.age(c.firstObserved)+'</div><div class="l">first seen</div></div>'
       +'<div class="kpi"><div class="v" style="font-size:14px">'+(c.score?c.score.total+'/100':'—')+'</div><div class="l">score '+(c.score?c.score.scoreVersion:'')+'</div></div></div>';
     if(c.score){ h+='<div class="bar"><i style="width:'+U.clamp(c.score.total,0,100)+'%"></i></div>';
-      h+='<details><summary>score breakdown (inputs + evidence)</summary>'+c.score.components.map(x=>'<div class="kv"><span class="k">'+x.label+' <span class="small">'+x.dataState+'</span></span><span class="v">'+x.points+'/'+x.max+'</span></div><div class="small" style="padding:0 0 6px 8px">'+U.esc(x.evidence)+'</div>').join('')+'<div class="note">'+U.esc(c.score.disclaimer)+'</div></details>'; }
+      h+='<details onclick="event.stopPropagation()"><summary>score breakdown (inputs + evidence)</summary>'+c.score.components.map(x=>'<div class="kv"><span class="k">'+x.label+' <span class="small">'+x.dataState+'</span></span><span class="v">'+x.points+'/'+x.max+'</span></div><div class="small" style="padding:0 0 6px 8px">'+U.esc(x.evidence)+'</div>').join('')+'<div class="note">'+U.esc(c.score.disclaimer)+'</div></details>'; }
     if(c.rejectionReasons&&c.rejectionReasons.length)h+='<div class="note" style="border-color:var(--amb)">Decision reasons: '+c.rejectionReasons.map(U.esc).join(' · ')+'</div>';
     if(c.lastError)h+='<div class="note" style="border-color:var(--red)">Last source error: '+U.esc(c.lastError)+'</div>';
     if(c.signalId&&S.signals.get(c.signalId)){ const g=S.signals.get(c.signalId);
@@ -1173,7 +1179,7 @@ class DashboardRenderer{
         +'<div class="kv"><span class="k">signal-time rate (frozen)</span><span class="v" style="color:var(--pur)">$'+g.signalPriceUsd+'</span></div>'
         +'<div class="kv"><span class="k">exit zone</span><span class="v">1.5x $'+(g.signalPriceUsd*1.5).toPrecision(4)+' · 2x $'+(g.signalPriceUsd*2).toPrecision(4)+' · 3x $'+(g.signalPriceUsd*3).toPrecision(4)+'</span></div>'
         +'<div class="small" style="color:var(--pur)">PAPER ONLY · signal-time reference — live price may differ</div></div>'; } }
-    h+='<div class="row" style="margin-top:8px">'+this.links(c)
+    h+='<div class="row" style="margin-top:8px" onclick="event.stopPropagation()">'+this.links(c)
       +'<button class="btn sm" onclick="BOOT.analyzeOne(\''+c.mint+'\')">analyze</button>'
       +'<button class="btn sm" onclick="DISCOVERY.refreshCandidate(\''+c.mint+'\').then(()=>RENDER.all()).catch(e=>U.toast(e.message))">refresh</button>'
       +'<span class="sp"></span><span class="small">'+U.esc((c.feeds||[]).join(' + '))+'</span></div>';
@@ -1248,7 +1254,7 @@ DashboardRenderer.prototype.signals=function(){
   if(!list.length)h+='<div class="empty"><b>NO QUALIFIED SIGNAL</b><br>No candidate has passed every mandatory gate yet. This is an honest empty state, not a missing feature. The scanner keeps evaluating new discoveries.</div>';
   for(const g of list){
     const c=S.candidates.get(g.mint)||{}; const ev=g.evidence||{};
-    h+='<div class="card tok s-sig" id="sig-'+g.id+'"><div class="row"><b style="font-size:15px">'+U.esc(g.symbol||'(no symbol)')+'</b>'+this.badge('PAPER_SIGNAL','b-pur')+(g.consumed?this.badge('POSITION OPENED','b-live'):'')+'<span class="sp"></span><span class="scorebig">'+g.score+'</span></div>'
+    h+='<div class="card tok s-sig tappable" id="sig-'+g.id+'" onclick="openDetail(\'signal\',\''+g.id+'\')"><div class="row"><b style="font-size:15px">'+U.esc(g.symbol||'(no symbol)')+'</b>'+this.badge('PAPER_SIGNAL','b-pur')+(g.consumed?this.badge('POSITION OPENED','b-live'):'')+'<span class="sp"></span><span class="scorebig">'+g.score+'</span></div>'
       +'<div class="mint">'+g.mint+'</div>'
       +'<div class="kv"><span class="k">signal time</span><span class="v">'+new Date(g.createdAt).toLocaleString()+' ('+U.age(g.createdAt)+' ago)</span></div>'
       +'<div class="kv" style="border:1px solid var(--pur);border-radius:8px;padding:6px 8px;margin:4px 0"><span class="k">🔒 signal-time rate (frozen)</span><span class="v" style="color:var(--pur)">'+(g.signalPriceUsd!=null?'$'+g.signalPriceUsd:'— (signal predates snapshot feature)')+'</span></div>'
@@ -1261,9 +1267,8 @@ DashboardRenderer.prototype.signals=function(){
       +'<div class="kv"><span class="k">risk verdict</span><span class="v">'+(ev.riskVerdict||'—')+'</span></div>'
       +'<div class="kv"><span class="k">versions</span><span class="v small">'+g.scoreVersion+' · '+g.riskPolicyVersion+' · '+g.thresholdsVersion+'</span></div>'
       +'<div class="note">'+U.esc(g.note)+'</div>'
-      +'<div class="row">'+(!g.consumed&&c.market?'<button class="btn grn sm" onclick="BOOT.enterPaper(\''+g.mint+'\')">enter $'+S.settings.entrySizeUsd+' paper</button>':'')
-      +(c.mint?'<a class="btn sm" target="_blank" href="https://solscan.io/token/'+c.mint+'">solscan</a>':'')
-      +(ev.pairAddress?'<a class="btn sm" target="_blank" href="https://dexscreener.com/solana/'+ev.pairAddress+'">dexscreener</a>':'')+'</div></div>';
+      +'<div class="row" onclick="event.stopPropagation()">'+(!g.consumed&&c.market?'<button class="btn grn sm" onclick="BOOT.enterPaper(\''+g.mint+'\')">enter $'+S.settings.entrySizeUsd+' paper</button>':'')
+      +this.links(c)+'</div></div>';
   }
   el.innerHTML=h;
 };
@@ -1286,19 +1291,19 @@ DashboardRenderer.prototype.portfolio=function(){
   if(!open.length)h+='<div class="empty"><b>No open positions.</b></div>';
   for(const p of open){
     const unr=PORT.unrealized(p); const mult=p.lastPrice?p.lastPrice/p.entryPrice:null;
-    h+='<div class="card"><div class="row"><b>'+U.esc(p.symbol||U.short(p.mint))+'</b>'+this.badge('OPEN','b-live')
+    h+='<div class="card tappable" onclick="openDetail(\'portpos\',\''+p.id+'\')"><div class="row"><b>'+U.esc(p.symbol||U.short(p.mint))+'</b>'+this.badge('OPEN','b-live')
       +(p.priceStale?this.badge('PRICE STALE','b-stale'):'')+(p.milestonesHit.length?this.badge(p.milestonesHit[p.milestonesHit.length-1]+'x HIT','b-pur'):'')
       +'<span class="sp"></span><span style="font-weight:800;color:'+(unr==null?'var(--dim)':unr>=0?'var(--grn)':'var(--red)')+'">'+(unr==null?'UNAVAILABLE':U.fmt$(unr))+'</span></div>'
       +'<div class="kv"><span class="k">entry</span><span class="v">$'+p.entryPrice.toPrecision(4)+' · '+U.fmt$(p.entrySizeUsd)+' · '+U.age(p.openedAt)+' ago</span></div>'
       +'<div class="kv"><span class="k">last price</span><span class="v">'+(p.lastPrice!=null?'$'+p.lastPrice.toPrecision(4)+' · '+U.age(p.lastPriceAt)+' ago':'UNAVAILABLE — not treated as current')+'</span></div>'
       +'<div class="kv"><span class="k">multiple</span><span class="v">'+(mult?mult.toFixed(2)+'x':'—')+'</span></div>'
       +'<div class="kv"><span class="k">score at entry</span><span class="v">'+(p.scoreAtEntry==null?'—':p.scoreAtEntry+' ('+p.scoreVersion+')')+'</span></div>'
-      +'<div class="row" style="margin-top:6px"><button class="btn red sm" onclick="BOOT.manualExit(\''+p.id+'\')">exit now (paper)</button></div></div>';
+      +'<div class="row" style="margin-top:6px" onclick="event.stopPropagation()"><button class="btn red sm" onclick="BOOT.manualExit(\''+p.id+'\')">exit now (paper)</button>'+this.links({mint:p.mint})+'</div></div>';
   }
   h+='<h3 style="margin:12px 0 8px;font-size:14px;color:var(--blu)">Closed positions ('+closed.length+')</h3>';
   if(!closed.length)h+='<div class="empty"><b>No closed positions yet.</b></div>';
   for(const p of closed.slice(0,25)){
-    h+='<div class="card"><div class="row"><b>'+U.esc(p.symbol||U.short(p.mint))+'</b>'+this.badge('CLOSED','b-dim')
+    h+='<div class="card tappable" onclick="openDetail(\'portpos\',\''+p.id+'\')"><div class="row"><b>'+U.esc(p.symbol||U.short(p.mint))+'</b>'+this.badge('CLOSED','b-dim')
       +'<span class="sp"></span><span style="font-weight:800;color:'+((p.realizedPnl||0)>=0?'var(--grn)':'var(--red)')+'">'+U.fmt$(p.realizedPnl)+'</span></div>'
       +'<div class="kv"><span class="k">exit reason</span><span class="v small">'+U.esc(p.exitReason||'—')+'</span></div>'
       +'<div class="kv"><span class="k">held</span><span class="v">'+U.age(p.openedAt-(p.closedAt-p.openedAt))+' → closed '+U.age(p.closedAt)+' ago</span></div></div>';
@@ -1398,13 +1403,14 @@ DashboardRenderer.prototype.autotrade=function(){
   if(!open.length)h+='<div class="small">none — next PAPER_SIGNAL fills a free slot automatically'+(S.settings.autoTradeEnabled?'':' (auto trade is OFF in settings)')+'</div>';
   for(const p of open){
     const x=p.lastPrice!=null?p.lastPrice/p.entryRate:null;
-    h+='<div class="tok" style="border:1px solid var(--line);border-radius:10px;padding:8px;margin:8px 0">'
+    h+='<div class="tok tappable" style="border:1px solid var(--line);border-radius:10px;padding:8px;margin:8px 0" onclick="openDetail(\'autopos\',\''+p.id+'\')">'
       +'<div class="row"><b>'+U.esc(p.symbol||'(no symbol)')+'</b>'+this.badge('PAPER','b-dim')+(p.priceState==='LIVE'?this.badge('LIVE PRICE','b-live'):this.badge('PRICE UNAVAILABLE','b-err'))+'<span class="sp"></span>'+(x!=null?'<b style="color:'+(x>=1?'var(--grn)':'var(--red)')+'">'+x.toFixed(3)+'x</b>':'')+'</div>'
       +'<div class="mint">'+p.mint+'</div>'
       +'<div class="kv"><span class="k">entry (frozen signal rate)</span><span class="v">$'+p.entryRate+' · '+new Date(p.entryAt).toLocaleString()+'</span></div>'
       +'<div class="kv"><span class="k">live price now</span><span class="v">'+(p.priceState==='LIVE'&&p.lastPrice!=null?'$'+p.lastPrice+' · '+U.age(p.lastPriceAt)+' ago':'— unavailable (no action taken)')+'</span></div>'
       +(x!=null?'<div class="kv"><span class="k">distance to exits</span><span class="v">'+(x>=1.5?'1.5x REACHED':'+'+((1.5/x-1)*100).toFixed(1)+'% to 1.5x')+' · '+(x<=0.5?'−50% REACHED':((0.5/x-1)*100).toFixed(1)+'% drop to −50%')+'</span></div>':'')
       +(p.entryLiquidity!=null?'<div class="kv"><span class="k">liquidity at entry</span><span class="v">'+U.fmt$(p.entryLiquidity)+'</span></div>':'')
+      +'<div class="row" style="margin-top:6px" onclick="event.stopPropagation()">'+this.links({mint:p.mint})+'</div>'
       +'</div>';
   }
   h+='</div>';
@@ -1442,6 +1448,11 @@ DashboardRenderer.prototype.serverbook=function(){
     +'<div class="kpi '+(d.equity>=d.bank?'':'bad')+'"><div class="v">'+U.fmt$(d.equity!=null?d.equity:0)+'</div><div class="l">equity @ update</div></div>'
     +'<div class="kpi '+((d.realizedPnl||0)>=0?'':'bad')+'"><div class="v">'+((d.realizedPnl||0)>=0?'+':'')+U.fmt$(d.realizedPnl||0)+'</div><div class="l">realized P&L</div></div></div>';
   if(d.slotsUsed!=null)h+='<div class="kv"><span class="k">slots used</span><span class="v">'+d.slotsUsed+(d.maxSlots!=null?' / '+d.maxSlots:'')+'</span></div>';
+  if(d.rules){ const r=d.rules; const q=r.qualification||{};
+    h+='<h3 style="margin-top:10px">server rules ('+U.esc(String(r.entryMode||'standard'))+')</h3><div class="small">'
+      +(r.entryMode==='dip-limit-v2'?('entry: LIMIT BUY at signal rate ×0.80 (−'+(r.limitBelowSignalPct||20)+'% dip) · fills only on a real later observation ≤ limit · expires in '+(r.limitExpiryMinutes||60)+' min or earlier on disqualification · pending orders do NOT consume cash or slots<br>'):('entry: $'+r.entryUsd+' per qualifying signal<br>'))
+      +'gates: score ≥ '+(q.scoreThreshold!=null?q.scoreThreshold:'—')+' · ≥ '+(q.minQualifiedWallets!=null?q.minQualifiedWallets:'—')+' wallets · liquidity ≥ '+U.fmt$(q.minLiquidityUsd)+' · 24h vol ≥ '+U.fmt$(q.minVolume24Usd)+'<br>'
+      +'exits from filled entry: '+r.takeProfitMultiple+'x sell · −'+Math.round((1-r.stopMultiple)*100)+'% exit · rug ≤ '+U.fmt$(r.rugLiquidityUsd)+' or ≥ '+r.rugDropPct+'% liquidity drop = full loss · fee '+r.feePct+'%/side · no time limit</div>'; }
   const pos=Array.isArray(d.positions)?d.positions:[];
   h+='<h3 style="margin-top:10px">server positions ('+pos.length+')</h3>';
   if(!pos.length)h+='<div class="small">none open</div>';
@@ -1449,7 +1460,7 @@ DashboardRenderer.prototype.serverbook=function(){
     const open=(p.status||'').toUpperCase()!=='CLOSED';
     const lp=p.mint?b.live[p.mint]:null;
     const liveX=(open&&lp&&p.entryRate)?(lp.price/p.entryRate):null;
-    h+='<div class="tok" style="border:1px solid var(--line);border-radius:10px;padding:8px;margin:8px 0">'
+    h+='<div class="tok tappable" style="border:1px solid var(--line);border-radius:10px;padding:8px;margin:8px 0" onclick="openDetail(\'srvpos\',\''+p.id+'\')">'
       +'<div class="row"><b>'+U.esc(p.symbol||'(no symbol)')+'</b>'+this.badge(open?'OPEN':'CLOSED',open?'b-live':'b-dim')+this.badge('PAPER','b-dim')+'<span class="sp"></span>'+(liveX!=null?'<b style="color:'+(liveX>=1?'var(--grn)':'var(--red)')+'">'+liveX.toFixed(3)+'x LIVE</b>':(p.currentX!=null?'<b>'+(+p.currentX).toFixed(3)+'x @ update</b>':''))+'</div>'
       +(p.mint?'<div class="mint">'+p.mint+'</div>':'')
       +'<div class="kv"><span class="k">entry rate (frozen)</span><span class="v">'+(p.entryRate!=null?'$'+p.entryRate:'—')+(p.entryAt?' · '+new Date(b.ts(p.entryAt)).toLocaleString():'')+'</span></div>'
@@ -1457,6 +1468,20 @@ DashboardRenderer.prototype.serverbook=function(){
       +'<div class="kv"><span class="k">price in book snapshot</span><span class="v">'+(p.lastPrice!=null?'$'+p.lastPrice:'—')+(p.lastPriceAt?' · as of '+new Date(b.ts(p.lastPriceAt)).toLocaleString():'')+'</span></div>'
       +(p.exitInfo?'<div class="small">'+U.esc(String(p.exitInfo))+'</div>':'')
       +(p.exitReason?'<div class="small">'+U.esc(String(p.exitReason))+'</div>':'')
+      +(p.mint?'<div class="row" style="margin-top:6px" onclick="event.stopPropagation()">'+this.links({mint:p.mint})+'</div>':'')
+      +'</div>';
+  }
+  const po=Array.isArray(d.pendingOrders)?d.pendingOrders:[];
+  h+='<h3 style="margin-top:10px">pending dip-limit orders ('+po.length+')</h3>';
+  if(!po.length)h+='<div class="small">none pending — the next qualifying signal places a limit buy at −'+((d.rules&&d.rules.limitBelowSignalPct)||20)+'% below its signal rate</div>';
+  for(const o of po){
+    h+='<div class="tok" style="border:1px solid var(--line);border-radius:10px;padding:8px;margin:8px 0">'
+      +'<div class="row"><b>'+U.esc(o.symbol||'(no symbol)')+'</b>'+this.badge(o.status||'PENDING','b-info')+this.badge('PAPER','b-dim')+'</div>'
+      +(o.mint?'<div class="mint">'+o.mint+'</div>':'')
+      +(o.limitPrice!=null?'<div class="kv"><span class="k">limit buy price</span><span class="v">$'+o.limitPrice+'</span></div>':'')
+      +(o.signalPrice!=null?'<div class="kv"><span class="k">signal rate</span><span class="v">$'+o.signalPrice+'</span></div>':'')
+      +(o.expiresAt?'<div class="kv"><span class="k">expires</span><span class="v">'+new Date(b.ts(o.expiresAt)).toLocaleString()+'</span></div>':'')
+      +(o.mint?'<div class="row" style="margin-top:6px" onclick="event.stopPropagation()">'+this.links({mint:o.mint})+'</div>':'')
       +'</div>';
   }
   const hist=Array.isArray(d.historyTail)?d.historyTail.slice(-8).reverse():[];
@@ -1727,6 +1752,153 @@ const SRVBOOK={state:'idle',data:null,fetchedAt:0,error:null,lastTry:0,live:{},l
     }catch(e){ /* keep old live marks, they carry their own timestamps */ }
   }
 };
+
+/* ============================================================
+   T. DETAILUI — drill-down detail overlay. Tapping any coin,
+   signal, or position opens a full in-app detail view with
+   everything available for it + the complete link set
+   (GMGN · Dexscreener · Solscan · Binance). Missing data is
+   labeled honestly, never invented.
+   ============================================================ */
+const DETAILUI={
+  open(kind,key){ S.ui.detail={kind,key}; this.render(); },
+  close(){ S.ui.detail=null; const ov=document.getElementById('detailOverlay'); if(ov)ov.innerHTML=''; },
+  render(){
+    const ov=document.getElementById('detailOverlay'); if(!ov)return;
+    const d=S.ui.detail; if(!d){ ov.innerHTML=''; return; }
+    let body='';
+    try{
+      if(d.kind==='candidate')body=this.candidate(d.key);
+      else if(d.kind==='signal')body=this.signal(d.key);
+      else if(d.kind==='autopos')body=this.autopos(d.key);
+      else if(d.kind==='srvpos')body=this.srvpos(d.key);
+      else if(d.kind==='portpos')body=this.portpos(d.key);
+    }catch(e){ body='<div class="note">detail render error: '+U.esc(String(e))+'</div>'; }
+    ov.innerHTML='<div class="dov" onclick="if(event.target===this)DETAILUI.close()"><div class="dov-panel">'
+      +'<div class="row" style="position:sticky;top:0;background:var(--bg);z-index:2;padding:4px 0 8px"><b style="font-size:15px">🔍 DETAIL</b><span class="sp"></span><button class="btn sm" onclick="DETAILUI.close()">✕ close</button></div>'
+      +(body||'<div class="note">Record not found — it may have been wiped or rotated out.</div>')+'</div></div>';
+  },
+  linksFor(mint,pair){
+    return '<div class="row" style="margin:8px 0;flex-wrap:wrap">'+RENDER.links({mint,market:pair?{pairAddress:pair}:null})+'</div>'
+      +'<div class="small" style="margin-bottom:6px">*binance opens Binance main markets — new DEX coins are usually not listed there (honest main-site link).</div>';
+  },
+  kv(k,v){ return '<div class="kv"><span class="k">'+k+'</span><span class="v">'+v+'</span></div>'; },
+  /* ---- TOKEN (radar candidate) ---- */
+  candidate(mint){
+    const c=S.candidates.get(mint); if(!c)return null;
+    const m=c.market||{};
+    let h='<div class="row"><b style="font-size:17px">'+U.esc(m.symbol||'(no symbol)')+'</b><span class="small">'+U.esc(m.name||'')+'</span><span class="sp"></span>'
+      +RENDER.stateBadge(c.state)+RENDER.riskBadge(c.risk&&c.risk.verdict)+RENDER.freshness(m.observedAt)+'</div>';
+    h+='<div class="row" style="margin:4px 0"><span class="mint">'+mint+'</span>'+RENDER.copyBtn(mint)+'</div>';
+    h+=this.linksFor(mint,m.pairAddress);
+    h+='<div class="card"><h3>Market (as observed)</h3>'
+      +this.kv('price',m.priceUsd!=null?'$'+m.priceUsd:'—')
+      +this.kv('liquidity',U.fmt$(m.liquidityUsd))
+      +this.kv('volume 24h',U.fmt$(m.volume&&m.volume.h24))
+      +(m.pairAddress?this.kv('pair','<span class="small">'+m.pairAddress+'</span>'):'')
+      +this.kv('price observed',m.observedAt?new Date(m.observedAt).toLocaleString()+' ('+U.age(m.observedAt)+' ago)':'never')
+      +this.kv('first seen by us',new Date(c.firstObserved).toLocaleString()+' (our observation time, NOT verified launch time)')+'</div>';
+    if(c.score){
+      h+='<div class="card"><h3>Score '+c.score.total+'/100 <span class="small">'+c.score.scoreVersion+'</span></h3>'
+        +'<div class="bar" style="margin:6px 0"><i style="width:'+U.clamp(c.score.total,0,100)+'%"></i></div>'
+        +c.score.components.map(x=>'<div class="kv"><span class="k">'+x.label+' <span class="small">'+x.dataState+'</span></span><span class="v">'+x.points+'/'+x.max+'</span></div><div class="small" style="padding:0 0 6px 8px">'+U.esc(x.evidence)+'</div>').join('')
+        +'<div class="note">'+U.esc(c.score.disclaimer)+'</div></div>';
+    }else h+='<div class="note">No score computed for this token yet.</div>';
+    if(c.risk)h+='<div class="card"><h3>Risk review</h3>'+this.kv('verdict',c.risk.verdict||'NOT RUN')+(c.risk.reasons?'<div class="small">'+[].concat(c.risk.reasons).map(U.esc).join('<br>')+'</div>':'')+'</div>';
+    if(c.rejectionReasons&&c.rejectionReasons.length)h+='<div class="note" style="border-color:var(--amb)">Decision reasons: '+c.rejectionReasons.map(U.esc).join(' · ')+'</div>';
+    if(c.lastError)h+='<div class="note" style="border-color:var(--red)">Last source error: '+U.esc(c.lastError)+'</div>';
+    if(c.signalId&&S.signals.get(c.signalId))h+=this.signalBlock(S.signals.get(c.signalId));
+    return h;
+  },
+  signalBlock(g){
+    const ev=g.evidence||{};
+    return '<div class="card" style="border-color:var(--pur)"><h3>📡 Signal '+g.score+'/100 '+RENDER.badge('PAPER_SIGNAL','b-pur')+'</h3>'
+      +this.kv('signal time',new Date(g.createdAt).toLocaleString()+' ('+U.age(g.createdAt)+' ago)')
+      +this.kv('🔒 signal-time rate (frozen)','<span style="color:var(--pur)">'+(g.signalPriceUsd!=null?'$'+g.signalPriceUsd:'— legacy signal')+'</span>')
+      +(g.signalPriceUsd!=null?this.kv('exit zones','1.5x $'+(g.signalPriceUsd*1.5).toPrecision(4)+' · 2x $'+(g.signalPriceUsd*2).toPrecision(4)+' · 3x $'+(g.signalPriceUsd*3).toPrecision(4)):'')
+      +this.kv('liquidity / vol24',U.fmt$(ev.liquidityUsd)+' / '+U.fmt$(ev.volume24))
+      +this.kv('qualified wallets',ev.qualifiedWallets!=null?ev.qualifiedWallets:'—')
+      +this.kv('risk verdict',ev.riskVerdict||'—')
+      +this.kv('versions','<span class="small">'+g.scoreVersion+' · '+g.riskPolicyVersion+' · '+g.thresholdsVersion+'</span>')
+      +'<div class="note">'+U.esc(g.note||'')+'</div></div>';
+  },
+  /* ---- SIGNAL ---- */
+  signal(id){
+    const g=S.signals.get(id); if(!g)return null;
+    const c=S.candidates.get(g.mint);
+    let h='<div class="row"><b style="font-size:17px">'+U.esc(g.symbol||'(no symbol)')+'</b>'+RENDER.badge('PAPER_SIGNAL','b-pur')+(g.consumed?RENDER.badge('POSITION OPENED','b-live'):'')+'<span class="sp"></span><span class="scorebig">'+g.score+'</span></div>';
+    h+='<div class="row" style="margin:4px 0"><span class="mint">'+g.mint+'</span>'+RENDER.copyBtn(g.mint)+'</div>';
+    h+=this.linksFor(g.mint,(c&&c.market)?c.market.pairAddress:null);
+    h+=this.signalBlock(g);
+    if(c)h+='<div class="row"><button class="btn sm" onclick="DETAILUI.open(\'candidate\',\''+g.mint+'\')">open token detail (score breakdown, market) →</button></div>';
+    else h+='<div class="note">Token candidate record not in store — score breakdown unavailable.</div>';
+    if(c&&c.market&&!g.consumed)h+='<div class="row"><button class="btn grn sm" onclick="event.stopPropagation();BOOT.enterPaper(\''+g.mint+'\')">enter $'+S.settings.entrySizeUsd+' paper</button></div>';
+    return h;
+  },
+  /* ---- LOCAL AUTO BOOK position ---- */
+  autopos(id){
+    const p=AUTO.positions.get(id); if(!p)return null;
+    const x=p.lastPrice!=null?p.lastPrice/p.entryRate:null;
+    let h='<div class="row"><b style="font-size:17px">'+U.esc(p.symbol||'(no symbol)')+'</b>'+RENDER.badge(p.status,p.status==='OPEN'?'b-live':'b-dim')+RENDER.badge('PAPER','b-dim')+RENDER.badge('THIS DEVICE','b-info')+'<span class="sp"></span>'+(x!=null&&p.status==='OPEN'?'<b style="color:'+(x>=1?'var(--grn)':'var(--red)')+'">'+x.toFixed(3)+'x</b>':'')+'</div>';
+    h+='<div class="row" style="margin:4px 0"><span class="mint">'+p.mint+'</span>'+RENDER.copyBtn(p.mint)+'</div>';
+    h+=this.linksFor(p.mint,null);
+    h+='<div class="card"><h3>Position (local auto book)</h3>'
+      +this.kv('entry (frozen signal rate)','$'+p.entryRate+' · '+new Date(p.entryAt).toLocaleString())
+      +this.kv('size','$'+p.entrySizeUsd+' + fee $'+p.feeUsd+' · qty '+p.qty.toLocaleString())
+      +(p.entryLiquidity!=null?this.kv('liquidity at entry',U.fmt$(p.entryLiquidity)):'')
+      +this.kv('live price',p.priceState==='LIVE'&&p.lastPrice!=null?'$'+p.lastPrice+' · '+U.age(p.lastPriceAt)+' ago':'UNAVAILABLE — no action taken')
+      +(x!=null&&p.status==='OPEN'?this.kv('distance to exits',(x>=1.5?'1.5x REACHED':'+'+((1.5/x-1)*100).toFixed(1)+'% to 1.5x')+' · '+(x<=0.5?'−50% REACHED':((0.5/x-1)*100).toFixed(1)+'% drop to −50%')):'');
+    if(p.status==='CLOSED')h+=this.kv('exit',U.esc(p.exitReason||''))+this.kv('exit value / realized',U.fmt$(p.exitValueUsd)+' / '+((p.realizedPnl||0)>=0?'+':'')+U.fmt$(p.realizedPnl||0))+this.kv('closed',new Date(p.exitAt).toLocaleString());
+    h+='<div class="small" style="margin-top:4px">'+U.esc(p.rules||'')+'</div></div>';
+    if(S.candidates.get(p.mint))h+='<div class="row"><button class="btn sm" onclick="DETAILUI.open(\'candidate\',\''+p.mint+'\')">open token detail →</button></div>';
+    return h;
+  },
+  /* ---- SERVER BOOK position (data: book.json only — honest labels) ---- */
+  srvpos(id){
+    const d=SRVBOOK.data; if(!d)return null;
+    const p=(d.positions||[]).find(x=>x.id===id); if(!p)return null;
+    const open=(p.status||'').toUpperCase()!=='CLOSED';
+    const lp=p.mint?SRVBOOK.live[p.mint]:null;
+    const liveX=(open&&lp&&p.entryRate)?(lp.price/p.entryRate):null;
+    let h='<div class="row"><b style="font-size:17px">'+U.esc(p.symbol||'(no symbol)')+'</b>'+RENDER.badge(open?'OPEN':'CLOSED',open?'b-live':'b-dim')+RENDER.badge('PAPER','b-dim')+RENDER.badge('24/7 SERVER','b-pur')+'<span class="sp"></span>'+(liveX!=null?'<b style="color:'+(liveX>=1?'var(--grn)':'var(--red)')+'">'+liveX.toFixed(3)+'x LIVE</b>':'')+'</div>';
+    h+='<div class="row" style="margin:4px 0"><span class="mint">'+(p.mint||'—')+'</span>'+(p.mint?RENDER.copyBtn(p.mint):'')+'</div>';
+    if(p.mint)h+=this.linksFor(p.mint,null);
+    h+='<div class="card"><h3>Position (24/7 server book)</h3>'
+      +this.kv('entry rate (frozen)',(p.entryRate!=null?'$'+p.entryRate:'—')+(p.entryAt?' · '+new Date(SRVBOOK.ts(p.entryAt)).toLocaleString():''))
+      +(p.entrySizeUsd!=null?this.kv('size','$'+p.entrySizeUsd+(p.feeUsd!=null?' + fee $'+p.feeUsd:'')+(p.qty?' · qty '+Math.round(p.qty).toLocaleString():'')):'')
+      +(p.entryLiquidity!=null?this.kv('liquidity at entry',U.fmt$(p.entryLiquidity)):'')
+      +(open?this.kv('live price NOW (this device)',lp?'$'+lp.price+' · '+U.age(lp.at)+' ago':'fetching… (Dexscreener)'):'')
+      +this.kv('price in book snapshot',(p.lastPrice!=null?'$'+p.lastPrice:'—')+(p.lastPriceAt?' · as of '+new Date(SRVBOOK.ts(p.lastPriceAt)).toLocaleString():''))
+      +(p.currentX!=null?this.kv('multiple @ book update',(+p.currentX).toFixed(3)+'x'):'')
+      +(p.exitReason?this.kv('exit',U.esc(p.exitReason)):'')
+      +(p.exitValueUsd!=null?this.kv('exit value / realized',U.fmt$(p.exitValueUsd)+' / '+((p.realizedPnl||0)>=0?'+':'')+U.fmt$(p.realizedPnl||0)):'')
+      +(p.exitAt?this.kv('closed',new Date(SRVBOOK.ts(p.exitAt)).toLocaleString()):'')
+      +(p.rules?'<div class="small" style="margin-top:4px">'+U.esc(p.rules)+'</div>':'')+'</div>';
+    h+='<div class="note">Score breakdown, wallet evidence and risk verdict are NOT AVAILABLE server-side — book.json carries position facts only. Not invented here. Book last updated: '+(SRVBOOK.ts(d.generatedAt)?new Date(SRVBOOK.ts(d.generatedAt)).toLocaleString():'unknown')+'.</div>';
+    if(S.candidates.get(p.mint))h+='<div class="row"><button class="btn sm" onclick="DETAILUI.open(\'candidate\',\''+p.mint+'\')">open token detail (this device has it) →</button></div>';
+    return h;
+  },
+  /* ---- MANUAL PORTFOLIO position ---- */
+  portpos(id){
+    const p=S.positions.get(id); if(!p)return null;
+    const unr=p.status==='OPEN'?PORT.unrealized(p):null;
+    let h='<div class="row"><b style="font-size:17px">'+U.esc(p.symbol||U.short(p.mint))+'</b>'+RENDER.badge(p.status,p.status==='OPEN'?'b-live':'b-dim')+RENDER.badge('MANUAL BOOK','b-info')+'<span class="sp"></span>'+(p.status==='CLOSED'?'<b style="color:'+((p.realizedPnl||0)>=0?'var(--grn)':'var(--red)')+'">'+U.fmt$(p.realizedPnl)+'</b>':'')+'</div>';
+    h+='<div class="row" style="margin:4px 0"><span class="mint">'+p.mint+'</span>'+RENDER.copyBtn(p.mint)+'</div>';
+    h+=this.linksFor(p.mint,null);
+    h+='<div class="card"><h3>Position (manual paper book)</h3>'
+      +this.kv('entry','$'+p.entryPrice.toPrecision(4)+' · '+U.fmt$(p.entrySizeUsd)+' · '+new Date(p.openedAt).toLocaleString())
+      +this.kv('last price',p.lastPrice!=null?'$'+p.lastPrice.toPrecision(4)+' · '+U.age(p.lastPriceAt)+' ago'+(p.priceStale?' (STALE — not treated as current)':''):'UNAVAILABLE — not treated as current')
+      +(p.status==='OPEN'?this.kv('unrealized',unr==null?'UNAVAILABLE':U.fmt$(unr)):'')
+      +this.kv('score at entry',p.scoreAtEntry==null?'—':p.scoreAtEntry+' ('+p.scoreVersion+')')
+      +(p.milestonesHit&&p.milestonesHit.length?this.kv('milestones',p.milestonesHit.map(m2=>m2+'x').join(' · ')):'')
+      +(p.status==='CLOSED'?this.kv('exit',U.esc(p.exitReason||''))+this.kv('realized',U.fmt$(p.realizedPnl)):'');
+    h+='</div>';
+    if(p.status==='OPEN')h+='<div class="row"><button class="btn red sm" onclick="event.stopPropagation();BOOT.manualExit(\''+p.id+'\');DETAILUI.close()">exit now (paper)</button></div>';
+    if(S.candidates.get(p.mint))h+='<div class="row"><button class="btn sm" onclick="DETAILUI.open(\'candidate\',\''+p.mint+'\')">open token detail →</button></div>';
+    return h;
+  }
+};
+function openDetail(kind,key){ DETAILUI.open(kind,key); }
 
 </script>
 </body>
