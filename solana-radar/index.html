@@ -1222,8 +1222,8 @@ DashboardRenderer.prototype.signals=function(){
       +'<div class="mint">'+g.mint+'</div>'
       +'<div class="kv"><span class="k">created</span><span class="v">'+new Date(g.createdAt).toLocaleString()+' ('+U.age(g.createdAt)+' ago)</span></div>'
       +'<div class="kv"><span class="k">liquidity / vol24</span><span class="v">'+U.fmt$(ev.liquidityUsd)+' / '+U.fmt$(ev.volume24)+'</span></div>'
-      +'<div class="kv"><span class="k">qualified wallets</span><span class="v">'+ev.qualifiedWallets!=null?ev.qualifiedWallets:'—'+'</span></div>'
-      +'<div class="kv"><span class="k">risk verdict</span><span class="v">'+ev.riskVerdict||'—'+'</span></div>'
+      +'<div class="kv"><span class="k">qualified wallets</span><span class="v">'+(ev.qualifiedWallets!=null?ev.qualifiedWallets:'—')+'</span></div>'
+      +'<div class="kv"><span class="k">risk verdict</span><span class="v">'+(ev.riskVerdict||'—')+'</span></div>'
       +'<div class="kv"><span class="k">versions</span><span class="v small">'+g.scoreVersion+' · '+g.riskPolicyVersion+' · '+g.thresholdsVersion+'</span></div>'
       +'<div class="note">'+U.esc(g.note)+'</div>'
       +'<div class="row">'+(!g.consumed&&c.market?'<button class="btn grn sm" onclick="BOOT.enterPaper(\''+g.mint+'\')">enter $'+S.settings.entrySizeUsd+' paper</button>':'')
