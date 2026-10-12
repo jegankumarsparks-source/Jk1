@@ -1,11 +1,11 @@
 {
   "schema": 1,
-  "generatedAt": "2026-10-12T20:34:44.922533+00:00",
-  "lastCheckedAt": "2026-10-12T20:34:41.666Z",
+  "generatedAt": "2026-10-12T20:51:20.536424+00:00",
+  "lastCheckedAt": "2026-10-12T20:51:17.783Z",
   "paperOnly": true,
   "bank": 200,
   "cash": 137.98,
-  "equity": 157.21,
+  "equity": 156.32,
   "realizedPnl": -41.92,
   "slotsUsed": 1,
   "maxSlots": 6,
@@ -334,8 +334,8 @@
       "qty": 44752.741105392706,
       "entryLiquidity": 64865.13,
       "status": "OPEN",
-      "lastPrice": 0.0004298,
-      "lastPriceAt": 1791837274055,
+      "lastPrice": 0.0004098,
+      "lastPriceAt": 1791838267700,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -346,7 +346,7 @@
       "limitOrderId": "limit_sig_mv5kc4fml1bpwz",
       "signalReferencePrice": 0.000562,
       "limitPrice": 0.00044960000000000003,
-      "currentX": 0.9617364063548891,
+      "currentX": 0.9169836652494965,
       "exitInfo": null
     }
   ],
@@ -438,9 +438,11 @@
       "limitPrice": 0.0008448000000000002,
       "createdAt": 1791834629747,
       "expiresAt": 1791838229747,
-      "status": "PENDING",
+      "status": "CANCELLED",
       "score": 81,
-      "signalLiquidity": 90371.79
+      "signalLiquidity": 90371.79,
+      "cancelledAt": 1791838268884,
+      "cancelReason": "60-minute signal expiry"
     },
     {
       "id": "limit_sig_mv5pge0ngh2vbo",
@@ -766,6 +768,14 @@
       "signalPrice": 0.0002669,
       "usd": 20,
       "reason": "v2: -20% limit, expires in 60 minutes; no cash/slot consumed"
+    },
+    {
+      "t": 1791838268884,
+      "type": "LIMIT_CANCELLED",
+      "mint": "4hsJNmPComjTsbrDtoLjDMmsyZ1g2T1xy1xHnEE2pump",
+      "symbol": "BATONA",
+      "price": 0.0008448000000000002,
+      "reason": "60-minute signal expiry"
     }
   ],
   "sourceHealth": [
@@ -774,7 +784,7 @@
       "label": "Dexscreener (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791837281550,
+      "lastSuccess": 1791838277659,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
@@ -788,12 +798,12 @@
       "label": "RugCheck (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791837280969,
+      "lastSuccess": 1791838277100,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
       "rateLimitCount": 0,
-      "requestCount": 5,
+      "requestCount": 4,
       "note": "Token risk report: authorities, holders, liquidity. topHolders may be null on mega-caps.",
       "backoffUntil": 0
     },
@@ -802,7 +812,7 @@
       "label": "Solana JSON-RPC (PublicNode)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791837281531,
+      "lastSuccess": 1791838277583,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
