@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "generatedAt": "2026-10-12T22:03:07.185547+00:00",
-  "lastCheckedAt": "2026-10-12T22:03:04.277Z",
+  "generatedAt": "2026-10-12T22:25:09.633082+00:00",
+  "lastCheckedAt": "2026-10-12T22:25:05.516Z",
   "paperOnly": true,
   "bank": 200,
   "cash": 140.47,
@@ -575,6 +575,19 @@
       "status": "PENDING",
       "score": 85,
       "signalLiquidity": 151331.79
+    },
+    {
+      "id": "limit_sig_mv5tleqq0l6wvj",
+      "signalId": "sig_mv5tleqq0l6wvj",
+      "mint": "HQgMPJbGctpP9P27DdJW5f8rncz7gvg4vEL3hT7hpump",
+      "symbol": "LILANSEM",
+      "signalPrice": 0.0008806,
+      "limitPrice": 0.0007044800000000001,
+      "createdAt": 1791843901154,
+      "expiresAt": 1791847501154,
+      "status": "PENDING",
+      "score": 75,
+      "signalLiquidity": 87549.59
     }
   ],
   "rulesVersion": "dip-limit-v2",
@@ -957,6 +970,16 @@
       "price": 0.001232,
       "usd": 33.46,
       "reason": "1.5x target hit (1.68x) \u2014 auto sell"
+    },
+    {
+      "t": 1791843901154,
+      "type": "LIMIT_PLACED",
+      "mint": "HQgMPJbGctpP9P27DdJW5f8rncz7gvg4vEL3hT7hpump",
+      "symbol": "LILANSEM",
+      "price": 0.0007044800000000001,
+      "signalPrice": 0.0008806,
+      "usd": 20,
+      "reason": "v2: -20% limit, expires in 60 minutes; no cash/slot consumed"
     }
   ],
   "sourceHealth": [
@@ -965,7 +988,7 @@
       "label": "Dexscreener (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791842584119,
+      "lastSuccess": 1791843905356,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
@@ -979,10 +1002,10 @@
       "label": "RugCheck (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791842583641,
+      "lastSuccess": 1791843904135,
       "lastError": null,
-      "errorCount": 1,
-      "timeoutCount": 1,
+      "errorCount": 0,
+      "timeoutCount": 0,
       "rateLimitCount": 0,
       "requestCount": 5,
       "note": "Token risk report: authorities, holders, liquidity. topHolders may be null on mega-caps.",
@@ -993,12 +1016,12 @@
       "label": "Solana JSON-RPC (PublicNode)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791842584102,
+      "lastSuccess": 1791843905014,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
       "rateLimitCount": 0,
-      "requestCount": 25,
+      "requestCount": 30,
       "note": "Keyless public RPC. Browser polling is not a backend indexer or persistent WebSocket.",
       "backoffUntil": 0
     }
