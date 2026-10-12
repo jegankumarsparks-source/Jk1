@@ -1,11 +1,11 @@
 {
   "schema": 1,
-  "generatedAt": "2026-10-12T16:04:38.474440+00:00",
-  "lastCheckedAt": "2026-10-12T16:04:35.623Z",
+  "generatedAt": "2026-10-12T16:21:14.913656+00:00",
+  "lastCheckedAt": "2026-10-12T16:21:09.896Z",
   "paperOnly": true,
   "bank": 200,
   "cash": 148.14,
-  "equity": 163.01,
+  "equity": 160.75,
   "realizedPnl": -31.76,
   "slotsUsed": 1,
   "maxSlots": 6,
@@ -268,8 +268,8 @@
       "qty": 82440.23083264634,
       "entryLiquidity": 46181.15,
       "status": "OPEN",
-      "lastPrice": 0.0001804,
-      "lastPriceAt": 1791821060296,
+      "lastPrice": 0.000153,
+      "lastPriceAt": 1791822053385,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -280,7 +280,7 @@
       "limitOrderId": "limit_sig_mv56qoka87soeq",
       "signalReferencePrice": 0.0003209,
       "limitPrice": 0.00025672,
-      "currentX": 0.7436108821104699,
+      "currentX": 0.6306677658697445,
       "exitInfo": null
     },
     {
@@ -374,9 +374,11 @@
       "limitPrice": 0.0005736,
       "createdAt": 1791818417031,
       "expiresAt": 1791822017031,
-      "status": "PENDING",
+      "status": "CANCELLED",
       "score": 76.5,
-      "signalLiquidity": 76282.53
+      "signalLiquidity": 76282.53,
+      "cancelledAt": 1791822054314,
+      "cancelReason": "60-minute signal expiry"
     }
   ],
   "rulesVersion": "dip-limit-v2",
@@ -609,6 +611,14 @@
       "price": 4.115e-05,
       "usd": 9.05,
       "reason": "-50% exit (-54.5%) \u2014 auto exit"
+    },
+    {
+      "t": 1791822054314,
+      "type": "LIMIT_CANCELLED",
+      "mint": "4WgA82UNbdbS66Stnv9zbaoASsWT2k4ohgLHDEgCpump",
+      "symbol": "ISAI",
+      "price": 0.0005736,
+      "reason": "60-minute signal expiry"
     }
   ],
   "sourceHealth": [
@@ -617,12 +627,12 @@
       "label": "Dexscreener (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791821075540,
+      "lastSuccess": 1791822069814,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
       "rateLimitCount": 0,
-      "requestCount": 22,
+      "requestCount": 21,
       "note": "REST market feed \u2014 not a complete historical on-chain feed. Rate limits apply.",
       "backoffUntil": 0
     },
@@ -631,12 +641,12 @@
       "label": "RugCheck (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791821074888,
+      "lastSuccess": 1791822069098,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
       "rateLimitCount": 0,
-      "requestCount": 6,
+      "requestCount": 4,
       "note": "Token risk report: authorities, holders, liquidity. topHolders may be null on mega-caps.",
       "backoffUntil": 0
     },
@@ -645,7 +655,7 @@
       "label": "Solana JSON-RPC (PublicNode)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791821075420,
+      "lastSuccess": 1791822069601,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
