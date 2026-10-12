@@ -699,6 +699,14 @@
       "signalPrice": 0.0008806,
       "usd": 20,
       "reason": "v2: -20% limit, expires in 60 minutes; no cash/slot consumed"
+    },
+    {
+      "t": 1791844558706,
+      "type": "LIMIT_CANCELLED",
+      "mint": "CQCDTp8rsFV3PhaPeYjcCW5LdGTxi6jFx7eC3UXnpump",
+      "symbol": "CRAWLER",
+      "price": 0.002276,
+      "reason": "60-minute signal expiry"
     }
   ],
   "pendingOrders": [
@@ -851,9 +859,11 @@
       "limitPrice": 0.002276,
       "createdAt": 1791840921452,
       "expiresAt": 1791844521452,
-      "status": "PENDING",
+      "status": "CANCELLED",
       "score": 85,
-      "signalLiquidity": 151331.79
+      "signalLiquidity": 151331.79,
+      "cancelledAt": 1791844558706,
+      "cancelReason": "60-minute signal expiry"
     },
     {
       "id": "limit_sig_mv5tleqq0l6wvj",
@@ -878,10 +888,10 @@
     "minVolume24Usd": 50000
   },
   "limitExpiryMinutes": 60,
-  "eventsReported": 40,
-  "analysisCursor": 453,
-  "v2ScansCompleted": 151,
-  "asOf": "2026-10-12T22:25:05.516Z",
+  "eventsReported": 41,
+  "analysisCursor": 8,
+  "v2ScansCompleted": 153,
+  "asOf": "2026-10-12T22:36:09.432Z",
   "equity": 140.47,
   "realizedPnl": -59.53
 }
