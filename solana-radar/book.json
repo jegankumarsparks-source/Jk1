@@ -1,13 +1,13 @@
 {
   "schema": 1,
-  "generatedAt": "2026-10-12T15:30:57.538642+00:00",
-  "lastCheckedAt": "2026-10-12T15:30:57.336Z",
+  "generatedAt": "2026-10-12T16:04:38.474440+00:00",
+  "lastCheckedAt": "2026-10-12T16:04:35.623Z",
   "paperOnly": true,
   "bank": 200,
-  "cash": 139.09,
-  "equity": 178.31,
-  "realizedPnl": -20.71,
-  "slotsUsed": 2,
+  "cash": 148.14,
+  "equity": 163.01,
+  "realizedPnl": -31.76,
+  "slotsUsed": 1,
   "maxSlots": 6,
   "positions": [
     {
@@ -268,8 +268,8 @@
       "qty": 82440.23083264634,
       "entryLiquidity": 46181.15,
       "status": "OPEN",
-      "lastPrice": 0.000276,
-      "lastPriceAt": 1791819048065,
+      "lastPrice": 0.0001804,
+      "lastPriceAt": 1791821060296,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -280,7 +280,7 @@
       "limitOrderId": "limit_sig_mv56qoka87soeq",
       "signalReferencePrice": 0.0003209,
       "limitPrice": 0.00025672,
-      "currentX": 1.1376751854905194,
+      "currentX": 0.7436108821104699,
       "exitInfo": null
     },
     {
@@ -294,21 +294,27 @@
       "feeUsd": 0.1,
       "qty": 221141.08801415304,
       "entryLiquidity": 26645.07,
-      "status": "OPEN",
-      "lastPrice": 7.448e-05,
-      "lastPriceAt": 1791819048089,
+      "status": "CLOSED",
+      "lastPrice": 4.115e-05,
+      "lastPriceAt": 1791821060325,
       "priceState": "LIVE",
-      "exitAt": null,
-      "exitPrice": null,
-      "exitReason": null,
-      "exitValueUsd": null,
-      "realizedPnl": null,
+      "exitAt": 1791821060326,
+      "exitPrice": 4.115e-05,
+      "exitReason": "-50% exit (-54.5%) \u2014 auto exit",
+      "exitValueUsd": 9.05,
+      "realizedPnl": -11.05,
       "rules": "auto-exit at 1.5x / -50% / rug (liquidity gone). no time limit. PAPER ONLY.",
       "limitOrderId": "limit_sig_mv5ahkij5e2ezo",
       "signalReferencePrice": 0.0001277,
       "limitPrice": 0.00010216,
-      "currentX": 0.823529411764706,
-      "exitInfo": null
+      "currentX": 0.4549977885891199,
+      "exitInfo": {
+        "at": 1791821060326,
+        "price": 4.115e-05,
+        "reason": "-50% exit (-54.5%) \u2014 auto exit",
+        "netUsd": 9.05,
+        "pnl": -11.05
+      }
     }
   ],
   "pendingOrders": [
@@ -594,6 +600,15 @@
       "signalPrice": 0.000717,
       "usd": 20,
       "reason": "v2: -20% limit, expires in 60 minutes; no cash/slot consumed"
+    },
+    {
+      "t": 1791821060326,
+      "type": "AUTO_EXIT",
+      "symbol": "Ploy",
+      "mint": "39fzweMMY4DRAgBQN61jbMGRoa2RBFTjAY3Vg95Epump",
+      "price": 4.115e-05,
+      "usd": 9.05,
+      "reason": "-50% exit (-54.5%) \u2014 auto exit"
     }
   ],
   "sourceHealth": [
@@ -602,7 +617,7 @@
       "label": "Dexscreener (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791819057264,
+      "lastSuccess": 1791821075540,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
@@ -616,7 +631,7 @@
       "label": "RugCheck (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791819056288,
+      "lastSuccess": 1791821074888,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
@@ -630,7 +645,7 @@
       "label": "Solana JSON-RPC (PublicNode)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791819056810,
+      "lastSuccess": 1791821075420,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
