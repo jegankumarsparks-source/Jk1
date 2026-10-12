@@ -246,8 +246,8 @@
       "qty": 44752.741105392706,
       "entryLiquidity": 64865.13,
       "status": "OPEN",
-      "lastPrice": 0.0004298,
-      "lastPriceAt": 1791837274055,
+      "lastPrice": 0.0004098,
+      "lastPriceAt": 1791838267700,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -556,6 +556,14 @@
       "signalPrice": 0.0002669,
       "usd": 20,
       "reason": "v2: -20% limit, expires in 60 minutes; no cash/slot consumed"
+    },
+    {
+      "t": 1791838268884,
+      "type": "LIMIT_CANCELLED",
+      "mint": "4hsJNmPComjTsbrDtoLjDMmsyZ1g2T1xy1xHnEE2pump",
+      "symbol": "BATONA",
+      "price": 0.0008448000000000002,
+      "reason": "60-minute signal expiry"
     }
   ],
   "pendingOrders": [
@@ -646,9 +654,11 @@
       "limitPrice": 0.0008448000000000002,
       "createdAt": 1791834629747,
       "expiresAt": 1791838229747,
-      "status": "PENDING",
+      "status": "CANCELLED",
       "score": 81,
-      "signalLiquidity": 90371.79
+      "signalLiquidity": 90371.79,
+      "cancelledAt": 1791838268884,
+      "cancelReason": "60-minute signal expiry"
     },
     {
       "id": "limit_sig_mv5pge0ngh2vbo",
@@ -686,10 +696,10 @@
     "minVolume24Usd": 50000
   },
   "limitExpiryMinutes": 60,
-  "eventsReported": 30,
-  "analysisCursor": 333,
-  "v2ScansCompleted": 131,
-  "asOf": "2026-10-12T20:34:41.666Z",
-  "equity": 157.21,
+  "eventsReported": 31,
+  "analysisCursor": 351,
+  "v2ScansCompleted": 134,
+  "asOf": "2026-10-12T20:51:17.783Z",
+  "equity": 156.32,
   "realizedPnl": -41.92
 }
