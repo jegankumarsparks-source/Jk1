@@ -86,7 +86,7 @@ a{color:var(--blu);text-decoration:none}
 <body>
 <header>
 <h1>⚡ SOLANA EARLY-WALLET RADAR</h1>
-<span class="hdr-pill b-dim" style="border:none">MAXIMUM EDITION · v1.2.0</span>
+<span class="hdr-pill b-dim" style="border:none">MAXIMUM EDITION · v1.3.0</span>
 <span id="scanPill" class="hdr-pill off">SCANNER IDLE</span>
 <span class="hdr-pill b-dim" style="border:none">PAPER ONLY</span>
 <div class="sub">Research + paper trading only. No real money, no wallet signing, no keys. Public keyless data — every field labelled by source &amp; freshness.</div>
@@ -116,7 +116,7 @@ a{color:var(--blu);text-decoration:none}
    Modules A–Q as separated classes in one file. No frameworks.
    ============================================================ */
 const BUILD_MARKER='JK-SR-MAX-V1';
-const APP_VERSION='1.2.0';
+const APP_VERSION='1.3.0';
 const SCORE_VERSION='score-v1.0';
 const RISK_POLICY_VERSION='risk-v1.0';
 const THRESHOLDS_VERSION='thresh-v1.0';
@@ -750,6 +750,8 @@ class SignalQualificationEngine{
     if(c.signalId&&S.signals.get(c.signalId)&&!S.signals.get(c.signalId).consumed){ return 'PAPER_SIGNAL'; }
     // ALL GATES PASSED -> create signal
     const sig={id:U.uid('sig'),mint:c.mint,symbol:c.market.symbol,name:c.market.name,createdAt:t,
+      signalPriceUsd:c.market.priceUsd,signalPriceAt:t,
+      signalPriceNote:'PAPER reference - exact price at signal time. Live price moves; this value never updates.',
       score:sc.total,scoreVersion:SCORE_VERSION,thresholdsVersion:THRESHOLDS_VERSION,riskPolicyVersion:RISK_POLICY_VERSION,
       evidence:{liquidityUsd:c.market.liquidityUsd,volume24:c.market.volume.h24,qualifiedWallets:qualW,
         riskVerdict:rk.verdict,pairAddress:c.market.pairAddress,dexId:c.market.dexId,
@@ -1146,6 +1148,12 @@ class DashboardRenderer{
       h+='<details><summary>score breakdown (inputs + evidence)</summary>'+c.score.components.map(x=>'<div class="kv"><span class="k">'+x.label+' <span class="small">'+x.dataState+'</span></span><span class="v">'+x.points+'/'+x.max+'</span></div><div class="small" style="padding:0 0 6px 8px">'+U.esc(x.evidence)+'</div>').join('')+'<div class="note">'+U.esc(c.score.disclaimer)+'</div></details>'; }
     if(c.rejectionReasons&&c.rejectionReasons.length)h+='<div class="note" style="border-color:var(--amb)">Decision reasons: '+c.rejectionReasons.map(U.esc).join(' · ')+'</div>';
     if(c.lastError)h+='<div class="note" style="border-color:var(--red)">Last source error: '+U.esc(c.lastError)+'</div>';
+    if(c.signalId&&S.signals.get(c.signalId)){ const g=S.signals.get(c.signalId);
+      if(g.signalPriceUsd!=null){ h+='<div style="border:1px dashed var(--pur);border-radius:10px;padding:7px 9px;margin-top:7px">'
+        +'<div class="row"><span class="badge b-pur">BUY ZONE</span><span class="small">paper reference · signal '+U.age(g.createdAt)+' ago</span></div>'
+        +'<div class="kv"><span class="k">signal-time rate (frozen)</span><span class="v" style="color:var(--pur)">$'+g.signalPriceUsd+'</span></div>'
+        +'<div class="kv"><span class="k">exit zone</span><span class="v">1.5x $'+(g.signalPriceUsd*1.5).toPrecision(4)+' · 2x $'+(g.signalPriceUsd*2).toPrecision(4)+' · 3x $'+(g.signalPriceUsd*3).toPrecision(4)+'</span></div>'
+        +'<div class="small" style="color:var(--pur)">PAPER ONLY · signal-time reference — live price may differ</div></div>'; } }
     h+='<div class="row" style="margin-top:8px">'+this.links(c)
       +'<button class="btn sm" onclick="BOOT.analyzeOne(\''+c.mint+'\')">analyze</button>'
       +'<button class="btn sm" onclick="DISCOVERY.refreshCandidate(\''+c.mint+'\').then(()=>RENDER.all()).catch(e=>U.toast(e.message))">refresh</button>'
@@ -1222,7 +1230,12 @@ DashboardRenderer.prototype.signals=function(){
     const c=S.candidates.get(g.mint)||{}; const ev=g.evidence||{};
     h+='<div class="card tok s-sig" id="sig-'+g.id+'"><div class="row"><b style="font-size:15px">'+U.esc(g.symbol||'(no symbol)')+'</b>'+this.badge('PAPER_SIGNAL','b-pur')+(g.consumed?this.badge('POSITION OPENED','b-live'):'')+'<span class="sp"></span><span class="scorebig">'+g.score+'</span></div>'
       +'<div class="mint">'+g.mint+'</div>'
-      +'<div class="kv"><span class="k">created</span><span class="v">'+new Date(g.createdAt).toLocaleString()+' ('+U.age(g.createdAt)+' ago)</span></div>'
+      +'<div class="kv"><span class="k">signal time</span><span class="v">'+new Date(g.createdAt).toLocaleString()+' ('+U.age(g.createdAt)+' ago)</span></div>'
+      +'<div class="kv" style="border:1px solid var(--pur);border-radius:8px;padding:6px 8px;margin:4px 0"><span class="k">🔒 signal-time rate (frozen)</span><span class="v" style="color:var(--pur)">'+(g.signalPriceUsd!=null?'$'+g.signalPriceUsd:'— (signal predates snapshot feature)')+'</span></div>'
+      +(function(){ const c2=S.candidates.get(g.mint); const lp=c2&&c2.market?c2.market.priceUsd:null; const la=c2&&c2.market?c2.market.observedAt:null;
+        return '<div class="kv"><span class="k">live price now</span><span class="v">'+(lp!=null?'$'+lp+' · '+U.age(la)+' ago':'— unavailable')+'</span></div>'; })()
+      +(g.signalPriceUsd!=null?'<div class="kv"><span class="k">EXIT ZONE targets (from frozen rate)</span><span class="v">1.5x $'+(g.signalPriceUsd*1.5).toPrecision(4)+' · 2x $'+(g.signalPriceUsd*2).toPrecision(4)+' · 3x $'+(g.signalPriceUsd*3).toPrecision(4)+'</span></div>':'')
+      +'<div class="small" style="color:var(--pur)">PAPER ONLY · signal-time reference price — live price may differ</div>'
       +'<div class="kv"><span class="k">liquidity / vol24</span><span class="v">'+U.fmt$(ev.liquidityUsd)+' / '+U.fmt$(ev.volume24)+'</span></div>'
       +'<div class="kv"><span class="k">qualified wallets</span><span class="v">'+(ev.qualifiedWallets!=null?ev.qualifiedWallets:'—')+'</span></div>'
       +'<div class="kv"><span class="k">risk verdict</span><span class="v">'+(ev.riskVerdict||'—')+'</span></div>'
