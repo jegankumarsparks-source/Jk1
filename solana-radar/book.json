@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "generatedAt": "2026-10-12T22:25:09.633082+00:00",
-  "lastCheckedAt": "2026-10-12T22:25:05.516Z",
+  "generatedAt": "2026-10-12T22:36:12.530917+00:00",
+  "lastCheckedAt": "2026-10-12T22:36:09.432Z",
   "paperOnly": true,
   "bank": 200,
   "cash": 140.47,
@@ -572,9 +572,11 @@
       "limitPrice": 0.002276,
       "createdAt": 1791840921452,
       "expiresAt": 1791844521452,
-      "status": "PENDING",
+      "status": "CANCELLED",
       "score": 85,
-      "signalLiquidity": 151331.79
+      "signalLiquidity": 151331.79,
+      "cancelledAt": 1791844558706,
+      "cancelReason": "60-minute signal expiry"
     },
     {
       "id": "limit_sig_mv5tleqq0l6wvj",
@@ -980,6 +982,14 @@
       "signalPrice": 0.0008806,
       "usd": 20,
       "reason": "v2: -20% limit, expires in 60 minutes; no cash/slot consumed"
+    },
+    {
+      "t": 1791844558706,
+      "type": "LIMIT_CANCELLED",
+      "mint": "CQCDTp8rsFV3PhaPeYjcCW5LdGTxi6jFx7eC3UXnpump",
+      "symbol": "CRAWLER",
+      "price": 0.002276,
+      "reason": "60-minute signal expiry"
     }
   ],
   "sourceHealth": [
@@ -988,7 +998,7 @@
       "label": "Dexscreener (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791843905356,
+      "lastSuccess": 1791844569238,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
@@ -1002,12 +1012,12 @@
       "label": "RugCheck (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791843904135,
+      "lastSuccess": 1791844568647,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
       "rateLimitCount": 0,
-      "requestCount": 5,
+      "requestCount": 4,
       "note": "Token risk report: authorities, holders, liquidity. topHolders may be null on mega-caps.",
       "backoffUntil": 0
     },
@@ -1016,7 +1026,7 @@
       "label": "Solana JSON-RPC (PublicNode)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791843905014,
+      "lastSuccess": 1791844569161,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
