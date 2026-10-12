@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "cash": 137.98,
+  "cash": 117.88,
   "positions": [
     {
       "id": "ap_mv4w49a0k5sr7f",
@@ -246,8 +246,8 @@
       "qty": 44752.741105392706,
       "entryLiquidity": 64865.13,
       "status": "OPEN",
-      "lastPrice": 0.0004098,
-      "lastPriceAt": 1791838267700,
+      "lastPrice": 0.0004619,
+      "lastPriceAt": 1791838597519,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -258,6 +258,31 @@
       "limitOrderId": "limit_sig_mv5kc4fml1bpwz",
       "signalReferencePrice": 0.000562,
       "limitPrice": 0.00044960000000000003
+    },
+    {
+      "id": "ap_mv5qfs2rugaupu",
+      "mint": "gogxD5VKgKFy5e3nFLyJQFSMntdYs6U64WYWwZ6pump",
+      "symbol": "COINPUTER",
+      "signalId": "sig_mv5pnhucvkoqqi",
+      "entryAt": 1791838599651,
+      "entryRate": 0.0001676,
+      "entrySizeUsd": 20,
+      "feeUsd": 0.1,
+      "qty": 119331.74224343675,
+      "entryLiquidity": 35208.21,
+      "status": "OPEN",
+      "lastPrice": 0.0001676,
+      "lastPriceAt": 1791838599651,
+      "priceState": "LIVE",
+      "exitAt": null,
+      "exitPrice": null,
+      "exitReason": null,
+      "exitValueUsd": null,
+      "realizedPnl": null,
+      "rules": "auto-exit at 1.5x / -50% / rug (liquidity gone). no time limit. PAPER ONLY.",
+      "limitOrderId": "limit_sig_mv5pnhucvkoqqi",
+      "signalReferencePrice": 0.0002669,
+      "limitPrice": 0.00021352
     }
   ],
   "history": [
@@ -564,6 +589,16 @@
       "symbol": "BATONA",
       "price": 0.0008448000000000002,
       "reason": "60-minute signal expiry"
+    },
+    {
+      "t": 1791838599651,
+      "type": "AUTO_ENTRY",
+      "symbol": "COINPUTER",
+      "mint": "gogxD5VKgKFy5e3nFLyJQFSMntdYs6U64WYWwZ6pump",
+      "price": 0.0001676,
+      "usd": 20,
+      "fee": 0.1,
+      "reason": "limit fill at later real check price <= -20% signal limit"
     }
   ],
   "pendingOrders": [
@@ -682,9 +717,12 @@
       "limitPrice": 0.00021352,
       "createdAt": 1791837280020,
       "expiresAt": 1791840880020,
-      "status": "PENDING",
+      "status": "FILLED",
       "score": 74,
-      "signalLiquidity": 44732.91
+      "signalLiquidity": 44732.91,
+      "filledAt": 1791838599651,
+      "fillPrice": 0.0001676,
+      "positionId": "ap_mv5qfs2rugaupu"
     }
   ],
   "rulesVersion": "dip-limit-v2",
@@ -696,10 +734,10 @@
     "minVolume24Usd": 50000
   },
   "limitExpiryMinutes": 60,
-  "eventsReported": 31,
-  "analysisCursor": 351,
-  "v2ScansCompleted": 134,
-  "asOf": "2026-10-12T20:51:17.783Z",
-  "equity": 156.32,
+  "eventsReported": 32,
+  "analysisCursor": 357,
+  "v2ScansCompleted": 135,
+  "asOf": "2026-10-12T20:56:45.033Z",
+  "equity": 158.55,
   "realizedPnl": -41.92
 }
