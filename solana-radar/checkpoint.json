@@ -246,8 +246,8 @@
       "qty": 44752.741105392706,
       "entryLiquidity": 64865.13,
       "status": "OPEN",
-      "lastPrice": 0.0004619,
-      "lastPriceAt": 1791838597519,
+      "lastPrice": 0.0003242,
+      "lastPriceAt": 1791840251503,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -271,8 +271,8 @@
       "qty": 119331.74224343675,
       "entryLiquidity": 35208.21,
       "status": "OPEN",
-      "lastPrice": 0.0001676,
-      "lastPriceAt": 1791838599651,
+      "lastPrice": 0.0001436,
+      "lastPriceAt": 1791840251525,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -599,6 +599,16 @@
       "usd": 20,
       "fee": 0.1,
       "reason": "limit fill at later real check price <= -20% signal limit"
+    },
+    {
+      "t": 1791840257348,
+      "type": "LIMIT_PLACED",
+      "mint": "AjpPZo85HmHrGTcC4hrVRwMR4WteBywRqZWZEkdFpump",
+      "symbol": "DOGGO",
+      "price": 0.0008240000000000001,
+      "signalPrice": 0.00103,
+      "usd": 20,
+      "reason": "v2: -20% limit, expires in 60 minutes; no cash/slot consumed"
     }
   ],
   "pendingOrders": [
@@ -723,6 +733,19 @@
       "filledAt": 1791838599651,
       "fillPrice": 0.0001676,
       "positionId": "ap_mv5qfs2rugaupu"
+    },
+    {
+      "id": "limit_sig_mv5rfb5wy9o03x",
+      "signalId": "sig_mv5rfb5wy9o03x",
+      "mint": "AjpPZo85HmHrGTcC4hrVRwMR4WteBywRqZWZEkdFpump",
+      "symbol": "DOGGO",
+      "signalPrice": 0.00103,
+      "limitPrice": 0.0008240000000000001,
+      "createdAt": 1791840257347,
+      "expiresAt": 1791843857347,
+      "status": "PENDING",
+      "score": 81,
+      "signalLiquidity": 89595.8
     }
   ],
   "rulesVersion": "dip-limit-v2",
@@ -734,10 +757,10 @@
     "minVolume24Usd": 50000
   },
   "limitExpiryMinutes": 60,
-  "eventsReported": 32,
-  "analysisCursor": 357,
-  "v2ScansCompleted": 135,
-  "asOf": "2026-10-12T20:56:45.033Z",
-  "equity": 158.55,
+  "eventsReported": 33,
+  "analysisCursor": 387,
+  "v2ScansCompleted": 140,
+  "asOf": "2026-10-12T21:24:20.188Z",
+  "equity": 149.52,
   "realizedPnl": -41.92
 }
