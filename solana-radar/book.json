@@ -1,11 +1,11 @@
 {
   "schema": 1,
-  "generatedAt": "2026-10-12T14:30:51.684433+00:00",
-  "lastCheckedAt": "2026-10-12T14:30:47.821Z",
+  "generatedAt": "2026-10-12T14:47:24.322670+00:00",
+  "lastCheckedAt": "2026-10-12T14:47:20.196Z",
   "paperOnly": true,
   "bank": 200,
   "cash": 139.09,
-  "equity": 174.96,
+  "equity": 179.48,
   "realizedPnl": -20.71,
   "slotsUsed": 2,
   "maxSlots": 6,
@@ -268,8 +268,8 @@
       "qty": 82440.23083264634,
       "entryLiquidity": 46181.15,
       "status": "OPEN",
-      "lastPrice": 0.0002037,
-      "lastPriceAt": 1791815438174,
+      "lastPrice": 0.0002516,
+      "lastPriceAt": 1791816431293,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -280,7 +280,7 @@
       "limitOrderId": "limit_sig_mv56qoka87soeq",
       "signalReferencePrice": 0.0003209,
       "limitPrice": 0.00025672,
-      "currentX": 0.8396537510305029,
+      "currentX": 1.037098103874691,
       "exitInfo": null
     },
     {
@@ -295,8 +295,8 @@
       "qty": 221141.08801415304,
       "entryLiquidity": 26645.07,
       "status": "OPEN",
-      "lastPrice": 8.625e-05,
-      "lastPriceAt": 1791815438202,
+      "lastPrice": 8.883e-05,
+      "lastPriceAt": 1791816431370,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -307,7 +307,7 @@
       "limitOrderId": "limit_sig_mv5ahkij5e2ezo",
       "signalReferencePrice": 0.0001277,
       "limitPrice": 0.00010216,
-      "currentX": 0.953670942061035,
+      "currentX": 0.9821981424148608,
       "exitInfo": null
     }
   ],
@@ -353,9 +353,11 @@
       "limitPrice": 8.296e-05,
       "createdAt": 1791815447002,
       "expiresAt": 1791819047002,
-      "status": "PENDING",
+      "status": "CANCELLED",
       "score": 72.5,
-      "signalLiquidity": 28511.65
+      "signalLiquidity": 28511.65,
+      "cancelledAt": 1791816432500,
+      "cancelReason": "current tightened qualification failed"
     }
   ],
   "rulesVersion": "dip-limit-v2",
@@ -561,6 +563,14 @@
       "signalPrice": 0.0001037,
       "usd": 20,
       "reason": "v2: -20% limit, expires in 60 minutes; no cash/slot consumed"
+    },
+    {
+      "t": 1791816432500,
+      "type": "LIMIT_CANCELLED",
+      "mint": "2WvvNt9P7RYJzSPE7q2mV1ySrm97ddbf5YjfkAX5pump",
+      "symbol": "MINU",
+      "price": 8.296e-05,
+      "reason": "current tightened qualification failed"
     }
   ],
   "sourceHealth": [
@@ -569,7 +579,7 @@
       "label": "Dexscreener (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791815447769,
+      "lastSuccess": 1791816440144,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
@@ -583,12 +593,12 @@
       "label": "RugCheck (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791815447250,
+      "lastSuccess": 1791816439628,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
       "rateLimitCount": 0,
-      "requestCount": 6,
+      "requestCount": 5,
       "note": "Token risk report: authorities, holders, liquidity. topHolders may be null on mega-caps.",
       "backoffUntil": 0
     },
@@ -597,7 +607,7 @@
       "label": "Solana JSON-RPC (PublicNode)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791815447712,
+      "lastSuccess": 1791816440123,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
