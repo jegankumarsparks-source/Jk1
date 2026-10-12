@@ -1,13 +1,13 @@
 {
   "schema": 1,
-  "generatedAt": "2026-10-12T18:05:54.788441+00:00",
-  "lastCheckedAt": "2026-10-12T18:05:52.378Z",
+  "generatedAt": "2026-10-12T18:16:58.913531+00:00",
+  "lastCheckedAt": "2026-10-12T18:16:56.577Z",
   "paperOnly": true,
   "bank": 200,
-  "cash": 158.08,
-  "equity": 158.08,
+  "cash": 137.98,
+  "equity": 157.98,
   "realizedPnl": -41.92,
-  "slotsUsed": 0,
+  "slotsUsed": 1,
   "maxSlots": 6,
   "positions": [
     {
@@ -321,6 +321,33 @@
         "netUsd": 9.05,
         "pnl": -11.05
       }
+    },
+    {
+      "id": "ap_mv5kq3hmgwoz4c",
+      "mint": "98AG3zJUawbvDnpgbDhmxpMKva43vtgPLLPSXqo1pump",
+      "symbol": "HIRE",
+      "signalId": "sig_mv5kc4fml1bpwz",
+      "entryAt": 1791829003306,
+      "entryRate": 0.0004469,
+      "entrySizeUsd": 20,
+      "feeUsd": 0.1,
+      "qty": 44752.741105392706,
+      "entryLiquidity": 64865.13,
+      "status": "OPEN",
+      "lastPrice": 0.0004469,
+      "lastPriceAt": 1791829003306,
+      "priceState": "LIVE",
+      "exitAt": null,
+      "exitPrice": null,
+      "exitReason": null,
+      "exitValueUsd": null,
+      "realizedPnl": null,
+      "rules": "auto-exit at 1.5x / -50% / rug (liquidity gone). no time limit. PAPER ONLY.",
+      "limitOrderId": "limit_sig_mv5kc4fml1bpwz",
+      "signalReferencePrice": 0.000562,
+      "limitPrice": 0.00044960000000000003,
+      "currentX": 1.0,
+      "exitInfo": null
     }
   ],
   "pendingOrders": [
@@ -395,9 +422,12 @@
       "limitPrice": 0.00044960000000000003,
       "createdAt": 1791828351346,
       "expiresAt": 1791831951346,
-      "status": "PENDING",
+      "status": "FILLED",
       "score": 72,
-      "signalLiquidity": 73231.95
+      "signalLiquidity": 73231.95,
+      "filledAt": 1791829003306,
+      "fillPrice": 0.0004469,
+      "positionId": "ap_mv5kq3hmgwoz4c"
     }
   ],
   "rulesVersion": "dip-limit-v2",
@@ -657,6 +687,16 @@
       "signalPrice": 0.000562,
       "usd": 20,
       "reason": "v2: -20% limit, expires in 60 minutes; no cash/slot consumed"
+    },
+    {
+      "t": 1791829003306,
+      "type": "AUTO_ENTRY",
+      "symbol": "HIRE",
+      "mint": "98AG3zJUawbvDnpgbDhmxpMKva43vtgPLLPSXqo1pump",
+      "price": 0.0004469,
+      "usd": 20,
+      "fee": 0.1,
+      "reason": "limit fill at later real check price <= -20% signal limit"
     }
   ],
   "sourceHealth": [
@@ -665,7 +705,7 @@
       "label": "Dexscreener (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791828352286,
+      "lastSuccess": 1791829016464,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
@@ -679,7 +719,7 @@
       "label": "RugCheck (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791828351670,
+      "lastSuccess": 1791829015794,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
@@ -693,7 +733,7 @@
       "label": "Solana JSON-RPC (PublicNode)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791828352218,
+      "lastSuccess": 1791829016334,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
