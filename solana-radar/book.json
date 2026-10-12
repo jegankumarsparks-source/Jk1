@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "generatedAt": "2026-10-12T08:38:16.118930+00:00",
-  "lastCheckedAt": "2026-10-12T08:38:08.400Z",
+  "generatedAt": "2026-10-12T11:45:25.088911+00:00",
+  "lastCheckedAt": "2026-10-12T11:45:21.671Z",
   "paperOnly": true,
   "bank": 200,
   "cash": 179.29,
@@ -257,7 +257,21 @@
       }
     }
   ],
-  "pendingOrders": [],
+  "pendingOrders": [
+    {
+      "id": "limit_sig_mv56qoka87soeq",
+      "signalId": "sig_mv56qoka87soeq",
+      "mint": "HT1hPomeMjNM81XebDHLgiBr3upQCHSgWLmeoyU7pump",
+      "symbol": "OVERDRIVE",
+      "signalPrice": 0.0003209,
+      "limitPrice": 0.00025672,
+      "createdAt": 1791805515994,
+      "expiresAt": 1791809115994,
+      "status": "PENDING",
+      "score": 76.5,
+      "signalLiquidity": 52877.64
+    }
+  ],
   "rulesVersion": "dip-limit-v2",
   "historyTail": [
     {
@@ -411,6 +425,16 @@
       "price": 0.0001225,
       "usd": 24.3,
       "reason": "USER REQUEST: close all at current real observation price"
+    },
+    {
+      "t": 1791805515994,
+      "type": "LIMIT_PLACED",
+      "mint": "HT1hPomeMjNM81XebDHLgiBr3upQCHSgWLmeoyU7pump",
+      "symbol": "OVERDRIVE",
+      "price": 0.00025672,
+      "signalPrice": 0.0003209,
+      "usd": 20,
+      "reason": "v2: -20% limit, expires in 60 minutes; no cash/slot consumed"
     }
   ],
   "sourceHealth": [
@@ -419,7 +443,7 @@
       "label": "Dexscreener (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791794288373,
+      "lastSuccess": 1791805521625,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
@@ -433,12 +457,12 @@
       "label": "RugCheck (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791794287802,
+      "lastSuccess": 1791805520777,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
       "rateLimitCount": 0,
-      "requestCount": 5,
+      "requestCount": 6,
       "note": "Token risk report: authorities, holders, liquidity. topHolders may be null on mega-caps.",
       "backoffUntil": 0
     },
@@ -447,7 +471,7 @@
       "label": "Solana JSON-RPC (PublicNode)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791794288263,
+      "lastSuccess": 1791805521605,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
