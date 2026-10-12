@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "cash": 158.08,
+  "cash": 137.98,
   "positions": [
     {
       "id": "ap_mv4w49a0k5sr7f",
@@ -233,6 +233,31 @@
       "limitOrderId": "limit_sig_mv5ahkij5e2ezo",
       "signalReferencePrice": 0.0001277,
       "limitPrice": 0.00010216
+    },
+    {
+      "id": "ap_mv5kq3hmgwoz4c",
+      "mint": "98AG3zJUawbvDnpgbDhmxpMKva43vtgPLLPSXqo1pump",
+      "symbol": "HIRE",
+      "signalId": "sig_mv5kc4fml1bpwz",
+      "entryAt": 1791829003306,
+      "entryRate": 0.0004469,
+      "entrySizeUsd": 20,
+      "feeUsd": 0.1,
+      "qty": 44752.741105392706,
+      "entryLiquidity": 64865.13,
+      "status": "OPEN",
+      "lastPrice": 0.0004469,
+      "lastPriceAt": 1791829003306,
+      "priceState": "LIVE",
+      "exitAt": null,
+      "exitPrice": null,
+      "exitReason": null,
+      "exitValueUsd": null,
+      "realizedPnl": null,
+      "rules": "auto-exit at 1.5x / -50% / rug (liquidity gone). no time limit. PAPER ONLY.",
+      "limitOrderId": "limit_sig_mv5kc4fml1bpwz",
+      "signalReferencePrice": 0.000562,
+      "limitPrice": 0.00044960000000000003
     }
   ],
   "history": [
@@ -491,6 +516,16 @@
       "signalPrice": 0.000562,
       "usd": 20,
       "reason": "v2: -20% limit, expires in 60 minutes; no cash/slot consumed"
+    },
+    {
+      "t": 1791829003306,
+      "type": "AUTO_ENTRY",
+      "symbol": "HIRE",
+      "mint": "98AG3zJUawbvDnpgbDhmxpMKva43vtgPLLPSXqo1pump",
+      "price": 0.0004469,
+      "usd": 20,
+      "fee": 0.1,
+      "reason": "limit fill at later real check price <= -20% signal limit"
     }
   ],
   "pendingOrders": [
@@ -565,9 +600,12 @@
       "limitPrice": 0.00044960000000000003,
       "createdAt": 1791828351346,
       "expiresAt": 1791831951346,
-      "status": "PENDING",
+      "status": "FILLED",
       "score": 72,
-      "signalLiquidity": 73231.95
+      "signalLiquidity": 73231.95,
+      "filledAt": 1791829003306,
+      "fillPrice": 0.0004469,
+      "positionId": "ap_mv5kq3hmgwoz4c"
     }
   ],
   "rulesVersion": "dip-limit-v2",
@@ -579,10 +617,10 @@
     "minVolume24Usd": 50000
   },
   "limitExpiryMinutes": 60,
-  "eventsReported": 26,
-  "analysisCursor": 171,
-  "v2ScansCompleted": 104,
-  "asOf": "2026-10-12T18:05:52.378Z",
-  "equity": 158.08,
+  "eventsReported": 27,
+  "analysisCursor": 183,
+  "v2ScansCompleted": 106,
+  "asOf": "2026-10-12T18:16:56.577Z",
+  "equity": 157.98,
   "realizedPnl": -41.92
 }
