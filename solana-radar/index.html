@@ -1378,7 +1378,10 @@ DashboardRenderer.prototype.settings=function(){
 /* ---------------- 11b. AUTO PAPER TRADE ---------------- */
 DashboardRenderer.prototype.autotrade=function(){
   const el=document.getElementById('page-autotrade'); const st=AUTO.stats();
-  let h='<div class="note">PAPER ONLY — virtual $'+S.settings.startCapital+' bank, never real money, no wallet signing. Runs only while this tab is open. Exits are evaluated on real public price/liquidity data; missing price = no action.</div>';
+  SRVBOOK.refresh();
+  let h='<div class="note">PAPER ONLY — two separate virtual books: a 24/7 SERVER book (top) and the local auto book on THIS DEVICE (bottom). Never real money, no wallet signing.</div>';
+  h+=this.serverbook();
+  h+='<div class="note" style="text-align:center;margin:16px 0 4px;font-weight:700">📱 THIS DEVICE (local auto book — runs only while this tab is open)</div>';
   h+='<div class="kpis">'
     +'<div class="kpi"><div class="v">'+U.fmt$(AUTO.cash())+'</div><div class="l">auto cash</div></div>'
     +'<div class="kpi '+(st.equity>=S.settings.startCapital?'':'bad')+'"><div class="v">'+U.fmt$(st.equity)+(st.valuationsComplete?'':'*')+'</div><div class="l">equity</div></div>'
@@ -1418,6 +1421,55 @@ DashboardRenderer.prototype.autotrade=function(){
     +'<button class="btn red sm" onclick="BOOT.resetAuto()">reset auto book</button></div>'
     +'<div class="small">Reset wipes auto positions/history and refills the virtual $'+S.settings.startCapital+' bank. Cannot touch the manual portfolio.</div></div>';
   el.innerHTML=h;
+};
+
+/* ---------------- 11c. 24/7 SERVER BOOK (read-only mirror) ---------------- */
+DashboardRenderer.prototype.serverbook=function(){
+  const b=SRVBOOK;
+  let h='<div class="card" style="border-color:var(--pur)"><h3>🛰 24/7 SERVER BOOK (paper only)</h3>';
+  h+='<div class="small">runs 24/7 on a server · this app just mirrors its book.json (updated on every entry/exit + daily) · virtual money only</div>';
+  if(b.state==='loading'||b.state==='idle'){ h+='<div class="small" style="padding:8px 0">contacting server book…</div></div>'; return h; }
+  if(b.state==='missing'){ h+='<div class="note" style="margin-top:8px">book.json NOT PUBLISHED YET — no server state committed so far. This section fills in automatically once it is. Nothing shown rather than fake data.</div></div>'; return h; }
+  if(b.state==='error'&&!b.data){ h+='<div class="note" style="margin-top:8px">server book load FAILED ('+U.esc(String(b.error))+'). Nothing shown rather than guessed data. Will retry.</div></div>'; return h; }
+  const d=b.data; const gen=b.ts(d.generatedAt);
+  h+='<div class="kv"><span class="k">last book update</span><span class="v">'+(gen!=null?new Date(gen).toLocaleString()+' ('+U.age(gen)+' ago)':'unknown')+'</span></div>';
+  if(gen!=null&&(U.now()-gen)>26*3600*1000)h+='<div class="small" style="color:var(--amb)">No daily checkpoint in over 26h — server may be down. Shown as last known state.</div>';
+  else h+='<div class="small">Book values below are as of that update (the server writes on trade events, not every minute). LIVE prices come from this device, labeled with their own age.</div>';
+  if(b.state==='error')h+='<div class="small" style="color:var(--amb)">latest refresh failed ('+U.esc(String(b.error))+') — showing last good snapshot, labeled by its own time.</div>';
+  h+='<div class="kpis">'
+    +'<div class="kpi"><div class="v">'+U.fmt$(d.bank!=null?d.bank:0)+'</div><div class="l">server bank</div></div>'
+    +'<div class="kpi"><div class="v">'+U.fmt$(d.cash!=null?d.cash:0)+'</div><div class="l">server cash</div></div>'
+    +'<div class="kpi '+(d.equity>=d.bank?'':'bad')+'"><div class="v">'+U.fmt$(d.equity!=null?d.equity:0)+'</div><div class="l">equity @ update</div></div>'
+    +'<div class="kpi '+((d.realizedPnl||0)>=0?'':'bad')+'"><div class="v">'+((d.realizedPnl||0)>=0?'+':'')+U.fmt$(d.realizedPnl||0)+'</div><div class="l">realized P&L</div></div></div>';
+  if(d.slotsUsed!=null)h+='<div class="kv"><span class="k">slots used</span><span class="v">'+d.slotsUsed+(d.maxSlots!=null?' / '+d.maxSlots:'')+'</span></div>';
+  const pos=Array.isArray(d.positions)?d.positions:[];
+  h+='<h3 style="margin-top:10px">server positions ('+pos.length+')</h3>';
+  if(!pos.length)h+='<div class="small">none open</div>';
+  for(const p of pos){
+    const open=(p.status||'').toUpperCase()!=='CLOSED';
+    const lp=p.mint?b.live[p.mint]:null;
+    const liveX=(open&&lp&&p.entryRate)?(lp.price/p.entryRate):null;
+    h+='<div class="tok" style="border:1px solid var(--line);border-radius:10px;padding:8px;margin:8px 0">'
+      +'<div class="row"><b>'+U.esc(p.symbol||'(no symbol)')+'</b>'+this.badge(open?'OPEN':'CLOSED',open?'b-live':'b-dim')+this.badge('PAPER','b-dim')+'<span class="sp"></span>'+(liveX!=null?'<b style="color:'+(liveX>=1?'var(--grn)':'var(--red)')+'">'+liveX.toFixed(3)+'x LIVE</b>':(p.currentX!=null?'<b>'+(+p.currentX).toFixed(3)+'x @ update</b>':''))+'</div>'
+      +(p.mint?'<div class="mint">'+p.mint+'</div>':'')
+      +'<div class="kv"><span class="k">entry rate (frozen)</span><span class="v">'+(p.entryRate!=null?'$'+p.entryRate:'—')+(p.entryAt?' · '+new Date(b.ts(p.entryAt)).toLocaleString():'')+'</span></div>'
+      +(open?'<div class="kv"><span class="k">live price NOW (this device)</span><span class="v">'+(lp?'$'+lp.price+' · '+U.age(lp.at)+' ago':'fetching… (Dexscreener)')+'</span></div>':'')
+      +'<div class="kv"><span class="k">price in book snapshot</span><span class="v">'+(p.lastPrice!=null?'$'+p.lastPrice:'—')+(p.lastPriceAt?' · as of '+new Date(b.ts(p.lastPriceAt)).toLocaleString():'')+'</span></div>'
+      +(p.exitInfo?'<div class="small">'+U.esc(String(p.exitInfo))+'</div>':'')
+      +(p.exitReason?'<div class="small">'+U.esc(String(p.exitReason))+'</div>':'')
+      +'</div>';
+  }
+  const hist=Array.isArray(d.historyTail)?d.historyTail.slice(-8).reverse():[];
+  h+='<h3 style="margin-top:10px">recent server history</h3>';
+  if(!hist.length)h+='<div class="small">none yet</div>';
+  for(const e of hist){
+    const et=b.ts(e&&e.t); const txt=(e&&(e.reason||e.type||e.text))||'event';
+    h+='<div class="kv"><span class="k small">'+(et?new Date(et).toLocaleString():'')+'</span><span class="v small">'+U.esc(String(e&&e.type||''))+(e&&e.symbol?' · '+U.esc(String(e.symbol)):'')+(e&&e.usd!=null?' · '+U.fmt$(e.usd):'')+'<br>'+U.esc(String(txt))+'</span></div>';
+  }
+  if(d.valuationNote)h+='<div class="small" style="margin-top:6px">'+U.esc(String(d.valuationNote))+'</div>';
+  if(Array.isArray(d.sourceHealth)&&d.sourceHealth.length)h+='<div class="kv"><span class="k">server data sources</span><span class="v small">'+d.sourceHealth.map(s2=>U.esc(s2.id)+': '+U.esc(s2.status)).join(' · ')+'</span></div>';
+  h+='</div>';
+  return h;
 };
 
 /* ============================================================
@@ -1636,6 +1688,45 @@ class AutoTradeEngine{
   }
 }
 const AUTO=new AutoTradeEngine();
+
+/* ============================================================
+   S. SRVBOOK — read-only mirror of the 24/7 server-side paper
+   book published at ./book.json (committed by us when the trade
+   agent sends updates: on every entry/exit + daily). The book
+   file ages between events — its generatedAt is always labeled
+   "last book update", never "live". This device fetches CURRENT
+   prices for open mints itself (Dexscreener) with their own
+   freshness labels. Missing/failed file states are honest.
+   ============================================================ */
+const SRVBOOK={state:'idle',data:null,fetchedAt:0,error:null,lastTry:0,live:{},liveAt:0,
+  ts(g){ if(g==null)return null; if(typeof g==='number')return g>1e12?g:g*1000; const t=Date.parse(g); return isNaN(t)?null:t; },
+  async refresh(force){
+    const now=U.now();
+    if(!force&&now-this.lastTry<60000)return; // throttle: at most one fetch/min
+    this.lastTry=now; if(!this.data)this.state='loading';
+    try{
+      const r=await fetch('book.json?ts='+now,{cache:'no-store'});
+      if(r.status===404){ this.state='missing'; this.data=null; this.error=null; }
+      else if(!r.ok){ this.state='error'; this.error='HTTP '+r.status; }
+      else{ const j=await r.json(); this.data=j; this.state='ok'; this.error=null; }
+      this.fetchedAt=U.now();
+    }catch(e){ this.state='error'; this.error=String((e&&e.message)||e); }
+    this.refreshLive();
+    if(typeof S!=='undefined'&&S.ui&&S.ui.page==='autotrade')try{RENDER.all();}catch(e){}
+  },
+  /* current prices for open server positions, fetched by THIS device */
+  async refreshLive(force){
+    if(!this.data)return;
+    const mints=[...new Set((this.data.positions||[]).filter(p=>(p.status||'').toUpperCase()!=='CLOSED'&&p.mint).map(p=>p.mint))];
+    if(!mints.length)return;
+    const now=U.now(); if(!force&&now-this.liveAt<45000)return; this.liveAt=now;
+    try{
+      const pr=await DISCOVERY.refreshPricesFor(mints);
+      for(const m of Object.keys(pr||{}))if(pr[m]&&pr[m].ok&&pr[m].priceUsd!=null)this.live[m]={price:pr[m].priceUsd,at:pr[m].observedAt||U.now()};
+      if(S.ui&&S.ui.page==='autotrade')try{RENDER.all();}catch(e){}
+    }catch(e){ /* keep old live marks, they carry their own timestamps */ }
+  }
+};
 
 </script>
 </body>
