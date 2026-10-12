@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "cash": 117.88,
+  "cash": 97.78,
   "positions": [
     {
       "id": "ap_mv4w49a0k5sr7f",
@@ -246,8 +246,8 @@
       "qty": 44752.741105392706,
       "entryLiquidity": 64865.13,
       "status": "OPEN",
-      "lastPrice": 0.0003242,
-      "lastPriceAt": 1791840251503,
+      "lastPrice": 0.0002897,
+      "lastPriceAt": 1791840583255,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -270,9 +270,34 @@
       "feeUsd": 0.1,
       "qty": 119331.74224343675,
       "entryLiquidity": 35208.21,
+      "status": "CLOSED",
+      "lastPrice": 2.758e-06,
+      "lastPriceAt": 1791840583336,
+      "priceState": "LIVE",
+      "exitAt": 1791840583337,
+      "exitPrice": 0,
+      "exitReason": "RUG PULL \u2014 liquidity collapsed ($35.2k -> $2.9k, real data). Full position lost.",
+      "exitValueUsd": 0,
+      "realizedPnl": -20.1,
+      "rules": "auto-exit at 1.5x / -50% / rug (liquidity gone). no time limit. PAPER ONLY.",
+      "limitOrderId": "limit_sig_mv5pnhucvkoqqi",
+      "signalReferencePrice": 0.0002669,
+      "limitPrice": 0.00021352
+    },
+    {
+      "id": "ap_mv5rmc4x053lib",
+      "mint": "AjpPZo85HmHrGTcC4hrVRwMR4WteBywRqZWZEkdFpump",
+      "symbol": "DOGGO",
+      "signalId": "sig_mv5rfb5wy9o03x",
+      "entryAt": 1791840585201,
+      "entryRate": 0.0007328,
+      "entrySizeUsd": 20,
+      "feeUsd": 0.1,
+      "qty": 27292.576419213972,
+      "entryLiquidity": 75373.74,
       "status": "OPEN",
-      "lastPrice": 0.0001436,
-      "lastPriceAt": 1791840251525,
+      "lastPrice": 0.0007328,
+      "lastPriceAt": 1791840585201,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -280,9 +305,9 @@
       "exitValueUsd": null,
       "realizedPnl": null,
       "rules": "auto-exit at 1.5x / -50% / rug (liquidity gone). no time limit. PAPER ONLY.",
-      "limitOrderId": "limit_sig_mv5pnhucvkoqqi",
-      "signalReferencePrice": 0.0002669,
-      "limitPrice": 0.00021352
+      "limitOrderId": "limit_sig_mv5rfb5wy9o03x",
+      "signalReferencePrice": 0.00103,
+      "limitPrice": 0.0008240000000000001
     }
   ],
   "history": [
@@ -609,6 +634,33 @@
       "signalPrice": 0.00103,
       "usd": 20,
       "reason": "v2: -20% limit, expires in 60 minutes; no cash/slot consumed"
+    },
+    {
+      "t": 1791840583337,
+      "type": "RUG_LOSS",
+      "symbol": "COINPUTER",
+      "mint": "gogxD5VKgKFy5e3nFLyJQFSMntdYs6U64WYWwZ6pump",
+      "price": 0,
+      "usd": 0,
+      "reason": "RUG PULL \u2014 liquidity collapsed ($35.2k -> $2.9k, real data). Full position lost."
+    },
+    {
+      "t": 1791840584386,
+      "type": "LIMIT_CANCELLED",
+      "mint": "hKyXZVKmrBDPhKKhdSaaGf1qrFwUkwjqrdzRc63farm",
+      "symbol": "FARM",
+      "price": 5.1216000000000006e-05,
+      "reason": "60-minute signal expiry"
+    },
+    {
+      "t": 1791840585201,
+      "type": "AUTO_ENTRY",
+      "symbol": "DOGGO",
+      "mint": "AjpPZo85HmHrGTcC4hrVRwMR4WteBywRqZWZEkdFpump",
+      "price": 0.0007328,
+      "usd": 20,
+      "fee": 0.1,
+      "reason": "limit fill at later real check price <= -20% signal limit"
     }
   ],
   "pendingOrders": [
@@ -714,9 +766,11 @@
       "limitPrice": 5.1216000000000006e-05,
       "createdAt": 1791836948471,
       "expiresAt": 1791840548471,
-      "status": "PENDING",
+      "status": "CANCELLED",
       "score": 72,
-      "signalLiquidity": 77720.43
+      "signalLiquidity": 77720.43,
+      "cancelledAt": 1791840584386,
+      "cancelReason": "60-minute signal expiry"
     },
     {
       "id": "limit_sig_mv5pnhucvkoqqi",
@@ -743,9 +797,12 @@
       "limitPrice": 0.0008240000000000001,
       "createdAt": 1791840257347,
       "expiresAt": 1791843857347,
-      "status": "PENDING",
+      "status": "FILLED",
       "score": 81,
-      "signalLiquidity": 89595.8
+      "signalLiquidity": 89595.8,
+      "filledAt": 1791840585201,
+      "fillPrice": 0.0007328,
+      "positionId": "ap_mv5rmc4x053lib"
     }
   ],
   "rulesVersion": "dip-limit-v2",
@@ -757,10 +814,10 @@
     "minVolume24Usd": 50000
   },
   "limitExpiryMinutes": 60,
-  "eventsReported": 33,
-  "analysisCursor": 387,
-  "v2ScansCompleted": 140,
-  "asOf": "2026-10-12T21:24:20.188Z",
-  "equity": 149.52,
-  "realizedPnl": -41.92
+  "eventsReported": 34,
+  "analysisCursor": 393,
+  "v2ScansCompleted": 141,
+  "asOf": "2026-10-12T21:29:55.382Z",
+  "equity": 130.74,
+  "realizedPnl": -62.02
 }
