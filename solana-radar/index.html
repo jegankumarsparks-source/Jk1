@@ -1215,18 +1215,18 @@ DashboardRenderer.prototype.signals=function(){
   let h='<div class="note">PAPER ONLY — "Live" means generated from live public data, never real-money execution. No auto-trading, no wallet signing.</div>';
   if(!list.length)h+='<div class="empty"><b>NO QUALIFIED SIGNAL</b><br>No candidate has passed every mandatory gate yet. This is an honest empty state, not a missing feature. The scanner keeps evaluating new discoveries.</div>';
   for(const g of list){
-    const c=S.candidates.get(g.mint)||{};
+    const c=S.candidates.get(g.mint)||{}; const ev=g.evidence||{};
     h+='<div class="card tok s-sig"><div class="row"><b style="font-size:15px">'+U.esc(g.symbol||'(no symbol)')+'</b>'+this.badge('PAPER_SIGNAL','b-pur')+(g.consumed?this.badge('POSITION OPENED','b-live'):'')+'<span class="sp"></span><span class="scorebig">'+g.score+'</span></div>'
       +'<div class="mint">'+g.mint+'</div>'
       +'<div class="kv"><span class="k">created</span><span class="v">'+new Date(g.createdAt).toLocaleString()+' ('+U.age(g.createdAt)+' ago)</span></div>'
-      +'<div class="kv"><span class="k">liquidity / vol24</span><span class="v">'+U.fmt$(g.evidence.liquidityUsd)+' / '+U.fmt$(g.evidence.volume24)+'</span></div>'
-      +'<div class="kv"><span class="k">qualified wallets</span><span class="v">'+g.evidence.qualifiedWallets+'</span></div>'
-      +'<div class="kv"><span class="k">risk verdict</span><span class="v">'+g.evidence.riskVerdict+'</span></div>'
+      +'<div class="kv"><span class="k">liquidity / vol24</span><span class="v">'+U.fmt$(ev.liquidityUsd)+' / '+U.fmt$(ev.volume24)+'</span></div>'
+      +'<div class="kv"><span class="k">qualified wallets</span><span class="v">'+ev.qualifiedWallets!=null?ev.qualifiedWallets:'—'+'</span></div>'
+      +'<div class="kv"><span class="k">risk verdict</span><span class="v">'+ev.riskVerdict||'—'+'</span></div>'
       +'<div class="kv"><span class="k">versions</span><span class="v small">'+g.scoreVersion+' · '+g.riskPolicyVersion+' · '+g.thresholdsVersion+'</span></div>'
       +'<div class="note">'+U.esc(g.note)+'</div>'
       +'<div class="row">'+(!g.consumed&&c.market?'<button class="btn grn sm" onclick="BOOT.enterPaper(\''+g.mint+'\')">enter $'+S.settings.entrySizeUsd+' paper</button>':'')
       +(c.mint?'<a class="btn sm" target="_blank" href="https://solscan.io/token/'+c.mint+'">solscan</a>':'')
-      +(g.evidence.pairAddress?'<a class="btn sm" target="_blank" href="https://dexscreener.com/solana/'+g.evidence.pairAddress+'">dexscreener</a>':'')+'</div></div>';
+      +(ev.pairAddress?'<a class="btn sm" target="_blank" href="https://dexscreener.com/solana/'+ev.pairAddress+'">dexscreener</a>':'')+'</div></div>';
   }
   el.innerHTML=h;
 };
