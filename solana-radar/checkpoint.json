@@ -761,6 +761,14 @@
       "price": 8.03e-06,
       "usd": 0.33,
       "reason": "-50% exit (-98.3%) \u2014 auto exit"
+    },
+    {
+      "t": 1791848854827,
+      "type": "LIMIT_CANCELLED",
+      "mint": "EH4cP8K1qDYZZH5ezVJFCnTQmsXXPjhF6Tbx8w6Kpump",
+      "symbol": "Dogcoin",
+      "price": 0.00021288000000000004,
+      "reason": "60-minute signal expiry"
     }
   ],
   "pendingOrders": [
@@ -944,9 +952,11 @@
       "limitPrice": 0.00021288000000000004,
       "createdAt": 1791845218216,
       "expiresAt": 1791848818216,
-      "status": "PENDING",
+      "status": "CANCELLED",
       "score": 72.5,
-      "signalLiquidity": 46782.23
+      "signalLiquidity": 46782.23,
+      "cancelledAt": 1791848854827,
+      "cancelReason": "60-minute signal expiry"
     }
   ],
   "rulesVersion": "dip-limit-v2",
@@ -958,10 +968,10 @@
     "minVolume24Usd": 50000
   },
   "limitExpiryMinutes": 60,
-  "eventsReported": 44,
-  "analysisCursor": 38,
-  "v2ScansCompleted": 158,
-  "asOf": "2026-10-12T23:03:40.412Z",
+  "eventsReported": 45,
+  "analysisCursor": 86,
+  "v2ScansCompleted": 166,
+  "asOf": "2026-10-12T23:47:41.440Z",
   "equity": 120.7,
   "realizedPnl": -79.3
 }
