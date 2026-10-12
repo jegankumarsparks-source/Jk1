@@ -1,11 +1,11 @@
 {
   "schema": 1,
-  "generatedAt": "2026-10-12T20:56:47.660907+00:00",
-  "lastCheckedAt": "2026-10-12T20:56:45.033Z",
+  "generatedAt": "2026-10-12T21:24:24.288733+00:00",
+  "lastCheckedAt": "2026-10-12T21:24:20.188Z",
   "paperOnly": true,
   "bank": 200,
   "cash": 117.88,
-  "equity": 158.55,
+  "equity": 149.52,
   "realizedPnl": -41.92,
   "slotsUsed": 2,
   "maxSlots": 6,
@@ -334,8 +334,8 @@
       "qty": 44752.741105392706,
       "entryLiquidity": 64865.13,
       "status": "OPEN",
-      "lastPrice": 0.0004619,
-      "lastPriceAt": 1791838597519,
+      "lastPrice": 0.0003242,
+      "lastPriceAt": 1791840251503,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -346,7 +346,7 @@
       "limitOrderId": "limit_sig_mv5kc4fml1bpwz",
       "signalReferencePrice": 0.000562,
       "limitPrice": 0.00044960000000000003,
-      "currentX": 1.0335645558290445,
+      "currentX": 0.7254419333184158,
       "exitInfo": null
     },
     {
@@ -361,8 +361,8 @@
       "qty": 119331.74224343675,
       "entryLiquidity": 35208.21,
       "status": "OPEN",
-      "lastPrice": 0.0001676,
-      "lastPriceAt": 1791838599651,
+      "lastPrice": 0.0001436,
+      "lastPriceAt": 1791840251525,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -373,7 +373,7 @@
       "limitOrderId": "limit_sig_mv5pnhucvkoqqi",
       "signalReferencePrice": 0.0002669,
       "limitPrice": 0.00021352,
-      "currentX": 1.0,
+      "currentX": 0.8568019093078758,
       "exitInfo": null
     }
   ],
@@ -499,6 +499,19 @@
       "filledAt": 1791838599651,
       "fillPrice": 0.0001676,
       "positionId": "ap_mv5qfs2rugaupu"
+    },
+    {
+      "id": "limit_sig_mv5rfb5wy9o03x",
+      "signalId": "sig_mv5rfb5wy9o03x",
+      "mint": "AjpPZo85HmHrGTcC4hrVRwMR4WteBywRqZWZEkdFpump",
+      "symbol": "DOGGO",
+      "signalPrice": 0.00103,
+      "limitPrice": 0.0008240000000000001,
+      "createdAt": 1791840257347,
+      "expiresAt": 1791843857347,
+      "status": "PENDING",
+      "score": 81,
+      "signalLiquidity": 89595.8
     }
   ],
   "rulesVersion": "dip-limit-v2",
@@ -816,6 +829,16 @@
       "usd": 20,
       "fee": 0.1,
       "reason": "limit fill at later real check price <= -20% signal limit"
+    },
+    {
+      "t": 1791840257348,
+      "type": "LIMIT_PLACED",
+      "mint": "AjpPZo85HmHrGTcC4hrVRwMR4WteBywRqZWZEkdFpump",
+      "symbol": "DOGGO",
+      "price": 0.0008240000000000001,
+      "signalPrice": 0.00103,
+      "usd": 20,
+      "reason": "v2: -20% limit, expires in 60 minutes; no cash/slot consumed"
     }
   ],
   "sourceHealth": [
@@ -824,12 +847,12 @@
       "label": "Dexscreener (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791838604909,
+      "lastSuccess": 1791840260057,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
       "rateLimitCount": 0,
-      "requestCount": 21,
+      "requestCount": 22,
       "note": "REST market feed \u2014 not a complete historical on-chain feed. Rate limits apply.",
       "backoffUntil": 0
     },
@@ -838,12 +861,12 @@
       "label": "RugCheck (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791838603459,
+      "lastSuccess": 1791840259441,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
       "rateLimitCount": 0,
-      "requestCount": 5,
+      "requestCount": 6,
       "note": "Token risk report: authorities, holders, liquidity. topHolders may be null on mega-caps.",
       "backoffUntil": 0
     },
@@ -852,7 +875,7 @@
       "label": "Solana JSON-RPC (PublicNode)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791838604848,
+      "lastSuccess": 1791840259976,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
