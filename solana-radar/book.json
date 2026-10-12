@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "generatedAt": "2026-10-12T08:37:16.205839+00:00",
-  "lastCheckedAt": "2026-10-12T08:37:08.672Z",
+  "generatedAt": "2026-10-12T08:38:16.118930+00:00",
+  "lastCheckedAt": "2026-10-12T08:38:08.400Z",
   "paperOnly": true,
   "bank": 200,
   "cash": 179.29,
@@ -257,6 +257,8 @@
       }
     }
   ],
+  "pendingOrders": [],
+  "rulesVersion": "dip-limit-v2",
   "historyTail": [
     {
       "t": 1791787673592,
@@ -417,12 +419,12 @@
       "label": "Dexscreener (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791794228478,
+      "lastSuccess": 1791794288373,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
       "rateLimitCount": 0,
-      "requestCount": 6,
+      "requestCount": 20,
       "note": "REST market feed \u2014 not a complete historical on-chain feed. Rate limits apply.",
       "backoffUntil": 0
     },
@@ -430,13 +432,13 @@
       "id": "rugcheck",
       "label": "RugCheck (public, keyless)",
       "kind": "rest",
-      "status": "NOT_OBSERVED",
-      "lastSuccess": null,
+      "status": "LIVE",
+      "lastSuccess": 1791794287802,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
       "rateLimitCount": 0,
-      "requestCount": 0,
+      "requestCount": 5,
       "note": "Token risk report: authorities, holders, liquidity. topHolders may be null on mega-caps.",
       "backoffUntil": 0
     },
@@ -444,13 +446,13 @@
       "id": "solanarpc",
       "label": "Solana JSON-RPC (PublicNode)",
       "kind": "rest",
-      "status": "NOT_OBSERVED",
-      "lastSuccess": null,
+      "status": "LIVE",
+      "lastSuccess": 1791794288263,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
       "rateLimitCount": 0,
-      "requestCount": 0,
+      "requestCount": 30,
       "note": "Keyless public RPC. Browser polling is not a backend indexer or persistent WebSocket.",
       "backoffUntil": 0
     }
@@ -464,7 +466,16 @@
     "rugLiquidityUsd": 500,
     "rugDropPct": 90,
     "holdLimit": null,
-    "checkIntervalMinutes": 5
+    "checkIntervalMinutes": 5,
+    "entryMode": "dip-limit-v2",
+    "limitBelowSignalPct": 20,
+    "limitExpiryMinutes": 60,
+    "qualification": {
+      "scoreThreshold": 70,
+      "minQualifiedWallets": 3,
+      "minLiquidityUsd": 25000,
+      "minVolume24Usd": 50000
+    }
   },
   "valuationNote": "Last observed market prices, not guaranteed executable fills. Unavailable prices retain explicitly stale last marks. Five-minute polling does not prove the exact crossing tick."
 }
