@@ -86,7 +86,7 @@ a{color:var(--blu);text-decoration:none}
 <body>
 <header>
 <h1>⚡ SOLANA EARLY-WALLET RADAR</h1>
-<span class="hdr-pill b-dim" style="border:none">MAXIMUM EDITION · v1.0.0</span>
+<span class="hdr-pill b-dim" style="border:none">MAXIMUM EDITION · v1.2.0</span>
 <span id="scanPill" class="hdr-pill off">SCANNER IDLE</span>
 <span class="hdr-pill b-dim" style="border:none">PAPER ONLY</span>
 <div class="sub">Research + paper trading only. No real money, no wallet signing, no keys. Public keyless data — every field labelled by source &amp; freshness.</div>
@@ -116,7 +116,7 @@ a{color:var(--blu);text-decoration:none}
    Modules A–Q as separated classes in one file. No frameworks.
    ============================================================ */
 const BUILD_MARKER='JK-SR-MAX-V1';
-const APP_VERSION='1.0.0';
+const APP_VERSION='1.2.0';
 const SCORE_VERSION='score-v1.0';
 const RISK_POLICY_VERSION='risk-v1.0';
 const THRESHOLDS_VERSION='thresh-v1.0';
@@ -148,9 +148,10 @@ const U={
    A. AppState — central store, settings, event bus, scan guard
    ============================================================ */
 const DEFAULT_SETTINGS={
-  pollIntervalSec:120,
-  maxTokensPerCycle:8,
-  maxRugcheckPerCycle:4,
+  pollIntervalSec:10,
+  maxTokensPerCycle:12,
+  maxRugcheckPerCycle:6,
+  walletResearchPerCandidate:5,
   minLiquidityUsd:5000,
   minVolume24Usd:2000,
   scoreThreshold:55,
@@ -948,6 +949,7 @@ class PersistenceEngine{
   async loadAll(){
     try{
       const st=await this._get('settings','main'); if(st)S.settings=Object.assign(JSON.parse(JSON.stringify(DEFAULT_SETTINGS)),st,{weights:Object.assign({},DEFAULT_SETTINGS.weights,st.weights||{})});
+      if(!S.settings._v12){ S.settings.pollIntervalSec=10; S.settings.maxTokensPerCycle=12; S.settings.maxRugcheckPerCycle=6; S.settings.walletResearchPerCandidate=5; S.settings._v12=true; }
       const dg=await this._get('diag','main'); if(dg)S.diag=Object.assign(S.diag,dg,{scanning:false});
       const meta=await this._get('diag','meta'); if(meta){S.cycleFrozen=!!meta.cycleFrozen;S.targetReached=!!meta.targetReached;if(meta.cash!=null)PORT.setCash(meta.cash);}
       for(const c of await this._all('candidates'))S.candidates.set(c.mint,c);
@@ -1375,13 +1377,16 @@ const BOOT={
   },
   start(){
     if(S.scanTimer)return;
-    BOOT.scanNow();
-    S.scanTimer=setInterval(()=>BOOT.scanNow(),S.settings.pollIntervalSec*1000);
-    S.priceTimer=setInterval(()=>{ if(S.settings.autoRefreshPrices)MONITOR.run().then(()=>RENDER.all()); },Math.max(60,Math.floor(S.settings.pollIntervalSec/2))*1000);
-    RENDER.scanPill(); U.toast('scanner started (tab-open monitoring only)');
+    S.scanTimer=true;
+    const tick=async()=>{ if(!S.scanTimer)return;
+      try{ await BOOT.scanNow(); }catch(e){ console.log('cycle error',e); }
+      if(S.scanTimer)S.scanTimerId=setTimeout(tick,Math.max(5,S.settings.pollIntervalSec)*1000); };
+    tick();
+    S.priceTimer=setInterval(()=>{ if(S.settings.autoRefreshPrices)MONITOR.run().then(()=>RENDER.all()); },60000);
+    RENDER.scanPill(); U.toast('scanner started — auto-scan every ~'+Math.max(5,S.settings.pollIntervalSec)+'s until STOP (tab-open only)');
   },
   stop(){
-    clearInterval(S.scanTimer); clearInterval(S.priceTimer); S.scanTimer=null; S.priceTimer=null;
+    S.scanTimer=false; clearTimeout(S.scanTimerId); clearInterval(S.priceTimer); S.priceTimer=null;
     RENDER.scanPill(); U.toast('scanner stopped');
   },
   async scanNow(){
@@ -1410,7 +1415,7 @@ const BOOT={
     if(c.rugcheck){
       WALLETS.harvestFromToken(c);
       // research top few wallets (bounded, non-insider first)
-      const recs=(c.rugcheck.topHolders||[]).filter(h=>h.address&&!h.insider).slice(0,3);
+      const recs=(c.rugcheck.topHolders||[]).filter(h=>h.address&&!h.insider).slice(0,S.settings.walletResearchPerCandidate||5);
       for(const h of recs){ try{ await WALLETS.researchWallet(h.address); }catch(e){} }
       c.walletEvidence=(c.rugcheck.topHolders||[]).filter(h=>h.address).map(h=>{
         const w=S.wallets.get(h.address);
