@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "generatedAt": "2026-10-13T14:25:00.297012+00:00",
+  "generatedAt": "2026-10-13T14:27:23.223301+00:00",
   "lastCheckedAt": "2026-10-13T14:24:41.350Z",
   "paperOnly": true,
   "bank": 200,
@@ -803,7 +803,7 @@
       "cancelReason": "current tightened qualification failed"
     }
   ],
-  "rulesVersion": "defensive-v3",
+  "rulesVersion": "entry-open-v4",
   "historyTail": [
     {
       "t": 1791794228479,
@@ -1350,23 +1350,52 @@
           "tpMultiple": 1.5,
           "rugFullLossDropPct": 90
         }
+      },
+      {
+        "at": 1791901641932,
+        "version": "entry-open-v4",
+        "reason": "User typed override: All rules remove pannidu, replying to v3 entry list",
+        "originalUserMessageId": "wamid.HBgMOTE3NDQ4NjU2NjI0FQIAEhggQUM4RUQ3OUNGOUIwNTQwODEwQjZFNzc3QkYzQTY0NkUA",
+        "removedEntryScreens": [
+          "liquidity minimum",
+          "volume minimum",
+          "score threshold",
+          "qualified wallet minimum",
+          "top10 concentration",
+          "pool age",
+          "insider/risk flags",
+          "risk evidence age",
+          "5-minute crash gate",
+          "85% signal liquidity retention",
+          "70% lower fill band",
+          "4-minute confirmation"
+        ],
+        "retained": {
+          "paperOnly": true,
+          "stakeUsd": 10,
+          "maxFilled": 4,
+          "limitBelowSignalPct": 20,
+          "expiryMinutes": 60,
+          "tpMultiple": 1.5,
+          "stopLossPct": 25,
+          "liquidityExitDropPct": 30,
+          "rugDropPct": 90,
+          "rugLiquidityUsd": 500,
+          "feePct": 0.5,
+          "missingMarketEvidenceBlocks": true
+        }
       }
     ],
     "rugLiquidityUsd": 500,
     "rugDropPct": 90,
     "holdLimit": null,
     "checkIntervalMinutes": 5,
-    "entryMode": "defensive-v3",
+    "entryMode": "entry-open-v4",
     "limitBelowSignalPct": 20,
     "limitExpiryMinutes": 60,
     "qualification": {
-      "scoreThreshold": 80,
-      "minQualifiedWallets": 4,
-      "minLiquidityUsd": 75000,
-      "minVolume24Usd": 250000,
       "entrySizeUsd": 10,
-      "autoMaxPositions": 4,
-      "top10ConcentrationFailPct": 25
+      "autoMaxPositions": 4
     }
   },
   "valuationNote": "Last observed market prices, not guaranteed executable fills. Unavailable prices retain explicitly stale last marks. Five-minute polling does not prove the exact crossing tick."
