@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "generatedAt": "2026-10-13T15:36:26.764326+00:00",
-  "lastCheckedAt": "2026-10-13T15:36:20.329Z",
+  "generatedAt": "2026-10-13T15:41:50.969908+00:00",
+  "lastCheckedAt": "2026-10-13T15:41:46.683Z",
   "paperOnly": true,
   "bank": 200,
   "cash": 80.5,
@@ -1112,19 +1112,23 @@
       "status": "PENDING",
       "score": 60,
       "signalLiquidity": 11510.25
+    },
+    {
+      "id": "limit_sig_open_mv6umnex_vttddz",
+      "signalId": "sig_open_mv6umnex_vttddz",
+      "mint": "FXynyTLxTwaLZJrBuLTNafBfqBthbAxKiv7afABapump",
+      "symbol": "WAIFU",
+      "signalPrice": 2.093e-06,
+      "limitPrice": 1.6744000000000002e-06,
+      "createdAt": 1791906104841,
+      "expiresAt": 1791909704841,
+      "status": "PENDING",
+      "score": null,
+      "signalLiquidity": 2210.84
     }
   ],
   "rulesVersion": "entry-open-v4",
   "historyTail": [
-    {
-      "t": 1791842567751,
-      "type": "AUTO_EXIT",
-      "symbol": "DOGGO",
-      "mint": "AjpPZo85HmHrGTcC4hrVRwMR4WteBywRqZWZEkdFpump",
-      "price": 0.001232,
-      "usd": 33.46,
-      "reason": "1.5x target hit (1.68x) \u2014 auto sell"
-    },
     {
       "t": 1791843901154,
       "type": "LIMIT_PLACED",
@@ -1587,6 +1591,16 @@
       "signalPrice": 2.019e-05,
       "usd": 10,
       "reason": "entry-open-v4: -20% limit, expires in 60 minutes; no cash/slot consumed"
+    },
+    {
+      "t": 1791906104841,
+      "type": "LIMIT_PLACED",
+      "mint": "FXynyTLxTwaLZJrBuLTNafBfqBthbAxKiv7afABapump",
+      "symbol": "WAIFU",
+      "price": 1.6744000000000002e-06,
+      "signalPrice": 2.093e-06,
+      "usd": 10,
+      "reason": "entry-open-v4: -20% limit, expires in 60 minutes; no cash/slot consumed"
     }
   ],
   "sourceHealth": [
@@ -1595,12 +1609,12 @@
       "label": "Dexscreener (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791905780124,
+      "lastSuccess": 1791906106466,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
       "rateLimitCount": 0,
-      "requestCount": 36,
+      "requestCount": 37,
       "note": "REST market feed \u2014 not a complete historical on-chain feed. Rate limits apply.",
       "backoffUntil": 0
     },
