@@ -354,10 +354,11 @@
       "exitReason": null,
       "exitValueUsd": null,
       "realizedPnl": null,
-      "rules": "auto-exit at 1.5x / -50% / rug (liquidity gone). no time limit. PAPER ONLY.",
+      "rules": "PAPER ONLY: TP 1.5x; SL -25%; defensive liquidity exit -30%; full-loss rug >=90% or <=$500; no time limit",
       "limitOrderId": "limit_sig_mv69xwfh47f3s7",
       "signalReferencePrice": 0.000337,
-      "limitPrice": 0.0002696
+      "limitPrice": 0.0002696,
+      "rulesVersion": "defensive-v3"
     },
     {
       "id": "ap_mv6dhhq2m0s3xr",
@@ -1189,18 +1190,50 @@
       "positionId": "ap_mv6dhhq2m0s3xr"
     }
   ],
-  "rulesVersion": "dip-limit-v2",
-  "ruleChangeAt": 1791794165000,
+  "rulesVersion": "defensive-v3",
+  "ruleChangeAt": 1791881193992,
   "settingsOverrides": {
-    "scoreThreshold": 70,
-    "minQualifiedWallets": 3,
-    "minLiquidityUsd": 25000,
-    "minVolume24Usd": 50000
+    "scoreThreshold": 80,
+    "minQualifiedWallets": 4,
+    "minLiquidityUsd": 75000,
+    "minVolume24Usd": 250000,
+    "entrySizeUsd": 10,
+    "autoMaxPositions": 4,
+    "top10ConcentrationFailPct": 25
   },
   "limitExpiryMinutes": 60,
-  "eventsReported": 56,
+  "eventsReported": 57,
   "analysisCursor": 71,
   "v2ScansCompleted": 263,
+  "ruleChanges": [
+    {
+      "at": 1791881193992,
+      "version": "defensive-v3",
+      "reason": "loss review: deeper liquidity, smaller exposure, fresh risk evidence, dip confirmation, earlier liquidity/price exit",
+      "originalUserMessageId": "wamid.HBgMOTE3NDQ4NjU2NjI0FQIAEhggQUMwMUYzNjc4QjZBN0M1MDIyNDREMTBBRTBFQjRDNkQA",
+      "policy": {
+        "entryUsd": 10,
+        "maxFilled": 4,
+        "minLiquidity": 75000,
+        "minVol24": 250000,
+        "minScore": 80,
+        "minWallets": 4,
+        "maxTop10Pct": 25,
+        "minPoolAgeMinutes": 60,
+        "riskMaxAgeMinutes": 5,
+        "max5MinutePriceDropPct": 10,
+        "minSignalLiquidityRetentionPct": 85,
+        "fillBandSignalPct": [
+          70,
+          80
+        ],
+        "stopLossPct": 25,
+        "liquidityExitDropPct": 30,
+        "tpMultiple": 1.5,
+        "rugFullLossDropPct": 90
+      }
+    }
+  ],
   "asOf": "2026-10-13T08:42:43.799Z",
   "equity": 104.13,
   "realizedPnl": -99.4
