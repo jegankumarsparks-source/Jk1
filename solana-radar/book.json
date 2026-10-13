@@ -1,13 +1,13 @@
 {
   "schema": 1,
-  "generatedAt": "2026-10-13T06:08:18.029192+00:00",
-  "lastCheckedAt": "2026-10-13T06:08:11.634Z",
+  "generatedAt": "2026-10-13T06:52:28.588263+00:00",
+  "lastCheckedAt": "2026-10-13T06:52:19.910Z",
   "paperOnly": true,
   "bank": 200,
-  "cash": 120.7,
-  "equity": 120.7,
+  "cash": 100.6,
+  "equity": 120.6,
   "realizedPnl": -79.3,
-  "slotsUsed": 0,
+  "slotsUsed": 1,
   "maxSlots": 6,
   "positions": [
     {
@@ -453,6 +453,33 @@
         "netUsd": 0.33,
         "pnl": -19.77
       }
+    },
+    {
+      "id": "ap_mv6bppju3ust2m",
+      "mint": "9LEmajzfB3GJaJpKgXSu8MW5riEnY7F8AMWuwcQRpump",
+      "symbol": "VRAX",
+      "signalId": "sig_mv69xwfh47f3s7",
+      "entryAt": 1791874334874,
+      "entryRate": 0.0002623,
+      "entrySizeUsd": 20,
+      "feeUsd": 0.1,
+      "qty": 76248.57033930614,
+      "entryLiquidity": 44469.2,
+      "status": "OPEN",
+      "lastPrice": 0.0002623,
+      "lastPriceAt": 1791874334874,
+      "priceState": "LIVE",
+      "exitAt": null,
+      "exitPrice": null,
+      "exitReason": null,
+      "exitValueUsd": null,
+      "realizedPnl": null,
+      "rules": "auto-exit at 1.5x / -50% / rug (liquidity gone). no time limit. PAPER ONLY.",
+      "limitOrderId": "limit_sig_mv69xwfh47f3s7",
+      "signalReferencePrice": 0.000337,
+      "limitPrice": 0.0002696,
+      "currentX": 1.0,
+      "exitInfo": null
     }
   ],
   "pendingOrders": [
@@ -666,9 +693,12 @@
       "limitPrice": 0.0002696,
       "createdAt": 1791871357804,
       "expiresAt": 1791874957804,
-      "status": "PENDING",
+      "status": "FILLED",
       "score": 81,
-      "signalLiquidity": 50525.54
+      "signalLiquidity": 50525.54,
+      "filledAt": 1791874334874,
+      "fillPrice": 0.0002623,
+      "positionId": "ap_mv6bppju3ust2m"
     },
     {
       "id": "limit_sig_mv6a4yoit0nuv1",
@@ -686,16 +716,6 @@
   ],
   "rulesVersion": "dip-limit-v2",
   "historyTail": [
-    {
-      "t": 1791787673592,
-      "type": "AUTO_ENTRY",
-      "symbol": "DOGCOIN",
-      "mint": "GmDjFweCHd1FaDUV6TiUreVZa24KMeQMCBA18d5opump",
-      "price": 0.0001027,
-      "usd": 20,
-      "fee": 0.1,
-      "reason": "auto entry at signal-time price"
-    },
     {
       "t": 1791788996974,
       "type": "AUTO_ENTRY",
@@ -1157,6 +1177,16 @@
       "signalPrice": 0.00463,
       "usd": 20,
       "reason": "v2: -20% limit, expires in 60 minutes; no cash/slot consumed"
+    },
+    {
+      "t": 1791874334874,
+      "type": "AUTO_ENTRY",
+      "symbol": "VRAX",
+      "mint": "9LEmajzfB3GJaJpKgXSu8MW5riEnY7F8AMWuwcQRpump",
+      "price": 0.0002623,
+      "usd": 20,
+      "fee": 0.1,
+      "reason": "limit fill at later real check price <= -20% signal limit"
     }
   ],
   "sourceHealth": [
@@ -1165,7 +1195,7 @@
       "label": "Dexscreener (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791871691443,
+      "lastSuccess": 1791874339708,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
@@ -1179,7 +1209,7 @@
       "label": "RugCheck (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791871690288,
+      "lastSuccess": 1791874339166,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
@@ -1193,7 +1223,7 @@
       "label": "Solana JSON-RPC (PublicNode)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791871691171,
+      "lastSuccess": 1791874339657,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
