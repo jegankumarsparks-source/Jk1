@@ -1,11 +1,11 @@
 {
   "schema": 1,
-  "generatedAt": "2026-10-13T13:46:19.250752+00:00",
-  "lastCheckedAt": "2026-10-13T13:46:12.865Z",
+  "generatedAt": "2026-10-13T13:51:43.085276+00:00",
+  "lastCheckedAt": "2026-10-13T13:51:29.224Z",
   "paperOnly": true,
   "bank": 200,
   "cash": 80.5,
-  "equity": 103.14,
+  "equity": 98.71,
   "realizedPnl": -99.4,
   "slotsUsed": 1,
   "maxSlots": 4,
@@ -466,8 +466,8 @@
       "qty": 76248.57033930614,
       "entryLiquidity": 44469.2,
       "status": "OPEN",
-      "lastPrice": 0.0002969,
-      "lastPriceAt": 1791899154136,
+      "lastPrice": 0.0002388,
+      "lastPriceAt": 1791899479365,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -479,8 +479,8 @@
       "signalReferencePrice": 0.000337,
       "limitPrice": 0.0002696,
       "rulesVersion": "defensive-v3",
-      "lastLiquidityUsd": 47564.74,
-      "currentX": 1.1319100266869997,
+      "lastLiquidityUsd": 42472.12,
+      "currentX": 0.9104079298513154,
       "exitInfo": null
     },
     {
@@ -790,22 +790,15 @@
       "limitPrice": 0.020360000000000003,
       "createdAt": 1791899155402,
       "expiresAt": 1791902755402,
-      "status": "PENDING",
+      "status": "CANCELLED",
       "score": 85,
-      "signalLiquidity": 468480.69
+      "signalLiquidity": 468480.69,
+      "cancelledAt": 1791899480748,
+      "cancelReason": "current tightened qualification failed"
     }
   ],
   "rulesVersion": "defensive-v3",
   "historyTail": [
-    {
-      "t": 1791792627402,
-      "type": "RUG_LOSS",
-      "symbol": "GOMODOGE",
-      "mint": "AVfEas6mLgkXNvVWcc6qeHLpYeA8nRx42iB9WBKhpump",
-      "price": 0,
-      "usd": 0,
-      "reason": "RUG PULL \u2014 liquidity collapsed ($36.0k -> $2.4k, real data). Full position lost."
-    },
     {
       "t": 1791793951488,
       "type": "AUTO_ENTRY",
@@ -1264,6 +1257,14 @@
       "signalPrice": 0.02545,
       "usd": 10,
       "reason": "v3: -20% limit, expires in 60 minutes; no cash/slot consumed"
+    },
+    {
+      "t": 1791899480748,
+      "type": "LIMIT_CANCELLED",
+      "mint": "CQCDTp8rsFV3PhaPeYjcCW5LdGTxi6jFx7eC3UXnpump",
+      "symbol": "CRAWLER",
+      "price": 0.020360000000000003,
+      "reason": "current tightened qualification failed"
     }
   ],
   "sourceHealth": [
@@ -1272,7 +1273,7 @@
       "label": "Dexscreener (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791899172597,
+      "lastSuccess": 1791899489010,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
@@ -1286,7 +1287,7 @@
       "label": "RugCheck (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791899171934,
+      "lastSuccess": 1791899488426,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
@@ -1300,7 +1301,7 @@
       "label": "Solana JSON-RPC (PublicNode)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791899172445,
+      "lastSuccess": 1791899488964,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
