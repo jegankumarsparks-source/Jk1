@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "cash": 120.7,
+  "cash": 100.6,
   "positions": [
     {
       "id": "ap_mv4w49a0k5sr7f",
@@ -333,6 +333,31 @@
       "limitOrderId": "limit_sig_mv5tleqq0l6wvj",
       "signalReferencePrice": 0.0008806,
       "limitPrice": 0.0007044800000000001
+    },
+    {
+      "id": "ap_mv6bppju3ust2m",
+      "mint": "9LEmajzfB3GJaJpKgXSu8MW5riEnY7F8AMWuwcQRpump",
+      "symbol": "VRAX",
+      "signalId": "sig_mv69xwfh47f3s7",
+      "entryAt": 1791874334874,
+      "entryRate": 0.0002623,
+      "entrySizeUsd": 20,
+      "feeUsd": 0.1,
+      "qty": 76248.57033930614,
+      "entryLiquidity": 44469.2,
+      "status": "OPEN",
+      "lastPrice": 0.0002623,
+      "lastPriceAt": 1791874334874,
+      "priceState": "LIVE",
+      "exitAt": null,
+      "exitPrice": null,
+      "exitReason": null,
+      "exitValueUsd": null,
+      "realizedPnl": null,
+      "rules": "auto-exit at 1.5x / -50% / rug (liquidity gone). no time limit. PAPER ONLY.",
+      "limitOrderId": "limit_sig_mv69xwfh47f3s7",
+      "signalReferencePrice": 0.000337,
+      "limitPrice": 0.0002696
     }
   ],
   "history": [
@@ -807,6 +832,16 @@
       "signalPrice": 0.00463,
       "usd": 20,
       "reason": "v2: -20% limit, expires in 60 minutes; no cash/slot consumed"
+    },
+    {
+      "t": 1791874334874,
+      "type": "AUTO_ENTRY",
+      "symbol": "VRAX",
+      "mint": "9LEmajzfB3GJaJpKgXSu8MW5riEnY7F8AMWuwcQRpump",
+      "price": 0.0002623,
+      "usd": 20,
+      "fee": 0.1,
+      "reason": "limit fill at later real check price <= -20% signal limit"
     }
   ],
   "pendingOrders": [
@@ -1020,9 +1055,12 @@
       "limitPrice": 0.0002696,
       "createdAt": 1791871357804,
       "expiresAt": 1791874957804,
-      "status": "PENDING",
+      "status": "FILLED",
       "score": 81,
-      "signalLiquidity": 50525.54
+      "signalLiquidity": 50525.54,
+      "filledAt": 1791874334874,
+      "fillPrice": 0.0002623,
+      "positionId": "ap_mv6bppju3ust2m"
     },
     {
       "id": "limit_sig_mv6a4yoit0nuv1",
@@ -1047,10 +1085,10 @@
     "minVolume24Usd": 50000
   },
   "limitExpiryMinutes": 60,
-  "eventsReported": 49,
-  "analysisCursor": 500,
-  "v2ScansCompleted": 235,
-  "asOf": "2026-10-13T06:08:11.634Z",
-  "equity": 120.7,
+  "eventsReported": 50,
+  "analysisCursor": 548,
+  "v2ScansCompleted": 243,
+  "asOf": "2026-10-13T06:52:19.910Z",
+  "equity": 120.6,
   "realizedPnl": -79.3
 }
