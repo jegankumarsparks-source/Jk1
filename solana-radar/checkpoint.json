@@ -779,6 +779,14 @@
       "signalPrice": 0.003468,
       "usd": 20,
       "reason": "v2: -20% limit, expires in 60 minutes; no cash/slot consumed"
+    },
+    {
+      "t": 1791866719329,
+      "type": "LIMIT_CANCELLED",
+      "mint": "HgTGdc29D5bDMrDvsCLnorxz899VyDj7ZN7FPa6vpump",
+      "symbol": "VEIL",
+      "price": 0.0027744,
+      "reason": "60-minute signal expiry"
     }
   ],
   "pendingOrders": [
@@ -977,9 +985,11 @@
       "limitPrice": 0.0027744,
       "createdAt": 1791863085611,
       "expiresAt": 1791866685611,
-      "status": "PENDING",
+      "status": "CANCELLED",
       "score": 80.5,
-      "signalLiquidity": 168347.24
+      "signalLiquidity": 168347.24,
+      "cancelledAt": 1791866719329,
+      "cancelReason": "60-minute signal expiry"
     }
   ],
   "rulesVersion": "dip-limit-v2",
@@ -991,10 +1001,10 @@
     "minVolume24Usd": 50000
   },
   "limitExpiryMinutes": 60,
-  "eventsReported": 46,
-  "analysisCursor": 344,
-  "v2ScansCompleted": 209,
-  "asOf": "2026-10-13T03:44:45.960Z",
+  "eventsReported": 47,
+  "analysisCursor": 410,
+  "v2ScansCompleted": 220,
+  "asOf": "2026-10-13T04:45:25.442Z",
   "equity": 120.7,
   "realizedPnl": -79.3
 }
