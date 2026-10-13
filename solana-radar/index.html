@@ -90,7 +90,7 @@ a{color:var(--blu);text-decoration:none}
 <body>
 <header>
 <h1>⚡ SOLANA EARLY-WALLET RADAR</h1>
-<span class="hdr-pill b-dim" style="border:none">MAXIMUM EDITION · v1.6.0</span>
+<span class="hdr-pill b-dim" style="border:none">MAXIMUM EDITION · v1.7.0</span>
 <span id="scanPill" class="hdr-pill off">SCANNER IDLE</span>
 <span class="hdr-pill b-dim" style="border:none">PAPER ONLY</span>
 <div class="sub">Research + paper trading only. No real money, no wallet signing, no keys. Public keyless data — every field labelled by source &amp; freshness.</div>
@@ -124,7 +124,7 @@ a{color:var(--blu);text-decoration:none}
    Modules A–Q as separated classes in one file. No frameworks.
    ============================================================ */
 const BUILD_MARKER='JK-SR-MAX-V1';
-const APP_VERSION='1.5.0';
+const APP_VERSION='1.7.0';
 const SCORE_VERSION='score-v1.0';
 const RISK_POLICY_VERSION='risk-v1.0';
 const THRESHOLDS_VERSION='thresh-v1.0';
@@ -747,20 +747,11 @@ class SignalQualificationEngine{
     const v=VALIDATOR.validate(c); c.validation=v;
     if(v.status!=='VALIDATED'){ const why='validation incomplete: '+v.problems.join('; ');
       c.rejectionReasons.push(why); S.diag.counters.incomplete++; return set('DATA_INCOMPLETE',why); }
-    // 2. risk gates (fail-closed)
+    // 2. v4 OPEN ENTRY (owner typed override 2026-10-13 "All rules remove pannidu"): risk, score and
+    //    wallet evidence are still computed and SHOWN for research, but NONE of them gates a paper entry.
     const rk=c.risk||RISK.analyze(c); c.risk=rk;
-    if(rk.verdict==='FAIL'){ const why='critical risk FAIL: '+rk.checks.filter(x=>x.critical&&x.state==='FAIL').map(x=>x.label).join('; ');
-      c.rejectionReasons.push(why); S.diag.counters.rejected++; S.diag.rejectReasons[why]=(S.diag.rejectReasons[why]||0)+1; return set('REJECTED',why); }
-    if(rk.verdict==='UNKNOWN'&&S.settings.criticalUnknownBlocks){ const why='critical risk UNKNOWN (fail-closed): '+rk.checks.filter(x=>x.critical&&x.state==='UNKNOWN').map(x=>x.label).join('; ');
-      c.rejectionReasons.push(why); return set('RISK_REVIEW',why); }
-    // 3. score
     const sc=SCORER.score(c);
-    if(sc.total<S.settings.scoreThreshold){ const why='score '+sc.total+' < threshold '+S.settings.scoreThreshold+' ('+SCORE_VERSION+')';
-      c.rejectionReasons.push(why); return set('WATCHLIST',why); }
-    // 4. wallet evidence
     const qualW=(c.walletEvidence||[]).filter(e=>e.qualified).length;
-    if(qualW<S.settings.minQualifiedWallets){ const why='qualified wallets '+qualW+' < required '+S.settings.minQualifiedWallets;
-      c.rejectionReasons.push(why); return set('WATCHLIST',why); }
     // 5. cooldown / duplicate
     if(c.cooldownUntil&&c.cooldownUntil>t){ const why='cooldown until '+new Date(c.cooldownUntil).toLocaleTimeString();
       c.rejectionReasons.push(why); return set('WATCHLIST',why); }
@@ -776,7 +767,7 @@ class SignalQualificationEngine{
       state:'PAPER_SIGNAL',consumed:false,
       paperOnly:true,note:'PAPER SIGNAL — research only. Not financial advice. Not a guarantee of profit or early entry.'};
     S.signals.set(sig.id,sig); c.signalId=sig.id; S.diag.counters.signals++;
-    set('PAPER_SIGNAL','all gates passed: identity validated, risk '+rk.verdict+', score '+sc.total+', wallets '+qualW);
+    set('PAPER_SIGNAL','v4 open entry: validated identity + fresh market evidence, NO entry screens (risk '+rk.verdict+' / score '+sc.total+' / wallets '+qualW+' = research display only)');
     S.emit('signal',sig);
     return 'PAPER_SIGNAL';
   }
@@ -1234,11 +1225,11 @@ class DashboardRenderer{
   risk(){
     const el=document.getElementById('page-risk');
     const list=[...S.candidates.values()].filter(c=>c.risk).sort((a,b)=>(a.risk.verdict==='FAIL'?-1:0)-(b.risk.verdict==='FAIL'?-1:0));
-    let h='<div class="note">Every check returns PASS / FAIL / UNKNOWN / NOT_SUPPORTED. UNKNOWN never counts as PASS (fail-closed). Policy '+RISK_POLICY_VERSION+'. Nothing here is a complete rug detection.</div>';
+    let h='<div class="note">Every check returns PASS / FAIL / UNKNOWN / NOT_SUPPORTED. UNKNOWN never counts as PASS. Policy '+RISK_POLICY_VERSION+'. Nothing here is a complete rug detection. Research display only — under entry-open-v4 these checks do NOT block paper entries.</div>';
     if(!list.length)h+='<div class="empty"><b>No risk reports yet.</b><br>Tap "analyze" on any token in the Radar.</div>';
     for(const c of list.slice(0,40)){
       h+='<div class="card"><div class="row"><b>'+U.esc((c.market&&c.market.symbol)||U.short(c.mint))+'</b><span class="sp"></span>'+this.riskBadge(c.risk.verdict)+'</div>'
-        +c.risk.checks.map(x=>'<div class="chk '+x.state+'"><span class="st">'+x.state+'</span><div><b>'+U.esc(x.label)+'</b><div class="small">'+U.esc(x.scope)+(x.critical?' · <span style="color:var(--red)">critical gate</span>':'')+'</div></div></div>').join('')
+        +c.risk.checks.map(x=>'<div class="chk '+x.state+'"><span class="st">'+x.state+'</span><div><b>'+U.esc(x.label)+'</b><div class="small">'+U.esc(x.scope)+(x.critical?' · <span style="color:var(--red)">critical flag (display only)</span>':'')+'</div></div></div>').join('')
         +'<div class="small">analyzed '+U.age(c.risk.analyzedAt)+' ago · '+U.esc(c.risk.note)+'</div></div>';
     }
     el.innerHTML=h;
@@ -1370,9 +1361,9 @@ DashboardRenderer.prototype.settings=function(){
   const el=document.getElementById('page-settings'); const st=S.settings;
   const num=(key,label,step)=>'<label class="fl">'+label+'</label><input type="number" step="'+(step||1)+'" value="'+st[key]+'" onchange="BOOT.setNum(\''+key+'\',this.value)">';
   let h='<div class="card"><h3>Scanner</h3>'+num('pollIntervalSec','Poll interval (seconds)')+num('maxTokensPerCycle','Max tokens enriched per cycle')+num('maxRugcheckPerCycle','Max RugCheck reports per cycle')+'</div>';
-  h+='<div class="card"><h3>Qualification thresholds ('+THRESHOLDS_VERSION+')</h3>'+num('minLiquidityUsd','Min liquidity USD')+num('minVolume24Usd','Min 24h volume USD')+num('scoreThreshold','Score threshold (0-100)')+num('minQualifiedWallets','Min qualified wallets')+num('signalCooldownHours','Signal cooldown (hours)')+num('top10ConcentrationFailPct','Top-10 concentration FAIL %')+'<label class="fl"><input type="checkbox" style="width:auto" '+(st.criticalUnknownBlocks?'checked':'')+' onchange="BOOT.setBool(\'criticalUnknownBlocks\',this.checked)"> Critical UNKNOWN blocks qualification (fail-closed)</label></div>';
+  h+='<div class="card"><h3>Radar research display thresholds ('+THRESHOLDS_VERSION+')</h3><div class="small" style="margin-bottom:6px">These tune the research panels ONLY. Under entry-open-v4 they do NOT gate any paper entry or signal.</div>'+num('minLiquidityUsd','Min liquidity USD')+num('minVolume24Usd','Min 24h volume USD')+num('scoreThreshold','Score threshold (0-100)')+num('minQualifiedWallets','Min qualified wallets')+num('signalCooldownHours','Signal cooldown (hours)')+num('top10ConcentrationFailPct','Top-10 concentration FAIL %')+'</div>';
   h+='<div class="card"><h3>Paper portfolio</h3>'+num('startCapital','Starting capital $')+num('entrySizeUsd','Entry size $')+num('maxPositionPct','Max position % of start')+num('maxOpenPositions','Max open positions')+num('feePct','Fee % per side',0.1)+num('slippagePct','Slippage %',0.1)+num('stopLossPct','Stop-loss % (negative)')+num('trailingAfterX','Trailing after X multiple')+num('trailingDropPct','Trailing drop %')+num('maxHoldHours','Max holding hours (0=off)')+num('liquidityExitPct','Liquidity deterioration exit %')+num('targetEquity','Target equity $')+'</div>';
-  h+='<div class="card"><h3>Auto paper trade (🤖 tab)</h3><label class="fl"><input type="checkbox" style="width:auto" '+(st.autoTradeEnabled?'checked':'')+' onchange="BOOT.setBool(\'autoTradeEnabled\',this.checked)"> Auto paper trade enabled</label><label class="fl"><input type="checkbox" style="width:auto" '+(st.autoStartOnLoad?'checked':'')+' onchange="BOOT.setBool(\'autoStartOnLoad\',this.checked)"> Auto-start scan when app opens</label>'+'<div class="small" style="margin:4px 0">auto rules fixed: $10 dip-limit entries, max 4 slots + 4 pending (defensive-v3)</div>'+num('rugLiquidityUsd','Rug: liquidity floor $')+num('rugLiquidityDropPct','Rug: liquidity drop % vs entry')+'</div>';
+  h+='<div class="card"><h3>Auto paper trade (🤖 tab)</h3><label class="fl"><input type="checkbox" style="width:auto" '+(st.autoTradeEnabled?'checked':'')+' onchange="BOOT.setBool(\'autoTradeEnabled\',this.checked)"> Auto paper trade enabled</label><label class="fl"><input type="checkbox" style="width:auto" '+(st.autoStartOnLoad?'checked':'')+' onchange="BOOT.setBool(\'autoStartOnLoad\',this.checked)"> Auto-start scan when app opens</label>'+'<div class="small" style="margin:4px 0">auto rules fixed: $10 dip-limit entries, max 4 slots + 4 pending, NO entry screens (entry-open-v4)</div>'+num('rugLiquidityUsd','Rug: liquidity floor $')+num('rugLiquidityDropPct','Rug: liquidity drop % vs entry')+'</div>';
   h+='<div class="card"><h3>Score weights ('+SCORE_VERSION+') — must total 100</h3>'
     +Object.keys(st.weights).map(k=>'<label class="fl">'+k+'</label><input type="number" value="'+st.weights[k]+'" onchange="BOOT.setWeight(\''+k+'\',this.value)">').join('')
     +'<div class="small" id="wsum">total: '+Object.values(st.weights).reduce((a,b)=>a+(+b||0),0)+'</div></div>';
@@ -1390,15 +1381,16 @@ DashboardRenderer.prototype.autotrade=function(){
   h+='<div class="kpis">'
     +'<div class="kpi"><div class="v">'+U.fmt$(AUTO.cash())+'</div><div class="l">auto cash</div></div>'
     +'<div class="kpi '+(st.equity>=S.settings.startCapital?'':'bad')+'"><div class="v">'+U.fmt$(st.equity)+(st.valuationsComplete?'':'*')+'</div><div class="l">equity</div></div>'
-    +'<div class="kpi"><div class="v">'+st.open+' / '+AUTO_V3.maxSlots+'</div><div class="l">slots used</div></div>'
-    +'<div class="kpi"><div class="v">'+AUTO.pending.size+' / '+AUTO_V3.maxSlots+'</div><div class="l">pending limits</div></div>'
+    +'<div class="kpi"><div class="v">'+st.open+' / '+AUTO_V4.maxSlots+'</div><div class="l">slots used</div></div>'
+    +'<div class="kpi"><div class="v">'+AUTO.pending.size+' / '+AUTO_V4.maxSlots+'</div><div class="l">pending limits</div></div>'
     +'<div class="kpi '+(st.realized>=0?'':'bad')+'"><div class="v">'+(st.realized>=0?'+':'')+U.fmt$(st.realized)+'</div><div class="l">realized P&L</div></div></div>';
-  h+='<div class="card"><h3>Auto rules (defensive-v3)</h3>'
-    +'<div class="kv"><span class="k">entry</span><span class="v">$'+AUTO_V3.stakeUsd+' dip-limit at signal rate ×0.80 (−'+AUTO_V3.limitBelowSignalPct+'% dip) · pending orders consume NO cash or slots · one per coin · max '+AUTO_V3.maxSlots+' pending</span></div>'
-    +'<div class="kv"><span class="k">fill</span><span class="v">only on a later REAL observation ≤ limit · expires after '+AUTO_V3.limitExpiryMinutes+' min · cancels if slots full or bank short at fill</span></div>'
-    +'<div class="kv"><span class="k">win exit</span><span class="v">auto sell at '+AUTO_V3.tpMultiple+'x entry</span></div>'
-    +'<div class="kv"><span class="k">price stop</span><span class="v">auto exit at −'+Math.round((1-AUTO_V3.stopMultiple)*100)+'%</span></div>'
-    +'<div class="kv"><span class="k">liquidity exit</span><span class="v">defensive exit if liquidity −'+AUTO_V3.defensiveLiqExitDropPct+'% vs entry</span></div>'
+  h+='<div class="card"><h3>Auto rules (entry-open-v4)</h3>'
+    +'<div class="kv"><span class="k">entry screens</span><span class="v">NONE — owner override 2026-10-13: no liquidity / volume / score / wallet / age / flag / crash screens; every validated coin with fresh market data gets a dip-limit</span></div>'
+    +'<div class="kv"><span class="k">entry</span><span class="v">$'+AUTO_V4.stakeUsd+' dip-limit at signal rate ×0.80 (−'+AUTO_V4.limitBelowSignalPct+'% dip) · pending orders consume NO cash or slots · one per coin · max '+AUTO_V4.maxSlots+' pending</span></div>'
+    +'<div class="kv"><span class="k">fill</span><span class="v">only on a later REAL observation ≤ limit · expires after '+AUTO_V4.limitExpiryMinutes+' min · cancels if slots full or bank short at fill</span></div>'
+    +'<div class="kv"><span class="k">win exit</span><span class="v">auto sell at '+AUTO_V4.tpMultiple+'x entry</span></div>'
+    +'<div class="kv"><span class="k">price stop</span><span class="v">auto exit at −'+Math.round((1-AUTO_V4.stopMultiple)*100)+'%</span></div>'
+    +'<div class="kv"><span class="k">liquidity exit</span><span class="v">defensive exit if liquidity −'+AUTO_V4.defensiveLiqExitDropPct+'% vs entry</span></div>'
     +'<div class="kv"><span class="k">rug</span><span class="v">liquidity gone per real data (≤ $'+S.settings.rugLiquidityUsd+' or −'+S.settings.rugLiquidityDropPct+'% vs entry) = full position lost</span></div>'
     +'<div class="kv"><span class="k">time limit</span><span class="v">none — holds until a rule fires</span></div></div>';
   const open=AUTO.open().sort((a,b)=>b.entryAt-a.entryAt);
@@ -1418,7 +1410,7 @@ DashboardRenderer.prototype.autotrade=function(){
   }
   h+='</div>';
   const pends=[...AUTO.pending.values()].sort((a,b)=>b.placedAt-a.placedAt);
-  h+='<div class="card"><h3>Pending dip-limit orders ('+pends.length+' / '+AUTO_V3.maxSlots+')</h3>';
+  h+='<div class="card"><h3>Pending dip-limit orders ('+pends.length+' / '+AUTO_V4.maxSlots+')</h3>';
   if(!pends.length)h+='<div class="small">none — a new PAPER_SIGNAL places one (limit = signal rate ×0.80)</div>';
   for(const o of pends){
     h+='<div class="tok" style="border:1px solid var(--line);border-radius:10px;padding:8px;margin:8px 0">'
@@ -1465,8 +1457,8 @@ DashboardRenderer.prototype.serverbook=function(){
   if(d.slotsUsed!=null)h+='<div class="kv"><span class="k">slots used</span><span class="v">'+d.slotsUsed+(d.maxSlots!=null?' / '+d.maxSlots:'')+'</span></div>';
   if(d.rules){ const r=d.rules; const q=r.qualification||{};
     h+='<h3 style="margin-top:10px">server rules ('+U.esc(String(r.entryMode||'standard'))+')</h3><div class="small">'
-      +((r.entryMode==='dip-limit-v2'||r.entryMode==='defensive-v3')?('entry: LIMIT BUY at signal rate ×0.80 (−'+(r.limitBelowSignalPct||20)+'% dip) · fills only on a real later observation ≤ limit · expires in '+(r.limitExpiryMinutes||60)+' min or earlier on disqualification · pending orders do NOT consume cash or slots<br>'):('entry: $'+r.entryUsd+' per qualifying signal<br>'))
-      +'gates: score ≥ '+(q.scoreThreshold!=null?q.scoreThreshold:'—')+' · ≥ '+(q.minQualifiedWallets!=null?q.minQualifiedWallets:'—')+' wallets · liquidity ≥ '+U.fmt$(q.minLiquidityUsd)+' · 24h vol ≥ '+U.fmt$(q.minVolume24Usd)+'<br>'
+      +((r.entryMode==='dip-limit-v2'||r.entryMode==='defensive-v3'||r.entryMode==='entry-open-v4')?('entry: LIMIT BUY at signal rate ×0.80 (−'+(r.limitBelowSignalPct||20)+'% dip) · fills only on a real later observation ≤ limit · expires in '+(r.limitExpiryMinutes||60)+' min'+(r.entryMode==='entry-open-v4'?'':' or earlier on disqualification')+' · pending orders do NOT consume cash or slots<br>'):('entry: $'+r.entryUsd+' per qualifying signal<br>'))
+      +(r.entryMode==='entry-open-v4'?('entry screens: NONE (v4 owner override) — no liquidity / volume / score / wallet / age / flag / crash screens; real identity + fresh market evidence only<br>'):('gates: score ≥ '+(q.scoreThreshold!=null?q.scoreThreshold:'—')+' · ≥ '+(q.minQualifiedWallets!=null?q.minQualifiedWallets:'—')+' wallets · liquidity ≥ '+U.fmt$(q.minLiquidityUsd)+' · 24h vol ≥ '+U.fmt$(q.minVolume24Usd)+'<br>'))
       +'exits from filled entry: '+r.takeProfitMultiple+'x sell · −'+Math.round((1-r.stopMultiple)*100)+'% price stop'+(r.defensiveLiquidityExitDropPct!=null?' · liquidity −'+r.defensiveLiquidityExitDropPct+'% defensive exit':'')+' · rug ≤ '+U.fmt$(r.rugLiquidityUsd)+' or ≥ '+r.rugDropPct+'% liquidity drop = full loss · fee '+r.feePct+'%/side · no time limit</div>'; }
   const pos=Array.isArray(d.positions)?d.positions:[];
   h+='<h3 style="margin-top:10px">server positions ('+pos.length+')</h3>';
@@ -1515,7 +1507,7 @@ DashboardRenderer.prototype.serverbook=function(){
 /* ============================================================
    PIPELINE ORCHESTRATOR + BOOT
    Discovery -> Validation -> Wallet research -> Clusters ->
-   Risk gates -> Score -> Qualification -> Paper ledger -> Monitor
+   Validation -> v4 open entry (no screens) -> Paper ledger -> Monitor
    ============================================================ */
 const BOOT={
   async init(){
@@ -1634,36 +1626,37 @@ window.addEventListener('load',()=>BOOT.init());
 
 /* ============================================================
    R. AutoTradeEngine — separate $200 AUTO paper book.
-   defensive-v3 rules: $10/entry via dip-limit (-20% limit, 60 min
+   entry-open-v4 rules: NO entry screens (owner override) - every
+   validated signal places a $10 dip-limit (-20% limit, 60 min
    expiry, fills only on a later real observation <= limit), max 4
    filled slots, exits: 1.5x sell / -25% price stop / liquidity -30%
    defensive exit / rug (>=90% liq drop) = full loss. No time limit.
    PAPER ONLY. Runs only while tab is open.
    ============================================================ */
-/* defensive-v3 rule parameters for the LOCAL auto book (agent-set per owner voice note 2026-10-13) */
-const AUTO_V3={stakeUsd:10,maxSlots:4,tpMultiple:1.5,stopMultiple:0.75,defensiveLiqExitDropPct:30,limitBelowSignalPct:20,limitExpiryMinutes:60};
+/* entry-open-v4 rule parameters for the LOCAL auto book (no entry screens per owner typed override 2026-10-13; exit params agent-set per owner voice note) */
+const AUTO_V4={stakeUsd:10,maxSlots:4,tpMultiple:1.5,stopMultiple:0.75,defensiveLiqExitDropPct:30,limitBelowSignalPct:20,limitExpiryMinutes:60};
 class AutoTradeEngine{
   constructor(){ this.positions=new Map(); this.pending=new Map(); this._cash=null; this.history=[]; }
   cash(){ return this._cash==null?S.settings.startCapital:this._cash; }
   setCash(v){ this._cash=Math.round(v*100)/100; }
   reset(){ this._cash=null; }
   open(){ return [...this.positions.values()].filter(p=>p.status==='OPEN'); }
-  fee(){ return AUTO_V3.stakeUsd*S.settings.feePct/100; }
-  cost(){ return AUTO_V3.stakeUsd+this.fee(); }
-  /* defensive-v3 entry: place a PENDING dip-limit order (no cash/slot consumed until a real fill) */
+  fee(){ return AUTO_V4.stakeUsd*S.settings.feePct/100; }
+  cost(){ return AUTO_V4.stakeUsd+this.fee(); }
+  /* entry-open-v4 entry: place a PENDING dip-limit order on ANY validated signal (no cash/slot consumed until a real fill) */
   onSignal(g){
     if(!S.settings.autoTradeEnabled)return {ok:false,reason:'auto trade disabled'};
     if(g.signalPriceUsd==null)return {ok:false,reason:'signal has no frozen signal-time price (legacy signal)'};
     if([...this.positions.values()].some(p=>p.mint===g.mint&&p.status==='OPEN'))return {ok:false,reason:'position already open for this coin'};
     if([...this.pending.values()].some(o=>o.mint===g.mint))return {ok:false,reason:'pending limit already placed for this coin'};
-    if(this.pending.size>=AUTO_V3.maxSlots)return {ok:false,reason:'max '+AUTO_V3.maxSlots+' pending limits already placed'};
-    const limitPrice=g.signalPriceUsd*(1-AUTO_V3.limitBelowSignalPct/100);
+    if(this.pending.size>=AUTO_V4.maxSlots)return {ok:false,reason:'max '+AUTO_V4.maxSlots+' pending limits already placed'};
+    const limitPrice=g.signalPriceUsd*(1-AUTO_V4.limitBelowSignalPct/100);
     const o={id:U.uid('apend'),mint:g.mint,symbol:g.symbol,signalId:g.id,
       placedAt:U.now(),signalRate:g.signalPriceUsd,limitPrice,
-      stakeUsd:AUTO_V3.stakeUsd,expiryMinutes:AUTO_V3.limitExpiryMinutes,
+      stakeUsd:AUTO_V4.stakeUsd,expiryMinutes:AUTO_V4.limitExpiryMinutes,
       entryLiquidity:g.evidence?g.evidence.liquidityUsd:null};
     this.pending.set(o.id,o);
-    this.history.push({t:U.now(),type:'PENDING_PLACED',symbol:g.symbol,mint:g.mint,price:limitPrice,usd:AUTO_V3.stakeUsd,fee:0,reason:'dip-limit placed at $'+limitPrice+' ('+AUTO_V3.limitBelowSignalPct+'% below signal rate $'+g.signalPriceUsd+')'});
+    this.history.push({t:U.now(),type:'PENDING_PLACED',symbol:g.symbol,mint:g.mint,price:limitPrice,usd:AUTO_V4.stakeUsd,fee:0,reason:'dip-limit placed at $'+limitPrice+' ('+AUTO_V4.limitBelowSignalPct+'% below signal rate $'+g.signalPriceUsd+')'});
     g.autoConsumed=true;
     S.emit('data');
     return {ok:true,pend:o};
@@ -1672,7 +1665,7 @@ class AutoTradeEngine{
   refill(){
     let filled=0;
     for(const g of [...S.signals.values()].sort((a,b)=>b.createdAt-a.createdAt)){
-      if(this.pending.size>=AUTO_V3.maxSlots)break;
+      if(this.pending.size>=AUTO_V4.maxSlots)break;
       if(g.consumed||g.autoConsumed)continue;
       if(g.signalPriceUsd==null)continue;
       const r=this.onSignal(g); if(r.ok)filled++;
@@ -1694,19 +1687,19 @@ class AutoTradeEngine{
         const pr=ppx[o.mint];
         if(!pr||!pr.ok||pr.priceUsd==null)continue; // honest: no fill on missing data
         if(pr.priceUsd<=o.limitPrice){
-          if(this.open().length>=AUTO_V3.maxSlots){ this.pending.delete(o.id); this.history.push({t:U.now(),type:'PENDING_CANCELLED',symbol:o.symbol,mint:o.mint,price:pr.priceUsd,usd:0,fee:0,reason:'limit reached but all '+AUTO_V3.maxSlots+' slots full — cancelled'}); continue; }
+          if(this.open().length>=AUTO_V4.maxSlots){ this.pending.delete(o.id); this.history.push({t:U.now(),type:'PENDING_CANCELLED',symbol:o.symbol,mint:o.mint,price:pr.priceUsd,usd:0,fee:0,reason:'limit reached but all '+AUTO_V4.maxSlots+' slots full — cancelled'}); continue; }
           if(this.cash()<this.cost()){ this.pending.delete(o.id); this.history.push({t:U.now(),type:'PENDING_CANCELLED',symbol:o.symbol,mint:o.mint,price:pr.priceUsd,usd:0,fee:0,reason:'limit reached but auto bank insufficient ('+U.fmt$(this.cash())+') — cancelled'}); continue; }
-          const qty=AUTO_V3.stakeUsd/pr.priceUsd;
+          const qty=AUTO_V4.stakeUsd/pr.priceUsd;
           const pos={id:U.uid('ap'),mint:o.mint,symbol:o.symbol,signalId:o.signalId,
-            entryAt:U.now(),entryRate:pr.priceUsd,entrySizeUsd:AUTO_V3.stakeUsd,feeUsd:this.fee(),qty,
+            entryAt:U.now(),entryRate:pr.priceUsd,entrySizeUsd:AUTO_V4.stakeUsd,feeUsd:this.fee(),qty,
             entryLiquidity:pr.liquidityUsd!=null?pr.liquidityUsd:o.entryLiquidity,
             status:'OPEN',lastPrice:pr.priceUsd,lastPriceAt:pr.observedAt,priceState:'LIVE',
             exitAt:null,exitPrice:null,exitReason:null,exitValueUsd:null,realizedPnl:null,
-            rules:'defensive-v3: dip-limit fill at real observed price; exits 1.5x / -25% price stop / -30% liquidity defensive exit / rug full loss. no time limit. PAPER ONLY.'};
+            rules:'entry-open-v4: no entry screens; dip-limit fill at real observed price; exits 1.5x / -25% price stop / -30% liquidity defensive exit / rug full loss. no time limit. PAPER ONLY.'};
           this.setCash(this.cash()-this.cost());
           this.positions.set(pos.id,pos);
           this.pending.delete(o.id);
-          this.history.push({t:U.now(),type:'AUTO_ENTRY',symbol:o.symbol,mint:o.mint,price:pr.priceUsd,usd:AUTO_V3.stakeUsd,fee:pos.feeUsd,reason:'dip-limit fill at $'+pr.priceUsd+' (real observation <= limit $'+o.limitPrice+')'});
+          this.history.push({t:U.now(),type:'AUTO_ENTRY',symbol:o.symbol,mint:o.mint,price:pr.priceUsd,usd:AUTO_V4.stakeUsd,fee:pos.feeUsd,reason:'dip-limit fill at $'+pr.priceUsd+' (real observation <= limit $'+o.limitPrice+')'});
           U.toast('🤖 dip-limit FILLED: '+(o.symbol||U.short(o.mint))+' @ $'+pr.priceUsd);
         }
       }
@@ -1732,13 +1725,13 @@ class AutoTradeEngine{
       // defensive liquidity exit: -30% vs entry
       if(p.entryLiquidity&&pr.liquidityUsd!=null){
         const ldrop=(p.entryLiquidity-pr.liquidityUsd)/p.entryLiquidity*100;
-        if(ldrop>=AUTO_V3.defensiveLiqExitDropPct){
-          this._close(p,pr.priceUsd,'defensive exit — liquidity -'+ldrop.toFixed(1)+'% vs entry (rule: -'+AUTO_V3.defensiveLiqExitDropPct+'%)');
+        if(ldrop>=AUTO_V4.defensiveLiqExitDropPct){
+          this._close(p,pr.priceUsd,'defensive exit — liquidity -'+ldrop.toFixed(1)+'% vs entry (rule: -'+AUTO_V4.defensiveLiqExitDropPct+'%)');
           continue;
         }
       }
-      if(x>=AUTO_V3.tpMultiple){ this._close(p,pr.priceUsd,'1.5x target hit ('+x.toFixed(2)+'x) — auto sell'); continue; }
-      if(x<=AUTO_V3.stopMultiple){ this._close(p,pr.priceUsd,'-25% price stop ('+((x-1)*100).toFixed(1)+'%) — auto exit'); continue; }
+      if(x>=AUTO_V4.tpMultiple){ this._close(p,pr.priceUsd,'1.5x target hit ('+x.toFixed(2)+'x) — auto sell'); continue; }
+      if(x<=AUTO_V4.stopMultiple){ this._close(p,pr.priceUsd,'-25% price stop ('+((x-1)*100).toFixed(1)+'%) — auto exit'); continue; }
     }
     this.refill();
     S.emit('data');
