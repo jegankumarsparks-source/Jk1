@@ -346,8 +346,8 @@
       "qty": 76248.57033930614,
       "entryLiquidity": 44469.2,
       "status": "OPEN",
-      "lastPrice": 0.0003247,
-      "lastPriceAt": 1791879298380,
+      "lastPrice": 0.0003099,
+      "lastPriceAt": 1791880947240,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -370,15 +370,15 @@
       "feeUsd": 0.1,
       "qty": 206568.89072505682,
       "entryLiquidity": 26019.23,
-      "status": "OPEN",
-      "lastPrice": 0.0001342,
-      "lastPriceAt": 1791879298404,
+      "status": "CLOSED",
+      "lastPrice": 2.299e-06,
+      "lastPriceAt": 1791880947262,
       "priceState": "LIVE",
-      "exitAt": null,
-      "exitPrice": null,
-      "exitReason": null,
-      "exitValueUsd": null,
-      "realizedPnl": null,
+      "exitAt": 1791880947262,
+      "exitPrice": 0,
+      "exitReason": "RUG PULL \u2014 liquidity collapsed ($26.0k -> $2.4k, real data). Full position lost.",
+      "exitValueUsd": 0,
+      "realizedPnl": -20.1,
       "rules": "auto-exit at 1.5x / -50% / rug (liquidity gone). no time limit. PAPER ONLY.",
       "limitOrderId": "limit_sig_mv6ci1g4w7o20n",
       "signalReferencePrice": 0.0001298,
@@ -913,6 +913,15 @@
       "symbol": "swordcat",
       "price": 0.0026072000000000005,
       "reason": "60-minute signal expiry"
+    },
+    {
+      "t": 1791880947262,
+      "type": "RUG_LOSS",
+      "symbol": "DOT",
+      "mint": "12D9AqkmPuBLSJK7ERWfvf1FSWBQNi5N8ndqZL97pump",
+      "price": 0,
+      "usd": 0,
+      "reason": "RUG PULL \u2014 liquidity collapsed ($26.0k -> $2.4k, real data). Full position lost."
     }
   ],
   "pendingOrders": [
@@ -1189,10 +1198,10 @@
     "minVolume24Usd": 50000
   },
   "limitExpiryMinutes": 60,
-  "eventsReported": 55,
-  "analysisCursor": 41,
-  "v2ScansCompleted": 258,
-  "asOf": "2026-10-13T08:15:17.996Z",
-  "equity": 132.98,
-  "realizedPnl": -79.3
+  "eventsReported": 56,
+  "analysisCursor": 71,
+  "v2ScansCompleted": 263,
+  "asOf": "2026-10-13T08:42:43.799Z",
+  "equity": 104.13,
+  "realizedPnl": -99.4
 }
