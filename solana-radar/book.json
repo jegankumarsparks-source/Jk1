@@ -1,11 +1,11 @@
 {
   "schema": 1,
-  "generatedAt": "2026-10-13T08:47:03.289771+00:00",
-  "lastCheckedAt": "2026-10-13T08:42:43.799Z",
+  "generatedAt": "2026-10-13T13:46:19.250752+00:00",
+  "lastCheckedAt": "2026-10-13T13:46:12.865Z",
   "paperOnly": true,
   "bank": 200,
   "cash": 80.5,
-  "equity": 104.13,
+  "equity": 103.14,
   "realizedPnl": -99.4,
   "slotsUsed": 1,
   "maxSlots": 4,
@@ -466,8 +466,8 @@
       "qty": 76248.57033930614,
       "entryLiquidity": 44469.2,
       "status": "OPEN",
-      "lastPrice": 0.0003099,
-      "lastPriceAt": 1791880947240,
+      "lastPrice": 0.0002969,
+      "lastPriceAt": 1791899154136,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -479,7 +479,8 @@
       "signalReferencePrice": 0.000337,
       "limitPrice": 0.0002696,
       "rulesVersion": "defensive-v3",
-      "currentX": 1.1814715974075487,
+      "lastLiquidityUsd": 47564.74,
+      "currentX": 1.1319100266869997,
       "exitInfo": null
     },
     {
@@ -779,20 +780,23 @@
       "filledAt": 1791877310714,
       "fillPrice": 9.682e-05,
       "positionId": "ap_mv6dhhq2m0s3xr"
+    },
+    {
+      "id": "limit_sig_mv6qhp6y6cu4jm",
+      "signalId": "sig_mv6qhp6y6cu4jm",
+      "mint": "CQCDTp8rsFV3PhaPeYjcCW5LdGTxi6jFx7eC3UXnpump",
+      "symbol": "CRAWLER",
+      "signalPrice": 0.02545,
+      "limitPrice": 0.020360000000000003,
+      "createdAt": 1791899155402,
+      "expiresAt": 1791902755402,
+      "status": "PENDING",
+      "score": 85,
+      "signalLiquidity": 468480.69
     }
   ],
   "rulesVersion": "defensive-v3",
   "historyTail": [
-    {
-      "t": 1791789988351,
-      "type": "AUTO_ENTRY",
-      "symbol": "CAESAR",
-      "mint": "EaqXJVr1aFPhMyTJbDCpwvTeiKc8x4gueFjFKKBvtcWY",
-      "price": 0.0001775,
-      "usd": 20,
-      "fee": 0.1,
-      "reason": "auto entry at signal-time price"
-    },
     {
       "t": 1791792627402,
       "type": "RUG_LOSS",
@@ -1250,6 +1254,16 @@
       "price": 0,
       "usd": 0,
       "reason": "RUG PULL \u2014 liquidity collapsed ($26.0k -> $2.4k, real data). Full position lost."
+    },
+    {
+      "t": 1791899155402,
+      "type": "LIMIT_PLACED",
+      "mint": "CQCDTp8rsFV3PhaPeYjcCW5LdGTxi6jFx7eC3UXnpump",
+      "symbol": "CRAWLER",
+      "price": 0.020360000000000003,
+      "signalPrice": 0.02545,
+      "usd": 10,
+      "reason": "v3: -20% limit, expires in 60 minutes; no cash/slot consumed"
     }
   ],
   "sourceHealth": [
@@ -1258,12 +1272,12 @@
       "label": "Dexscreener (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791880963564,
+      "lastSuccess": 1791899172597,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
       "rateLimitCount": 0,
-      "requestCount": 22,
+      "requestCount": 21,
       "note": "REST market feed \u2014 not a complete historical on-chain feed. Rate limits apply.",
       "backoffUntil": 0
     },
@@ -1272,7 +1286,7 @@
       "label": "RugCheck (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791880963014,
+      "lastSuccess": 1791899171934,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
@@ -1286,7 +1300,7 @@
       "label": "Solana JSON-RPC (PublicNode)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791880963484,
+      "lastSuccess": 1791899172445,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
