@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "generatedAt": "2026-10-13T03:44:49.927851+00:00",
-  "lastCheckedAt": "2026-10-13T03:44:45.960Z",
+  "generatedAt": "2026-10-13T04:45:29.762238+00:00",
+  "lastCheckedAt": "2026-10-13T04:45:25.442Z",
   "paperOnly": true,
   "bank": 200,
   "cash": 120.7,
@@ -651,9 +651,11 @@
       "limitPrice": 0.0027744,
       "createdAt": 1791863085611,
       "expiresAt": 1791866685611,
-      "status": "PENDING",
+      "status": "CANCELLED",
       "score": 80.5,
-      "signalLiquidity": 168347.24
+      "signalLiquidity": 168347.24,
+      "cancelledAt": 1791866719329,
+      "cancelReason": "60-minute signal expiry"
     }
   ],
   "rulesVersion": "dip-limit-v2",
@@ -1101,6 +1103,14 @@
       "signalPrice": 0.003468,
       "usd": 20,
       "reason": "v2: -20% limit, expires in 60 minutes; no cash/slot consumed"
+    },
+    {
+      "t": 1791866719329,
+      "type": "LIMIT_CANCELLED",
+      "mint": "HgTGdc29D5bDMrDvsCLnorxz899VyDj7ZN7FPa6vpump",
+      "symbol": "VEIL",
+      "price": 0.0027744,
+      "reason": "60-minute signal expiry"
     }
   ],
   "sourceHealth": [
@@ -1109,7 +1119,7 @@
       "label": "Dexscreener (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791863085610,
+      "lastSuccess": 1791866725273,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
@@ -1123,12 +1133,12 @@
       "label": "RugCheck (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791863084936,
+      "lastSuccess": 1791866724690,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
       "rateLimitCount": 0,
-      "requestCount": 6,
+      "requestCount": 5,
       "note": "Token risk report: authorities, holders, liquidity. topHolders may be null on mega-caps.",
       "backoffUntil": 0
     },
@@ -1137,7 +1147,7 @@
       "label": "Solana JSON-RPC (PublicNode)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791863085543,
+      "lastSuccess": 1791866725172,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
