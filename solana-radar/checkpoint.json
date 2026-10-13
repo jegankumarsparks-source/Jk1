@@ -346,8 +346,8 @@
       "qty": 76248.57033930614,
       "entryLiquidity": 44469.2,
       "status": "OPEN",
-      "lastPrice": 0.0003099,
-      "lastPriceAt": 1791880947240,
+      "lastPrice": 0.0002969,
+      "lastPriceAt": 1791899154136,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -358,7 +358,8 @@
       "limitOrderId": "limit_sig_mv69xwfh47f3s7",
       "signalReferencePrice": 0.000337,
       "limitPrice": 0.0002696,
-      "rulesVersion": "defensive-v3"
+      "rulesVersion": "defensive-v3",
+      "lastLiquidityUsd": 47564.74
     },
     {
       "id": "ap_mv6dhhq2m0s3xr",
@@ -923,6 +924,16 @@
       "price": 0,
       "usd": 0,
       "reason": "RUG PULL \u2014 liquidity collapsed ($26.0k -> $2.4k, real data). Full position lost."
+    },
+    {
+      "t": 1791899155402,
+      "type": "LIMIT_PLACED",
+      "mint": "CQCDTp8rsFV3PhaPeYjcCW5LdGTxi6jFx7eC3UXnpump",
+      "symbol": "CRAWLER",
+      "price": 0.020360000000000003,
+      "signalPrice": 0.02545,
+      "usd": 10,
+      "reason": "v3: -20% limit, expires in 60 minutes; no cash/slot consumed"
     }
   ],
   "pendingOrders": [
@@ -1188,6 +1199,19 @@
       "filledAt": 1791877310714,
       "fillPrice": 9.682e-05,
       "positionId": "ap_mv6dhhq2m0s3xr"
+    },
+    {
+      "id": "limit_sig_mv6qhp6y6cu4jm",
+      "signalId": "sig_mv6qhp6y6cu4jm",
+      "mint": "CQCDTp8rsFV3PhaPeYjcCW5LdGTxi6jFx7eC3UXnpump",
+      "symbol": "CRAWLER",
+      "signalPrice": 0.02545,
+      "limitPrice": 0.020360000000000003,
+      "createdAt": 1791899155402,
+      "expiresAt": 1791902755402,
+      "status": "PENDING",
+      "score": 85,
+      "signalLiquidity": 468480.69
     }
   ],
   "rulesVersion": "defensive-v3",
@@ -1203,8 +1227,8 @@
   },
   "limitExpiryMinutes": 60,
   "eventsReported": 57,
-  "analysisCursor": 71,
-  "v2ScansCompleted": 263,
+  "analysisCursor": 401,
+  "v2ScansCompleted": 318,
   "ruleChanges": [
     {
       "at": 1791881193992,
@@ -1234,7 +1258,7 @@
       }
     }
   ],
-  "asOf": "2026-10-13T08:42:43.799Z",
-  "equity": 104.13,
+  "asOf": "2026-10-13T13:46:12.865Z",
+  "equity": 103.14,
   "realizedPnl": -99.4
 }
