@@ -346,8 +346,8 @@
       "qty": 76248.57033930614,
       "entryLiquidity": 44469.2,
       "status": "OPEN",
-      "lastPrice": 0.0002623,
-      "lastPriceAt": 1791874334874,
+      "lastPrice": 0.0002427,
+      "lastPriceAt": 1791875327744,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -842,6 +842,14 @@
       "usd": 20,
       "fee": 0.1,
       "reason": "limit fill at later real check price <= -20% signal limit"
+    },
+    {
+      "t": 1791875328629,
+      "type": "LIMIT_CANCELLED",
+      "mint": "7jNwX4Me9zGEjmWY7zARDG2LYjVs1WXD6DZ1JvSfpump",
+      "symbol": "HUMPH",
+      "price": 0.003704,
+      "reason": "60-minute signal expiry"
     }
   ],
   "pendingOrders": [
@@ -1071,9 +1079,11 @@
       "limitPrice": 0.003704,
       "createdAt": 1791871687314,
       "expiresAt": 1791875287314,
-      "status": "PENDING",
+      "status": "CANCELLED",
       "score": 85,
-      "signalLiquidity": 200228.5
+      "signalLiquidity": 200228.5,
+      "cancelledAt": 1791875328629,
+      "cancelReason": "60-minute signal expiry"
     }
   ],
   "rulesVersion": "dip-limit-v2",
@@ -1085,10 +1095,10 @@
     "minVolume24Usd": 50000
   },
   "limitExpiryMinutes": 60,
-  "eventsReported": 50,
-  "analysisCursor": 548,
-  "v2ScansCompleted": 243,
-  "asOf": "2026-10-13T06:52:19.910Z",
-  "equity": 120.6,
+  "eventsReported": 51,
+  "analysisCursor": 566,
+  "v2ScansCompleted": 246,
+  "asOf": "2026-10-13T07:09:00.878Z",
+  "equity": 119.11,
   "realizedPnl": -79.3
 }
