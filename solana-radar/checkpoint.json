@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "cash": 100.6,
+  "cash": 80.5,
   "positions": [
     {
       "id": "ap_mv4w49a0k5sr7f",
@@ -346,8 +346,8 @@
       "qty": 76248.57033930614,
       "entryLiquidity": 44469.2,
       "status": "OPEN",
-      "lastPrice": 0.0002586,
-      "lastPriceAt": 1791875652068,
+      "lastPrice": 0.000261,
+      "lastPriceAt": 1791877308750,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -358,6 +358,31 @@
       "limitOrderId": "limit_sig_mv69xwfh47f3s7",
       "signalReferencePrice": 0.000337,
       "limitPrice": 0.0002696
+    },
+    {
+      "id": "ap_mv6dhhq2m0s3xr",
+      "mint": "12D9AqkmPuBLSJK7ERWfvf1FSWBQNi5N8ndqZL97pump",
+      "symbol": "DOT",
+      "signalId": "sig_mv6ci1g4w7o20n",
+      "entryAt": 1791877310714,
+      "entryRate": 9.682e-05,
+      "entrySizeUsd": 20,
+      "feeUsd": 0.1,
+      "qty": 206568.89072505682,
+      "entryLiquidity": 26019.23,
+      "status": "OPEN",
+      "lastPrice": 9.682e-05,
+      "lastPriceAt": 1791877310714,
+      "priceState": "LIVE",
+      "exitAt": null,
+      "exitPrice": null,
+      "exitReason": null,
+      "exitValueUsd": null,
+      "realizedPnl": null,
+      "rules": "auto-exit at 1.5x / -50% / rug (liquidity gone). no time limit. PAPER ONLY.",
+      "limitOrderId": "limit_sig_mv6ci1g4w7o20n",
+      "signalReferencePrice": 0.0001298,
+      "limitPrice": 0.00010384000000000001
     }
   ],
   "history": [
@@ -870,6 +895,16 @@
       "signalPrice": 0.0001298,
       "usd": 20,
       "reason": "v2: -20% limit, expires in 60 minutes; no cash/slot consumed"
+    },
+    {
+      "t": 1791877310714,
+      "type": "AUTO_ENTRY",
+      "symbol": "DOT",
+      "mint": "12D9AqkmPuBLSJK7ERWfvf1FSWBQNi5N8ndqZL97pump",
+      "price": 9.682e-05,
+      "usd": 20,
+      "fee": 0.1,
+      "reason": "limit fill at later real check price <= -20% signal limit"
     }
   ],
   "pendingOrders": [
@@ -1127,9 +1162,12 @@
       "limitPrice": 0.00010384000000000001,
       "createdAt": 1791875656660,
       "expiresAt": 1791879256660,
-      "status": "PENDING",
+      "status": "FILLED",
       "score": 77,
-      "signalLiquidity": 30372.16
+      "signalLiquidity": 30372.16,
+      "filledAt": 1791877310714,
+      "fillPrice": 9.682e-05,
+      "positionId": "ap_mv6dhhq2m0s3xr"
     }
   ],
   "rulesVersion": "dip-limit-v2",
@@ -1141,10 +1179,10 @@
     "minVolume24Usd": 50000
   },
   "limitExpiryMinutes": 60,
-  "eventsReported": 52,
-  "analysisCursor": 572,
-  "v2ScansCompleted": 247,
-  "asOf": "2026-10-13T07:14:18.821Z",
-  "equity": 120.32,
+  "eventsReported": 54,
+  "analysisCursor": 602,
+  "v2ScansCompleted": 252,
+  "asOf": "2026-10-13T07:41:56.979Z",
+  "equity": 120.4,
   "realizedPnl": -79.3
 }
