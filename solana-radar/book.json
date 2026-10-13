@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "generatedAt": "2026-10-12T23:47:44.080895+00:00",
-  "lastCheckedAt": "2026-10-12T23:47:41.440Z",
+  "generatedAt": "2026-10-13T03:44:49.927851+00:00",
+  "lastCheckedAt": "2026-10-13T03:44:45.960Z",
   "paperOnly": true,
   "bank": 200,
   "cash": 120.7,
@@ -641,6 +641,19 @@
       "signalLiquidity": 46782.23,
       "cancelledAt": 1791848854827,
       "cancelReason": "60-minute signal expiry"
+    },
+    {
+      "id": "limit_sig_mv650lkb7928ff",
+      "signalId": "sig_mv650lkb7928ff",
+      "mint": "HgTGdc29D5bDMrDvsCLnorxz899VyDj7ZN7FPa6vpump",
+      "symbol": "VEIL",
+      "signalPrice": 0.003468,
+      "limitPrice": 0.0027744,
+      "createdAt": 1791863085611,
+      "expiresAt": 1791866685611,
+      "status": "PENDING",
+      "score": 80.5,
+      "signalLiquidity": 168347.24
     }
   ],
   "rulesVersion": "dip-limit-v2",
@@ -1078,6 +1091,16 @@
       "symbol": "Dogcoin",
       "price": 0.00021288000000000004,
       "reason": "60-minute signal expiry"
+    },
+    {
+      "t": 1791863085611,
+      "type": "LIMIT_PLACED",
+      "mint": "HgTGdc29D5bDMrDvsCLnorxz899VyDj7ZN7FPa6vpump",
+      "symbol": "VEIL",
+      "price": 0.0027744,
+      "signalPrice": 0.003468,
+      "usd": 20,
+      "reason": "v2: -20% limit, expires in 60 minutes; no cash/slot consumed"
     }
   ],
   "sourceHealth": [
@@ -1086,7 +1109,7 @@
       "label": "Dexscreener (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791848861281,
+      "lastSuccess": 1791863085610,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
@@ -1100,12 +1123,12 @@
       "label": "RugCheck (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791848860692,
+      "lastSuccess": 1791863084936,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
       "rateLimitCount": 0,
-      "requestCount": 5,
+      "requestCount": 6,
       "note": "Token risk report: authorities, holders, liquidity. topHolders may be null on mega-caps.",
       "backoffUntil": 0
     },
@@ -1114,7 +1137,7 @@
       "label": "Solana JSON-RPC (PublicNode)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791848861182,
+      "lastSuccess": 1791863085543,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
