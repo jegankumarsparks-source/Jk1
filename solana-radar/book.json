@@ -1,11 +1,11 @@
 {
   "schema": 1,
-  "generatedAt": "2026-10-13T06:52:28.588263+00:00",
-  "lastCheckedAt": "2026-10-13T06:52:19.910Z",
+  "generatedAt": "2026-10-13T07:09:08.520199+00:00",
+  "lastCheckedAt": "2026-10-13T07:09:00.878Z",
   "paperOnly": true,
   "bank": 200,
   "cash": 100.6,
-  "equity": 120.6,
+  "equity": 119.11,
   "realizedPnl": -79.3,
   "slotsUsed": 1,
   "maxSlots": 6,
@@ -466,8 +466,8 @@
       "qty": 76248.57033930614,
       "entryLiquidity": 44469.2,
       "status": "OPEN",
-      "lastPrice": 0.0002623,
-      "lastPriceAt": 1791874334874,
+      "lastPrice": 0.0002427,
+      "lastPriceAt": 1791875327744,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -478,7 +478,7 @@
       "limitOrderId": "limit_sig_mv69xwfh47f3s7",
       "signalReferencePrice": 0.000337,
       "limitPrice": 0.0002696,
-      "currentX": 1.0,
+      "currentX": 0.92527640106748,
       "exitInfo": null
     }
   ],
@@ -709,23 +709,15 @@
       "limitPrice": 0.003704,
       "createdAt": 1791871687314,
       "expiresAt": 1791875287314,
-      "status": "PENDING",
+      "status": "CANCELLED",
       "score": 85,
-      "signalLiquidity": 200228.5
+      "signalLiquidity": 200228.5,
+      "cancelledAt": 1791875328629,
+      "cancelReason": "60-minute signal expiry"
     }
   ],
   "rulesVersion": "dip-limit-v2",
   "historyTail": [
-    {
-      "t": 1791788996974,
-      "type": "AUTO_ENTRY",
-      "symbol": "FIGHT",
-      "mint": "A8JUiZLzjGAsKxE74evdspHcuW4hvhPbvryDhaDZpump",
-      "price": 0.0002142,
-      "usd": 20,
-      "fee": 0.1,
-      "reason": "auto entry at signal-time price"
-    },
     {
       "t": 1791789321652,
       "type": "AUTO_EXIT",
@@ -1187,6 +1179,14 @@
       "usd": 20,
       "fee": 0.1,
       "reason": "limit fill at later real check price <= -20% signal limit"
+    },
+    {
+      "t": 1791875328629,
+      "type": "LIMIT_CANCELLED",
+      "mint": "7jNwX4Me9zGEjmWY7zARDG2LYjVs1WXD6DZ1JvSfpump",
+      "symbol": "HUMPH",
+      "price": 0.003704,
+      "reason": "60-minute signal expiry"
     }
   ],
   "sourceHealth": [
@@ -1195,12 +1195,12 @@
       "label": "Dexscreener (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791874339708,
+      "lastSuccess": 1791875340683,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
       "rateLimitCount": 0,
-      "requestCount": 20,
+      "requestCount": 21,
       "note": "REST market feed \u2014 not a complete historical on-chain feed. Rate limits apply.",
       "backoffUntil": 0
     },
@@ -1209,7 +1209,7 @@
       "label": "RugCheck (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791874339166,
+      "lastSuccess": 1791875340184,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
@@ -1223,7 +1223,7 @@
       "label": "Solana JSON-RPC (PublicNode)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791874339657,
+      "lastSuccess": 1791875340668,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
