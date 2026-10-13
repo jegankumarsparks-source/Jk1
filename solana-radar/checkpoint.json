@@ -3,7 +3,7 @@
   "initializedAt": "2026-10-12T06:30:23.852287+00:00",
   "sourceUrl": "https://raw.githubusercontent.com/jegankumarsparks-source/Jk1/main/solana-radar/index.html",
   "sourceSha256": "e78898b61da7b70ccf4354c086d52de12dc877e3077decf648148b1203d1c186",
-  "cash": 45.86,
+  "cash": 42.8,
   "positions": [
     {
       "id": "ap_mv4w49a0k5sr7f",
@@ -428,8 +428,8 @@
       "qty": 633713.5614702154,
       "entryLiquidity": 9102.45,
       "status": "OPEN",
-      "lastPrice": 0.00001766,
-      "lastPriceAt": 1791911722371,
+      "lastPrice": 0.00001779,
+      "lastPriceAt": 1791912053277,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -441,7 +441,7 @@
       "limitOrderId": "limit_sig_open_mv6u8fd6_hsnuj2",
       "signalReferencePrice": 0.00002076,
       "limitPrice": 0.000016608,
-      "lastLiquidityUsd": 9751.88
+      "lastLiquidityUsd": 9792.75
     },
     {
       "id": "ap_mv6v0sse3dfjje",
@@ -455,8 +455,8 @@
       "qty": 124084.87405385284,
       "entryLiquidity": 24963.62,
       "status": "OPEN",
-      "lastPrice": 0.00008994,
-      "lastPriceAt": 1791911722399,
+      "lastPrice": 0.00008919,
+      "lastPriceAt": 1791912053362,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -468,7 +468,7 @@
       "limitOrderId": "limit_sig_open_mv6u1g5v_fovo3m",
       "signalReferencePrice": 0.0001072,
       "limitPrice": 0.00008576,
-      "lastLiquidityUsd": 26385.1
+      "lastLiquidityUsd": 26317.16
     },
     {
       "id": "ap_mv6vf27qakcgwm",
@@ -481,21 +481,21 @@
       "feeUsd": 0.05,
       "qty": 284656.9883290635,
       "entryLiquidity": 14887.12,
-      "status": "OPEN",
-      "lastPrice": 0.00003625,
-      "lastPriceAt": 1791911722444,
+      "status": "CLOSED",
+      "lastPrice": 0.00002467,
+      "lastPriceAt": 1791912053392,
       "priceState": "LIVE",
-      "exitAt": null,
-      "exitPrice": null,
-      "exitReason": null,
-      "exitValueUsd": null,
-      "realizedPnl": null,
+      "exitAt": 1791912053481,
+      "exitPrice": 0.00002467,
+      "exitReason": "SL - observed -29.78% <=-25%",
+      "exitValueUsd": 6.99,
+      "realizedPnl": -3.06,
       "rules": "PAPER ONLY: TP 1.5x; SL -25%; defensive liquidity exit -30%; full-loss rug >=90% or <=$500; no time limit",
       "rulesVersion": "entry-open-v4",
       "limitOrderId": "limit_sig_open_mv6utsp6_pufpv7",
       "signalReferencePrice": 0.00005236,
       "limitPrice": 0.000041888,
-      "lastLiquidityUsd": 15130.81
+      "lastLiquidityUsd": 12178.61
     },
     {
       "id": "ap_mv6wsnpfti3zou",
@@ -510,7 +510,7 @@
       "entryLiquidity": 3353.27,
       "status": "OPEN",
       "lastPrice": 0.000003509,
-      "lastPriceAt": 1791911722474,
+      "lastPriceAt": 1791912053481,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -523,6 +523,32 @@
       "signalReferencePrice": 0.000004925,
       "limitPrice": 0.00000394,
       "lastLiquidityUsd": 3353.27
+    },
+    {
+      "id": "ap_mv6y6aee3vkeeh",
+      "mint": "9hX1BbhNyqfJQjTikiQrotUp6UTBWXnEDgAb5VATpump",
+      "symbol": "FISH",
+      "signalId": "sig_open_mv6wlosb_m0m48v",
+      "entryAt": 1791912059942,
+      "entryRate": 0.000008105,
+      "entrySizeUsd": 10,
+      "feeUsd": 0.05,
+      "qty": 1233806.2924120913,
+      "entryLiquidity": 5949.43,
+      "status": "OPEN",
+      "lastPrice": 0.000008105,
+      "lastPriceAt": 1791912059942,
+      "priceState": "LIVE",
+      "exitAt": null,
+      "exitPrice": null,
+      "exitReason": null,
+      "exitValueUsd": null,
+      "realizedPnl": null,
+      "rules": "PAPER ONLY: TP 1.5x; SL -25%; defensive liquidity exit -30%; full-loss rug >=90% or <=$500; no time limit",
+      "rulesVersion": "entry-open-v4",
+      "limitOrderId": "limit_sig_open_mv6wlosb_m0m48v",
+      "signalReferencePrice": 0.00001075,
+      "limitPrice": 0.0000086
     }
   ],
   "history": [
@@ -2254,6 +2280,93 @@
       "symbol": "Jamie",
       "price": 0.0000041872,
       "signalPrice": 0.000005234,
+      "usd": 10,
+      "reason": "entry-open-v4: -20% limit, expires in 60 minutes; no cash/slot consumed"
+    },
+    {
+      "t": 1791912053481,
+      "type": "AUTO_EXIT",
+      "symbol": "WALTJR",
+      "mint": "GbMfpnmsavwc5uHCqhbuFrSLdtggJiAxub7UKQ2hpump",
+      "price": 0.00002467,
+      "usd": 6.99,
+      "reason": "SL - observed -29.78% <=-25%"
+    },
+    {
+      "t": 1791912054225,
+      "type": "LIMIT_CANCELLED",
+      "mint": "91cjjARosQJZiCJzA8btiGBT7Bx5jBzShQHzhsx4pump",
+      "symbol": "BlackWhale",
+      "price": 0.00000398,
+      "reason": "60-minute signal expiry"
+    },
+    {
+      "t": 1791912054706,
+      "type": "LIMIT_CANCELLED",
+      "mint": "DDypwicBd51Bnqhw8UCcpz3NFfGqjh5nJob3gRCxpump",
+      "symbol": "CLAUDECHUD",
+      "price": 0.0000024752,
+      "reason": "60-minute signal expiry"
+    },
+    {
+      "t": 1791912055250,
+      "type": "LIMIT_CANCELLED",
+      "mint": "Gs7kJBNMDNYLtLESH1jjtC9rQkvTQQE3MLtFhaFvpump",
+      "symbol": "SAX",
+      "price": 0.0000049984,
+      "reason": "60-minute signal expiry"
+    },
+    {
+      "t": 1791912055793,
+      "type": "LIMIT_CANCELLED",
+      "mint": "DXnLJCPQqC17YSeBaLEEms6yRAL1dvj6BTeHnTKtpump",
+      "symbol": "MarsX",
+      "price": 0.000005940000000000001,
+      "reason": "60-minute signal expiry"
+    },
+    {
+      "t": 1791912056240,
+      "type": "LIMIT_CANCELLED",
+      "mint": "44qYD9WNJFvH4oc6ydFpTZan5BYpAq9yGK44mdnwpump",
+      "symbol": "Chonkie",
+      "price": 0.0000022288,
+      "reason": "60-minute signal expiry"
+    },
+    {
+      "t": 1791912056731,
+      "type": "LIMIT_CANCELLED",
+      "mint": "291HZmFgynd2MY2YTzbZ7sjoZbKnuZgdJAi9oq7Kpump",
+      "symbol": "AMD",
+      "price": 0.0000017200000000000003,
+      "reason": "60-minute signal expiry"
+    },
+    {
+      "t": 1791912059942,
+      "type": "AUTO_ENTRY",
+      "symbol": "FISH",
+      "mint": "9hX1BbhNyqfJQjTikiQrotUp6UTBWXnEDgAb5VATpump",
+      "price": 0.000008105,
+      "usd": 10,
+      "fee": 0.05,
+      "reason": "limit fill at later real check price <= -20% signal limit"
+    },
+    {
+      "t": 1791912068090,
+      "type": "LIMIT_PLACED",
+      "mint": "DciicAXD2F74CazeBEozmwbT5dx1YhpWszx5JBcppump",
+      "symbol": "Dirac Quantum",
+      "price": 0.000002092,
+      "signalPrice": 0.000002615,
+      "usd": 10,
+      "reason": "entry-open-v4: -20% limit, expires in 60 minutes; no cash/slot consumed"
+    },
+    {
+      "t": 1791912069309,
+      "type": "LIMIT_PLACED",
+      "mint": "4nMTfs9FR9ijL1MeAveU8s8M2g2awfPKJQKDeVtCCqve",
+      "symbol": "Irlcat",
+      "price": 0.0000025792000000000002,
+      "signalPrice": 0.000003224,
       "usd": 10,
       "reason": "entry-open-v4: -20% limit, expires in 60 minutes; no cash/slot consumed"
     }
@@ -303408,46 +303521,46 @@
           "symbol": "ETHINU",
           "name": "ETH INU",
           "quoteSymbol": "WETH",
-          "priceUsd": 0.00008994,
-          "priceNative": 3.594e-8,
-          "liquidityUsd": 26385.1,
-          "liquidityBase": 146672064,
-          "liquidityQuote": 5.272,
-          "mcap": 89946,
-          "fdv": 89946,
+          "priceUsd": 0.00008919,
+          "priceNative": 3.553e-8,
+          "liquidityUsd": 26317.16,
+          "liquidityBase": 147524471,
+          "liquidityQuote": 5.242,
+          "mcap": 89196,
+          "fdv": 89196,
           "volume": {
-            "m5": 363.24,
-            "h1": 3918.67,
-            "h6": 33833.91,
-            "h24": 414761.99
+            "m5": 69.31,
+            "h1": 3742.5,
+            "h6": 33520.39,
+            "h24": 414837.39
           },
           "priceChange": {
-            "m5": -4.82,
-            "h1": 20.55,
-            "h6": -27.71,
-            "h24": 104
+            "m5": -0.67,
+            "h1": 17.4,
+            "h6": -30.66,
+            "h24": 103
           },
           "txns": {
             "m5": {
-              "buys": 2,
+              "buys": 0,
               "sells": 4
             },
             "h1": {
-              "buys": 47,
-              "sells": 33
+              "buys": 44,
+              "sells": 32
             },
             "h6": {
-              "buys": 338,
-              "sells": 327
+              "buys": 332,
+              "sells": 329
             },
             "h24": {
               "buys": 4300,
-              "sells": 3055
+              "sells": 3060
             }
           },
           "pairCreatedAt": 1791853754000,
           "source": "dexscreener",
-          "observedAt": 1791911722399,
+          "observedAt": 1791912053363,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -303962,7 +304075,7 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791911722399,
+            "observedAt": 1791912053363,
             "status": "LIVE"
           },
           "rugcheck": {
@@ -303973,7 +304086,7 @@
         },
         "pairCreatedAt": 1791853754000,
         "lastError": null,
-        "updatedAt": 1791911722399,
+        "updatedAt": 1791912053363,
         "v2QualificationActive": true,
         "wasQualifiedBeforeRuleChange": false
       }
@@ -304696,46 +304809,46 @@
           "symbol": "LOFO",
           "name": "Lofo",
           "quoteSymbol": "SOL",
-          "priceUsd": 0.00001766,
-          "priceNative": 1.648e-7,
-          "liquidityUsd": 9751.88,
-          "liquidityBase": 327611038,
-          "liquidityQuote": 36.979,
-          "mcap": 16668,
-          "fdv": 16668,
+          "priceUsd": 0.00001779,
+          "priceNative": 1.66e-7,
+          "liquidityUsd": 9792.75,
+          "liquidityBase": 328034275,
+          "liquidityQuote": 36.9094,
+          "mcap": 16785,
+          "fdv": 16785,
           "volume": {
-            "m5": 17.66,
-            "h1": 2858.45,
-            "h6": 17443.75,
-            "h24": 175918.39
+            "m5": 0,
+            "h1": 2731.4,
+            "h6": 17248.78,
+            "h24": 175940.9
           },
           "priceChange": {
-            "m5": -2.17,
-            "h1": 16.9,
-            "h6": -24.09,
-            "h24": -57.94
+            "m5": null,
+            "h1": 25.34,
+            "h6": 4.65,
+            "h24": -57.64
           },
           "txns": {
             "m5": {
-              "buys": 1,
-              "sells": 1
+              "buys": 0,
+              "sells": 0
             },
             "h1": {
-              "buys": 66,
-              "sells": 36
+              "buys": 67,
+              "sells": 32
             },
             "h6": {
-              "buys": 273,
-              "sells": 205
+              "buys": 268,
+              "sells": 201
             },
             "h24": {
-              "buys": 2319,
-              "sells": 1788
+              "buys": 2320,
+              "sells": 1789
             }
           },
           "pairCreatedAt": 1791854929000,
           "source": "dexscreener",
-          "observedAt": 1791911722372,
+          "observedAt": 1791912053277,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -304752,13 +304865,13 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791911722372,
+            "observedAt": 1791912053277,
             "status": "LIVE"
           }
         },
         "pairCreatedAt": 1791854929000,
         "lastError": null,
-        "updatedAt": 1791911722372,
+        "updatedAt": 1791912053277,
         "v2QualificationActive": true,
         "wasQualifiedBeforeRuleChange": false
       }
@@ -313099,46 +313212,46 @@
           "symbol": "WALTJR",
           "name": "For Walter Jr",
           "quoteSymbol": "SOL",
-          "priceUsd": 0.00003625,
-          "priceNative": 3.382e-7,
-          "liquidityUsd": 15130.81,
-          "liquidityBase": 233583609,
-          "liquidityQuote": 62.1534,
-          "mcap": 34558,
-          "fdv": 34558,
+          "priceUsd": 0.00002467,
+          "priceNative": 2.296e-7,
+          "liquidityUsd": 12178.61,
+          "liquidityBase": 284265495,
+          "liquidityQuote": 48.06772,
+          "mcap": 23516,
+          "fdv": 23516,
           "volume": {
-            "m5": 362.71,
-            "h1": 1902.86,
-            "h6": 26227.54,
-            "h24": 196245.53
+            "m5": 299.51,
+            "h1": 2173.71,
+            "h6": 26527.05,
+            "h24": 196545.04
           },
           "priceChange": {
-            "m5": 4.76,
-            "h1": 19.71,
-            "h6": 100,
-            "h24": -16.69
+            "m5": -31.95,
+            "h1": -16.76,
+            "h6": 36.37,
+            "h24": -43.31
           },
           "txns": {
             "m5": {
-              "buys": 5,
-              "sells": 3
+              "buys": 10,
+              "sells": 6
             },
             "h1": {
-              "buys": 38,
-              "sells": 40
+              "buys": 46,
+              "sells": 45
             },
             "h6": {
-              "buys": 350,
-              "sells": 371
+              "buys": 360,
+              "sells": 377
             },
             "h24": {
-              "buys": 2433,
-              "sells": 2497
+              "buys": 2443,
+              "sells": 2503
             }
           },
           "pairCreatedAt": 1791857911000,
           "source": "dexscreener",
-          "observedAt": 1791911722444,
+          "observedAt": 1791912053392,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -313653,7 +313766,7 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791911722444,
+            "observedAt": 1791912053392,
             "status": "LIVE"
           },
           "rugcheck": {
@@ -313664,7 +313777,7 @@
         },
         "pairCreatedAt": 1791857911000,
         "lastError": null,
-        "updatedAt": 1791911722444,
+        "updatedAt": 1791912053392,
         "v2QualificationActive": true,
         "wasQualifiedBeforeRuleChange": false
       }
@@ -320147,14 +320260,14 @@
           "fdv": 3415,
           "volume": {
             "m5": 0,
-            "h1": 53.33,
-            "h6": 954.44,
+            "h1": 0.43,
+            "h6": 944.04,
             "h24": 127354.05
           },
           "priceChange": {
             "m5": null,
-            "h1": -3.01,
-            "h6": -22.11,
+            "h1": -2.47,
+            "h6": -19.46,
             "h24": -92.02
           },
           "txns": {
@@ -320164,10 +320277,10 @@
             },
             "h1": {
               "buys": 0,
-              "sells": 2
+              "sells": 1
             },
             "h6": {
-              "buys": 10,
+              "buys": 9,
               "sells": 23
             },
             "h24": {
@@ -320177,7 +320290,7 @@
           },
           "pairCreatedAt": 1791861745000,
           "source": "dexscreener",
-          "observedAt": 1791911722474,
+          "observedAt": 1791912053481,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -320698,7 +320811,7 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791911722474,
+            "observedAt": 1791912053481,
             "status": "LIVE"
           },
           "rugcheck": {
@@ -320709,7 +320822,7 @@
         },
         "pairCreatedAt": 1791861745000,
         "lastError": null,
-        "updatedAt": 1791911722474,
+        "updatedAt": 1791912053481,
         "v2QualificationActive": true,
         "wasQualifiedBeforeRuleChange": false
       }
@@ -327645,7 +327758,7 @@
           },
           "pairCreatedAt": 1791866638000,
           "source": "dexscreener",
-          "observedAt": 1791911724054,
+          "observedAt": 1791912054224,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -328171,7 +328284,7 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791911724054,
+            "observedAt": 1791912054224,
             "status": "LIVE"
           },
           "rugcheck": {
@@ -328182,7 +328295,7 @@
         },
         "pairCreatedAt": 1791866638000,
         "lastError": null,
-        "updatedAt": 1791911724054,
+        "updatedAt": 1791912054224,
         "v2QualificationActive": true,
         "wasQualifiedBeforeRuleChange": false
       }
@@ -328251,7 +328364,7 @@
           },
           "pairCreatedAt": 1791865602000,
           "source": "dexscreener",
-          "observedAt": 1791911724354,
+          "observedAt": 1791912054706,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -328772,7 +328885,7 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791911724354,
+            "observedAt": 1791912054706,
             "status": "LIVE"
           },
           "rugcheck": {
@@ -328783,7 +328896,7 @@
         },
         "pairCreatedAt": 1791865602000,
         "lastError": null,
-        "updatedAt": 1791911724354,
+        "updatedAt": 1791912054706,
         "v2QualificationActive": true,
         "wasQualifiedBeforeRuleChange": false
       }
@@ -328813,46 +328926,46 @@
           "symbol": "SAX",
           "name": "SAXQUITO",
           "quoteSymbol": "SOL",
-          "priceUsd": 0.000008927,
-          "priceNative": 8.329e-8,
-          "liquidityUsd": 6373.97,
-          "liquidityBase": 461461215,
-          "liquidityQuote": 21.03277,
-          "mcap": 8476,
-          "fdv": 8476,
+          "priceUsd": 0.000009104,
+          "priceNative": 8.472e-8,
+          "liquidityUsd": 6461.12,
+          "liquidityBase": 458513605,
+          "liquidityQuote": 21.2819,
+          "mcap": 8643,
+          "fdv": 8643,
           "volume": {
-            "m5": 153.83,
-            "h1": 594,
-            "h6": 5082.69,
-            "h24": 84966.29
+            "m5": 14.05,
+            "h1": 394.42,
+            "h6": 5096.75,
+            "h24": 84980.35
           },
           "priceChange": {
-            "m5": 0.65,
-            "h1": 21.7,
-            "h6": -44.65,
-            "h24": -80.21
+            "m5": 1.98,
+            "h1": 45.71,
+            "h6": -43.55,
+            "h24": -79.82
           },
           "txns": {
             "m5": {
-              "buys": 4,
-              "sells": 6
+              "buys": 2,
+              "sells": 0
             },
             "h1": {
-              "buys": 25,
-              "sells": 13
+              "buys": 21,
+              "sells": 12
             },
             "h6": {
-              "buys": 90,
+              "buys": 92,
               "sells": 90
             },
             "h24": {
-              "buys": 1102,
+              "buys": 1104,
               "sells": 1001
             }
           },
           "pairCreatedAt": 1791865780000,
           "source": "dexscreener",
-          "observedAt": 1791911724725,
+          "observedAt": 1791912055250,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -328869,13 +328982,13 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791911724725,
+            "observedAt": 1791912055250,
             "status": "LIVE"
           }
         },
         "pairCreatedAt": 1791865780000,
         "lastError": null,
-        "updatedAt": 1791911724725,
+        "updatedAt": 1791912055250,
         "v2QualificationActive": true,
         "wasQualifiedBeforeRuleChange": false
       }
@@ -328944,7 +329057,7 @@
           },
           "pairCreatedAt": 1791864245000,
           "source": "dexscreener",
-          "observedAt": 1791911725073,
+          "observedAt": 1791912055793,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -329465,7 +329578,7 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791911725073,
+            "observedAt": 1791912055793,
             "status": "LIVE"
           },
           "rugcheck": {
@@ -329476,7 +329589,7 @@
         },
         "pairCreatedAt": 1791864245000,
         "lastError": null,
-        "updatedAt": 1791911725073,
+        "updatedAt": 1791912055793,
         "v2QualificationActive": true,
         "wasQualifiedBeforeRuleChange": false
       }
@@ -329546,7 +329659,7 @@
           },
           "pairCreatedAt": 1791873752000,
           "source": "dexscreener",
-          "observedAt": 1791911725321,
+          "observedAt": 1791912056240,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -330067,7 +330180,7 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791911725321,
+            "observedAt": 1791912056240,
             "status": "LIVE"
           },
           "rugcheck": {
@@ -330078,7 +330191,7 @@
         },
         "pairCreatedAt": 1791873752000,
         "lastError": null,
-        "updatedAt": 1791911725321,
+        "updatedAt": 1791912056240,
         "v2QualificationActive": true,
         "wasQualifiedBeforeRuleChange": false
       }
@@ -330147,7 +330260,7 @@
           },
           "pairCreatedAt": 1791866065000,
           "source": "dexscreener",
-          "observedAt": 1791911725604,
+          "observedAt": 1791912056731,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -330668,7 +330781,7 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791911725604,
+            "observedAt": 1791912056731,
             "status": "LIVE"
           },
           "rugcheck": {
@@ -330679,7 +330792,7 @@
         },
         "pairCreatedAt": 1791866065000,
         "lastError": null,
-        "updatedAt": 1791911725604,
+        "updatedAt": 1791912056731,
         "v2QualificationActive": true,
         "wasQualifiedBeforeRuleChange": false
       }
@@ -330748,7 +330861,7 @@
           },
           "pairCreatedAt": 1791866006000,
           "source": "dexscreener",
-          "observedAt": 1791911725918,
+          "observedAt": 1791912057267,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -331269,7 +331382,7 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791911725918,
+            "observedAt": 1791912057267,
             "status": "LIVE"
           },
           "rugcheck": {
@@ -331280,7 +331393,7 @@
         },
         "pairCreatedAt": 1791866006000,
         "lastError": null,
-        "updatedAt": 1791911725918,
+        "updatedAt": 1791912057267,
         "v2QualificationActive": true,
         "wasQualifiedBeforeRuleChange": false
       }
@@ -331320,13 +331433,13 @@
           "volume": {
             "m5": 0,
             "h1": 0,
-            "h6": 2633.4,
+            "h6": 2596.99,
             "h24": 9029.46
           },
           "priceChange": {
             "m5": null,
             "h1": null,
-            "h6": 6.32,
+            "h6": 6.84,
             "h24": 6.22
           },
           "txns": {
@@ -331340,7 +331453,7 @@
             },
             "h6": {
               "buys": 1,
-              "sells": 12
+              "sells": 11
             },
             "h24": {
               "buys": 38,
@@ -331349,7 +331462,7 @@
           },
           "pairCreatedAt": 1771438708000,
           "source": "dexscreener",
-          "observedAt": 1791911726256,
+          "observedAt": 1791912057489,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -331870,7 +331983,7 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791911726256,
+            "observedAt": 1791912057489,
             "status": "LIVE"
           },
           "rugcheck": {
@@ -331881,7 +331994,7 @@
         },
         "pairCreatedAt": 1771438708000,
         "lastError": null,
-        "updatedAt": 1791911726256,
+        "updatedAt": 1791912057489,
         "v2QualificationActive": true,
         "wasQualifiedBeforeRuleChange": false
       }
@@ -332042,7 +332155,7 @@
           },
           "pairCreatedAt": 1791867791000,
           "source": "dexscreener",
-          "observedAt": 1791911726637,
+          "observedAt": 1791912057776,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -332568,7 +332681,7 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791911726637,
+            "observedAt": 1791912057776,
             "status": "LIVE"
           },
           "rugcheck": {
@@ -332579,7 +332692,7 @@
         },
         "pairCreatedAt": 1791867791000,
         "lastError": null,
-        "updatedAt": 1791911726637,
+        "updatedAt": 1791912057776,
         "v2QualificationActive": true,
         "wasQualifiedBeforeRuleChange": false
       }
@@ -332618,14 +332731,14 @@
           "fdv": 3296,
           "volume": {
             "m5": 0,
-            "h1": 32.24,
-            "h6": 7895.33,
+            "h1": 20.71,
+            "h6": 7890.25,
             "h24": 51479.18
           },
           "priceChange": {
             "m5": null,
-            "h1": -10.36,
-            "h6": -51.64,
+            "h1": -6.02,
+            "h6": -50.98,
             "h24": -92.29
           },
           "txns": {
@@ -332635,10 +332748,10 @@
             },
             "h1": {
               "buys": 1,
-              "sells": 4
+              "sells": 3
             },
             "h6": {
-              "buys": 86,
+              "buys": 85,
               "sells": 102
             },
             "h24": {
@@ -332648,7 +332761,7 @@
           },
           "pairCreatedAt": 1791867707000,
           "source": "dexscreener",
-          "observedAt": 1791911726940,
+          "observedAt": 1791912058133,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -333169,7 +333282,7 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791911726940,
+            "observedAt": 1791912058133,
             "status": "LIVE"
           },
           "rugcheck": {
@@ -333180,7 +333293,7 @@
         },
         "pairCreatedAt": 1791867707000,
         "lastError": null,
-        "updatedAt": 1791911726940,
+        "updatedAt": 1791912058133,
         "v2QualificationActive": true,
         "wasQualifiedBeforeRuleChange": false
       }
@@ -333215,46 +333328,46 @@
           "symbol": "swordcat",
           "name": "cat wif sword",
           "quoteSymbol": "SOL",
-          "priceUsd": 0.003463,
-          "priceNative": 0.0000323,
-          "liquidityUsd": 349700.54,
-          "liquidityBase": 18422692,
-          "liquidityQuote": 2666.3955,
-          "mcap": 3326026,
-          "fdv": 3326026,
+          "priceUsd": 0.003325,
+          "priceNative": 0.00003102,
+          "liquidityUsd": 347174.87,
+          "liquidityBase": 18426856,
+          "liquidityQuote": 2667.4858,
+          "mcap": 3193124,
+          "fdv": 3193124,
           "volume": {
-            "m5": 630.23,
-            "h1": 15628.03,
-            "h6": 77500.67,
-            "h24": 232960.1
+            "m5": 13.84,
+            "h1": 13557.36,
+            "h6": 77514.51,
+            "h24": 232120.47
           },
           "priceChange": {
-            "m5": null,
-            "h1": 7,
-            "h6": 11.74,
-            "h24": 6.53
+            "m5": -4,
+            "h1": 4.63,
+            "h6": 7.28,
+            "h24": 0.37
           },
           "txns": {
             "m5": {
-              "buys": 4,
-              "sells": 0
+              "buys": 0,
+              "sells": 1
             },
             "h1": {
               "buys": 35,
-              "sells": 17
+              "sells": 13
             },
             "h6": {
               "buys": 158,
-              "sells": 110
+              "sells": 111
             },
             "h24": {
-              "buys": 432,
-              "sells": 479
+              "buys": 428,
+              "sells": 480
             }
           },
           "pairCreatedAt": 1790593855000,
           "source": "dexscreener",
-          "observedAt": 1791911727249,
+          "observedAt": 1791912058387,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -333769,7 +333882,7 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791911727249,
+            "observedAt": 1791912058387,
             "status": "LIVE"
           },
           "rugcheck": {
@@ -333780,7 +333893,7 @@
         },
         "pairCreatedAt": 1790593855000,
         "lastError": null,
-        "updatedAt": 1791911727249,
+        "updatedAt": 1791912058387,
         "validation": {
           "status": "VALIDATED",
           "checks": [
@@ -333881,7 +333994,7 @@
           },
           "pairCreatedAt": 1791857916000,
           "source": "dexscreener",
-          "observedAt": 1791911727490,
+          "observedAt": 1791912058623,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -334396,7 +334509,7 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791911727490,
+            "observedAt": 1791912058623,
             "status": "LIVE"
           },
           "rugcheck": {
@@ -334407,7 +334520,7 @@
         },
         "pairCreatedAt": 1791857916000,
         "lastError": null,
-        "updatedAt": 1791911727490,
+        "updatedAt": 1791912058623,
         "validation": {
           "status": "VALIDATED",
           "checks": [
@@ -335654,46 +335767,46 @@
           "symbol": "NI",
           "name": "Nietzschean Inu",
           "quoteSymbol": "SOL",
-          "priceUsd": 0.000002801,
-          "priceNative": 2.612e-8,
-          "liquidityUsd": 2751.64,
-          "liquidityBase": 822646795,
-          "liquidityQuote": 4.1719,
-          "mcap": 2632,
-          "fdv": 2632,
+          "priceUsd": 0.000002775,
+          "priceNative": 2.582e-8,
+          "liquidityUsd": 2730.87,
+          "liquidityBase": 831830117,
+          "liquidityQuote": 3.9318,
+          "mcap": 2608,
+          "fdv": 2608,
           "volume": {
-            "m5": 0,
-            "h1": 0.91,
-            "h6": 52.19,
-            "h24": 73183.05
+            "m5": 25.48,
+            "h1": 26.39,
+            "h6": 77.68,
+            "h24": 73208.53
           },
           "priceChange": {
-            "m5": null,
-            "h1": -0.51,
-            "h6": -0.75,
-            "h24": -93.73
+            "m5": -0.93,
+            "h1": -1.44,
+            "h6": -1.67,
+            "h24": -93.79
           },
           "txns": {
             "m5": {
               "buys": 0,
-              "sells": 0
+              "sells": 1
             },
             "h1": {
               "buys": 0,
-              "sells": 2
+              "sells": 3
             },
             "h6": {
               "buys": 4,
-              "sells": 16
+              "sells": 17
             },
             "h24": {
               "buys": 1179,
-              "sells": 1070
+              "sells": 1071
             }
           },
           "pairCreatedAt": 1791869343000,
           "source": "dexscreener",
-          "observedAt": 1791911727845,
+          "observedAt": 1791912058991,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -336214,7 +336327,7 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791911727845,
+            "observedAt": 1791912058991,
             "status": "LIVE"
           },
           "rugcheck": {
@@ -336225,7 +336338,7 @@
         },
         "pairCreatedAt": 1791869343000,
         "lastError": null,
-        "updatedAt": 1791911727845,
+        "updatedAt": 1791912058991,
         "v2QualificationActive": true,
         "wasQualifiedBeforeRuleChange": false
       }
@@ -336269,7 +336382,7 @@
             "h24": 80521.66
           },
           "priceChange": {
-            "m5": -0.6,
+            "m5": null,
             "h1": -0.6,
             "h6": -37.43,
             "h24": -91.49
@@ -336277,7 +336390,7 @@
           "txns": {
             "m5": {
               "buys": 0,
-              "sells": 2
+              "sells": 0
             },
             "h1": {
               "buys": 0,
@@ -336294,7 +336407,7 @@
           },
           "pairCreatedAt": 1791867736000,
           "source": "dexscreener",
-          "observedAt": 1791911728205,
+          "observedAt": 1791912059287,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -336809,7 +336922,7 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791911728205,
+            "observedAt": 1791912059287,
             "status": "LIVE"
           },
           "rugcheck": {
@@ -336820,7 +336933,7 @@
         },
         "pairCreatedAt": 1791867736000,
         "lastError": null,
-        "updatedAt": 1791911728205,
+        "updatedAt": 1791912059287,
         "v2QualificationActive": true,
         "wasQualifiedBeforeRuleChange": false
       }
@@ -336850,46 +336963,46 @@
           "symbol": "Nietzsche",
           "name": "Friedrich Nietzsche",
           "quoteSymbol": "SOL",
-          "priceUsd": 0.000005119,
-          "priceNative": 4.776e-8,
-          "liquidityUsd": 4481.59,
-          "liquidityBase": 618682098,
-          "liquidityQuote": 12.2639,
-          "mcap": 4915,
-          "fdv": 4915,
+          "priceUsd": 0.00000569,
+          "priceNative": 5.295e-8,
+          "liquidityUsd": 4829.56,
+          "liquidityBase": 589393693,
+          "liquidityQuote": 13.7341,
+          "mcap": 5463,
+          "fdv": 5463,
           "volume": {
-            "m5": 34.63,
-            "h1": 534.69,
-            "h6": 3541.42,
-            "h24": 213711.36
+            "m5": 22.37,
+            "h1": 475.26,
+            "h6": 3556.95,
+            "h24": 213733.74
           },
           "priceChange": {
-            "m5": -3.41,
-            "h1": -5.01,
-            "h6": -60.43,
-            "h24": -88.28
+            "m5": 11.16,
+            "h1": 9.12,
+            "h6": -56.36,
+            "h24": -86.97
           },
           "txns": {
             "m5": {
-              "buys": 0,
-              "sells": 4
+              "buys": 2,
+              "sells": 0
             },
             "h1": {
-              "buys": 7,
-              "sells": 11
+              "buys": 9,
+              "sells": 10
             },
             "h6": {
-              "buys": 39,
-              "sells": 98
+              "buys": 40,
+              "sells": 97
             },
             "h24": {
-              "buys": 3323,
+              "buys": 3325,
               "sells": 2581
             }
           },
           "pairCreatedAt": 1791868370000,
           "source": "dexscreener",
-          "observedAt": 1791911728505,
+          "observedAt": 1791912059625,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -337404,7 +337517,7 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791911728505,
+            "observedAt": 1791912059625,
             "status": "LIVE"
           },
           "rugcheck": {
@@ -337415,7 +337528,7 @@
         },
         "pairCreatedAt": 1791868370000,
         "lastError": null,
-        "updatedAt": 1791911728505,
+        "updatedAt": 1791912059625,
         "v2QualificationActive": true,
         "wasQualifiedBeforeRuleChange": false
       }
@@ -338040,33 +338153,33 @@
           "symbol": "FISH",
           "name": "Fuck I should've Held",
           "quoteSymbol": "SOL",
-          "priceUsd": 0.000008678,
-          "priceNative": 8.093e-8,
-          "liquidityUsd": 6222.38,
-          "liquidityBase": 466085163,
-          "liquidityQuote": 20.3097,
-          "mcap": 8063,
-          "fdv": 8063,
+          "priceUsd": 0.000008105,
+          "priceNative": 7.562e-8,
+          "liquidityUsd": 5949.43,
+          "liquidityBase": 481577118,
+          "liquidityQuote": 19.08859,
+          "mcap": 7531,
+          "fdv": 7531,
           "volume": {
-            "m5": 32.98,
-            "h1": 904.98,
-            "h6": 6845.62,
-            "h24": 70523.21
+            "m5": 0,
+            "h1": 966.54,
+            "h6": 6937.32,
+            "h24": 70652.22
           },
           "priceChange": {
-            "m5": -3.53,
-            "h1": -17.1,
-            "h6": -39.32,
-            "h24": -81.09
+            "m5": null,
+            "h1": -20.98,
+            "h6": -42.63,
+            "h24": -82.34
           },
           "txns": {
             "m5": {
               "buys": 0,
-              "sells": 1
+              "sells": 0
             },
             "h1": {
               "buys": 9,
-              "sells": 16
+              "sells": 17
             },
             "h6": {
               "buys": 85,
@@ -338074,12 +338187,12 @@
             },
             "h24": {
               "buys": 1104,
-              "sells": 930
+              "sells": 932
             }
           },
           "pairCreatedAt": 1791871029000,
           "source": "dexscreener",
-          "observedAt": 1791911728782,
+          "observedAt": 1791912059941,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -338096,13 +338209,13 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791911728782,
+            "observedAt": 1791912059941,
             "status": "LIVE"
           }
         },
         "pairCreatedAt": 1791871029000,
         "lastError": null,
-        "updatedAt": 1791911728782,
+        "updatedAt": 1791912059941,
         "v2QualificationActive": true,
         "wasQualifiedBeforeRuleChange": false
       }
@@ -338232,13 +338345,13 @@
           "mcap": 2416,
           "fdv": 2416,
           "volume": {
-            "m5": 0.76,
+            "m5": 0,
             "h1": 0.76,
             "h6": 100.37,
             "h24": 127586.02
           },
           "priceChange": {
-            "m5": -1.9,
+            "m5": null,
             "h1": -1.9,
             "h6": -10.63,
             "h24": -94.23
@@ -338246,7 +338359,7 @@
           "txns": {
             "m5": {
               "buys": 0,
-              "sells": 1
+              "sells": 0
             },
             "h1": {
               "buys": 0,
@@ -338263,7 +338376,7 @@
           },
           "pairCreatedAt": 1791871436000,
           "source": "dexscreener",
-          "observedAt": 1791911729126,
+          "observedAt": 1791912060468,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -338784,7 +338897,7 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791911729126,
+            "observedAt": 1791912060468,
             "status": "LIVE"
           },
           "rugcheck": {
@@ -338795,7 +338908,7 @@
         },
         "pairCreatedAt": 1791871436000,
         "lastError": null,
-        "updatedAt": 1791911729126,
+        "updatedAt": 1791912060468,
         "v2QualificationActive": true,
         "wasQualifiedBeforeRuleChange": false
       }
@@ -338825,46 +338938,46 @@
           "symbol": "sanctuary",
           "name": "sanctuary",
           "quoteSymbol": "SOL",
-          "priceUsd": 0.00001616,
-          "priceNative": 1.508e-7,
-          "liquidityUsd": 10372.2,
-          "liquidityBase": 378280902,
-          "liquidityQuote": 39.7126,
-          "mcap": 15483,
-          "fdv": 15483,
+          "priceUsd": 0.00001884,
+          "priceNative": 1.753e-7,
+          "liquidityUsd": 11364.65,
+          "liquidityBase": 350662057,
+          "liquidityQuote": 44.2678,
+          "mcap": 18047,
+          "fdv": 18047,
           "volume": {
-            "m5": 204.81,
-            "h1": 3646.21,
-            "h6": 45648.94,
-            "h24": 978316.25
+            "m5": 35.63,
+            "h1": 3677.95,
+            "h6": 45366.18,
+            "h24": 978428.3
           },
           "priceChange": {
-            "m5": -6.24,
-            "h1": -30.17,
-            "h6": -83.46,
-            "h24": -64.13
+            "m5": 5.88,
+            "h1": -18.12,
+            "h6": -79.55,
+            "h24": -58.19
           },
           "txns": {
             "m5": {
-              "buys": 1,
-              "sells": 7
+              "buys": 2,
+              "sells": 0
             },
             "h1": {
-              "buys": 54,
-              "sells": 60
+              "buys": 57,
+              "sells": 57
             },
             "h6": {
-              "buys": 660,
-              "sells": 554
+              "buys": 662,
+              "sells": 543
             },
             "h24": {
-              "buys": 9998,
+              "buys": 10004,
               "sells": 8364
             }
           },
           "pairCreatedAt": 1791870327000,
           "source": "dexscreener",
-          "observedAt": 1791911729403,
+          "observedAt": 1791912060752,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -339379,7 +339492,7 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791911729403,
+            "observedAt": 1791912060752,
             "status": "LIVE"
           },
           "rugcheck": {
@@ -339390,7 +339503,7 @@
         },
         "pairCreatedAt": 1791870327000,
         "lastError": null,
-        "updatedAt": 1791911729403,
+        "updatedAt": 1791912060752,
         "v2QualificationActive": true,
         "wasQualifiedBeforeRuleChange": false
       }
@@ -340711,14 +340824,14 @@
           "fdv": 18199,
           "volume": {
             "m5": 0,
-            "h1": 420.17,
-            "h6": 6851.66,
+            "h1": 278.48,
+            "h6": 6660.95,
             "h24": 65924.51
           },
           "priceChange": {
             "m5": null,
-            "h1": -32.55,
-            "h6": 4.52,
+            "h1": -31.57,
+            "h6": -11.83,
             "h24": -57.74
           },
           "txns": {
@@ -340727,11 +340840,11 @@
               "sells": 0
             },
             "h1": {
-              "buys": 2,
-              "sells": 3
+              "buys": 1,
+              "sells": 2
             },
             "h6": {
-              "buys": 66,
+              "buys": 61,
               "sells": 61
             },
             "h24": {
@@ -340741,7 +340854,7 @@
           },
           "pairCreatedAt": 1791879994000,
           "source": "dexscreener",
-          "observedAt": 1791911729657,
+          "observedAt": 1791912061040,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -340758,13 +340871,13 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791911729657,
+            "observedAt": 1791912061040,
             "status": "LIVE"
           }
         },
         "pairCreatedAt": 1791879994000,
         "lastError": null,
-        "updatedAt": 1791911729657,
+        "updatedAt": 1791912061040,
         "v2QualificationActive": true,
         "wasQualifiedBeforeRuleChange": false
       }
@@ -341389,33 +341502,33 @@
           "symbol": "PLAYSET",
           "name": "Playset",
           "quoteSymbol": "CARDS",
-          "priceUsd": 0.00001563,
-          "priceNative": 0.00005535,
-          "liquidityUsd": 9527.75,
-          "liquidityBase": 364128908,
-          "liquidityQuote": 13568,
-          "mcap": 14614,
-          "fdv": 14614,
+          "priceUsd": 0.00001608,
+          "priceNative": 0.00005664,
+          "liquidityUsd": 9710.29,
+          "liquidityBase": 359685127,
+          "liquidityQuote": 13820,
+          "mcap": 15032,
+          "fdv": 15032,
           "volume": {
-            "m5": 0,
-            "h1": 351.17,
-            "h6": 11576.71,
-            "h24": 226604.68
+            "m5": 5.02,
+            "h1": 226.85,
+            "h6": 11581.64,
+            "h24": 226609.71
           },
           "priceChange": {
-            "m5": null,
-            "h1": 23.23,
-            "h6": -38.12,
-            "h24": -64.63
+            "m5": 2.86,
+            "h1": 14.54,
+            "h6": -38.95,
+            "h24": -63.62
           },
           "txns": {
             "m5": {
               "buys": 0,
-              "sells": 0
+              "sells": 1
             },
             "h1": {
-              "buys": 8,
-              "sells": 8
+              "buys": 4,
+              "sells": 9
             },
             "h6": {
               "buys": 132,
@@ -341423,12 +341536,12 @@
             },
             "h24": {
               "buys": 1727,
-              "sells": 2027
+              "sells": 2028
             }
           },
           "pairCreatedAt": 1791873221000,
           "source": "dexscreener",
-          "observedAt": 1791911729916,
+          "observedAt": 1791912061379,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -341943,7 +342056,7 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791911729916,
+            "observedAt": 1791912061379,
             "status": "LIVE"
           },
           "rugcheck": {
@@ -341954,7 +342067,7 @@
         },
         "pairCreatedAt": 1791873221000,
         "lastError": null,
-        "updatedAt": 1791911729916,
+        "updatedAt": 1791912061379,
         "v2QualificationActive": true,
         "wasQualifiedBeforeRuleChange": false
       }
@@ -342580,46 +342693,46 @@
           "symbol": "$HATE",
           "name": "HATE PEOPLE ",
           "quoteSymbol": "SOL",
-          "priceUsd": 0.000002203,
-          "priceNative": 2.055e-8,
-          "liquidityUsd": 2292.26,
-          "liquidityBase": 947889047,
-          "liquidityQuote": 1.8997,
-          "mcap": 2100,
-          "fdv": 2100,
+          "priceUsd": 0.000002181,
+          "priceNative": 2.029e-8,
+          "liquidityUsd": 2271.54,
+          "liquidityBase": 947930644,
+          "liquidityQuote": 1.8989,
+          "mcap": 2079,
+          "fdv": 2079,
           "volume": {
-            "m5": 7.34,
-            "h1": 114.11,
-            "h6": 14453.44,
-            "h24": 433393.26
+            "m5": 8.54,
+            "h1": 114.39,
+            "h6": 14453.37,
+            "h24": 433403.36
           },
           "priceChange": {
-            "m5": -0.04,
-            "h1": -0.49,
-            "h6": -98.26,
-            "h24": -95.2
+            "m5": -1.03,
+            "h1": -1.54,
+            "h6": -98.25,
+            "h24": -95.25
           },
           "txns": {
             "m5": {
-              "buys": 69,
-              "sells": 23
+              "buys": 80,
+              "sells": 28
             },
             "h1": {
-              "buys": 985,
-              "sells": 327
+              "buys": 995,
+              "sells": 331
             },
             "h6": {
-              "buys": 5985,
-              "sells": 2243
+              "buys": 5996,
+              "sells": 2248
             },
             "h24": {
-              "buys": 15633,
-              "sells": 7176
+              "buys": 15727,
+              "sells": 7208
             }
           },
           "pairCreatedAt": 1791866008000,
           "source": "dexscreener",
-          "observedAt": 1791911730163,
+          "observedAt": 1791912061704,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -343134,7 +343247,7 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791911730163,
+            "observedAt": 1791912061704,
             "status": "LIVE"
           },
           "rugcheck": {
@@ -343145,7 +343258,7 @@
         },
         "pairCreatedAt": 1791866008000,
         "lastError": null,
-        "updatedAt": 1791911730163,
+        "updatedAt": 1791912061704,
         "v2QualificationActive": true,
         "wasQualifiedBeforeRuleChange": false
       }
@@ -343368,14 +343481,14 @@
           "fdv": 9135,
           "volume": {
             "m5": 0,
-            "h1": 294.14,
-            "h6": 11244.02,
+            "h1": 281.07,
+            "h6": 11243.13,
             "h24": 67501.13
           },
           "priceChange": {
             "m5": null,
-            "h1": -14.8,
-            "h6": 22.49,
+            "h1": -16.14,
+            "h6": 25.7,
             "h24": -78.98
           },
           "txns": {
@@ -343384,12 +343497,12 @@
               "sells": 0
             },
             "h1": {
-              "buys": 3,
+              "buys": 1,
               "sells": 7
             },
             "h6": {
               "buys": 142,
-              "sells": 147
+              "sells": 146
             },
             "h24": {
               "buys": 893,
@@ -343398,7 +343511,7 @@
           },
           "pairCreatedAt": 1791875784000,
           "source": "dexscreener",
-          "observedAt": 1791911730433,
+          "observedAt": 1791912061969,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -343913,7 +344026,7 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791911730433,
+            "observedAt": 1791912061969,
             "status": "LIVE"
           },
           "rugcheck": {
@@ -343924,7 +344037,7 @@
         },
         "pairCreatedAt": 1791875784000,
         "lastError": null,
-        "updatedAt": 1791911730433,
+        "updatedAt": 1791912061969,
         "v2QualificationActive": true,
         "wasQualifiedBeforeRuleChange": false
       }
@@ -343964,13 +344077,13 @@
           "volume": {
             "m5": 0,
             "h1": 85.41,
-            "h6": 2311.6,
+            "h6": 2241.6,
             "h24": 104227.22
           },
           "priceChange": {
             "m5": null,
             "h1": -3.47,
-            "h6": -47.27,
+            "h6": -43.07,
             "h24": -88.93
           },
           "txns": {
@@ -343983,7 +344096,7 @@
               "sells": 1
             },
             "h6": {
-              "buys": 39,
+              "buys": 37,
               "sells": 51
             },
             "h24": {
@@ -343993,7 +344106,7 @@
           },
           "pairCreatedAt": 1791875378000,
           "source": "dexscreener",
-          "observedAt": 1791911730752,
+          "observedAt": 1791912062224,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -344514,7 +344627,7 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791911730752,
+            "observedAt": 1791912062224,
             "status": "LIVE"
           },
           "rugcheck": {
@@ -344525,7 +344638,7 @@
         },
         "pairCreatedAt": 1791875378000,
         "lastError": null,
-        "updatedAt": 1791911730752,
+        "updatedAt": 1791912062224,
         "v2QualificationActive": true,
         "wasQualifiedBeforeRuleChange": false
       }
@@ -344564,15 +344677,15 @@
           "fdv": 133652,
           "volume": {
             "m5": 0,
-            "h1": 1154.72,
-            "h6": 30063.63,
-            "h24": 67057.64
+            "h1": 821.23,
+            "h6": 29046.47,
+            "h24": 67036.99
           },
           "priceChange": {
             "m5": null,
-            "h1": 2.26,
-            "h6": -47.97,
-            "h24": 298
+            "h1": -5.79,
+            "h6": -44.05,
+            "h24": 314
           },
           "txns": {
             "m5": {
@@ -344580,21 +344693,21 @@
               "sells": 0
             },
             "h1": {
-              "buys": 8,
-              "sells": 10
+              "buys": 7,
+              "sells": 9
             },
             "h6": {
-              "buys": 201,
-              "sells": 124
+              "buys": 198,
+              "sells": 122
             },
             "h24": {
-              "buys": 455,
-              "sells": 304
+              "buys": 454,
+              "sells": 303
             }
           },
           "pairCreatedAt": 1791556280000,
           "source": "dexscreener",
-          "observedAt": 1791911731010,
+          "observedAt": 1791912062532,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -345109,7 +345222,7 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791911731010,
+            "observedAt": 1791912062532,
             "status": "LIVE"
           },
           "rugcheck": {
@@ -345120,7 +345233,7 @@
         },
         "pairCreatedAt": 1791556280000,
         "lastError": null,
-        "updatedAt": 1791911731010,
+        "updatedAt": 1791912062532,
         "v2QualificationActive": true,
         "wasQualifiedBeforeRuleChange": false
       }
@@ -345150,46 +345263,46 @@
           "symbol": "nonce",
           "name": "nonce mine",
           "quoteSymbol": "SOL",
-          "priceUsd": 0.00001171,
-          "priceNative": 1.093e-7,
-          "liquidityUsd": 7988.47,
-          "liquidityBase": 420222123,
-          "liquidityQuote": 28.5847,
-          "mcap": 11262,
-          "fdv": 11262,
+          "priceUsd": 0.00001121,
+          "priceNative": 1.044e-7,
+          "liquidityUsd": 7783.73,
+          "liquidityBase": 428788857,
+          "liquidityQuote": 27.6689,
+          "mcap": 10781,
+          "fdv": 10781,
           "volume": {
-            "m5": 43.65,
-            "h1": 375.21,
-            "h6": 12526.41,
-            "h24": 408812.44
+            "m5": 9.7,
+            "h1": 374.83,
+            "h6": 12466.66,
+            "h24": 408822.15
           },
           "priceChange": {
-            "m5": -0.64,
-            "h1": 4.11,
-            "h6": -65.25,
-            "h24": -72.47
+            "m5": -4.27,
+            "h1": -0.59,
+            "h6": -63.83,
+            "h24": -73.65
           },
           "txns": {
             "m5": {
-              "buys": 1,
-              "sells": 2
+              "buys": 0,
+              "sells": 1
             },
             "h1": {
-              "buys": 7,
+              "buys": 6,
               "sells": 16
             },
             "h6": {
-              "buys": 196,
-              "sells": 262
+              "buys": 193,
+              "sells": 255
             },
             "h24": {
               "buys": 5913,
-              "sells": 5358
+              "sells": 5359
             }
           },
           "pairCreatedAt": 1791876130000,
           "source": "dexscreener",
-          "observedAt": 1791911731261,
+          "observedAt": 1791912062796,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -345704,7 +345817,7 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791911731261,
+            "observedAt": 1791912062796,
             "status": "LIVE"
           },
           "rugcheck": {
@@ -345715,7 +345828,7 @@
         },
         "pairCreatedAt": 1791876130000,
         "lastError": null,
-        "updatedAt": 1791911731261,
+        "updatedAt": 1791912062796,
         "v2QualificationActive": true,
         "wasQualifiedBeforeRuleChange": false
       }
@@ -345755,14 +345868,14 @@
           "volume": {
             "m5": 0,
             "h1": 311.12,
-            "h6": 2157.34,
-            "h24": 29913.48
+            "h6": 2044.14,
+            "h24": 29607.97
           },
           "priceChange": {
             "m5": null,
             "h1": 4.31,
-            "h6": -41.48,
-            "h24": 371
+            "h6": -40.71,
+            "h24": 318
           },
           "txns": {
             "m5": {
@@ -345774,17 +345887,17 @@
               "sells": 2
             },
             "h6": {
-              "buys": 25,
-              "sells": 35
+              "buys": 24,
+              "sells": 34
             },
             "h24": {
-              "buys": 255,
-              "sells": 237
+              "buys": 252,
+              "sells": 235
             }
           },
           "pairCreatedAt": 1771640513000,
           "source": "dexscreener",
-          "observedAt": 1791911731494,
+          "observedAt": 1791912063032,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -345801,13 +345914,13 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791911731494,
+            "observedAt": 1791912063032,
             "status": "LIVE"
           }
         },
         "pairCreatedAt": 1771640513000,
         "lastError": null,
-        "updatedAt": 1791911731494,
+        "updatedAt": 1791912063032,
         "v2QualificationActive": true,
         "wasQualifiedBeforeRuleChange": false
       }
@@ -345939,13 +346052,13 @@
           "volume": {
             "m5": 0,
             "h1": 75.08,
-            "h6": 894.85,
+            "h6": 885.32,
             "h24": 57157.82
           },
           "priceChange": {
             "m5": null,
             "h1": 7.04,
-            "h6": -50.53,
+            "h6": -51.12,
             "h24": -92.25
           },
           "txns": {
@@ -345958,7 +346071,7 @@
               "sells": 0
             },
             "h6": {
-              "buys": 13,
+              "buys": 12,
               "sells": 33
             },
             "h24": {
@@ -345968,7 +346081,7 @@
           },
           "pairCreatedAt": 1791877608000,
           "source": "dexscreener",
-          "observedAt": 1791911731885,
+          "observedAt": 1791912063373,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -346483,7 +346596,7 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791911731885,
+            "observedAt": 1791912063373,
             "status": "LIVE"
           },
           "rugcheck": {
@@ -346494,7 +346607,7 @@
         },
         "pairCreatedAt": 1791877608000,
         "lastError": null,
-        "updatedAt": 1791911731885,
+        "updatedAt": 1791912063373,
         "v2QualificationActive": true,
         "wasQualifiedBeforeRuleChange": false
       }
@@ -346655,7 +346768,7 @@
           },
           "pairCreatedAt": 1791877313000,
           "source": "dexscreener",
-          "observedAt": 1791911732242,
+          "observedAt": 1791912063685,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -346672,13 +346785,13 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791911732242,
+            "observedAt": 1791912063685,
             "status": "LIVE"
           }
         },
         "pairCreatedAt": 1791877313000,
         "lastError": null,
-        "updatedAt": 1791911732242,
+        "updatedAt": 1791912063685,
         "v2QualificationActive": true,
         "wasQualifiedBeforeRuleChange": false
       }
@@ -346747,7 +346860,7 @@
           },
           "pairCreatedAt": 1791878885000,
           "source": "dexscreener",
-          "observedAt": 1791911732566,
+          "observedAt": 1791912063999,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -346764,13 +346877,13 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791911732566,
+            "observedAt": 1791912063999,
             "status": "LIVE"
           }
         },
         "pairCreatedAt": 1791878885000,
         "lastError": null,
-        "updatedAt": 1791911732566,
+        "updatedAt": 1791912063999,
         "v2QualificationActive": true,
         "wasQualifiedBeforeRuleChange": false
       }
@@ -346808,24 +346921,24 @@
           "mcap": 34022,
           "fdv": 34022,
           "volume": {
-            "m5": 9.16,
-            "h1": 1426.76,
+            "m5": 0,
+            "h1": 1378.1,
             "h6": 6444.56,
             "h24": 6444.56
           },
           "priceChange": {
-            "m5": -0.89,
-            "h1": -3.18,
+            "m5": null,
+            "h1": -3.84,
             "h6": -33.21,
-            "h24": -30.42
+            "h24": -29.9
           },
           "txns": {
             "m5": {
-              "buys": 1,
+              "buys": 0,
               "sells": 0
             },
             "h1": {
-              "buys": 7,
+              "buys": 6,
               "sells": 7
             },
             "h6": {
@@ -346833,13 +346946,13 @@
               "sells": 34
             },
             "h24": {
-              "buys": 163,
-              "sells": 146
+              "buys": 161,
+              "sells": 144
             }
           },
           "pairCreatedAt": 1791314201000,
           "source": "dexscreener",
-          "observedAt": 1791911732802,
+          "observedAt": 1791912064290,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -346856,13 +346969,13 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791911732802,
+            "observedAt": 1791912064290,
             "status": "LIVE"
           }
         },
         "pairCreatedAt": 1791314201000,
         "lastError": null,
-        "updatedAt": 1791911732802,
+        "updatedAt": 1791912064290,
         "v2QualificationActive": true,
         "wasQualifiedBeforeRuleChange": false
       }
@@ -346994,13 +347107,13 @@
           "volume": {
             "m5": 0,
             "h1": 0,
-            "h6": 1660.52,
+            "h6": 1605.78,
             "h24": 6207.9
           },
           "priceChange": {
             "m5": null,
             "h1": null,
-            "h6": 8.45,
+            "h6": 8.95,
             "h24": 31.96
           },
           "txns": {
@@ -347014,7 +347127,7 @@
             },
             "h6": {
               "buys": 2,
-              "sells": 2
+              "sells": 1
             },
             "h24": {
               "buys": 32,
@@ -347023,7 +347136,7 @@
           },
           "pairCreatedAt": 1791876536000,
           "source": "dexscreener",
-          "observedAt": 1791911733096,
+          "observedAt": 1791912064616,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -347040,13 +347153,13 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791911733096,
+            "observedAt": 1791912064616,
             "status": "LIVE"
           }
         },
         "pairCreatedAt": 1791876536000,
         "lastError": null,
-        "updatedAt": 1791911733096,
+        "updatedAt": 1791912064616,
         "v2QualificationActive": true,
         "wasQualifiedBeforeRuleChange": false
       }
@@ -347086,13 +347199,13 @@
           "volume": {
             "m5": 0,
             "h1": 0,
-            "h6": 131457.46,
+            "h6": 131121.79,
             "h24": 753476.16
           },
           "priceChange": {
             "m5": null,
             "h1": null,
-            "h6": -98.99,
+            "h6": -98.97,
             "h24": -96.85
           },
           "txns": {
@@ -347105,8 +347218,8 @@
               "sells": 0
             },
             "h6": {
-              "buys": 496,
-              "sells": 2427
+              "buys": 494,
+              "sells": 2422
             },
             "h24": {
               "buys": 5083,
@@ -347115,7 +347228,7 @@
           },
           "pairCreatedAt": 1791865548000,
           "source": "dexscreener",
-          "observedAt": 1791911733520,
+          "observedAt": 1791912064911,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -347132,13 +347245,13 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791911733520,
+            "observedAt": 1791912064911,
             "status": "LIVE"
           }
         },
         "pairCreatedAt": 1791865548000,
         "lastError": null,
-        "updatedAt": 1791911733520,
+        "updatedAt": 1791912064911,
         "v2QualificationActive": true,
         "wasQualifiedBeforeRuleChange": false
       }
@@ -347360,29 +347473,29 @@
           "mcap": 4423,
           "fdv": 4423,
           "volume": {
-            "m5": 185.42,
-            "h1": 684.18,
-            "h6": 14672.81,
+            "m5": 0,
+            "h1": 668.85,
+            "h6": 12938.28,
             "h24": 120588.51
           },
           "priceChange": {
-            "m5": -17.67,
-            "h1": -31.26,
-            "h6": -69.88,
+            "m5": null,
+            "h1": -31.1,
+            "h6": -69.79,
             "h24": -89.78
           },
           "txns": {
             "m5": {
               "buys": 0,
-              "sells": 2
+              "sells": 0
             },
             "h1": {
               "buys": 1,
-              "sells": 10
+              "sells": 9
             },
             "h6": {
-              "buys": 159,
-              "sells": 176
+              "buys": 139,
+              "sells": 160
             },
             "h24": {
               "buys": 2031,
@@ -347391,7 +347504,7 @@
           },
           "pairCreatedAt": 1791882868000,
           "source": "dexscreener",
-          "observedAt": 1791911733837,
+          "observedAt": 1791912065197,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -347408,13 +347521,13 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791911733837,
+            "observedAt": 1791912065197,
             "status": "LIVE"
           }
         },
         "pairCreatedAt": 1791882868000,
         "lastError": null,
-        "updatedAt": 1791911733837,
+        "updatedAt": 1791912065197,
         "v2QualificationActive": true,
         "wasQualifiedBeforeRuleChange": false
       }
@@ -347904,24 +348017,24 @@
           "symbol": "Revolut",
           "name": "The Revolut Files",
           "quoteSymbol": "SOL",
-          "priceUsd": 0.000006937,
-          "priceNative": 6.453e-8,
-          "liquidityUsd": 5486.24,
-          "liquidityBase": 530850062,
-          "liquidityQuote": 16.7754,
-          "mcap": 6659,
-          "fdv": 6659,
+          "priceUsd": 0.000006913,
+          "priceNative": 6.45e-8,
+          "liquidityUsd": 5465.21,
+          "liquidityBase": 533106458,
+          "liquidityQuote": 16.6029,
+          "mcap": 6635,
+          "fdv": 6635,
           "volume": {
             "m5": 0,
-            "h1": 426.69,
-            "h6": 33152.54,
-            "h24": 167921.53
+            "h1": 492.53,
+            "h6": 30770.42,
+            "h24": 167988.83
           },
           "priceChange": {
             "m5": null,
-            "h1": -3.73,
-            "h6": -78.77,
-            "h24": -83.82
+            "h1": -2.89,
+            "h6": -77.36,
+            "h24": -83.88
           },
           "txns": {
             "m5": {
@@ -347933,17 +348046,17 @@
               "sells": 11
             },
             "h6": {
-              "buys": 432,
-              "sells": 430
+              "buys": 410,
+              "sells": 407
             },
             "h24": {
               "buys": 2804,
-              "sells": 2272
+              "sells": 2273
             }
           },
           "pairCreatedAt": 1791884583000,
           "source": "dexscreener",
-          "observedAt": 1791911734122,
+          "observedAt": 1791912065464,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -347960,13 +348073,13 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791911734122,
+            "observedAt": 1791912065464,
             "status": "LIVE"
           }
         },
         "pairCreatedAt": 1791884583000,
         "lastError": null,
-        "updatedAt": 1791911734122,
+        "updatedAt": 1791912065464,
         "v2QualificationActive": true,
         "wasQualifiedBeforeRuleChange": false
       }
@@ -347996,46 +348109,46 @@
           "symbol": "Juno",
           "name": "Juno",
           "quoteSymbol": "JUP",
-          "priceUsd": 0.00002269,
-          "priceNative": 0.00006964,
-          "liquidityUsd": 19048.98,
-          "liquidityBase": 419532145,
-          "liquidityQuote": 29249,
-          "mcap": 22690,
-          "fdv": 22690,
+          "priceUsd": 0.00002121,
+          "priceNative": 0.0000651,
+          "liquidityUsd": 18429.29,
+          "liquidityBase": 449239325,
+          "liquidityQuote": 27315,
+          "mcap": 21213,
+          "fdv": 21213,
           "volume": {
-            "m5": 863.46,
-            "h1": 1906.1,
-            "h6": 15922.28,
-            "h24": 221979.04
+            "m5": 630.17,
+            "h1": 2534,
+            "h6": 16121.82,
+            "h24": 222609.22
           },
           "priceChange": {
-            "m5": 4.29,
-            "h1": 23.35,
-            "h6": -24.09,
-            "h24": -76.78
+            "m5": -6.51,
+            "h1": 15.53,
+            "h6": -22.42,
+            "h24": -78.29
           },
           "txns": {
             "m5": {
-              "buys": 5,
-              "sells": 2
+              "buys": 0,
+              "sells": 1
             },
             "h1": {
               "buys": 12,
               "sells": 14
             },
             "h6": {
-              "buys": 171,
-              "sells": 146
+              "buys": 167,
+              "sells": 145
             },
             "h24": {
               "buys": 1655,
-              "sells": 1205
+              "sells": 1206
             }
           },
           "pairCreatedAt": 1791884198000,
           "source": "dexscreener",
-          "observedAt": 1791911734424,
+          "observedAt": 1791912065691,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -348052,13 +348165,13 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791911734424,
+            "observedAt": 1791912065691,
             "status": "LIVE"
           }
         },
         "pairCreatedAt": 1791884198000,
         "lastError": null,
-        "updatedAt": 1791911734424,
+        "updatedAt": 1791912065691,
         "v2QualificationActive": true,
         "wasQualifiedBeforeRuleChange": false
       }
@@ -348088,46 +348201,46 @@
           "symbol": "SEALS",
           "name": "Save The Seals",
           "quoteSymbol": "SOL",
-          "priceUsd": 0.0006049,
-          "priceNative": 0.000005643,
-          "liquidityUsd": 75738.09,
-          "liquidityBase": 64220053,
-          "liquidityQuote": 344.1925,
-          "mcap": 560773,
-          "fdv": 560773,
+          "priceUsd": 0.0005502,
+          "priceNative": 0.00000512,
+          "liquidityUsd": 72347.86,
+          "liquidityBase": 67409458,
+          "liquidityQuote": 328.1402,
+          "mcap": 510060,
+          "fdv": 510060,
           "volume": {
-            "m5": 1821.34,
-            "h1": 72764.56,
-            "h6": 1726951.33,
-            "h24": 1826776.06
+            "m5": 5736.06,
+            "h1": 71672.8,
+            "h6": 1730828.3,
+            "h24": 1832670.75
           },
           "priceChange": {
-            "m5": 6.86,
-            "h1": 15.46,
-            "h6": 1760,
-            "h24": 1299
+            "m5": -8.55,
+            "h1": -2.96,
+            "h6": 1137,
+            "h24": 1173
           },
           "txns": {
             "m5": {
-              "buys": 16,
-              "sells": 15
+              "buys": 47,
+              "sells": 29
             },
             "h1": {
-              "buys": 502,
-              "sells": 492
+              "buys": 495,
+              "sells": 447
             },
             "h6": {
-              "buys": 11148,
-              "sells": 10725
+              "buys": 11178,
+              "sells": 10733
             },
             "h24": {
-              "buys": 12655,
-              "sells": 11950
+              "buys": 12705,
+              "sells": 11982
             }
           },
           "pairCreatedAt": 1791885215000,
           "source": "dexscreener",
-          "observedAt": 1791911734707,
+          "observedAt": 1791912065921,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -348144,13 +348257,13 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791911734707,
+            "observedAt": 1791912065921,
             "status": "LIVE"
           }
         },
         "pairCreatedAt": 1791885215000,
         "lastError": null,
-        "updatedAt": 1791911734707,
+        "updatedAt": 1791912065921,
         "v2QualificationActive": true,
         "wasQualifiedBeforeRuleChange": false
       }
@@ -348311,7 +348424,7 @@
           },
           "pairCreatedAt": 1791885359000,
           "source": "dexscreener",
-          "observedAt": 1791911735053,
+          "observedAt": 1791912066203,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -348328,13 +348441,13 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791911735053,
+            "observedAt": 1791912066203,
             "status": "LIVE"
           }
         },
         "pairCreatedAt": 1791885359000,
         "lastError": null,
-        "updatedAt": 1791911735053,
+        "updatedAt": 1791912066203,
         "v2QualificationActive": true,
         "wasQualifiedBeforeRuleChange": false
       }
@@ -348365,46 +348478,46 @@
           "symbol": "YILONGMA",
           "name": "YiLong Ma",
           "quoteSymbol": "SOL",
-          "priceUsd": 0.0004205,
-          "priceNative": 0.000003924,
-          "liquidityUsd": 175382.51,
-          "liquidityBase": 416780524,
-          "liquidityQuote": 0.7932,
-          "mcap": 416878,
-          "fdv": 416878,
+          "priceUsd": 0.0004428,
+          "priceNative": 0.000004121,
+          "liquidityUsd": 184665.88,
+          "liquidityBase": 416771203,
+          "liquidityQuote": 0.8311,
+          "mcap": 438955,
+          "fdv": 438955,
           "volume": {
-            "m5": 8.46,
-            "h1": 137.49,
-            "h6": 10897.08,
-            "h24": 10912.32
+            "m5": 2.04,
+            "h1": 86.08,
+            "h6": 10901.15,
+            "h24": 10916.39
           },
           "priceChange": {
-            "m5": 2.35,
-            "h1": 5.02,
+            "m5": 2.77,
+            "h1": 10.74,
             "h6": -100,
             "h24": -100
           },
           "txns": {
             "m5": {
-              "buys": 4,
-              "sells": 2
+              "buys": 1,
+              "sells": 0
             },
             "h1": {
-              "buys": 14,
-              "sells": 20
+              "buys": 16,
+              "sells": 17
             },
             "h6": {
-              "buys": 65,
+              "buys": 67,
               "sells": 63
             },
             "h24": {
-              "buys": 66,
+              "buys": 68,
               "sells": 65
             }
           },
           "pairCreatedAt": 1791887062000,
           "source": "dexscreener",
-          "observedAt": 1791911735347,
+          "observedAt": 1791912066445,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -348421,13 +348534,13 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791911735347,
+            "observedAt": 1791912066445,
             "status": "LIVE"
           }
         },
         "pairCreatedAt": 1791887062000,
         "lastError": null,
-        "updatedAt": 1791911735347,
+        "updatedAt": 1791912066445,
         "v2QualificationActive": true,
         "wasQualifiedBeforeRuleChange": false
       }
@@ -348457,46 +348570,46 @@
           "symbol": "Whiskers",
           "name": "Officer Whiskers",
           "quoteSymbol": "SOL",
-          "priceUsd": 0.00001299,
-          "priceNative": 1.211e-7,
-          "liquidityUsd": 8083.81,
-          "liquidityBase": 381756688,
-          "liquidityQuote": 29.1321,
-          "mcap": 12503,
-          "fdv": 12503,
+          "priceUsd": 0.00001288,
+          "priceNative": 1.201e-7,
+          "liquidityUsd": 8038.5,
+          "liquidityBase": 383149715,
+          "liquidityQuote": 28.9555,
+          "mcap": 12394,
+          "fdv": 12394,
           "volume": {
-            "m5": 0,
-            "h1": 2840.48,
-            "h6": 20605.74,
-            "h24": 89432.65
+            "m5": 9.64,
+            "h1": 2707.09,
+            "h6": 19830.62,
+            "h24": 89442.29
           },
           "priceChange": {
-            "m5": null,
-            "h1": 18.83,
-            "h6": 29,
-            "h24": -70.72
+            "m5": -0.87,
+            "h1": 3.52,
+            "h6": 32.78,
+            "h24": -70.97
           },
           "txns": {
             "m5": {
               "buys": 0,
-              "sells": 0
+              "sells": 1
             },
             "h1": {
-              "buys": 29,
+              "buys": 26,
               "sells": 34
             },
             "h6": {
-              "buys": 249,
-              "sells": 241
+              "buys": 240,
+              "sells": 231
             },
             "h24": {
               "buys": 1275,
-              "sells": 1024
+              "sells": 1025
             }
           },
           "pairCreatedAt": 1791886507000,
           "source": "dexscreener",
-          "observedAt": 1791911735822,
+          "observedAt": 1791912066677,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -348513,13 +348626,13 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791911735822,
+            "observedAt": 1791912066677,
             "status": "LIVE"
           }
         },
         "pairCreatedAt": 1791886507000,
         "lastError": null,
-        "updatedAt": 1791911735822,
+        "updatedAt": 1791912066677,
         "v2QualificationActive": true,
         "wasQualifiedBeforeRuleChange": false
       }
@@ -348649,29 +348762,29 @@
           "mcap": 5151,
           "fdv": 5151,
           "volume": {
-            "m5": 2.19,
-            "h1": 165.69,
-            "h6": 23671.11,
+            "m5": 0,
+            "h1": 55.38,
+            "h6": 21185.69,
             "h24": 220098.8
           },
           "priceChange": {
-            "m5": -0.06,
-            "h1": -7.67,
-            "h6": -84.48,
+            "m5": null,
+            "h1": -4.62,
+            "h6": -82.96,
             "h24": -88.22
           },
           "txns": {
             "m5": {
               "buys": 0,
-              "sells": 1
+              "sells": 0
             },
             "h1": {
               "buys": 1,
-              "sells": 7
+              "sells": 4
             },
             "h6": {
-              "buys": 300,
-              "sells": 306
+              "buys": 269,
+              "sells": 278
             },
             "h24": {
               "buys": 2134,
@@ -348680,7 +348793,7 @@
           },
           "pairCreatedAt": 1791887002000,
           "source": "dexscreener",
-          "observedAt": 1791911736739,
+          "observedAt": 1791912066947,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -348697,13 +348810,13 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791911736739,
+            "observedAt": 1791912066947,
             "status": "LIVE"
           }
         },
         "pairCreatedAt": 1791887002000,
         "lastError": null,
-        "updatedAt": 1791911736739,
+        "updatedAt": 1791912066947,
         "v2QualificationActive": true,
         "wasQualifiedBeforeRuleChange": false
       }
@@ -348825,24 +348938,24 @@
           "symbol": "Jamie",
           "name": "Jamie Downey Jr",
           "quoteSymbol": "SOL",
-          "priceUsd": 0.000005234,
-          "priceNative": 4.883e-8,
-          "liquidityUsd": 4484.03,
-          "liquidityBase": 604406859,
-          "liquidityQuote": 12.3196,
-          "mcap": 4948,
-          "fdv": 4948,
+          "priceUsd": 0.000005223,
+          "priceNative": 4.861e-8,
+          "liquidityUsd": 4479.15,
+          "liquidityBase": 609352105,
+          "liquidityQuote": 12.0628,
+          "mcap": 4938,
+          "fdv": 4938,
           "volume": {
-            "m5": 0.1,
-            "h1": 966.36,
-            "h6": 92786.28,
-            "h24": 178345.08
+            "m5": 37.25,
+            "h1": 1018.15,
+            "h6": 76469.24,
+            "h24": 178396.87
           },
           "priceChange": {
-            "m5": 0.11,
-            "h1": 2.43,
-            "h6": -94.45,
-            "h24": -88.4
+            "m5": -1.74,
+            "h1": 2.22,
+            "h6": -92.93,
+            "h24": -88.42
           },
           "txns": {
             "m5": {
@@ -348850,21 +348963,21 @@
               "sells": 1
             },
             "h1": {
-              "buys": 12,
-              "sells": 15
+              "buys": 13,
+              "sells": 16
             },
             "h6": {
-              "buys": 1389,
-              "sells": 1052
+              "buys": 1164,
+              "sells": 905
             },
             "h24": {
-              "buys": 2560,
-              "sells": 1866
+              "buys": 2561,
+              "sells": 1867
             }
           },
           "pairCreatedAt": 1791887190000,
           "source": "dexscreener",
-          "observedAt": 1791911737706,
+          "observedAt": 1791912067222,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -348881,13 +348994,13 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791911737706,
+            "observedAt": 1791912067222,
             "status": "LIVE"
           }
         },
         "pairCreatedAt": 1791887190000,
         "lastError": null,
-        "updatedAt": 1791911737706,
+        "updatedAt": 1791912067222,
         "v2QualificationActive": true,
         "wasQualifiedBeforeRuleChange": false
       }
@@ -348903,7 +349016,7 @@
         "feeds": [
           "profiles"
         ],
-        "state": "DISCOVERED",
+        "state": "DATA_INCOMPLETE",
         "stateHistory": [
           {
             "state": "DISCOVERED",
@@ -348917,46 +349030,46 @@
           "symbol": "BAG",
           "name": "catwifbag",
           "quoteSymbol": "$WIF",
-          "priceUsd": 0.000005991,
-          "priceNative": 0.00002911,
+          "priceUsd": 0.000003248,
+          "priceNative": 0.00001568,
           "liquidityUsd": null,
           "liquidityBase": null,
           "liquidityQuote": null,
-          "mcap": 5991.25,
-          "fdv": 5991.25,
+          "mcap": 3248.24,
+          "fdv": 3248.24,
           "volume": {
-            "m5": 505.26,
-            "h1": 17377.9,
-            "h6": 17377.9,
-            "h24": 17377.9
+            "m5": 2.93,
+            "h1": 2.93,
+            "h6": 280.77,
+            "h24": 18544.96
           },
           "priceChange": {
-            "m5": -38.51,
-            "h1": 53.7,
-            "h6": 53.7,
-            "h24": 53.7
+            "m5": 0.29,
+            "h1": 0.29,
+            "h6": -31.62,
+            "h24": -16.67
           },
           "txns": {
             "m5": {
-              "buys": 6,
-              "sells": 15
+              "buys": 0,
+              "sells": 1
             },
             "h1": {
-              "buys": 285,
-              "sells": 176
+              "buys": 0,
+              "sells": 1
             },
             "h6": {
-              "buys": 285,
-              "sells": 176
+              "buys": 2,
+              "sells": 6
             },
             "h24": {
-              "buys": 285,
-              "sells": 176
+              "buys": 291,
+              "sells": 196
             }
           },
           "pairCreatedAt": 1791887607000,
           "source": "dexscreener",
-          "observedAt": 1791889222198,
+          "observedAt": 1791912067543,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -348973,13 +349086,13 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791889222198,
+            "observedAt": 1791912067543,
             "status": "LIVE"
           }
         },
         "pairCreatedAt": 1791887607000,
         "lastError": null,
-        "updatedAt": 1791889222198,
+        "updatedAt": 1791912067543,
         "v2QualificationActive": false,
         "wasQualifiedBeforeRuleChange": false
       }
@@ -348995,7 +349108,7 @@
         "feeds": [
           "profiles"
         ],
-        "state": "DISCOVERED",
+        "state": "DATA_INCOMPLETE",
         "stateHistory": [
           {
             "state": "DISCOVERED",
@@ -349009,46 +349122,46 @@
           "symbol": "Artcraft",
           "name": "Artcraft",
           "quoteSymbol": "SOL",
-          "priceUsd": 0.000009347,
-          "priceNative": 8.767e-8,
+          "priceUsd": 0.000004057,
+          "priceNative": 3.775e-8,
           "liquidityUsd": null,
           "liquidityBase": null,
           "liquidityQuote": null,
-          "mcap": 9347.74,
-          "fdv": 9347.74,
+          "mcap": 4057.22,
+          "fdv": 4057.22,
           "volume": {
-            "m5": 450.77,
-            "h1": 11335.46,
-            "h6": 39789.59,
-            "h24": 39789.59
+            "m5": 22.58,
+            "h1": 220.03,
+            "h6": 17454.58,
+            "h24": 53745.04
           },
           "priceChange": {
-            "m5": -11.37,
-            "h1": -13.23,
-            "h6": 173,
-            "h24": 173
+            "m5": -2.17,
+            "h1": -25.21,
+            "h6": -71.03,
+            "h24": 18.64
           },
           "txns": {
             "m5": {
-              "buys": 3,
-              "sells": 3
+              "buys": 0,
+              "sells": 1
             },
             "h1": {
-              "buys": 129,
-              "sells": 109
+              "buys": 0,
+              "sells": 9
             },
             "h6": {
-              "buys": 406,
-              "sells": 364
+              "buys": 201,
+              "sells": 194
             },
             "h24": {
-              "buys": 406,
-              "sells": 364
+              "buys": 566,
+              "sells": 524
             }
           },
           "pairCreatedAt": 1791882850000,
           "source": "dexscreener",
-          "observedAt": 1791891207878,
+          "observedAt": 1791912067862,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -349065,13 +349178,13 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791891207878,
+            "observedAt": 1791912067862,
             "status": "LIVE"
           }
         },
         "pairCreatedAt": 1791882850000,
         "lastError": null,
-        "updatedAt": 1791891207878,
+        "updatedAt": 1791912067862,
         "v2QualificationActive": false,
         "wasQualifiedBeforeRuleChange": false
       }
@@ -349087,7 +349200,7 @@
         "feeds": [
           "profiles"
         ],
-        "state": "DISCOVERED",
+        "state": "PAPER_SIGNAL",
         "stateHistory": [
           {
             "state": "DISCOVERED",
@@ -349096,51 +349209,51 @@
           }
         ],
         "market": {
-          "pairAddress": "HTpZhNHeYWkTib4TcSesupQSGEXaV1WdvswAM8mGWRcr",
-          "dexId": "pumpfun",
+          "pairAddress": "EG9ywUdMGgn82xjEFkwYPVDHxeJtdb8KBYqXmwQYNGEp",
+          "dexId": "pumpswap",
           "symbol": "Dirac Quantum",
           "name": "Dirac Quantum",
           "quoteSymbol": "SOL",
-          "priceUsd": 0.00002187,
-          "priceNative": 2.053e-7,
-          "liquidityUsd": null,
-          "liquidityBase": null,
-          "liquidityQuote": null,
-          "mcap": 21877.78,
-          "fdv": 21877.78,
+          "priceUsd": 0.000002615,
+          "priceNative": 2.428e-8,
+          "liquidityUsd": 2559.39,
+          "liquidityBase": 848107509,
+          "liquidityQuote": 3.1662,
+          "mcap": 2503,
+          "fdv": 2503,
           "volume": {
-            "m5": 652.72,
-            "h1": 19646.78,
-            "h6": 38301.47,
-            "h24": 38301.47
+            "m5": 0,
+            "h1": 0,
+            "h6": 13610.24,
+            "h24": 13610.24
           },
           "priceChange": {
-            "m5": -0.31,
-            "h1": 22.02,
-            "h6": 628,
-            "h24": 628
+            "m5": null,
+            "h1": null,
+            "h6": -94.04,
+            "h24": -94.04
           },
           "txns": {
             "m5": {
-              "buys": 7,
-              "sells": 8
+              "buys": 0,
+              "sells": 0
             },
             "h1": {
-              "buys": 231,
-              "sells": 145
+              "buys": 0,
+              "sells": 0
             },
             "h6": {
-              "buys": 408,
-              "sells": 291
+              "buys": 70,
+              "sells": 139
             },
             "h24": {
-              "buys": 408,
-              "sells": 291
+              "buys": 70,
+              "sells": 139
             }
           },
-          "pairCreatedAt": 1791885601000,
+          "pairCreatedAt": 1791896887000,
           "source": "dexscreener",
-          "observedAt": 1791891539512,
+          "observedAt": 1791912068089,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -349152,19 +349265,19 @@
         "qualification": null,
         "rejectionReasons": [],
         "cooldownUntil": 0,
-        "signalId": null,
+        "signalId": "sig_open_mv6y6gop_o7acx8",
         "_counted": true,
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791891539512,
+            "observedAt": 1791912068089,
             "status": "LIVE"
           }
         },
-        "pairCreatedAt": 1791885601000,
+        "pairCreatedAt": 1791896887000,
         "lastError": null,
-        "updatedAt": 1791891539512,
-        "v2QualificationActive": false,
+        "updatedAt": 1791912068089,
+        "v2QualificationActive": true,
         "wasQualifiedBeforeRuleChange": false
       }
     ],
@@ -349179,7 +349292,7 @@
         "feeds": [
           "profiles"
         ],
-        "state": "DISCOVERED",
+        "state": "DATA_INCOMPLETE",
         "stateHistory": [
           {
             "state": "DISCOVERED",
@@ -349193,46 +349306,46 @@
           "symbol": "ACHI",
           "name": "Achicoin",
           "quoteSymbol": "$WIF",
-          "priceUsd": 0.00002442,
-          "priceNative": 0.0001189,
+          "priceUsd": 0.000007533,
+          "priceNative": 0.00003647,
           "liquidityUsd": null,
           "liquidityBase": null,
           "liquidityQuote": null,
-          "mcap": 24429.11,
-          "fdv": 24429.11,
+          "mcap": 7533.79,
+          "fdv": 7533.79,
           "volume": {
-            "m5": 696.41,
-            "h1": 9914,
-            "h6": 9914,
-            "h24": 9914
+            "m5": 0,
+            "h1": 0,
+            "h6": 8385.37,
+            "h24": 19103.81
           },
           "priceChange": {
-            "m5": 30.98,
-            "h1": 462,
-            "h6": 462,
-            "h24": 462
+            "m5": null,
+            "h1": null,
+            "h6": -57.72,
+            "h24": 73.46
           },
           "txns": {
             "m5": {
-              "buys": 8,
-              "sells": 13
+              "buys": 0,
+              "sells": 0
             },
             "h1": {
-              "buys": 142,
-              "sells": 91
+              "buys": 0,
+              "sells": 0
             },
             "h6": {
-              "buys": 142,
-              "sells": 91
+              "buys": 98,
+              "sells": 101
             },
             "h24": {
-              "buys": 142,
-              "sells": 91
+              "buys": 250,
+              "sells": 198
             }
           },
           "pairCreatedAt": 1790061739000,
           "source": "dexscreener",
-          "observedAt": 1791890218336,
+          "observedAt": 1791912068636,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -349249,13 +349362,13 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791890218336,
+            "observedAt": 1791912068636,
             "status": "LIVE"
           }
         },
         "pairCreatedAt": 1790061739000,
         "lastError": null,
-        "updatedAt": 1791890218336,
+        "updatedAt": 1791912068636,
         "v2QualificationActive": false,
         "wasQualifiedBeforeRuleChange": false
       }
@@ -349271,7 +349384,7 @@
         "feeds": [
           "profiles"
         ],
-        "state": "DISCOVERED",
+        "state": "DATA_INCOMPLETE",
         "stateHistory": [
           {
             "state": "DISCOVERED",
@@ -349285,46 +349398,46 @@
           "symbol": "HH",
           "name": "Hitler House",
           "quoteSymbol": "SOL",
-          "priceUsd": 0.000007617,
-          "priceNative": 7.144e-8,
+          "priceUsd": 0.000005354,
+          "priceNative": 4.983e-8,
           "liquidityUsd": null,
           "liquidityBase": null,
           "liquidityQuote": null,
-          "mcap": 7617.87,
-          "fdv": 7617.87,
+          "mcap": 5354.5,
+          "fdv": 5354.5,
           "volume": {
-            "m5": 562.15,
-            "h1": 68592.66,
-            "h6": 68592.66,
-            "h24": 68592.66
+            "m5": 272.65,
+            "h1": 366.79,
+            "h6": 12009.91,
+            "h24": 72779.17
           },
           "priceChange": {
-            "m5": -35.78,
-            "h1": 112,
-            "h6": 112,
-            "h24": 112
+            "m5": 16.99,
+            "h1": 26.15,
+            "h6": -35.79,
+            "h24": 49.33
           },
           "txns": {
             "m5": {
               "buys": 4,
-              "sells": 10
+              "sells": 0
             },
             "h1": {
-              "buys": 1024,
-              "sells": 841
+              "buys": 6,
+              "sells": 3
             },
             "h6": {
-              "buys": 1024,
-              "sells": 841
+              "buys": 185,
+              "sells": 188
             },
             "h24": {
-              "buys": 1024,
-              "sells": 841
+              "buys": 1098,
+              "sells": 923
             }
           },
           "pairCreatedAt": 1791888794000,
           "source": "dexscreener",
-          "observedAt": 1791892199114,
+          "observedAt": 1791912068978,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -349341,13 +349454,13 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791892199114,
+            "observedAt": 1791912068978,
             "status": "LIVE"
           }
         },
         "pairCreatedAt": 1791888794000,
         "lastError": null,
-        "updatedAt": 1791892199114,
+        "updatedAt": 1791912068978,
         "v2QualificationActive": false,
         "wasQualifiedBeforeRuleChange": false
       }
@@ -349363,7 +349476,7 @@
         "feeds": [
           "profiles"
         ],
-        "state": "DISCOVERED",
+        "state": "PAPER_SIGNAL",
         "stateHistory": [
           {
             "state": "DISCOVERED",
@@ -349377,46 +349490,46 @@
           "symbol": "Irlcat",
           "name": "Scientists reveal the Hi",
           "quoteSymbol": "SOL",
-          "priceUsd": 0.000007923,
-          "priceNative": 7.469e-8,
-          "liquidityUsd": 5832.78,
-          "liquidityBase": 483317519,
-          "liquidityQuote": 18.8837,
-          "mcap": 6978,
-          "fdv": 6978,
+          "priceUsd": 0.000003224,
+          "priceNative": 2.999e-8,
+          "liquidityUsd": 3060.05,
+          "liquidityBase": 761906277,
+          "liquidityQuote": 5.6131,
+          "mcap": 2839,
+          "fdv": 2839,
           "volume": {
-            "m5": 118.72,
-            "h1": 6623.4,
-            "h6": 21988.44,
-            "h24": 21988.44
+            "m5": 0,
+            "h1": 0,
+            "h6": 5090.2,
+            "h24": 22401.35
           },
           "priceChange": {
-            "m5": -1.08,
-            "h1": -2.6,
-            "h6": -81.58,
-            "h24": -81.58
+            "m5": null,
+            "h1": null,
+            "h6": -47.46,
+            "h24": -92.5
           },
           "txns": {
             "m5": {
-              "buys": 2,
-              "sells": 4
+              "buys": 0,
+              "sells": 0
             },
             "h1": {
-              "buys": 112,
-              "sells": 112
+              "buys": 0,
+              "sells": 0
             },
             "h6": {
-              "buys": 353,
-              "sells": 353
+              "buys": 73,
+              "sells": 69
             },
             "h24": {
-              "buys": 353,
-              "sells": 353
+              "buys": 358,
+              "sells": 367
             }
           },
           "pairCreatedAt": 1791889540000,
           "source": "dexscreener",
-          "observedAt": 1791893522840,
+          "observedAt": 1791912069309,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -349428,19 +349541,19 @@
         "qualification": null,
         "rejectionReasons": [],
         "cooldownUntil": 0,
-        "signalId": null,
+        "signalId": "sig_open_mv6y6hml_zbmifi",
         "_counted": true,
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791893522840,
+            "observedAt": 1791912069309,
             "status": "LIVE"
           }
         },
         "pairCreatedAt": 1791889540000,
         "lastError": null,
-        "updatedAt": 1791893522840,
-        "v2QualificationActive": false,
+        "updatedAt": 1791912069309,
+        "v2QualificationActive": true,
         "wasQualifiedBeforeRuleChange": false
       }
     ],
@@ -360057,46 +360170,46 @@
           "symbol": "ETCHY",
           "name": "Etchy",
           "quoteSymbol": "WBTC",
-          "priceUsd": 0.0001873,
-          "priceNative": 2.256e-9,
-          "liquidityUsd": 39075.67,
-          "liquidityBase": 104492803,
-          "liquidityQuote": 0.2349,
-          "mcap": 187323,
-          "fdv": 187323,
+          "priceUsd": 0.0001659,
+          "priceNative": 1.996e-9,
+          "liquidityUsd": 36793.54,
+          "liquidityBase": 110868721,
+          "liquidityQuote": 0.2214,
+          "mcap": 165919,
+          "fdv": 165919,
           "volume": {
-            "m5": 98164.67,
-            "h1": 476241.43,
-            "h6": 476241.43,
-            "h24": 476241.43
+            "m5": 23017.87,
+            "h1": 505766.9,
+            "h6": 505766.9,
+            "h24": 505766.9
           },
           "priceChange": {
-            "m5": -36.23,
-            "h1": 298,
-            "h6": 298,
-            "h24": 298
+            "m5": -21.79,
+            "h1": 252,
+            "h6": 252,
+            "h24": 252
           },
           "txns": {
             "m5": {
-              "buys": 705,
-              "sells": 407
+              "buys": 176,
+              "sells": 100
             },
             "h1": {
-              "buys": 3159,
-              "sells": 2623
+              "buys": 3382,
+              "sells": 2757
             },
             "h6": {
-              "buys": 3159,
-              "sells": 2623
+              "buys": 3382,
+              "sells": 2757
             },
             "h24": {
-              "buys": 3159,
-              "sells": 2623
+              "buys": 3382,
+              "sells": 2757
             }
           },
           "pairCreatedAt": 1791910291000,
           "source": "dexscreener",
-          "observedAt": 1791911722751,
+          "observedAt": 1791912054085,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -360113,13 +360226,13 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791911722751,
+            "observedAt": 1791912054085,
             "status": "LIVE"
           }
         },
         "pairCreatedAt": 1791910291000,
         "lastError": null,
-        "updatedAt": 1791911722751
+        "updatedAt": 1791912054085
       }
     ],
     [
@@ -360147,24 +360260,24 @@
           "symbol": "GDN",
           "name": "GardenFarm",
           "quoteSymbol": "SOL",
-          "priceUsd": 0.00005653,
-          "priceNative": 5.272e-7,
-          "liquidityUsd": 18837.24,
-          "liquidityBase": 182962290,
-          "liquidityQuote": 79.2121,
-          "mcap": 54299,
-          "fdv": 54299,
+          "priceUsd": 0.00005712,
+          "priceNative": 5.316e-7,
+          "liquidityUsd": 18960.44,
+          "liquidityBase": 182541975,
+          "liquidityQuote": 79.407,
+          "mcap": 54867,
+          "fdv": 54867,
           "volume": {
-            "m5": 52.01,
-            "h1": 3264.76,
-            "h6": 9449.3,
-            "h24": 26752.44
+            "m5": 14.39,
+            "h1": 3251.46,
+            "h6": 9298.93,
+            "h24": 26766.83
           },
           "priceChange": {
-            "m5": 1.93,
-            "h1": -2.18,
-            "h6": 49.02,
-            "h24": 26.74
+            "m5": 1.04,
+            "h1": -1.26,
+            "h6": 54.69,
+            "h24": 28.07
           },
           "txns": {
             "m5": {
@@ -360172,21 +360285,21 @@
               "sells": 0
             },
             "h1": {
-              "buys": 68,
+              "buys": 66,
               "sells": 30
             },
             "h6": {
-              "buys": 288,
-              "sells": 110
+              "buys": 287,
+              "sells": 108
             },
             "h24": {
-              "buys": 516,
+              "buys": 517,
               "sells": 381
             }
           },
           "pairCreatedAt": 1791864092000,
           "source": "dexscreener",
-          "observedAt": 1791911722749,
+          "observedAt": 1791912054086,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -360203,13 +360316,13 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791911722749,
+            "observedAt": 1791912054086,
             "status": "LIVE"
           }
         },
         "pairCreatedAt": 1791864092000,
         "lastError": null,
-        "updatedAt": 1791911722749
+        "updatedAt": 1791912054086
       }
     ],
     [
@@ -360237,24 +360350,24 @@
           "symbol": "BOOBS",
           "name": "boobs",
           "quoteSymbol": "SOL",
-          "priceUsd": 0.00000304,
-          "priceNative": 2.836e-8,
+          "priceUsd": 0.000003087,
+          "priceNative": 2.873e-8,
           "liquidityUsd": null,
           "liquidityBase": null,
           "liquidityQuote": null,
-          "mcap": 3040.62,
-          "fdv": 3040.62,
+          "mcap": 3087.64,
+          "fdv": 3087.64,
           "volume": {
-            "m5": 10.66,
-            "h1": 24240.64,
-            "h6": 24240.64,
-            "h24": 24240.64
+            "m5": 0.01,
+            "h1": 24240.65,
+            "h6": 24240.65,
+            "h24": 24240.65
           },
           "priceChange": {
-            "m5": -1.17,
-            "h1": -16.88,
-            "h6": -16.88,
-            "h24": -16.88
+            "m5": 1.55,
+            "h1": -15.6,
+            "h6": -15.6,
+            "h24": -15.6
           },
           "txns": {
             "m5": {
@@ -360263,20 +360376,20 @@
             },
             "h1": {
               "buys": 207,
-              "sells": 215
+              "sells": 216
             },
             "h6": {
               "buys": 207,
-              "sells": 215
+              "sells": 216
             },
             "h24": {
               "buys": 207,
-              "sells": 215
+              "sells": 216
             }
           },
           "pairCreatedAt": 1791910639000,
           "source": "dexscreener",
-          "observedAt": 1791911722681,
+          "observedAt": 1791912053982,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -360293,13 +360406,13 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791911722681,
+            "observedAt": 1791912053982,
             "status": "LIVE"
           }
         },
         "pairCreatedAt": 1791910639000,
         "lastError": null,
-        "updatedAt": 1791911722681
+        "updatedAt": 1791912053982
       }
     ],
     [
@@ -360348,12 +360461,12 @@
           },
           "txns": {
             "m5": {
-              "buys": 4,
-              "sells": 2
+              "buys": 0,
+              "sells": 0
             },
             "h1": {
-              "buys": 76,
-              "sells": 67
+              "buys": 70,
+              "sells": 61
             },
             "h6": {
               "buys": 169,
@@ -360366,7 +360479,7 @@
           },
           "pairCreatedAt": 1791904828000,
           "source": "dexscreener",
-          "observedAt": 1791911722700,
+          "observedAt": 1791912054013,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -360383,13 +360496,13 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791911722700,
+            "observedAt": 1791912054013,
             "status": "LIVE"
           }
         },
         "pairCreatedAt": 1791904828000,
         "lastError": null,
-        "updatedAt": 1791911722700
+        "updatedAt": 1791912054013
       }
     ],
     [
@@ -360417,46 +360530,46 @@
           "symbol": "PINCHA",
           "name": "Penny Pincha",
           "quoteSymbol": "SOL",
-          "priceUsd": 0.0001724,
-          "priceNative": 0.000001608,
-          "liquidityUsd": 35103.18,
-          "liquidityBase": 106631192,
-          "liquidityQuote": 155.986,
-          "mcap": 172413,
-          "fdv": 172413,
+          "priceUsd": 0.0001674,
+          "priceNative": 0.000001557,
+          "liquidityUsd": 34836.2,
+          "liquidityBase": 109022736,
+          "liquidityQuote": 154.357,
+          "mcap": 167401,
+          "fdv": 167401,
           "volume": {
-            "m5": 13807.92,
-            "h1": 147601.11,
-            "h6": 147601.11,
-            "h24": 147601.11
+            "m5": 7456.59,
+            "h1": 156915.8,
+            "h6": 156915.8,
+            "h24": 156915.8
           },
           "priceChange": {
-            "m5": -2.37,
-            "h1": 289,
-            "h6": 289,
-            "h24": 289
+            "m5": 1.09,
+            "h1": 278,
+            "h6": 278,
+            "h24": 278
           },
           "txns": {
             "m5": {
-              "buys": 173,
-              "sells": 136
+              "buys": 133,
+              "sells": 89
             },
             "h1": {
-              "buys": 1658,
-              "sells": 1402
+              "buys": 1814,
+              "sells": 1505
             },
             "h6": {
-              "buys": 1658,
-              "sells": 1402
+              "buys": 1814,
+              "sells": 1505
             },
             "h24": {
-              "buys": 1658,
-              "sells": 1402
+              "buys": 1814,
+              "sells": 1505
             }
           },
           "pairCreatedAt": 1791910319000,
           "source": "dexscreener",
-          "observedAt": 1791911722699,
+          "observedAt": 1791912054032,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -360473,13 +360586,13 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791911722699,
+            "observedAt": 1791912054032,
             "status": "LIVE"
           }
         },
         "pairCreatedAt": 1791910319000,
         "lastError": null,
-        "updatedAt": 1791911722699
+        "updatedAt": 1791912054032
       }
     ],
     [
@@ -360507,46 +360620,46 @@
           "symbol": "TANK",
           "name": "Fish Tank",
           "quoteSymbol": "SOL",
-          "priceUsd": 0.00001338,
-          "priceNative": 1.249e-7,
+          "priceUsd": 0.00001589,
+          "priceNative": 1.479e-7,
           "liquidityUsd": null,
           "liquidityBase": null,
           "liquidityQuote": null,
-          "mcap": 13389.3,
-          "fdv": 13389.3,
+          "mcap": 15899.07,
+          "fdv": 15899.07,
           "volume": {
-            "m5": 1198.1,
-            "h1": 13595.1,
-            "h6": 13595.1,
-            "h24": 13595.1
+            "m5": 1122.57,
+            "h1": 14771.44,
+            "h6": 14771.44,
+            "h24": 14771.44
           },
           "priceChange": {
-            "m5": 16.68,
-            "h1": 322,
-            "h6": 322,
-            "h24": 322
+            "m5": 20.14,
+            "h1": 401,
+            "h6": 401,
+            "h24": 401
           },
           "txns": {
             "m5": {
-              "buys": 11,
-              "sells": 10
+              "buys": 8,
+              "sells": 4
             },
             "h1": {
-              "buys": 130,
-              "sells": 77
+              "buys": 138,
+              "sells": 82
             },
             "h6": {
-              "buys": 130,
-              "sells": 77
+              "buys": 138,
+              "sells": 82
             },
             "h24": {
-              "buys": 130,
-              "sells": 77
+              "buys": 138,
+              "sells": 82
             }
           },
           "pairCreatedAt": 1791910212000,
           "source": "dexscreener",
-          "observedAt": 1791911722731,
+          "observedAt": 1791912054054,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -360563,13 +360676,13 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791911722731,
+            "observedAt": 1791912054054,
             "status": "LIVE"
           }
         },
         "pairCreatedAt": 1791910212000,
         "lastError": null,
-        "updatedAt": 1791911722731
+        "updatedAt": 1791912054054
       }
     ],
     [
@@ -360687,46 +360800,46 @@
           "symbol": "CrawlHive",
           "name": "CrawlHive",
           "quoteSymbol": "SOL",
-          "priceUsd": 0.000008718,
-          "priceNative": 8.134e-8,
+          "priceUsd": 0.000007097,
+          "priceNative": 6.605e-8,
           "liquidityUsd": null,
           "liquidityBase": null,
           "liquidityQuote": null,
-          "mcap": 8718.67,
-          "fdv": 8718.67,
+          "mcap": 7097.88,
+          "fdv": 7097.88,
           "volume": {
-            "m5": 5892.47,
-            "h1": 29635.07,
-            "h6": 60637.69,
-            "h24": 60637.69
+            "m5": 2944.17,
+            "h1": 28196.77,
+            "h6": 63789.88,
+            "h24": 63789.88
           },
           "priceChange": {
-            "m5": -28.13,
-            "h1": -47.15,
-            "h6": 190,
-            "h24": 190
+            "m5": -14.23,
+            "h1": -51.73,
+            "h6": 136,
+            "h24": 136
           },
           "txns": {
             "m5": {
-              "buys": 48,
-              "sells": 61
+              "buys": 32,
+              "sells": 31
             },
             "h1": {
-              "buys": 244,
-              "sells": 258
+              "buys": 256,
+              "sells": 264
             },
             "h6": {
-              "buys": 437,
-              "sells": 392
+              "buys": 471,
+              "sells": 425
             },
             "h24": {
-              "buys": 437,
-              "sells": 392
+              "buys": 471,
+              "sells": 425
             }
           },
           "pairCreatedAt": 1791906188000,
           "source": "dexscreener",
-          "observedAt": 1791911722718,
+          "observedAt": 1791912054065,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -360743,13 +360856,13 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791911722718,
+            "observedAt": 1791912054065,
             "status": "LIVE"
           }
         },
         "pairCreatedAt": 1791906188000,
         "lastError": null,
-        "updatedAt": 1791911722718
+        "updatedAt": 1791912054065
       }
     ],
     [
@@ -360777,46 +360890,46 @@
           "symbol": "SOGE",
           "name": "SOGECOIN ",
           "quoteSymbol": "DOGE",
-          "priceUsd": 0.00001351,
-          "priceNative": 0.0001601,
+          "priceUsd": 0.00001118,
+          "priceNative": 0.0001325,
           "liquidityUsd": null,
           "liquidityBase": null,
           "liquidityQuote": null,
-          "mcap": 13512.97,
-          "fdv": 13512.97,
+          "mcap": 11184.36,
+          "fdv": 11184.36,
           "volume": {
-            "m5": 629.77,
-            "h1": 3311.4,
-            "h6": 3311.4,
-            "h24": 3311.4
+            "m5": 131.69,
+            "h1": 3443.1,
+            "h6": 3443.1,
+            "h24": 3443.1
           },
           "priceChange": {
-            "m5": 37.58,
-            "h1": 293,
-            "h6": 293,
-            "h24": 293
+            "m5": -17.23,
+            "h1": 225,
+            "h6": 225,
+            "h24": 225
           },
           "txns": {
             "m5": {
-              "buys": 6,
+              "buys": 2,
               "sells": 2
             },
             "h1": {
-              "buys": 29,
-              "sells": 19
+              "buys": 31,
+              "sells": 21
             },
             "h6": {
-              "buys": 29,
-              "sells": 19
+              "buys": 31,
+              "sells": 21
             },
             "h24": {
-              "buys": 29,
-              "sells": 19
+              "buys": 31,
+              "sells": 21
             }
           },
           "pairCreatedAt": 1791909467000,
           "source": "dexscreener",
-          "observedAt": 1791911722646,
+          "observedAt": 1791912053889,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -360833,13 +360946,13 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791911722646,
+            "observedAt": 1791912053889,
             "status": "LIVE"
           }
         },
         "pairCreatedAt": 1791909467000,
         "lastError": null,
-        "updatedAt": 1791911722646
+        "updatedAt": 1791912053889
       }
     ],
     [
@@ -360867,46 +360980,46 @@
           "symbol": " SOL Riche",
           "name": "1000 SOL Richer",
           "quoteSymbol": "SOL",
-          "priceUsd": 0.0001058,
-          "priceNative": 9.876e-7,
-          "liquidityUsd": 27342.57,
-          "liquidityBase": 137461316,
-          "liquidityQuote": 119.345,
-          "mcap": 105857,
-          "fdv": 105857,
+          "priceUsd": 0.000002593,
+          "priceNative": 2.413e-8,
+          "liquidityUsd": 2741.37,
+          "liquidityBase": 874469144,
+          "liquidityQuote": 4.41,
+          "mcap": 2593,
+          "fdv": 2593,
           "volume": {
-            "m5": 2511.88,
-            "h1": 21073.74,
-            "h6": 21073.74,
-            "h24": 21073.74
+            "m5": 283.76,
+            "h1": 21702.38,
+            "h6": 21702.38,
+            "h24": 21702.38
           },
           "priceChange": {
-            "m5": -25.23,
-            "h1": 122,
-            "h6": 122,
-            "h24": 122
+            "m5": -93.95,
+            "h1": -94.57,
+            "h6": -94.57,
+            "h24": -94.57
           },
           "txns": {
             "m5": {
-              "buys": 57,
-              "sells": 36
+              "buys": 19,
+              "sells": 18
             },
             "h1": {
-              "buys": 302,
-              "sells": 246
+              "buys": 331,
+              "sells": 276
             },
             "h6": {
-              "buys": 302,
-              "sells": 246
+              "buys": 331,
+              "sells": 276
             },
             "h24": {
-              "buys": 302,
-              "sells": 246
+              "buys": 331,
+              "sells": 276
             }
           },
           "pairCreatedAt": 1791910312000,
           "source": "dexscreener",
-          "observedAt": 1791911722668,
+          "observedAt": 1791912053989,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -360923,13 +361036,13 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791911722668,
+            "observedAt": 1791912053989,
             "status": "LIVE"
           }
         },
         "pairCreatedAt": 1791910312000,
         "lastError": null,
-        "updatedAt": 1791911722668
+        "updatedAt": 1791912053989
       }
     ],
     [
@@ -360957,46 +361070,46 @@
           "symbol": "ALOKA",
           "name": "The Peace Dog",
           "quoteSymbol": "SOL",
-          "priceUsd": 0.00003734,
-          "priceNative": 3.484e-7,
-          "liquidityUsd": 15131.63,
-          "liquidityBase": 226450602,
-          "liquidityQuote": 62.2826,
-          "mcap": 37342,
-          "fdv": 37342,
+          "priceUsd": 0.00007551,
+          "priceNative": 7.027e-7,
+          "liquidityUsd": 22400.96,
+          "liquidityBase": 159854716,
+          "liquidityQuote": 96.1383,
+          "mcap": 75512,
+          "fdv": 75512,
           "volume": {
-            "m5": 35706.09,
-            "h1": 180884.88,
-            "h6": 180884.88,
-            "h24": 180884.88
+            "m5": 18958.98,
+            "h1": 211981.33,
+            "h6": 211981.33,
+            "h24": 211981.33
           },
           "priceChange": {
-            "m5": -61.61,
-            "h1": -63.88,
-            "h6": -63.88,
-            "h24": -63.88
+            "m5": -20.31,
+            "h1": -26.96,
+            "h6": -26.96,
+            "h24": -26.96
           },
           "txns": {
             "m5": {
-              "buys": 797,
-              "sells": 414
+              "buys": 825,
+              "sells": 343
             },
             "h1": {
-              "buys": 3679,
-              "sells": 833
+              "buys": 4576,
+              "sells": 1261
             },
             "h6": {
-              "buys": 3679,
-              "sells": 833
+              "buys": 4576,
+              "sells": 1261
             },
             "h24": {
-              "buys": 3679,
-              "sells": 833
+              "buys": 4576,
+              "sells": 1261
             }
           },
           "pairCreatedAt": 1791910891000,
           "source": "dexscreener",
-          "observedAt": 1791911722555,
+          "observedAt": 1791912053863,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -361013,13 +361126,13 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791911722555,
+            "observedAt": 1791912053863,
             "status": "LIVE"
           }
         },
         "pairCreatedAt": 1791910891000,
         "lastError": null,
-        "updatedAt": 1791911722555
+        "updatedAt": 1791912053863
       }
     ],
     [
@@ -361047,46 +361160,46 @@
           "symbol": "BAG",
           "name": "Bagroom",
           "quoteSymbol": "SOL",
-          "priceUsd": 0.00002544,
-          "priceNative": 2.37e-7,
+          "priceUsd": 0.00002332,
+          "priceNative": 2.173e-7,
           "liquidityUsd": null,
           "liquidityBase": null,
           "liquidityQuote": null,
-          "mcap": 25446.82,
-          "fdv": 25446.82,
+          "mcap": 23328.83,
+          "fdv": 23328.83,
           "volume": {
-            "m5": 6994.74,
-            "h1": 41145.94,
-            "h6": 41145.94,
-            "h24": 41145.94
+            "m5": 8221.93,
+            "h1": 50184.42,
+            "h6": 50184.42,
+            "h24": 50184.42
           },
           "priceChange": {
-            "m5": -1.24,
-            "h1": 656,
-            "h6": 656,
-            "h24": 656
+            "m5": -17.18,
+            "h1": 593,
+            "h6": 593,
+            "h24": 593
           },
           "txns": {
             "m5": {
-              "buys": 31,
-              "sells": 58
+              "buys": 38,
+              "sells": 56
             },
             "h1": {
-              "buys": 251,
-              "sells": 217
+              "buys": 303,
+              "sells": 278
             },
             "h6": {
-              "buys": 251,
-              "sells": 217
+              "buys": 303,
+              "sells": 278
             },
             "h24": {
-              "buys": 251,
-              "sells": 217
+              "buys": 303,
+              "sells": 278
             }
           },
           "pairCreatedAt": 1791910992000,
           "source": "dexscreener",
-          "observedAt": 1791911722607,
+          "observedAt": 1791912053965,
           "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
           "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
           "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
@@ -361103,13 +361216,13 @@
         "fieldMeta": {
           "market": {
             "source": "dexscreener",
-            "observedAt": 1791911722607,
+            "observedAt": 1791912053965,
             "status": "LIVE"
           }
         },
         "pairCreatedAt": 1791910992000,
         "lastError": null,
-        "updatedAt": 1791911722607
+        "updatedAt": 1791912053965
       }
     ],
     [
@@ -361200,6 +361313,96 @@
         "pairCreatedAt": 1791652656000,
         "lastError": null,
         "updatedAt": 1791911722626
+      }
+    ],
+    [
+      "5sTxhZbnBvTMnXNrqHTEe1qXZnhEiCnRnj9JDkgJpump",
+      {
+        "mint": "5sTxhZbnBvTMnXNrqHTEe1qXZnhEiCnRnj9JDkgJpump",
+        "firstObserved": 1791912053860,
+        "launchTime": null,
+        "launchTimeNote": "first-seen time is our observation, NOT a verified launch time",
+        "ageConfidence": "MEDIUM — pairCreatedAt from Dexscreener (pool creation, may differ from token launch)",
+        "feeds": [
+          "profiles"
+        ],
+        "state": "DISCOVERED",
+        "stateHistory": [
+          {
+            "state": "DISCOVERED",
+            "at": 1791912053860,
+            "reason": "first seen in profiles"
+          }
+        ],
+        "market": {
+          "pairAddress": "AZV9pwTTMtmvVjiAUiAuTZCrJBEAcUgdov8zk6X6DwpE",
+          "dexId": "pumpfun",
+          "symbol": "TACTICS",
+          "name": "Pump TACTICS",
+          "quoteSymbol": "SOL",
+          "priceUsd": 0.00002574,
+          "priceNative": 2.396e-7,
+          "liquidityUsd": null,
+          "liquidityBase": null,
+          "liquidityQuote": null,
+          "mcap": 25748.34,
+          "fdv": 25748.34,
+          "volume": {
+            "m5": 2005.23,
+            "h1": 46741.4,
+            "h6": 46741.4,
+            "h24": 46741.4
+          },
+          "priceChange": {
+            "m5": 25.59,
+            "h1": 742,
+            "h6": 742,
+            "h24": 742
+          },
+          "txns": {
+            "m5": {
+              "buys": 27,
+              "sells": 21
+            },
+            "h1": {
+              "buys": 406,
+              "sells": 271
+            },
+            "h6": {
+              "buys": 406,
+              "sells": 271
+            },
+            "h24": {
+              "buys": 406,
+              "sells": 271
+            }
+          },
+          "pairCreatedAt": 1791910748000,
+          "source": "dexscreener",
+          "observedAt": 1791912053860,
+          "mcapMethod": "marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)",
+          "fdvMethod": "FDV = price x total supply as reported by Dexscreener",
+          "uniqueTraders": "NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders"
+        },
+        "rugcheck": null,
+        "walletEvidence": [],
+        "risk": null,
+        "score": null,
+        "qualification": null,
+        "rejectionReasons": [],
+        "cooldownUntil": 0,
+        "signalId": null,
+        "_counted": true,
+        "fieldMeta": {
+          "market": {
+            "source": "dexscreener",
+            "observedAt": 1791912053860,
+            "status": "LIVE"
+          }
+        },
+        "pairCreatedAt": 1791910748000,
+        "lastError": null,
+        "updatedAt": 1791912053860
       }
     ]
   ],
@@ -801913,6 +802116,50 @@
         "consumed": false,
         "paperOnly": true
       }
+    ],
+    [
+      "sig_open_mv6y6gop_o7acx8",
+      {
+        "id": "sig_open_mv6y6gop_o7acx8",
+        "mint": "DciicAXD2F74CazeBEozmwbT5dx1YhpWszx5JBcppump",
+        "symbol": "Dirac Quantum",
+        "name": "Dirac Quantum",
+        "createdAt": 1791912068089,
+        "signalPriceUsd": 0.000002615,
+        "signalPriceAt": 1791912068089,
+        "score": null,
+        "policyVersion": "entry-open-v4",
+        "evidence": {
+          "liquidityUsd": 2559.39,
+          "pairAddress": "EG9ywUdMGgn82xjEFkwYPVDHxeJtdb8KBYqXmwQYNGEp",
+          "dexId": "pumpswap"
+        },
+        "state": "PAPER_SIGNAL",
+        "consumed": false,
+        "paperOnly": true
+      }
+    ],
+    [
+      "sig_open_mv6y6hml_zbmifi",
+      {
+        "id": "sig_open_mv6y6hml_zbmifi",
+        "mint": "4nMTfs9FR9ijL1MeAveU8s8M2g2awfPKJQKDeVtCCqve",
+        "symbol": "Irlcat",
+        "name": "Scientists reveal the Hi",
+        "createdAt": 1791912069309,
+        "signalPriceUsd": 0.000003224,
+        "signalPriceAt": 1791912069309,
+        "score": null,
+        "policyVersion": "entry-open-v4",
+        "evidence": {
+          "liquidityUsd": 3060.05,
+          "pairAddress": "HurebA5g5H5PQFDYg3EYpW2NqMZiqbhixUs5AiXsrazf",
+          "dexId": "pumpswap"
+        },
+        "state": "PAPER_SIGNAL",
+        "consumed": false,
+        "paperOnly": true
+      }
     ]
   ],
   "scoreHistory": [
@@ -843418,14 +843665,14 @@
     }
   ],
   "lastCycle": {
-    "startedAt": "2026-10-13T17:15:22.184Z",
-    "completedAt": "2026-10-13T17:15:38.253Z",
+    "startedAt": "2026-10-13T17:20:53.081Z",
+    "completedAt": "2026-10-13T17:21:09.736Z",
     "discovery": {
       "errors": [],
-      "newMintsCount": 3
+      "newMintsCount": 1
     },
-    "analyzed": 45,
-    "pendingChecks": 39,
+    "analyzed": 47,
+    "pendingChecks": 41,
     "newCandidateChecks": 6,
     "monitoring": {
       "checked": 4
@@ -843436,12 +843683,12 @@
         "label": "Dexscreener (public, keyless)",
         "kind": "rest",
         "status": "LIVE",
-        "lastSuccess": 1791911737706,
+        "lastSuccess": 1791912069309,
         "lastError": null,
         "errorCount": 0,
         "timeoutCount": 0,
         "rateLimitCount": 0,
-        "requestCount": 63,
+        "requestCount": 65,
         "note": "REST market feed — not a complete historical on-chain feed. Rate limits apply.",
         "backoffUntil": 0
       },
@@ -843477,12 +843724,12 @@
     "states": {
       "WATCHLIST": 12,
       "REJECTED": 449,
-      "PAPER_SIGNAL": 93,
-      "DATA_INCOMPLETE": 69,
-      "DISCOVERED": 136
+      "PAPER_SIGNAL": 95,
+      "DATA_INCOMPLETE": 73,
+      "DISCOVERED": 131
     }
   },
-  "eventsReported": 178,
+  "eventsReported": 184,
   "pauseNewEntries": false,
   "ruleChangePendingEvidence": false,
   "rulesVersion": "entry-open-v4",
@@ -844395,9 +844642,11 @@
       "limitPrice": 0.00000398,
       "createdAt": 1791908425882,
       "expiresAt": 1791912025882,
-      "status": "PENDING",
+      "status": "CANCELLED",
       "score": 34.3,
-      "signalLiquidity": 4336.66
+      "signalLiquidity": 4336.66,
+      "cancelledAt": 1791912054225,
+      "cancelReason": "60-minute signal expiry"
     },
     {
       "id": "limit_sig_open_mv6w0eog_2fafl3",
@@ -844408,9 +844657,11 @@
       "limitPrice": 0.0000024752,
       "createdAt": 1791908426320,
       "expiresAt": 1791912026320,
-      "status": "PENDING",
+      "status": "CANCELLED",
       "score": 23.3,
-      "signalLiquidity": 2959.89
+      "signalLiquidity": 2959.89,
+      "cancelledAt": 1791912054706,
+      "cancelReason": "60-minute signal expiry"
     },
     {
       "id": "limit_sig_open_mv6w0f3e_c96ynq",
@@ -844421,9 +844672,11 @@
       "limitPrice": 0.0000049984,
       "createdAt": 1791908426858,
       "expiresAt": 1791912026858,
-      "status": "PENDING",
+      "status": "CANCELLED",
       "score": null,
-      "signalLiquidity": 5034.25
+      "signalLiquidity": 5034.25,
+      "cancelledAt": 1791912055250,
+      "cancelReason": "60-minute signal expiry"
     },
     {
       "id": "limit_sig_open_mv6w0fj1_6469iq",
@@ -844434,9 +844687,11 @@
       "limitPrice": 0.000005940000000000001,
       "createdAt": 1791908427421,
       "expiresAt": 1791912027421,
-      "status": "PENDING",
+      "status": "CANCELLED",
       "score": 32.3,
-      "signalLiquidity": 5613.84
+      "signalLiquidity": 5613.84,
+      "cancelledAt": 1791912055793,
+      "cancelReason": "60-minute signal expiry"
     },
     {
       "id": "limit_sig_open_mv6w0fw4_nzqlpw",
@@ -844447,9 +844702,11 @@
       "limitPrice": 0.0000022288,
       "createdAt": 1791908427892,
       "expiresAt": 1791912027892,
-      "status": "PENDING",
+      "status": "CANCELLED",
       "score": 17.3,
-      "signalLiquidity": 2702.16
+      "signalLiquidity": 2702.16,
+      "cancelledAt": 1791912056240,
+      "cancelReason": "60-minute signal expiry"
     },
     {
       "id": "limit_sig_open_mv6w0g9y_5865s7",
@@ -844460,9 +844717,11 @@
       "limitPrice": 0.0000017200000000000003,
       "createdAt": 1791908428390,
       "expiresAt": 1791912028390,
-      "status": "PENDING",
+      "status": "CANCELLED",
       "score": 36.5,
-      "signalLiquidity": 2322.6
+      "signalLiquidity": 2322.6,
+      "cancelledAt": 1791912056731,
+      "cancelReason": "60-minute signal expiry"
     },
     {
       "id": "limit_sig_open_mv6w7gjj_rifxiz",
@@ -844590,9 +844849,12 @@
       "limitPrice": 0.0000086,
       "createdAt": 1791909419195,
       "expiresAt": 1791913019195,
-      "status": "PENDING",
+      "status": "FILLED",
       "score": null,
-      "signalLiquidity": 7152.18
+      "signalLiquidity": 7152.18,
+      "filledAt": 1791912059942,
+      "fillPrice": 0.000008105,
+      "positionId": "ap_mv6y6aee3vkeeh"
     },
     {
       "id": "limit_sig_open_mv6wlphs_cw6lk4",
@@ -844918,6 +845180,32 @@
       "status": "PENDING",
       "score": null,
       "signalLiquidity": 4484.03
+    },
+    {
+      "id": "limit_sig_open_mv6y6gop_o7acx8",
+      "signalId": "sig_open_mv6y6gop_o7acx8",
+      "mint": "DciicAXD2F74CazeBEozmwbT5dx1YhpWszx5JBcppump",
+      "symbol": "Dirac Quantum",
+      "signalPrice": 0.000002615,
+      "limitPrice": 0.000002092,
+      "createdAt": 1791912068089,
+      "expiresAt": 1791915668089,
+      "status": "PENDING",
+      "score": null,
+      "signalLiquidity": 2559.39
+    },
+    {
+      "id": "limit_sig_open_mv6y6hml_zbmifi",
+      "signalId": "sig_open_mv6y6hml_zbmifi",
+      "mint": "4nMTfs9FR9ijL1MeAveU8s8M2g2awfPKJQKDeVtCCqve",
+      "symbol": "Irlcat",
+      "signalPrice": 0.000003224,
+      "limitPrice": 0.0000025792000000000002,
+      "createdAt": 1791912069309,
+      "expiresAt": 1791915669309,
+      "status": "PENDING",
+      "score": null,
+      "signalLiquidity": 3060.05
     }
   ],
   "settingsOverrides": {
@@ -844925,8 +845213,8 @@
     "autoMaxPositions": 4
   },
   "limitExpiryMinutes": 60,
-  "analysisCursor": 623,
-  "v2ScansCompleted": 355,
+  "analysisCursor": 629,
+  "v2ScansCompleted": 356,
   "ruleChanges": [
     {
       "at": 1791881193992,
