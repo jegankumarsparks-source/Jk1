@@ -346,8 +346,8 @@
       "qty": 76248.57033930614,
       "entryLiquidity": 44469.2,
       "status": "OPEN",
-      "lastPrice": 0.000261,
-      "lastPriceAt": 1791877308750,
+      "lastPrice": 0.0003247,
+      "lastPriceAt": 1791879298380,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -371,8 +371,8 @@
       "qty": 206568.89072505682,
       "entryLiquidity": 26019.23,
       "status": "OPEN",
-      "lastPrice": 9.682e-05,
-      "lastPriceAt": 1791877310714,
+      "lastPrice": 0.0001342,
+      "lastPriceAt": 1791879298404,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -905,6 +905,14 @@
       "usd": 20,
       "fee": 0.1,
       "reason": "limit fill at later real check price <= -20% signal limit"
+    },
+    {
+      "t": 1791879299177,
+      "type": "LIMIT_CANCELLED",
+      "mint": "5tCju6YNxHq5zrA6tGndr6F7TK42mpUFmeE31cSFpump",
+      "symbol": "swordcat",
+      "price": 0.0026072000000000005,
+      "reason": "60-minute signal expiry"
     }
   ],
   "pendingOrders": [
@@ -1149,9 +1157,11 @@
       "limitPrice": 0.0026072000000000005,
       "createdAt": 1791875655386,
       "expiresAt": 1791879255386,
-      "status": "PENDING",
+      "status": "CANCELLED",
       "score": 72.5,
-      "signalLiquidity": 330312.44
+      "signalLiquidity": 330312.44,
+      "cancelledAt": 1791879299177,
+      "cancelReason": "60-minute signal expiry"
     },
     {
       "id": "limit_sig_mv6ci1g4w7o20n",
@@ -1179,10 +1189,10 @@
     "minVolume24Usd": 50000
   },
   "limitExpiryMinutes": 60,
-  "eventsReported": 54,
-  "analysisCursor": 602,
-  "v2ScansCompleted": 252,
-  "asOf": "2026-10-13T07:41:56.979Z",
-  "equity": 120.4,
+  "eventsReported": 55,
+  "analysisCursor": 41,
+  "v2ScansCompleted": 258,
+  "asOf": "2026-10-13T08:15:17.996Z",
+  "equity": 132.98,
   "realizedPnl": -79.3
 }
