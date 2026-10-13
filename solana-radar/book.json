@@ -1,13 +1,13 @@
 {
   "schema": 1,
-  "generatedAt": "2026-10-13T13:51:43.085276+00:00",
-  "lastCheckedAt": "2026-10-13T13:51:29.224Z",
+  "generatedAt": "2026-10-13T14:25:00.297012+00:00",
+  "lastCheckedAt": "2026-10-13T14:24:41.350Z",
   "paperOnly": true,
   "bank": 200,
   "cash": 80.5,
-  "equity": 98.71,
-  "realizedPnl": -99.4,
-  "slotsUsed": 1,
+  "equity": 80.5,
+  "realizedPnl": -119.5,
+  "slotsUsed": 0,
   "maxSlots": 4,
   "positions": [
     {
@@ -465,23 +465,29 @@
       "feeUsd": 0.1,
       "qty": 76248.57033930614,
       "entryLiquidity": 44469.2,
-      "status": "OPEN",
-      "lastPrice": 0.0002388,
-      "lastPriceAt": 1791899479365,
+      "status": "CLOSED",
+      "lastPrice": 2.182e-06,
+      "lastPriceAt": 1791901465116,
       "priceState": "LIVE",
-      "exitAt": null,
-      "exitPrice": null,
-      "exitReason": null,
-      "exitValueUsd": null,
-      "realizedPnl": null,
+      "exitAt": 1791901465116,
+      "exitPrice": 0,
+      "exitReason": "RUG PULL - liquidity collapsed; >=90% drop or <=$500. Full position lost.",
+      "exitValueUsd": 0,
+      "realizedPnl": -20.1,
       "rules": "PAPER ONLY: TP 1.5x; SL -25%; defensive liquidity exit -30%; full-loss rug >=90% or <=$500; no time limit",
       "limitOrderId": "limit_sig_mv69xwfh47f3s7",
       "signalReferencePrice": 0.000337,
       "limitPrice": 0.0002696,
       "rulesVersion": "defensive-v3",
-      "lastLiquidityUsd": 42472.12,
-      "currentX": 0.9104079298513154,
-      "exitInfo": null
+      "lastLiquidityUsd": 2367.79,
+      "currentX": 0.0083187190240183,
+      "exitInfo": {
+        "at": 1791901465116,
+        "price": 0,
+        "reason": "RUG PULL - liquidity collapsed; >=90% drop or <=$500. Full position lost.",
+        "netUsd": 0,
+        "pnl": -20.1
+      }
     },
     {
       "id": "ap_mv6dhhq2m0s3xr",
@@ -799,16 +805,6 @@
   ],
   "rulesVersion": "defensive-v3",
   "historyTail": [
-    {
-      "t": 1791793951488,
-      "type": "AUTO_ENTRY",
-      "symbol": "Gem",
-      "mint": "9Y8CL6shxYH9XcoqWUoP62Fw1gtX4jsvv9xst1bTpump",
-      "price": 0.0001003,
-      "usd": 20,
-      "fee": 0.1,
-      "reason": "auto entry at signal-time price"
-    },
     {
       "t": 1791794228479,
       "type": "AUTO_EXIT",
@@ -1265,6 +1261,15 @@
       "symbol": "CRAWLER",
       "price": 0.020360000000000003,
       "reason": "current tightened qualification failed"
+    },
+    {
+      "t": 1791901465116,
+      "type": "RUG_LOSS",
+      "symbol": "VRAX",
+      "mint": "9LEmajzfB3GJaJpKgXSu8MW5riEnY7F8AMWuwcQRpump",
+      "price": 0,
+      "usd": 0,
+      "reason": "RUG PULL - liquidity collapsed; >=90% drop or <=$500. Full position lost."
     }
   ],
   "sourceHealth": [
@@ -1273,7 +1278,7 @@
       "label": "Dexscreener (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791899489010,
+      "lastSuccess": 1791901481083,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
@@ -1287,7 +1292,7 @@
       "label": "RugCheck (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791899488426,
+      "lastSuccess": 1791901480480,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
@@ -1301,7 +1306,7 @@
       "label": "Solana JSON-RPC (PublicNode)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791899488964,
+      "lastSuccess": 1791901480999,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
