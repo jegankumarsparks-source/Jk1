@@ -346,8 +346,8 @@
       "qty": 76248.57033930614,
       "entryLiquidity": 44469.2,
       "status": "OPEN",
-      "lastPrice": 0.0002969,
-      "lastPriceAt": 1791899154136,
+      "lastPrice": 0.0002388,
+      "lastPriceAt": 1791899479365,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -359,7 +359,7 @@
       "signalReferencePrice": 0.000337,
       "limitPrice": 0.0002696,
       "rulesVersion": "defensive-v3",
-      "lastLiquidityUsd": 47564.74
+      "lastLiquidityUsd": 42472.12
     },
     {
       "id": "ap_mv6dhhq2m0s3xr",
@@ -934,6 +934,14 @@
       "signalPrice": 0.02545,
       "usd": 10,
       "reason": "v3: -20% limit, expires in 60 minutes; no cash/slot consumed"
+    },
+    {
+      "t": 1791899480748,
+      "type": "LIMIT_CANCELLED",
+      "mint": "CQCDTp8rsFV3PhaPeYjcCW5LdGTxi6jFx7eC3UXnpump",
+      "symbol": "CRAWLER",
+      "price": 0.020360000000000003,
+      "reason": "current tightened qualification failed"
     }
   ],
   "pendingOrders": [
@@ -1209,9 +1217,11 @@
       "limitPrice": 0.020360000000000003,
       "createdAt": 1791899155402,
       "expiresAt": 1791902755402,
-      "status": "PENDING",
+      "status": "CANCELLED",
       "score": 85,
-      "signalLiquidity": 468480.69
+      "signalLiquidity": 468480.69,
+      "cancelledAt": 1791899480748,
+      "cancelReason": "current tightened qualification failed"
     }
   ],
   "rulesVersion": "defensive-v3",
@@ -1226,9 +1236,9 @@
     "top10ConcentrationFailPct": 25
   },
   "limitExpiryMinutes": 60,
-  "eventsReported": 57,
-  "analysisCursor": 401,
-  "v2ScansCompleted": 318,
+  "eventsReported": 58,
+  "analysisCursor": 407,
+  "v2ScansCompleted": 319,
   "ruleChanges": [
     {
       "at": 1791881193992,
@@ -1258,7 +1268,7 @@
       }
     }
   ],
-  "asOf": "2026-10-13T13:46:12.865Z",
-  "equity": 103.14,
+  "asOf": "2026-10-13T13:51:29.224Z",
+  "equity": 98.71,
   "realizedPnl": -99.4
 }
