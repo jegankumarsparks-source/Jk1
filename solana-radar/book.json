@@ -1,13 +1,13 @@
 {
   "schema": 1,
-  "generatedAt": "2026-10-13T08:15:33.870307+00:00",
-  "lastCheckedAt": "2026-10-13T08:15:17.996Z",
+  "generatedAt": "2026-10-13T08:42:49.660030+00:00",
+  "lastCheckedAt": "2026-10-13T08:42:43.799Z",
   "paperOnly": true,
   "bank": 200,
   "cash": 80.5,
-  "equity": 132.98,
-  "realizedPnl": -79.3,
-  "slotsUsed": 2,
+  "equity": 104.13,
+  "realizedPnl": -99.4,
+  "slotsUsed": 1,
   "maxSlots": 6,
   "positions": [
     {
@@ -466,8 +466,8 @@
       "qty": 76248.57033930614,
       "entryLiquidity": 44469.2,
       "status": "OPEN",
-      "lastPrice": 0.0003247,
-      "lastPriceAt": 1791879298380,
+      "lastPrice": 0.0003099,
+      "lastPriceAt": 1791880947240,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -478,7 +478,7 @@
       "limitOrderId": "limit_sig_mv69xwfh47f3s7",
       "signalReferencePrice": 0.000337,
       "limitPrice": 0.0002696,
-      "currentX": 1.237895539458635,
+      "currentX": 1.1814715974075487,
       "exitInfo": null
     },
     {
@@ -492,21 +492,27 @@
       "feeUsd": 0.1,
       "qty": 206568.89072505682,
       "entryLiquidity": 26019.23,
-      "status": "OPEN",
-      "lastPrice": 0.0001342,
-      "lastPriceAt": 1791879298404,
+      "status": "CLOSED",
+      "lastPrice": 2.299e-06,
+      "lastPriceAt": 1791880947262,
       "priceState": "LIVE",
-      "exitAt": null,
-      "exitPrice": null,
-      "exitReason": null,
-      "exitValueUsd": null,
-      "realizedPnl": null,
+      "exitAt": 1791880947262,
+      "exitPrice": 0,
+      "exitReason": "RUG PULL \u2014 liquidity collapsed ($26.0k -> $2.4k, real data). Full position lost.",
+      "exitValueUsd": 0,
+      "realizedPnl": -20.1,
       "rules": "auto-exit at 1.5x / -50% / rug (liquidity gone). no time limit. PAPER ONLY.",
       "limitOrderId": "limit_sig_mv6ci1g4w7o20n",
       "signalReferencePrice": 0.0001298,
       "limitPrice": 0.00010384000000000001,
-      "currentX": 1.3860772567651314,
-      "exitInfo": null
+      "currentX": 0.02374509398884528,
+      "exitInfo": {
+        "at": 1791880947262,
+        "price": 0,
+        "reason": "RUG PULL \u2014 liquidity collapsed ($26.0k -> $2.4k, real data). Full position lost.",
+        "netUsd": 0,
+        "pnl": -20.1
+      }
     }
   ],
   "pendingOrders": [
@@ -776,16 +782,6 @@
   ],
   "rulesVersion": "dip-limit-v2",
   "historyTail": [
-    {
-      "t": 1791789986932,
-      "type": "AUTO_ENTRY",
-      "symbol": "trenchcat",
-      "mint": "EQ46GCkgPctvueFDt2edutfa1hKxsDzo2EZeSMiHpump",
-      "price": 0.0001037,
-      "usd": 20,
-      "fee": 0.1,
-      "reason": "auto entry at signal-time price"
-    },
     {
       "t": 1791789988351,
       "type": "AUTO_ENTRY",
@@ -1244,6 +1240,15 @@
       "symbol": "swordcat",
       "price": 0.0026072000000000005,
       "reason": "60-minute signal expiry"
+    },
+    {
+      "t": 1791880947262,
+      "type": "RUG_LOSS",
+      "symbol": "DOT",
+      "mint": "12D9AqkmPuBLSJK7ERWfvf1FSWBQNi5N8ndqZL97pump",
+      "price": 0,
+      "usd": 0,
+      "reason": "RUG PULL \u2014 liquidity collapsed ($26.0k -> $2.4k, real data). Full position lost."
     }
   ],
   "sourceHealth": [
@@ -1252,12 +1257,12 @@
       "label": "Dexscreener (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791879317758,
+      "lastSuccess": 1791880963564,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
       "rateLimitCount": 0,
-      "requestCount": 21,
+      "requestCount": 22,
       "note": "REST market feed \u2014 not a complete historical on-chain feed. Rate limits apply.",
       "backoffUntil": 0
     },
@@ -1266,12 +1271,12 @@
       "label": "RugCheck (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791879317196,
+      "lastSuccess": 1791880963014,
       "lastError": null,
-      "errorCount": 1,
-      "timeoutCount": 1,
+      "errorCount": 0,
+      "timeoutCount": 0,
       "rateLimitCount": 0,
-      "requestCount": 5,
+      "requestCount": 6,
       "note": "Token risk report: authorities, holders, liquidity. topHolders may be null on mega-caps.",
       "backoffUntil": 0
     },
@@ -1280,12 +1285,12 @@
       "label": "Solana JSON-RPC (PublicNode)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791879317684,
+      "lastSuccess": 1791880963484,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
       "rateLimitCount": 0,
-      "requestCount": 25,
+      "requestCount": 30,
       "note": "Keyless public RPC. Browser polling is not a backend indexer or persistent WebSocket.",
       "backoffUntil": 0
     }
