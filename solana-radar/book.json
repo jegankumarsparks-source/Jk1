@@ -1,11 +1,11 @@
 {
   "schema": 1,
-  "generatedAt": "2026-10-13T18:44:06.011112+00:00",
-  "lastCheckedAt": "2026-10-13T18:43:58.312Z",
+  "generatedAt": "2026-10-13T18:49:29.311300+00:00",
+  "lastCheckedAt": "2026-10-13T18:49:19.537Z",
   "paperOnly": true,
   "bank": 200,
   "cash": 42.8,
-  "equity": 89.47,
+  "equity": 89.7,
   "realizedPnl": -117.0,
   "slotsUsed": 4,
   "maxSlots": 4,
@@ -569,8 +569,8 @@
       "qty": 633713.5614702154,
       "entryLiquidity": 9102.45,
       "status": "OPEN",
-      "lastPrice": 1.766e-05,
-      "lastPriceAt": 1791917025606,
+      "lastPrice": 1.713e-05,
+      "lastPriceAt": 1791917347553,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -582,8 +582,8 @@
       "limitOrderId": "limit_sig_open_mv6u8fd6_hsnuj2",
       "signalReferencePrice": 2.076e-05,
       "limitPrice": 1.6608e-05,
-      "lastLiquidityUsd": 9764.26,
-      "currentX": 1.1191381495564003,
+      "lastLiquidityUsd": 9590.8,
+      "currentX": 1.085551330798479,
       "exitInfo": null
     },
     {
@@ -598,8 +598,8 @@
       "qty": 124084.87405385284,
       "entryLiquidity": 24963.62,
       "status": "OPEN",
-      "lastPrice": 0.0001134,
-      "lastPriceAt": 1791917025690,
+      "lastPrice": 0.0001183,
+      "lastPriceAt": 1791917347647,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -611,8 +611,8 @@
       "limitOrderId": "limit_sig_open_mv6u1g5v_fovo3m",
       "signalReferencePrice": 0.0001072,
       "limitPrice": 8.576e-05,
-      "lastLiquidityUsd": 29629.88,
-      "currentX": 1.4071224717706912,
+      "lastLiquidityUsd": 30301.65,
+      "currentX": 1.467924060057079,
       "exitInfo": null
     },
     {
@@ -663,7 +663,7 @@
       "entryLiquidity": 3353.27,
       "status": "OPEN",
       "lastPrice": 3.213e-06,
-      "lastPriceAt": 1791917025717,
+      "lastPriceAt": 1791917347733,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -691,8 +691,8 @@
       "qty": 1233806.2924120913,
       "entryLiquidity": 5949.43,
       "status": "OPEN",
-      "lastPrice": 9.931e-06,
-      "lastPriceAt": 1791917025766,
+      "lastPrice": 9.894e-06,
+      "lastPriceAt": 1791917347833,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -704,8 +704,8 @@
       "limitOrderId": "limit_sig_open_mv6wlosb_m0m48v",
       "signalReferencePrice": 1.075e-05,
       "limitPrice": 8.6e-06,
-      "lastLiquidityUsd": 6795.22,
-      "currentX": 1.225293028994448,
+      "lastLiquidityUsd": 6778.7,
+      "currentX": 1.2207279457125233,
       "exitInfo": null
     }
   ],
@@ -2488,9 +2488,11 @@
       "limitPrice": 4.9088e-05,
       "createdAt": 1791913719840,
       "expiresAt": 1791917319840,
-      "status": "PENDING",
+      "status": "CANCELLED",
       "score": null,
-      "signalLiquidity": 20309.48
+      "signalLiquidity": 20309.48,
+      "cancelledAt": 1791917348180,
+      "cancelReason": "60-minute signal expiry"
     },
     {
       "id": "limit_sig_open_mv6z5vkc_zo9ix7",
@@ -2501,9 +2503,11 @@
       "limitPrice": 2.452e-06,
       "createdAt": 1791913720332,
       "expiresAt": 1791917320332,
-      "status": "PENDING",
+      "status": "CANCELLED",
       "score": null,
-      "signalLiquidity": 3038.05
+      "signalLiquidity": 3038.05,
+      "cancelledAt": 1791917348735,
+      "cancelReason": "60-minute signal expiry"
     },
     {
       "id": "limit_sig_open_mv6zcxqz_lvvltr",
@@ -2868,38 +2872,23 @@
       "status": "PENDING",
       "score": null,
       "signalLiquidity": 3122.11
+    },
+    {
+      "id": "limit_sig_open_mv71bu72_hyjlto",
+      "signalId": "sig_open_mv71bu72_hyjlto",
+      "mint": "5kpJEZrkDYH6yJviEvgPyhbcm6297F8VxdqjsaHXemfT",
+      "symbol": "RICK",
+      "signalPrice": 1.934e-05,
+      "limitPrice": 1.5472e-05,
+      "createdAt": 1791917357726,
+      "expiresAt": 1791920957726,
+      "status": "PENDING",
+      "score": null,
+      "signalLiquidity": 10427.22
     }
   ],
   "rulesVersion": "entry-open-v4",
   "historyTail": [
-    {
-      "t": 1791914700270,
-      "type": "LIMIT_CANCELLED",
-      "mint": "G3hU17QnrqRciQL5R8nNAkmwRKG9dt7ea6cxwrx2XuTj",
-      "symbol": "SOL95",
-      "price": 4.8504e-06,
-      "reason": "60-minute signal expiry"
-    },
-    {
-      "t": 1791914710650,
-      "type": "LIMIT_PLACED",
-      "mint": "Gq8LFQFCdxj1MoVp5yS71c9MkoQcY2k3aZt5bTBBpump",
-      "symbol": "hellop",
-      "price": 3.5135999999999997e-06,
-      "signalPrice": 4.392e-06,
-      "usd": 10,
-      "reason": "entry-open-v4: -20% limit, expires in 60 minutes; no cash/slot consumed"
-    },
-    {
-      "t": 1791914711144,
-      "type": "LIMIT_PLACED",
-      "mint": "4A68FxMhKnS81zDPKCa94TrqB9syewBe3eiLzaYupump",
-      "symbol": "NOMA",
-      "price": 2.2184000000000002e-06,
-      "signalPrice": 2.773e-06,
-      "usd": 10,
-      "reason": "entry-open-v4: -20% limit, expires in 60 minutes; no cash/slot consumed"
-    },
     {
       "t": 1791915036618,
       "type": "LIMIT_CANCELLED",
@@ -3319,6 +3308,32 @@
       "signalPrice": 3.315e-06,
       "usd": 10,
       "reason": "entry-open-v4: -20% limit, expires in 60 minutes; no cash/slot consumed"
+    },
+    {
+      "t": 1791917348180,
+      "type": "LIMIT_CANCELLED",
+      "mint": "DTBkv3GrfmUGtBHy5guQm2FmbYuWgtaDkW7XfJokpump",
+      "symbol": "COWE",
+      "price": 4.9088e-05,
+      "reason": "60-minute signal expiry"
+    },
+    {
+      "t": 1791917348735,
+      "type": "LIMIT_CANCELLED",
+      "mint": "9kv6MSdX64PaFHPh6vzGBYfXoBUNwF2qekrUiq62pump",
+      "symbol": "S&P500",
+      "price": 2.452e-06,
+      "reason": "60-minute signal expiry"
+    },
+    {
+      "t": 1791917357727,
+      "type": "LIMIT_PLACED",
+      "mint": "5kpJEZrkDYH6yJviEvgPyhbcm6297F8VxdqjsaHXemfT",
+      "symbol": "RICK",
+      "price": 1.5472e-05,
+      "signalPrice": 1.934e-05,
+      "usd": 10,
+      "reason": "entry-open-v4: -20% limit, expires in 60 minutes; no cash/slot consumed"
     }
   ],
   "sourceHealth": [
@@ -3327,7 +3342,7 @@
       "label": "Dexscreener (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791917037868,
+      "lastSuccess": 1791917359294,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
