@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "generatedAt": "2026-10-13T14:27:23.223301+00:00",
-  "lastCheckedAt": "2026-10-13T14:24:41.350Z",
+  "generatedAt": "2026-10-13T14:30:10.212473+00:00",
+  "lastCheckedAt": "2026-10-13T14:30:03.230Z",
   "paperOnly": true,
   "bank": 200,
   "cash": 80.5,
@@ -801,37 +801,49 @@
       "signalLiquidity": 468480.69,
       "cancelledAt": 1791899480748,
       "cancelReason": "current tightened qualification failed"
+    },
+    {
+      "id": "limit_sig_open_mv6s2e0e_ak02gx",
+      "signalId": "sig_open_mv6s2e0e_ak02gx",
+      "mint": "43RbtJd7Uhx8Tehdzw3gBZZKFysDMC29fjVruaPhpump",
+      "symbol": "Ggooi",
+      "signalPrice": 1.894e-05,
+      "limitPrice": 1.5152000000000002e-05,
+      "createdAt": 1791901800302,
+      "expiresAt": 1791905400302,
+      "status": "PENDING",
+      "score": 34.5,
+      "signalLiquidity": 10224.82
+    },
+    {
+      "id": "limit_sig_open_mv6s2etu_n3vovz",
+      "signalId": "sig_open_mv6s2etu_n3vovz",
+      "mint": "FXRDkcntDvxstU7fNEcy7PLc6EDncb3yNiKHPtVXpump",
+      "symbol": "OMD",
+      "signalPrice": 2.411e-06,
+      "limitPrice": 1.9288e-06,
+      "createdAt": 1791901801362,
+      "expiresAt": 1791905401362,
+      "status": "PENDING",
+      "score": 21.5,
+      "signalLiquidity": 2426.82
+    },
+    {
+      "id": "limit_sig_open_mv6s2fok_jnj5hx",
+      "signalId": "sig_open_mv6s2fok_jnj5hx",
+      "mint": "8gkVdgdApzfFKpU8ijqqhCXVL4FdWp8jsmCPbhuGpump",
+      "symbol": "Duge",
+      "signalPrice": 3.386e-06,
+      "limitPrice": 2.7088000000000002e-06,
+      "createdAt": 1791901802468,
+      "expiresAt": 1791905402468,
+      "status": "PENDING",
+      "score": 27.3,
+      "signalLiquidity": 3174.19
     }
   ],
   "rulesVersion": "entry-open-v4",
   "historyTail": [
-    {
-      "t": 1791794228479,
-      "type": "AUTO_EXIT",
-      "symbol": "FIGHT",
-      "mint": "A8JUiZLzjGAsKxE74evdspHcuW4hvhPbvryDhaDZpump",
-      "price": 0.0002442,
-      "usd": 22.69,
-      "reason": "USER REQUEST: close all at current real observation price"
-    },
-    {
-      "t": 1791794228521,
-      "type": "AUTO_EXIT",
-      "symbol": "SEAN",
-      "mint": "8PGyHCKvSUjezHkV7KLwMacnmSJLe1YbRM1zvDVApump",
-      "price": 0.001811,
-      "usd": 25.31,
-      "reason": "USER REQUEST: close all at current real observation price"
-    },
-    {
-      "t": 1791794228565,
-      "type": "AUTO_EXIT",
-      "symbol": "TM",
-      "mint": "6KDpQM4BVDdtAkjtyFDiBCkbii8q8BieEyXXm6kNpump",
-      "price": 0.0007514,
-      "usd": 20.03,
-      "reason": "USER REQUEST: close all at current real observation price"
-    },
     {
       "t": 1791794228598,
       "type": "AUTO_EXIT",
@@ -1270,6 +1282,36 @@
       "price": 0,
       "usd": 0,
       "reason": "RUG PULL - liquidity collapsed; >=90% drop or <=$500. Full position lost."
+    },
+    {
+      "t": 1791901800303,
+      "type": "LIMIT_PLACED",
+      "mint": "43RbtJd7Uhx8Tehdzw3gBZZKFysDMC29fjVruaPhpump",
+      "symbol": "Ggooi",
+      "price": 1.5152000000000002e-05,
+      "signalPrice": 1.894e-05,
+      "usd": 10,
+      "reason": "entry-open-v4: -20% limit, expires in 60 minutes; no cash/slot consumed"
+    },
+    {
+      "t": 1791901801362,
+      "type": "LIMIT_PLACED",
+      "mint": "FXRDkcntDvxstU7fNEcy7PLc6EDncb3yNiKHPtVXpump",
+      "symbol": "OMD",
+      "price": 1.9288e-06,
+      "signalPrice": 2.411e-06,
+      "usd": 10,
+      "reason": "entry-open-v4: -20% limit, expires in 60 minutes; no cash/slot consumed"
+    },
+    {
+      "t": 1791901802469,
+      "type": "LIMIT_PLACED",
+      "mint": "8gkVdgdApzfFKpU8ijqqhCXVL4FdWp8jsmCPbhuGpump",
+      "symbol": "Duge",
+      "price": 2.7088000000000002e-06,
+      "signalPrice": 3.386e-06,
+      "usd": 10,
+      "reason": "entry-open-v4: -20% limit, expires in 60 minutes; no cash/slot consumed"
     }
   ],
   "sourceHealth": [
@@ -1278,12 +1320,12 @@
       "label": "Dexscreener (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791901481083,
+      "lastSuccess": 1791901803026,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
       "rateLimitCount": 0,
-      "requestCount": 21,
+      "requestCount": 20,
       "note": "REST market feed \u2014 not a complete historical on-chain feed. Rate limits apply.",
       "backoffUntil": 0
     },
@@ -1291,13 +1333,13 @@
       "id": "rugcheck",
       "label": "RugCheck (public, keyless)",
       "kind": "rest",
-      "status": "LIVE",
-      "lastSuccess": 1791901480480,
+      "status": "NOT_OBSERVED",
+      "lastSuccess": null,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
       "rateLimitCount": 0,
-      "requestCount": 6,
+      "requestCount": 0,
       "note": "Token risk report: authorities, holders, liquidity. topHolders may be null on mega-caps.",
       "backoffUntil": 0
     },
@@ -1305,13 +1347,13 @@
       "id": "solanarpc",
       "label": "Solana JSON-RPC (PublicNode)",
       "kind": "rest",
-      "status": "LIVE",
-      "lastSuccess": 1791901480999,
+      "status": "NOT_OBSERVED",
+      "lastSuccess": null,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
       "rateLimitCount": 0,
-      "requestCount": 30,
+      "requestCount": 0,
       "note": "Keyless public RPC. Browser polling is not a backend indexer or persistent WebSocket.",
       "backoffUntil": 0
     }
