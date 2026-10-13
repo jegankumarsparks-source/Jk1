@@ -1,11 +1,11 @@
 {
   "schema": 1,
-  "generatedAt": "2026-10-13T07:42:05.711341+00:00",
-  "lastCheckedAt": "2026-10-13T07:41:56.979Z",
+  "generatedAt": "2026-10-13T08:15:33.870307+00:00",
+  "lastCheckedAt": "2026-10-13T08:15:17.996Z",
   "paperOnly": true,
   "bank": 200,
   "cash": 80.5,
-  "equity": 120.4,
+  "equity": 132.98,
   "realizedPnl": -79.3,
   "slotsUsed": 2,
   "maxSlots": 6,
@@ -466,8 +466,8 @@
       "qty": 76248.57033930614,
       "entryLiquidity": 44469.2,
       "status": "OPEN",
-      "lastPrice": 0.000261,
-      "lastPriceAt": 1791877308750,
+      "lastPrice": 0.0003247,
+      "lastPriceAt": 1791879298380,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -478,7 +478,7 @@
       "limitOrderId": "limit_sig_mv69xwfh47f3s7",
       "signalReferencePrice": 0.000337,
       "limitPrice": 0.0002696,
-      "currentX": 0.9950438429279452,
+      "currentX": 1.237895539458635,
       "exitInfo": null
     },
     {
@@ -493,8 +493,8 @@
       "qty": 206568.89072505682,
       "entryLiquidity": 26019.23,
       "status": "OPEN",
-      "lastPrice": 9.682e-05,
-      "lastPriceAt": 1791877310714,
+      "lastPrice": 0.0001342,
+      "lastPriceAt": 1791879298404,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -505,7 +505,7 @@
       "limitOrderId": "limit_sig_mv6ci1g4w7o20n",
       "signalReferencePrice": 0.0001298,
       "limitPrice": 0.00010384000000000001,
-      "currentX": 1.0,
+      "currentX": 1.3860772567651314,
       "exitInfo": null
     }
   ],
@@ -751,9 +751,11 @@
       "limitPrice": 0.0026072000000000005,
       "createdAt": 1791875655386,
       "expiresAt": 1791879255386,
-      "status": "PENDING",
+      "status": "CANCELLED",
       "score": 72.5,
-      "signalLiquidity": 330312.44
+      "signalLiquidity": 330312.44,
+      "cancelledAt": 1791879299177,
+      "cancelReason": "60-minute signal expiry"
     },
     {
       "id": "limit_sig_mv6ci1g4w7o20n",
@@ -774,16 +776,6 @@
   ],
   "rulesVersion": "dip-limit-v2",
   "historyTail": [
-    {
-      "t": 1791789656913,
-      "type": "AUTO_ENTRY",
-      "symbol": "TM",
-      "mint": "6KDpQM4BVDdtAkjtyFDiBCkbii8q8BieEyXXm6kNpump",
-      "price": 0.0007465,
-      "usd": 20,
-      "fee": 0.1,
-      "reason": "auto entry at signal-time price"
-    },
     {
       "t": 1791789986932,
       "type": "AUTO_ENTRY",
@@ -1244,6 +1236,14 @@
       "usd": 20,
       "fee": 0.1,
       "reason": "limit fill at later real check price <= -20% signal limit"
+    },
+    {
+      "t": 1791879299177,
+      "type": "LIMIT_CANCELLED",
+      "mint": "5tCju6YNxHq5zrA6tGndr6F7TK42mpUFmeE31cSFpump",
+      "symbol": "swordcat",
+      "price": 0.0026072000000000005,
+      "reason": "60-minute signal expiry"
     }
   ],
   "sourceHealth": [
@@ -1252,7 +1252,7 @@
       "label": "Dexscreener (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791877316776,
+      "lastSuccess": 1791879317758,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
@@ -1266,12 +1266,12 @@
       "label": "RugCheck (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791877315920,
+      "lastSuccess": 1791879317196,
       "lastError": null,
-      "errorCount": 0,
-      "timeoutCount": 0,
+      "errorCount": 1,
+      "timeoutCount": 1,
       "rateLimitCount": 0,
-      "requestCount": 4,
+      "requestCount": 5,
       "note": "Token risk report: authorities, holders, liquidity. topHolders may be null on mega-caps.",
       "backoffUntil": 0
     },
@@ -1280,12 +1280,12 @@
       "label": "Solana JSON-RPC (PublicNode)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791877316751,
+      "lastSuccess": 1791879317684,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
       "rateLimitCount": 0,
-      "requestCount": 30,
+      "requestCount": 25,
       "note": "Keyless public RPC. Browser polling is not a backend indexer or persistent WebSocket.",
       "backoffUntil": 0
     }
