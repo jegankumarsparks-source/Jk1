@@ -1,11 +1,11 @@
 {
   "schema": 1,
-  "generatedAt": "2026-10-14T15:07:35.430077+00:00",
-  "lastCheckedAt": "2026-10-14T15:07:32.327Z",
+  "generatedAt": "2026-10-14T15:12:46.229991+00:00",
+  "lastCheckedAt": "2026-10-14T15:12:43.051Z",
   "paperOnly": true,
   "bank": 200,
   "cash": 48.56,
-  "equity": 87.06,
+  "equity": 86.98,
   "realizedPnl": -111.24,
   "slotsUsed": 4,
   "maxSlots": 4,
@@ -885,7 +885,7 @@
       "entryLiquidity": 2598.31,
       "status": "OPEN",
       "lastPrice": 2.204e-06,
-      "lastPriceAt": 1791990435866,
+      "lastPriceAt": 1791990745127,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -984,7 +984,7 @@
       "entryLiquidity": 2640.55,
       "status": "OPEN",
       "lastPrice": 2.361e-06,
-      "lastPriceAt": 1791990435922,
+      "lastPriceAt": 1791990745176,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -1012,8 +1012,8 @@
       "qty": 2475860.361475613,
       "entryLiquidity": 3637.58,
       "status": "OPEN",
-      "lastPrice": 3.08e-06,
-      "lastPriceAt": 1791990436027,
+      "lastPrice": 3.05e-06,
+      "lastPriceAt": 1791990745227,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -1025,8 +1025,8 @@
       "limitOrderId": "limit_sig_open_mv80rueh_2ho0wb",
       "signalReferencePrice": 1.394e-05,
       "limitPrice": 1.1152000000000001e-05,
-      "lastLiquidityUsd": 2919.35,
-      "currentX": 0.7625649913344889,
+      "lastLiquidityUsd": 2898.12,
+      "currentX": 0.755137410250062,
       "exitInfo": null
     },
     {
@@ -1042,7 +1042,7 @@
       "entryLiquidity": 14205.82,
       "status": "OPEN",
       "lastPrice": 3.886e-05,
-      "lastPriceAt": 1791990436086,
+      "lastPriceAt": 1791990745282,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -8937,9 +8937,11 @@
       "limitPrice": 1.4944000000000001e-05,
       "createdAt": 1791987055835,
       "expiresAt": 1791990655835,
-      "status": "PENDING",
+      "status": "CANCELLED",
       "score": null,
-      "signalLiquidity": 0.13
+      "signalLiquidity": 0.13,
+      "cancelledAt": 1791990745797,
+      "cancelReason": "60-minute signal expiry"
     },
     {
       "id": "limit_sig_open_mv86tqp0_ox8sqx",
@@ -8950,9 +8952,11 @@
       "limitPrice": 1.0768000000000001e-05,
       "createdAt": 1791987057252,
       "expiresAt": 1791990657252,
-      "status": "PENDING",
+      "status": "CANCELLED",
       "score": null,
-      "signalLiquidity": 9243.42
+      "signalLiquidity": 9243.42,
+      "cancelledAt": 1791990746325,
+      "cancelReason": "60-minute signal expiry"
     },
     {
       "id": "limit_sig_open_mv870adx_dl4qj4",
@@ -9455,26 +9459,6 @@
   "rulesVersion": "entry-open-v4",
   "historyTail": [
     {
-      "t": 1791987363577,
-      "type": "LIMIT_PLACED",
-      "mint": "i5jmCdUFLQXSD4qStuU4ZHPND1C1spXHG9RhpCyfomo",
-      "symbol": "FOMOPAD",
-      "price": 1.7192000000000002e-06,
-      "signalPrice": 2.149e-06,
-      "usd": 10,
-      "reason": "entry-open-v4: -20% limit, expires in 60 minutes; no cash/slot consumed"
-    },
-    {
-      "t": 1791987364131,
-      "type": "LIMIT_PLACED",
-      "mint": "8QkjjuUZ7GMEFgmZNZ3vuyZw95BGX8tMjEgQkjh4pump",
-      "symbol": "MEMO",
-      "price": 2.0424e-06,
-      "signalPrice": 2.553e-06,
-      "usd": 10,
-      "reason": "entry-open-v4: -20% limit, expires in 60 minutes; no cash/slot consumed"
-    },
-    {
       "t": 1791987364992,
       "type": "LIMIT_PLACED",
       "mint": "FdZLTu8t1K7GkiDFJ1uerTQVEHUDWsqqQSN9kz9PJhbA",
@@ -9929,6 +9913,22 @@
       "signalPrice": 2.645e-06,
       "usd": 10,
       "reason": "entry-open-v4: -20% limit, expires in 60 minutes; no cash/slot consumed"
+    },
+    {
+      "t": 1791990745797,
+      "type": "LIMIT_CANCELLED",
+      "mint": "8j6FEcsrCtH9CevGYKD3Jg5wj2Jvw9tQ4MUFDNZMpump",
+      "symbol": "VLT",
+      "price": 1.4944000000000001e-05,
+      "reason": "60-minute signal expiry"
+    },
+    {
+      "t": 1791990746325,
+      "type": "LIMIT_CANCELLED",
+      "mint": "3ZWo461YsQopTrdis9F7ykkapMowyQnKVGmEecsEpump",
+      "symbol": "SHH",
+      "price": 1.0768000000000001e-05,
+      "reason": "60-minute signal expiry"
     }
   ],
   "sourceHealth": [
@@ -9937,12 +9937,12 @@
       "label": "Dexscreener (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791990452047,
+      "lastSuccess": 1791990762789,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
       "rateLimitCount": 0,
-      "requestCount": 62,
+      "requestCount": 63,
       "note": "REST market feed \u2014 not a complete historical on-chain feed. Rate limits apply.",
       "backoffUntil": 0
     },
