@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "generatedAt": "2026-10-14T06:24:04.695787+00:00",
-  "lastCheckedAt": "2026-10-14T06:23:58.446Z",
+  "generatedAt": "2026-10-14T06:29:32.161640+00:00",
+  "lastCheckedAt": "2026-10-14T06:29:27.562Z",
   "paperOnly": true,
   "bank": 200,
   "cash": 45.01,
@@ -675,7 +675,7 @@
       "entryLiquidity": 3353.27,
       "status": "OPEN",
       "lastPrice": 2.71e-06,
-      "lastPriceAt": 1791959034628,
+      "lastPriceAt": 1791959364547,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -879,7 +879,7 @@
       "entryLiquidity": 2598.31,
       "status": "OPEN",
       "lastPrice": 2.264e-06,
-      "lastPriceAt": 1791959034650,
+      "lastPriceAt": 1791959364566,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -908,7 +908,7 @@
       "entryLiquidity": 16264.2,
       "status": "OPEN",
       "lastPrice": 4.207e-05,
-      "lastPriceAt": 1791959034702,
+      "lastPriceAt": 1791959364616,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -972,7 +972,7 @@
       "entryLiquidity": 2640.55,
       "status": "OPEN",
       "lastPrice": 2.408e-06,
-      "lastPriceAt": 1791959034729,
+      "lastPriceAt": 1791959364656,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -8506,23 +8506,15 @@
       "limitPrice": 1.6368000000000002e-06,
       "createdAt": 1791955741017,
       "expiresAt": 1791959341017,
-      "status": "PENDING",
+      "status": "CANCELLED",
       "score": 27.5,
-      "signalLiquidity": 2138.25
+      "signalLiquidity": 2138.25,
+      "cancelledAt": 1791959365064,
+      "cancelReason": "60-minute signal expiry"
     }
   ],
   "rulesVersion": "entry-open-v4",
   "historyTail": [
-    {
-      "t": 1791954746209,
-      "type": "LIMIT_PLACED",
-      "mint": "DC6tBQKp4KMcuott1ud3PiHR6oCiRUzuW7p1KxS7pump",
-      "symbol": "QHOST",
-      "price": 2.6672000000000005e-06,
-      "signalPrice": 3.334e-06,
-      "usd": 10,
-      "reason": "entry-open-v4: -20% limit, expires in 60 minutes; no cash/slot consumed"
-    },
     {
       "t": 1791954746757,
       "type": "LIMIT_PLACED",
@@ -8930,6 +8922,14 @@
       "symbol": "Manya",
       "price": 5.4928e-06,
       "reason": "60-minute signal expiry"
+    },
+    {
+      "t": 1791959365064,
+      "type": "LIMIT_CANCELLED",
+      "mint": "19q2fyy97c15E46noy9ScB5wYh5aM5VCynUB3zCpump",
+      "symbol": "KnightDog",
+      "price": 1.6368000000000002e-06,
+      "reason": "60-minute signal expiry"
     }
   ],
   "sourceHealth": [
@@ -8938,12 +8938,12 @@
       "label": "Dexscreener (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791959038213,
+      "lastSuccess": 1791959367341,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
       "rateLimitCount": 0,
-      "requestCount": 27,
+      "requestCount": 25,
       "note": "REST market feed \u2014 not a complete historical on-chain feed. Rate limits apply.",
       "backoffUntil": 0
     },
