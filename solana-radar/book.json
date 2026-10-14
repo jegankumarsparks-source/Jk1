@@ -1,13 +1,13 @@
 {
   "schema": 1,
-  "generatedAt": "2026-10-14T13:25:12.031728+00:00",
-  "lastCheckedAt": "2026-10-14T13:24:58.585Z",
+  "generatedAt": "2026-10-14T13:30:05.521412+00:00",
+  "lastCheckedAt": "2026-10-14T13:29:52.563Z",
   "paperOnly": true,
   "bank": 200,
-  "cash": 51.18,
-  "equity": 84.83,
-  "realizedPnl": -108.62,
-  "slotsUsed": 4,
+  "cash": 58.61,
+  "equity": 84.42,
+  "realizedPnl": -111.24,
+  "slotsUsed": 3,
   "maxSlots": 4,
   "positions": [
     {
@@ -673,23 +673,29 @@
       "feeUsd": 0.05,
       "qty": 2849814.762040467,
       "entryLiquidity": 3353.27,
-      "status": "OPEN",
-      "lastPrice": 2.746e-06,
-      "lastPriceAt": 1791984293942,
+      "status": "CLOSED",
+      "lastPrice": 2.619e-06,
+      "lastPriceAt": 1791984586865,
       "priceState": "LIVE",
-      "exitAt": null,
-      "exitPrice": null,
-      "exitReason": null,
-      "exitValueUsd": null,
-      "realizedPnl": null,
+      "exitAt": 1791984587179,
+      "exitPrice": 2.619e-06,
+      "exitReason": "SL - observed -25.36% <=-25%",
+      "exitValueUsd": 7.43,
+      "realizedPnl": -2.62,
       "rules": "PAPER ONLY: TP 1.5x; SL -25%; defensive liquidity exit -30%; full-loss rug >=90% or <=$500; no time limit",
       "rulesVersion": "entry-open-v4",
       "limitOrderId": "limit_sig_open_mv6vf4ym_y71p8r",
       "signalReferencePrice": 4.925e-06,
       "limitPrice": 3.94e-06,
-      "lastLiquidityUsd": 2749.07,
-      "currentX": 0.7825591336563124,
-      "exitInfo": null
+      "lastLiquidityUsd": 2630.56,
+      "currentX": 0.7463664861783983,
+      "exitInfo": {
+        "at": 1791984587179,
+        "price": 2.619e-06,
+        "reason": "SL - observed -25.36% <=-25%",
+        "netUsd": 7.43,
+        "pnl": -2.62
+      }
     },
     {
       "id": "ap_mv6y6aee3vkeeh",
@@ -879,7 +885,7 @@
       "entryLiquidity": 2598.31,
       "status": "OPEN",
       "lastPrice": 2.231e-06,
-      "lastPriceAt": 1791984294021,
+      "lastPriceAt": 1791984587001,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -977,8 +983,8 @@
       "qty": 4025764.895330113,
       "entryLiquidity": 2640.55,
       "status": "OPEN",
-      "lastPrice": 2.382e-06,
-      "lastPriceAt": 1791984294079,
+      "lastPrice": 2.379e-06,
+      "lastPriceAt": 1791984587061,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -990,8 +996,8 @@
       "limitOrderId": "limit_sig_open_mv7h37ac_c2er34",
       "signalReferencePrice": 9.522e-05,
       "limitPrice": 7.617600000000001e-05,
-      "lastLiquidityUsd": 2537.42,
-      "currentX": 0.9589371980676328,
+      "lastLiquidityUsd": 2533.88,
+      "currentX": 0.9577294685990339,
       "exitInfo": null
     },
     {
@@ -1007,7 +1013,7 @@
       "entryLiquidity": 3637.58,
       "status": "OPEN",
       "lastPrice": 3.172e-06,
-      "lastPriceAt": 1791984294212,
+      "lastPriceAt": 1791984587179,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -8707,14 +8713,6 @@
   "rulesVersion": "entry-open-v4",
   "historyTail": [
     {
-      "t": 1791956057658,
-      "type": "LIMIT_CANCELLED",
-      "mint": "BYY9699AuAArjVfiBBUaUYtvs1Eiv8MmjUyJ1mMDpons",
-      "symbol": "PONSPUMP",
-      "price": 2.0488e-06,
-      "reason": "60-minute signal expiry"
-    },
-    {
       "t": 1791956058272,
       "type": "LIMIT_CANCELLED",
       "mint": "Duz4kaCfHSeubFDwqPdMYDYyQMcgbeAcDUkL78Cfpump",
@@ -9130,6 +9128,15 @@
       "symbol": "PALS",
       "price": 1.1200000000000001e-05,
       "reason": "60-minute signal expiry"
+    },
+    {
+      "t": 1791984587179,
+      "type": "AUTO_EXIT",
+      "symbol": "this",
+      "mint": "FMPtRTHXpX96pWrYUjxsNFih8h9nBwF1vMeu4QBSpump",
+      "price": 2.619e-06,
+      "usd": 7.43,
+      "reason": "SL - observed -25.36% <=-25%"
     }
   ],
   "sourceHealth": [
@@ -9138,12 +9145,12 @@
       "label": "Dexscreener (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791984298361,
+      "lastSuccess": 1791984592331,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
       "rateLimitCount": 0,
-      "requestCount": 30,
+      "requestCount": 29,
       "note": "REST market feed \u2014 not a complete historical on-chain feed. Rate limits apply.",
       "backoffUntil": 0
     },
