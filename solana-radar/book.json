@@ -1,13 +1,13 @@
 {
   "schema": 1,
-  "generatedAt": "2026-10-14T11:21:36.544975+00:00",
-  "lastCheckedAt": "2026-10-14T11:21:32.739Z",
+  "generatedAt": "2026-10-14T11:26:45.948546+00:00",
+  "lastCheckedAt": "2026-10-14T11:26:41.841Z",
   "paperOnly": true,
   "bank": 200,
-  "cash": 61.23,
-  "equity": 86.97,
+  "cash": 51.18,
+  "equity": 86.92,
   "realizedPnl": -108.62,
-  "slotsUsed": 3,
+  "slotsUsed": 4,
   "maxSlots": 4,
   "positions": [
     {
@@ -675,7 +675,7 @@
       "entryLiquidity": 3353.27,
       "status": "OPEN",
       "lastPrice": 2.681e-06,
-      "lastPriceAt": 1791976889244,
+      "lastPriceAt": 1791977197400,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -879,7 +879,7 @@
       "entryLiquidity": 2598.31,
       "status": "OPEN",
       "lastPrice": 2.231e-06,
-      "lastPriceAt": 1791976889368,
+      "lastPriceAt": 1791977197487,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -978,7 +978,7 @@
       "entryLiquidity": 2640.55,
       "status": "OPEN",
       "lastPrice": 2.414e-06,
-      "lastPriceAt": 1791976889413,
+      "lastPriceAt": 1791977197530,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -992,6 +992,34 @@
       "limitPrice": 7.617600000000001e-05,
       "lastLiquidityUsd": 2574.59,
       "currentX": 0.9718196457326893,
+      "exitInfo": null
+    },
+    {
+      "id": "ap_mv80yfytueykyp",
+      "mint": "5sTxhZbnBvTMnXNrqHTEe1qXZnhEiCnRnj9JDkgJpump",
+      "symbol": "TACTICS",
+      "signalId": "sig_open_mv80rueh_2ho0wb",
+      "entryAt": 1791977198933,
+      "entryRate": 4.039e-06,
+      "entrySizeUsd": 10,
+      "feeUsd": 0.05,
+      "qty": 2475860.361475613,
+      "entryLiquidity": 3637.58,
+      "status": "OPEN",
+      "lastPrice": 4.039e-06,
+      "lastPriceAt": 1791977198933,
+      "priceState": "LIVE",
+      "exitAt": null,
+      "exitPrice": null,
+      "exitReason": null,
+      "exitValueUsd": null,
+      "realizedPnl": null,
+      "rules": "PAPER ONLY: TP 1.5x; SL -25%; defensive liquidity exit -30%; full-loss rug >=90% or <=$500; no time limit",
+      "rulesVersion": "entry-open-v4",
+      "limitOrderId": "limit_sig_open_mv80rueh_2ho0wb",
+      "signalReferencePrice": 1.394e-05,
+      "limitPrice": 1.1152000000000001e-05,
+      "currentX": 1.0,
       "exitInfo": null
     }
   ],
@@ -8566,33 +8594,29 @@
       "limitPrice": 1.1152000000000001e-05,
       "createdAt": 1791976891049,
       "expiresAt": 1791980491049,
+      "status": "FILLED",
+      "score": null,
+      "signalLiquidity": 8366.57,
+      "filledAt": 1791977198933,
+      "fillPrice": 4.039e-06,
+      "positionId": "ap_mv80yfytueykyp"
+    },
+    {
+      "id": "limit_sig_open_mv80yh1f_c9v78x",
+      "signalId": "sig_open_mv80yh1f_c9v78x",
+      "mint": "6K8mmm6J3ciDdEhtQa1bJeeJdFEaR1VQ7UD6Eqbvc6KH",
+      "symbol": "FARMSEM",
+      "signalPrice": 1.088e-05,
+      "limitPrice": 8.704e-06,
+      "createdAt": 1791977200323,
+      "expiresAt": 1791980800323,
       "status": "PENDING",
       "score": null,
-      "signalLiquidity": 8366.57
+      "signalLiquidity": 237.38
     }
   ],
   "rulesVersion": "entry-open-v4",
   "historyTail": [
-    {
-      "t": 1791955081213,
-      "type": "LIMIT_PLACED",
-      "mint": "9BAx22utcotoMxseF8AViAMsrWVwMz4BLs3Not7BnfJN",
-      "symbol": "FARMCATS",
-      "price": 2.9287999999999998e-05,
-      "signalPrice": 3.661e-05,
-      "usd": 10,
-      "reason": "entry-open-v4: -20% limit, expires in 60 minutes; no cash/slot consumed"
-    },
-    {
-      "t": 1791955082480,
-      "type": "LIMIT_PLACED",
-      "mint": "4PZUKRYVFJNaGT6kYf5unu6rVNX2mjm7pQ329mrtpump",
-      "symbol": "MOCHI",
-      "price": 1.9352e-06,
-      "signalPrice": 2.419e-06,
-      "usd": 10,
-      "reason": "entry-open-v4: -20% limit, expires in 60 minutes; no cash/slot consumed"
-    },
     {
       "t": 1791955083082,
       "type": "LIMIT_PLACED",
@@ -8993,6 +9017,26 @@
       "signalPrice": 1.394e-05,
       "usd": 10,
       "reason": "entry-open-v4: -20% limit, expires in 60 minutes; no cash/slot consumed"
+    },
+    {
+      "t": 1791977198933,
+      "type": "AUTO_ENTRY",
+      "symbol": "TACTICS",
+      "mint": "5sTxhZbnBvTMnXNrqHTEe1qXZnhEiCnRnj9JDkgJpump",
+      "price": 4.039e-06,
+      "usd": 10,
+      "fee": 0.05,
+      "reason": "limit fill at later real check price <= -20% signal limit"
+    },
+    {
+      "t": 1791977200323,
+      "type": "LIMIT_PLACED",
+      "mint": "6K8mmm6J3ciDdEhtQa1bJeeJdFEaR1VQ7UD6Eqbvc6KH",
+      "symbol": "FARMSEM",
+      "price": 8.704e-06,
+      "signalPrice": 1.088e-05,
+      "usd": 10,
+      "reason": "entry-open-v4: -20% limit, expires in 60 minutes; no cash/slot consumed"
     }
   ],
   "sourceHealth": [
@@ -9001,12 +9045,12 @@
       "label": "Dexscreener (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791976892482,
+      "lastSuccess": 1791977201602,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
       "rateLimitCount": 0,
-      "requestCount": 26,
+      "requestCount": 27,
       "note": "REST market feed \u2014 not a complete historical on-chain feed. Rate limits apply.",
       "backoffUntil": 0
     },
