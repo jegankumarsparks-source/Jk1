@@ -1,0 +1,1954 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Solana Early-Wallet Radar — Maximum Edition</title>
+<style>
+:root{--bg:#070b12;--bg2:#0c1220;--card:#111a2b;--card2:#16213a;--line:#1f2d47;--txt:#dbe7ff;--dim:#7d8db1;--grn:#22ff88;--red:#ff5566;--amb:#ffb020;--blu:#4da3ff;--pur:#b78cff;--mono:'Courier New',ui-monospace,monospace}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,Roboto,Segoe UI,sans-serif;font-size:15px;line-height:1.45}
+body{padding-bottom:76px}
+header{position:sticky;top:0;z-index:50;background:linear-gradient(180deg,#0a1120 0%,#0a1120ee 100%);border-bottom:1px solid var(--line);padding:10px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+header h1{font-size:16px;letter-spacing:.5px;color:var(--grn);font-weight:800}
+header .sub{font-size:11px;color:var(--dim);width:100%}
+.hdr-pill{font-size:10px;padding:3px 8px;border-radius:20px;border:1px solid var(--line);background:var(--card);color:var(--dim)}
+.hdr-pill.on{color:#062;border-color:var(--grn);background:var(--grn);font-weight:700}
+.hdr-pill.off{color:var(--amb);border-color:var(--amb)}
+nav{position:fixed;bottom:0;left:0;right:0;z-index:50;background:#0a1120f5;border-top:1px solid var(--line);display:flex;overflow-x:auto;scrollbar-width:none}
+nav::-webkit-scrollbar{display:none}
+nav button{flex:0 0 auto;background:none;border:none;color:var(--dim);font-size:10px;padding:9px 11px 12px;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:64px}
+nav button .ic{font-size:17px}
+nav button.act{color:var(--grn)}
+nav button.act .ic{transform:scale(1.15)}
+main{padding:14px;max-width:1100px;margin:0 auto}
+.page{display:none}.page.act{display:block;animation:fade .18s ease}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1}}
+.grid{display:grid;gap:10px}
+.kpis{grid-template-columns:repeat(auto-fill,minmax(105px,1fr))}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px}
+.kpi .v{font-size:19px;font-weight:800;color:var(--grn);font-variant-numeric:tabular-nums}
+.kpi .l{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.4px;margin-top:2px}
+.kpi.warn .v{color:var(--amb)}.kpi.bad .v{color:var(--red)}.kpi.info .v{color:var(--blu)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px}
+.card h3{font-size:13px;color:var(--blu);margin-bottom:8px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.sp{flex:1}
+.badge{display:inline-block;font-size:9.5px;font-weight:700;padding:2px 7px;border-radius:20px;letter-spacing:.3px;text-transform:uppercase}
+.b-live{background:#063d22;color:var(--grn)}.b-cached{background:#3a2c06;color:var(--amb)}.b-stale{background:#3a1a06;color:#ff8c42}
+.b-err{background:#3d0f18;color:var(--red)}.b-dim{background:#1c2740;color:var(--dim)}.b-info{background:#0f2a4d;color:var(--blu)}.b-pur{background:#2a1a4d;color:var(--pur)}
+.b-pass{background:#063d22;color:var(--grn)}.b-fail{background:#3d0f18;color:var(--red)}.b-unk{background:#3a2c06;color:var(--amb)}
+.mint{font-family:var(--mono);font-size:11px;color:var(--dim);word-break:break-all}
+button.btn{background:var(--card2);border:1px solid var(--line);color:var(--txt);border-radius:10px;padding:8px 12px;font-size:12px;font-weight:600;cursor:pointer}
+button.btn.grn{background:var(--grn);color:#042;border-color:var(--grn)}
+button.btn.red{background:#3d0f18;color:var(--red);border-color:var(--red)}
+button.btn:disabled{opacity:.4}
+button.btn.sm{padding:4px 9px;font-size:11px;border-radius:8px}
+input,select{background:var(--bg2);border:1px solid var(--line);color:var(--txt);border-radius:10px;padding:8px 10px;font-size:13px;width:100%}
+input[type=number]{width:90px}
+label.fl{display:block;font-size:11px;color:var(--dim);margin:8px 0 3px}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;align-items:center}
+.toolbar input,.toolbar select{width:auto;flex:1;min-width:110px}
+.tok{border-left:3px solid var(--line)}
+.tok.s-pass{border-left-color:var(--grn)}.tok.s-fail{border-left-color:var(--red)}.tok.s-unk{border-left-color:var(--amb)}.tok.s-sig{border-left-color:var(--pur);box-shadow:0 0 12px #b78cff22}
+.kv{display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:1px dashed #1a2438}
+.kv:last-child{border-bottom:none}.kv .k{color:var(--dim)}.kv .v{font-weight:600;text-align:right}
+.small{font-size:11px;color:var(--dim)}
+.mono{font-family:var(--mono);font-size:11px}
+.bar{height:6px;background:var(--bg2);border-radius:4px;overflow:hidden;margin-top:4px}
+.bar>i{display:block;height:100%;background:linear-gradient(90deg,#0a5,var(--grn));border-radius:4px}
+.scorebig{font-size:24px;font-weight:800;color:var(--grn)}
+details{border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-top:8px;background:var(--bg2)}
+summary{font-size:12px;color:var(--blu);cursor:pointer;font-weight:600}
+table{width:100%;border-collapse:collapse;font-size:11.5px}
+th,td{padding:6px 6px;text-align:left;border-bottom:1px solid #1a2438;vertical-align:top}
+th{color:var(--dim);text-transform:uppercase;font-size:9.5px;letter-spacing:.4px}
+.empty{background:var(--card);border:1px dashed var(--line);border-radius:14px;padding:26px 16px;text-align:center;color:var(--dim);font-size:13px;margin-bottom:10px}
+.empty b{color:var(--txt)}
+.flash{animation:flashg 1s ease 3}
+@keyframes flashg{0%,100%{box-shadow:none}50%{box-shadow:0 0 18px var(--grn)}}
+#sigBanner{display:none;position:sticky;top:58px;z-index:40;cursor:pointer;background:linear-gradient(90deg,#063d22,#0a5c34);border:1px solid var(--grn);color:var(--grn);font-weight:800;text-align:center;padding:10px;border-radius:12px;margin-bottom:10px;animation:blinkbg 1s step-start infinite}
+#sigBanner.show{display:block}
+@keyframes blinkbg{50%{background:#02180d}}
+#targetBanner{display:none;position:sticky;top:58px;z-index:40;background:linear-gradient(90deg,#3a2c06,#5c440a);border:1px solid var(--amb);color:var(--amb);font-weight:800;text-align:center;padding:10px;border-radius:12px;margin-bottom:10px}
+#targetBanner.show{display:block}
+.toast{position:fixed;bottom:84px;left:50%;transform:translateX(-50%);background:var(--card2);border:1px solid var(--grn);color:var(--grn);padding:9px 16px;border-radius:24px;font-size:12px;font-weight:700;z-index:99;display:none}
+.pager{display:flex;gap:8px;justify-content:center;margin:10px 0}
+.chk{font-size:11.5px;padding:6px 8px;border-radius:8px;background:var(--bg2);margin:3px 0;display:flex;gap:8px;align-items:flex-start}
+.chk .st{font-weight:800;min-width:92px}
+.chk.PASS .st{color:var(--grn)}.chk.FAIL .st{color:var(--red)}.chk.UNKNOWN .st,.chk.NOT_SUPPORTED .st{color:var(--amb)}
+.note{font-size:10.5px;color:var(--dim);background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:8px 0}
+.h-scroll{overflow-x:auto}
+a{color:var(--blu);text-decoration:none}
+@media(min-width:760px){body{font-size:15px}.kpis{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}header h1{font-size:19px}}
+.dov{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:60;overflow-y:auto;padding:10px;-webkit-overflow-scrolling:touch}
+.dov-panel{max-width:640px;margin:0 auto;background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:12px}
+.tappable{cursor:pointer}
+.tappable:active{opacity:.85}
+</style>
+</head>
+<body>
+<header>
+<h1>⚡ SOLANA EARLY-WALLET RADAR</h1>
+<span class="hdr-pill b-dim" style="border:none">MAXIMUM EDITION · v1.7.0</span>
+<span id="scanPill" class="hdr-pill off">SCANNER IDLE</span>
+<span class="hdr-pill b-dim" style="border:none">PAPER ONLY</span>
+<div class="sub">Research + paper trading only. No real money, no wallet signing, no keys. Public keyless data — every field labelled by source &amp; freshness.</div>
+</header>
+<main>
+<div id="sigBanner"></div>
+<div id="targetBanner"></div>
+
+<section class="page act" id="page-overview"></section>
+<section class="page" id="page-radar"></section>
+<section class="page" id="page-wallets"></section>
+<section class="page" id="page-clusters"></section>
+<section class="page" id="page-risk"></section>
+<section class="page" id="page-signals"></section>
+<section class="page" id="page-portfolio"></section>
+<section class="page" id="page-trades"></section>
+<section class="page" id="page-learning"></section>
+<section class="page" id="page-health"></section>
+<section class="page" id="page-autotrade"></section>
+<section class="page" id="page-settings"></section>
+</main>
+<nav id="mainNav"></nav>
+<div class="toast" id="toast"></div>
+<div id="detailOverlay"></div>
+
+<script>
+'use strict';
+/* ============================================================
+   SOLANA EARLY-WALLET RADAR — SINGLE HTML MAXIMUM EDITION
+   Marker: JK-SR-MAX-V1
+   Modules A–Q as separated classes in one file. No frameworks.
+   ============================================================ */
+const BUILD_MARKER='JK-SR-MAX-V1';
+const APP_VERSION='1.7.0';
+const SCORE_VERSION='score-v1.0';
+const RISK_POLICY_VERSION='risk-v1.0';
+const THRESHOLDS_VERSION='thresh-v1.0';
+const SCHEMA_VERSION=2;
+
+/* ---------- tiny utils ---------- */
+const U={
+  now:()=>Date.now(),
+  fmt$(n){ if(n==null||isNaN(n))return '—'; const a=Math.abs(n);
+    if(a>=1e9)return '$'+(n/1e9).toFixed(2)+'B'; if(a>=1e6)return '$'+(n/1e6).toFixed(2)+'M';
+    if(a>=1e3)return '$'+(n/1e3).toFixed(1)+'k'; if(a>=1)return '$'+n.toFixed(2);
+    if(a===0)return '$0'; return '$'+n.toPrecision(3); },
+  fmtN(n){ if(n==null||isNaN(n))return '—'; const a=Math.abs(n);
+    if(a>=1e9)return (n/1e9).toFixed(2)+'B'; if(a>=1e6)return (n/1e6).toFixed(2)+'M';
+    if(a>=1e3)return (n/1e3).toFixed(1)+'k'; return String(Math.round(n*100)/100); },
+  fmtPct(n){ return (n==null||isNaN(n))?'—':(n>=0?'+':'')+n.toFixed(1)+'%'; },
+  age(ts){ if(!ts)return '—'; let s=Math.max(0,(U.now()-ts)/1000);
+    if(s<60)return Math.floor(s)+'s'; if(s<3600)return Math.floor(s/60)+'m';
+    if(s<86400)return Math.floor(s/3600)+'h '+(Math.floor(s/60)%60)+'m'; return Math.floor(s/86400)+'d'; },
+  short(a){ return a?a.slice(0,4)+'…'+a.slice(-4):'—'; },
+  esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); },
+  uid(p){ return (p||'id')+'_'+Date.now().toString(36)+Math.random().toString(36).slice(2,8); },
+  clamp(n,a,b){ return Math.max(a,Math.min(b,n)); },
+  toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.style.display='block';
+    clearTimeout(t._h); t._h=setTimeout(()=>t.style.display='none',2400); }
+};
+
+/* ============================================================
+   A. AppState — central store, settings, event bus, scan guard
+   ============================================================ */
+const DEFAULT_SETTINGS={
+  pollIntervalSec:10,
+  maxTokensPerCycle:12,
+  maxRugcheckPerCycle:6,
+  walletResearchPerCandidate:5,
+  minLiquidityUsd:5000,
+  minVolume24Usd:2000,
+  scoreThreshold:55,
+  minQualifiedWallets:1,
+  criticalUnknownBlocks:true,
+  signalCooldownHours:6,
+  clusterWindowMin:120,
+  top10ConcentrationFailPct:60,
+  startCapital:200,
+  entrySizeUsd:20,
+  maxPositionPct:10,
+  maxOpenPositions:5,
+  feePct:0.5,
+  slippagePct:1.0,
+  stopLossPct:-35,
+  trailingAfterX:2,
+  trailingDropPct:40,
+  maxHoldHours:72,
+  liquidityExitPct:50,
+  targetEquity:400,
+  weights:{liquidity:20,activity:15,earlyWallets:20,clusters:15,distribution:15,marketBehavior:15},
+  autoRefreshPrices:true,
+  autoStartOnLoad:true,
+  autoTradeEnabled:true,
+  autoMaxPositions:6,
+  rugLiquidityUsd:500,
+  rugLiquidityDropPct:90
+};
+class AppState{
+  constructor(){
+    this.settings=JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+    this.candidates=new Map();      // mint -> candidate
+    this.wallets=new Map();         // address -> wallet record
+    this.clusters=new Map();        // id -> cluster
+    this.signals=new Map();         // id -> signal
+    this.positions=new Map();       // id -> position (open+closed)
+    this.trades=[];                 // trade events
+    this.scoreHistory=[];           // score snapshots
+    this.diag={scans:0,lastScanStart:null,lastScanEnd:null,lastScanOk:null,scanning:false,
+      counters:{discovered:0,validated:0,rejected:0,incomplete:0,signals:0},
+      rejectReasons:{},storage:'unknown',idbAvailable:false};
+    this.listeners={};
+    this.scanTimer=null; this.priceTimer=null;
+    this.targetReached=false; this.cycleFrozen=false;
+    this.ui={page:'overview',radarFilter:'all',radarSort:'score',radarSearch:'',radarPage:0,walletSearch:'',signalFilter:'all'};
+  }
+  on(evt,fn){ (this.listeners[evt]=this.listeners[evt]||[]).push(fn); }
+  emit(evt,data){ (this.listeners[evt]||[]).forEach(fn=>{try{fn(data);}catch(e){console.error('listener',e);}}); }
+  weightsValid(){ const w=this.settings.weights; const s=Object.values(w).reduce((a,b)=>a+(+b||0),0); return s===100; }
+}
+const S=new AppState();
+
+/* ============================================================
+   B. DataSourceRegistry — sources, health, fetch w/ timeout,
+      backoff, dedupe, in-flight cancel, honest states
+   ============================================================ */
+class DataSourceRegistry{
+  constructor(){ this.sources={}; this.inflight=new Map(); }
+  register(id,cfg){ this.sources[id]={id,label:cfg.label||id,kind:cfg.kind||'rest',
+    status:'NOT_OBSERVED',lastSuccess:null,lastError:null,errorCount:0,timeoutCount:0,rateLimitCount:0,
+    requestCount:0,note:cfg.note||'',backoffUntil:0}; }
+  get(id){ return this.sources[id]; }
+  all(){ return Object.values(this.sources); }
+  markOk(id){ const s=this.sources[id]; if(!s)return; s.status='LIVE'; s.lastSuccess=U.now(); s.lastError=null; }
+  markErr(id,err,kind){ const s=this.sources[id]; if(!s)return; s.errorCount++; s.lastError=String(err).slice(0,160);
+    if(kind==='timeout')s.timeoutCount++; if(kind==='ratelimit'){s.rateLimitCount++; s.backoffUntil=U.now()+60000;}
+    s.status=(s.errorCount>2)?'ERROR':'DEGRADED'; }
+  /* fetchJSON with timeout, abort, rate-limit backoff, dedupe of identical in-flight GETs */
+  async fetchJSON(sourceId,url,opts={}){
+    const s=this.sources[sourceId];
+    if(s&&s.backoffUntil>U.now()) throw Object.assign(new Error('source in rate-limit backoff'),{kind:'ratelimit'});
+    const key=url+JSON.stringify(opts.body||'');
+    if(!opts.body&&this.inflight.has(key)) return this.inflight.get(key);
+    const p=this._doFetch(sourceId,url,opts).finally(()=>this.inflight.delete(key));
+    if(!opts.body)this.inflight.set(key,p);
+    return p;
+  }
+  async _doFetch(sourceId,url,opts){
+    const timeoutMs=opts.timeoutMs||12000; const retries=opts.retries==null?1:opts.retries;
+    let lastErr=null;
+    for(let attempt=0;attempt<=retries;attempt++){
+      const ctl=new AbortController(); const to=setTimeout(()=>ctl.abort(),timeoutMs);
+      try{
+        const s=this.sources[sourceId]; if(s)s.requestCount++;
+        const res=await fetch(url,{method:opts.method||(opts.body?'POST':'GET'),
+          headers:opts.body?{'Content-Type':'application/json'}:undefined,
+          body:opts.body?JSON.stringify(opts.body):undefined,signal:ctl.signal});
+        clearTimeout(to);
+        if(res.status===429||res.status===403){
+          lastErr=Object.assign(new Error('HTTP '+res.status),{kind:'ratelimit'});
+          if(attempt<retries){await new Promise(r=>setTimeout(r,4000+attempt*2000));continue;}
+          throw lastErr;
+        }
+        if(!res.ok) throw new Error('HTTP '+res.status);
+        const data=await res.json();
+        this.markOk(sourceId);
+        return {data,fetchedAt:U.now(),url};
+      }catch(e){
+        clearTimeout(to);
+        if(e.name==='AbortError'){ lastErr=Object.assign(new Error('timeout after '+timeoutMs+'ms'),{kind:'timeout'}); }
+        else if(!e.kind){ lastErr=e; } else lastErr=e;
+        if(attempt<retries){ await new Promise(r=>setTimeout(r,3500+attempt*2500)); continue; }
+      }
+    }
+    this.markErr(sourceId,lastErr&&lastErr.message||'unknown',lastErr&&lastErr.kind);
+    throw lastErr||new Error('fetch failed');
+  }
+}
+const REG=new DataSourceRegistry();
+REG.register('dexscreener',{label:'Dexscreener (public, keyless)',note:'REST market feed — not a complete historical on-chain feed. Rate limits apply.'});
+REG.register('rugcheck',{label:'RugCheck (public, keyless)',note:'Token risk report: authorities, holders, liquidity. topHolders may be null on mega-caps.'});
+REG.register('solanarpc',{label:'Solana JSON-RPC (PublicNode)',note:'Keyless public RPC. Browser polling is not a backend indexer or persistent WebSocket.'});
+
+/* ============================================================
+   C. SolanaRpcAdapter — JSON-RPC via keyless endpoints
+   ============================================================ */
+class SolanaRpcAdapter{
+  constructor(){ this.endpoints=['https://solana-rpc.publicnode.com','https://api.mainnet-beta.solana.com']; this.ep=0; }
+  async call(method,params,opts={}){
+    const body={jsonrpc:'2.0',id:1,method,params};
+    let lastErr=null;
+    for(let e=0;e<this.endpoints.length;e++){
+      const url=this.endpoints[(this.ep+e)%this.endpoints.length];
+      try{
+        const r=await REG.fetchJSON('solanarpc',url,{body,timeoutMs:15000,retries:opts.retries==null?1:opts.retries});
+        if(r.data&&r.data.error) throw new Error('RPC error: '+(r.data.error.message||JSON.stringify(r.data.error)).slice(0,120));
+        return {result:r.data?r.data.result:null,fetchedAt:r.fetchedAt,url};
+      }catch(err){ lastErr=err; }
+    }
+    throw lastErr||new Error('all RPC endpoints failed');
+  }
+  async getSignaturesForAddress(addr,limit=25){
+    try{ const r=await this.call('getSignaturesForAddress',[addr,{limit}]);
+      return {signatures:Array.isArray(r.result)?r.result:[],fetchedAt:r.fetchedAt,supported:true};
+    }catch(e){ return {signatures:null,fetchedAt:U.now(),supported:false,error:String(e.message||e).slice(0,120)}; }
+  }
+  async getBalance(addr){
+    try{ const r=await this.call('getBalance',[addr]);
+      return {lamports:r.result&&r.result.value!=null?r.result.value:null,fetchedAt:r.fetchedAt,supported:true};
+    }catch(e){ return {lamports:null,fetchedAt:U.now(),supported:false,error:String(e.message||e).slice(0,120)}; }
+  }
+}
+const RPC=new SolanaRpcAdapter();
+
+/* ============================================================
+   D. DexDataAdapter — Dexscreener + RugCheck normalization
+   ============================================================ */
+class DexDataAdapter{
+  /* --- Dexscreener: latest token profiles (new tokens across chains) --- */
+  async latestProfiles(){
+    const r=await REG.fetchJSON('dexscreener','https://api.dexscreener.com/token-profiles/latest/v1',{timeoutMs:12000,retries:1});
+    const arr=Array.isArray(r.data)?r.data:[];
+    return {items:arr.filter(x=>x&&x.chainId==='solana'&&x.tokenAddress),fetchedAt:r.fetchedAt};
+  }
+  /* --- Dexscreener: latest boosted tokens (activity feed) --- */
+  async latestBoosts(){
+    const r=await REG.fetchJSON('dexscreener','https://api.dexscreener.com/token-boosts/latest/v1',{timeoutMs:12000,retries:1});
+    const arr=Array.isArray(r.data)?r.data:[];
+    return {items:arr.filter(x=>x&&x.chainId==='solana'&&x.tokenAddress),fetchedAt:r.fetchedAt};
+  }
+  /* --- Dexscreener: full pair data for one mint --- */
+  async tokenPairs(mint){
+    const r=await REG.fetchJSON('dexscreener','https://api.dexscreener.com/latest/dex/tokens/'+encodeURIComponent(mint),{timeoutMs:12000,retries:1});
+    const pairs=r.data&&Array.isArray(r.data.pairs)?r.data.pairs:[];
+    const sol=pairs.filter(p=>p&&p.chainId==='solana');
+    return {pairs:sol,fetchedAt:r.fetchedAt};
+  }
+  /* pick best (highest-liquidity) Solana pair */
+  bestPair(pairs){
+    if(!pairs||!pairs.length)return null;
+    return pairs.slice().sort((a,b)=>((b.liquidity&&b.liquidity.usd)||0)-((a.liquidity&&a.liquidity.usd)||0))[0];
+  }
+  /* normalize a Dexscreener pair into our candidate market fields */
+  normalizePair(p){
+    if(!p)return null;
+    return {
+      pairAddress:p.pairAddress||null, dexId:p.dexId||null,
+      symbol:(p.baseToken&&p.baseToken.symbol)||null, name:(p.baseToken&&p.baseToken.name)||null,
+      quoteSymbol:(p.quoteToken&&p.quoteToken.symbol)||null,
+      priceUsd:p.priceUsd!=null?parseFloat(p.priceUsd):null,
+      priceNative:p.priceNative!=null?parseFloat(p.priceNative):null,
+      liquidityUsd:(p.liquidity&&p.liquidity.usd!=null)?p.liquidity.usd:null,
+      liquidityBase:(p.liquidity&&p.liquidity.base!=null)?p.liquidity.base:null,
+      liquidityQuote:(p.liquidity&&p.liquidity.quote!=null)?p.liquidity.quote:null,
+      mcap:(p.marketCap!=null)?p.marketCap:null, fdv:(p.fdv!=null)?p.fdv:null,
+      volume:{m5:(p.volume&&p.volume.m5!=null)?p.volume.m5:null,h1:(p.volume&&p.volume.h1!=null)?p.volume.h1:null,
+        h6:(p.volume&&p.volume.h6!=null)?p.volume.h6:null,h24:(p.volume&&p.volume.h24!=null)?p.volume.h24:null},
+      priceChange:{m5:(p.priceChange&&p.priceChange.m5!=null)?p.priceChange.m5:null,h1:(p.priceChange&&p.priceChange.h1!=null)?p.priceChange.h1:null,
+        h6:(p.priceChange&&p.priceChange.h6!=null)?p.priceChange.h6:null,h24:(p.priceChange&&p.priceChange.h24!=null)?p.priceChange.h24:null},
+      txns:{m5:this._tx(p.txns&&p.txns.m5),h1:this._tx(p.txns&&p.txns.h1),h6:this._tx(p.txns&&p.txns.h6),h24:this._tx(p.txns&&p.txns.h24)},
+      pairCreatedAt:p.pairCreatedAt||null,
+      source:'dexscreener',observedAt:U.now(),
+      // methodology labels (honesty)
+      mcapMethod:'marketCap as reported by Dexscreener (circulating assumption by source — not independently verified)',
+      fdvMethod:'FDV = price x total supply as reported by Dexscreener',
+      uniqueTraders:'NOT_SUPPORTED — Dexscreener public feed gives aggregate buys/sells only, not unique traders'
+    };
+  }
+  _tx(t){ return t?{buys:t.buys!=null?t.buys:null,sells:t.sells!=null?t.sells:null}:{buys:null,sells:null}; }
+  /* --- RugCheck report --- */
+  async rugcheckReport(mint){
+    const r=await REG.fetchJSON('rugcheck','https://api.rugcheck.xyz/v1/tokens/'+encodeURIComponent(mint)+'/report',{timeoutMs:15000,retries:1});
+    const d=r.data||{};
+    return {
+      mint,
+      mintAuthority:(d.token&&'mintAuthority'in d.token)?d.token.mintAuthority:undefined,
+      freezeAuthority:(d.token&&'freezeAuthority'in d.token)?d.token.freezeAuthority:undefined,
+      mutable:(d.tokenMeta&&'mutable'in d.tokenMeta)?d.tokenMeta.mutable:undefined,
+      supply:(d.token&&d.token.supply!=null)?d.token.supply:null,
+      decimals:(d.token&&d.token.decimals!=null)?d.token.decimals:null,
+      topHolders:Array.isArray(d.topHolders)?d.topHolders.slice(0,25).map(h=>({address:h.address||null,pct:h.pct!=null?h.pct:null,insider:!!h.insider,uiAmount:h.uiAmount!=null?h.uiAmount:null})):null,
+      totalMarketLiquidity:d.totalMarketLiquidity!=null?d.totalMarketLiquidity:null,
+      score:d.score!=null?d.score:null,
+      risks:Array.isArray(d.risks)?d.risks.map(x=>({name:x.name||'unknown',level:x.level||'info',description:x.description||''})) : [],
+      rugged:!!d.rugged,
+      markets:Array.isArray(d.markets)?d.markets.length:null,
+      fetchedAt:r.fetchedAt,source:'rugcheck'
+    };
+  }
+}
+const DEX=new DexDataAdapter();
+
+/* ============================================================
+   E. TokenDiscoveryEngine — discovery pipeline, dedupe, snapshots
+   ============================================================ */
+class TokenDiscoveryEngine{
+  constructor(){ this.seenQueue=[]; }
+  /* One discovery cycle. Never overlaps (guarded by AppState.diag.scanning). */
+  async runCycle(){
+    if(S.diag.scanning){ console.log('scan already running — skip overlap'); return {skipped:true}; }
+    S.diag.scanning=true; S.diag.lastScanStart=U.now(); S.emit('scanState');
+    const errors=[]; let newMints=[];
+    try{
+      // 1) gather candidate mints from two feeds
+      let feedItems=[];
+      try{ const pr=await DEX.latestProfiles(); feedItems=feedItems.concat(pr.items.map(x=>({mint:x.tokenAddress,feed:'profiles',feedAt:pr.fetchedAt}))); }
+      catch(e){ errors.push('profiles: '+(e.message||e)); }
+      try{ const bo=await DEX.latestBoosts(); feedItems=feedItems.concat(bo.items.map(x=>({mint:x.tokenAddress,feed:'boosts',feedAt:bo.fetchedAt}))); }
+      catch(e){ errors.push('boosts: '+(e.message||e)); }
+      // dedupe by mint, keep both feed tags
+      const byMint=new Map();
+      for(const it of feedItems){ if(!byMint.has(it.mint))byMint.set(it.mint,it); else byMint.get(it.mint).feed+='+'+it.feed; }
+      // 2) enrich a bounded number with pair data (bounded concurrency 2)
+      const mints=[...byMint.keys()];
+      const fresh=mints.filter(m=>!S.candidates.has(m));
+      const stale=mints.filter(m=>S.candidates.has(m)&&(U.now()-(S.candidates.get(m).market?.observedAt||0))>S.settings.pollIntervalSec*1000);
+      const toFetch=fresh.concat(stale).slice(0,S.settings.maxTokensPerCycle);
+      for(let i=0;i<toFetch.length;i+=2){
+        const batch=toFetch.slice(i,i+2);
+        await Promise.all(batch.map(async m=>{
+          try{
+            const tp=await DEX.tokenPairs(m);
+            const best=DEX.bestPair(tp.pairs);
+            if(!best){ this._touch(m,byMint.get(m),null,'NO_SOLANA_PAIR'); return; }
+            const norm=DEX.normalizePair(best);
+            this._touch(m,byMint.get(m),norm,null);
+            if(!S.candidates.get(m)._counted){ S.candidates.get(m)._counted=true; S.diag.counters.discovered++; }
+          }catch(e){ errors.push('pairs '+U.short(m)+': '+(e.message||e)); this._touchError(m,byMint.get(m),e); }
+        }));
+      }
+      newMints=fresh;
+      S.diag.lastScanOk=true;
+    }catch(e){ S.diag.lastScanOk=false; errors.push('cycle: '+(e.message||e)); }
+    S.diag.scans++; S.diag.lastScanEnd=U.now(); S.diag.scanning=false;
+    S.emit('scanState'); S.emit('data');
+    return {errors,newMintsCount:newMints.length};
+  }
+  _touch(mint,feedInfo,norm,noPairReason){
+    const t=U.now();
+    let c=S.candidates.get(mint);
+    if(!c){
+      c={mint,firstObserved:t,launchTime:null,launchTimeNote:'first-seen time is our observation, NOT a verified launch time',
+        ageConfidence:'LOW — based on first observation + pairCreatedAt when available',
+        feeds:[],state:'DISCOVERED',stateHistory:[{state:'DISCOVERED',at:t,reason:'first seen in '+((feedInfo&&feedInfo.feed)||'feed')}],
+        market:null,rugcheck:null,walletEvidence:[],risk:null,score:null,qualification:null,
+        rejectionReasons:[],cooldownUntil:0,signalId:null,_counted:false,fieldMeta:{}};
+      S.candidates.set(mint,c);
+    }
+    if(feedInfo&&!c.feeds.includes(feedInfo.feed))c.feeds.push(feedInfo.feed);
+    if(norm){
+      c.market=norm;
+      c.fieldMeta.market={source:'dexscreener',observedAt:norm.observedAt,status:'LIVE'};
+      if(norm.pairCreatedAt){ c.pairCreatedAt=norm.pairCreatedAt;
+        c.ageConfidence='MEDIUM — pairCreatedAt from Dexscreener (pool creation, may differ from token launch)'; }
+      c.lastError=null;
+    }
+    if(noPairReason){ c.noPairReason=noPairReason; }
+    c.updatedAt=t;
+  }
+  _touchError(mint,feedInfo,e){
+    let c=S.candidates.get(mint);
+    if(!c){ this._touch(mint,feedInfo,null,null); c=S.candidates.get(mint); }
+    c.lastError=String(e.message||e).slice(0,140);
+    c.fieldMeta.market={source:'dexscreener',observedAt:U.now(),status:'ERROR'};
+  }
+  /* manual refresh of one candidate */
+  async refreshCandidate(mint){
+    const tp=await DEX.tokenPairs(mint);
+    const best=DEX.bestPair(tp.pairs);
+    if(!best)throw new Error('no Solana pair found');
+    this._touch(mint,null,DEX.normalizePair(best),null);
+    S.emit('data');
+  }
+  /* refresh prices for open positions only (cheap, 1 call per mint) */
+  async refreshPricesFor(mints){
+    const out={};
+    for(const m of mints){
+      try{ const tp=await DEX.tokenPairs(m); const best=DEX.bestPair(tp.pairs);
+        if(best){ out[m]={priceUsd:best.priceUsd!=null?parseFloat(best.priceUsd):null,
+          liquidityUsd:(best.liquidity&&best.liquidity.usd!=null)?best.liquidity.usd:null,observedAt:U.now(),ok:true};
+          const c=S.candidates.get(m); if(c)this._touch(m,null,DEX.normalizePair(best),null); }
+        else out[m]={ok:false,error:'no pair'};
+      }catch(e){ out[m]={ok:false,error:String(e.message||e).slice(0,100)}; }
+    }
+    return out;
+  }
+}
+const DISCOVERY=new TokenDiscoveryEngine();
+
+/* ============================================================
+   F. TokenValidationEngine — identity + freshness validation
+   ============================================================ */
+class TokenValidationEngine{
+  validate(c){
+    const problems=[]; const checks=[];
+    const fresh=c.market&&(U.now()-c.market.observedAt)<3*S.settings.pollIntervalSec*1000;
+    checks.push({name:'Token+pool identity (mint & pair present)',ok:!!(c.mint&&c.market&&c.market.pairAddress),critical:true});
+    checks.push({name:'Market data fresh (<3 poll cycles)',ok:!!fresh,critical:true});
+    checks.push({name:'Liquidity field present (not null)',ok:c.market&&c.market.liquidityUsd!=null,critical:false});
+    checks.push({name:'Price field present',ok:c.market&&c.market.priceUsd!=null,critical:true});
+    const failed=checks.filter(x=>!x.ok);
+    const critFail=failed.filter(x=>x.critical);
+    let status;
+    if(!c.market){ status='DATA_INCOMPLETE'; problems.push('no market data (source failure or no Solana pair)'); }
+    else if(critFail.length){ status='DATA_INCOMPLETE'; problems.push(...critFail.map(x=>x.name)); }
+    else status='VALIDATED';
+    return {status,checks,problems,validatedAt:U.now()};
+  }
+}
+const VALIDATOR=new TokenValidationEngine();
+
+/* ============================================================
+   G. WalletResearchEngine — wallet records, honest evidence states
+   ============================================================ */
+class WalletResearchEngine{
+  /* harvest candidate wallets from a token's rugcheck topHolders */
+  harvestFromToken(c){
+    if(!c.rugcheck||!Array.isArray(c.rugcheck.topHolders))return {added:0,reason:'topHolders NOT_SUPPORTED or null for this token'};
+    let added=0; const t=U.now();
+    for(const h of c.rugcheck.topHolders.slice(0,12)){
+      if(!h.address)continue;
+      let w=S.wallets.get(h.address);
+      if(!w){
+        w={address:h.address,firstObserved:t,state:'UNVERIFIED',
+          observations:[],tokensSeen:[],qualityScore:null,qualityNote:'score requires enough verified observations',
+          realizedPnl:null,realizedPnlNote:'NOT_SUPPORTED — realized PnL needs full tx + cost-basis reconstruction (indexer), not available in this single file',
+          unrealizedNote:'estimated from current holder share only — not a trade result',
+          dataGaps:['full trade history (needs indexer)','funding sources (needs indexer)'],
+          sigCount:null,lastSigAt:null,insiderFlags:0};
+        S.wallets.set(h.address,w);
+      }
+      if(!w.tokensSeen.includes(c.mint)){ w.tokensSeen.push(c.mint); }
+      w.observations.push({t,mint:c.mint,pct:h.pct,insider:h.insider,source:'rugcheck'});
+      if(w.observations.length>200)w.observations=w.observations.slice(-200);
+      if(h.insider)w.insiderFlags++;
+      added++;
+    }
+    return {added};
+  }
+  /* research one wallet deeper via RPC signatures (bounded) */
+  async researchWallet(addr){
+    const w=S.wallets.get(addr); if(!w)return null;
+    const sig=await RPC.getSignaturesForAddress(addr,25);
+    if(!sig.supported){ w.state='DATA_INCOMPLETE'; w.dataGaps.push('RPC signature fetch failed: '+(sig.error||'')); w.lastResearchAt=U.now(); return w; }
+    w.sigCount=sig.signatures.length;
+    w.lastSigAt=sig.signatures.length?sig.signatures[0].blockTime*1000:null;
+    if(w.sigCount<5) w.state='INSUFFICIENT_SAMPLE';
+    else w.state='LIMITED_HISTORY'; // honest ceiling: we cannot fully reconstruct trades in-browser
+    w.qualityScore=this._quality(w);
+    w.lastResearchAt=U.now();
+    return w;
+  }
+  _quality(w){
+    // quality score only with enough evidence; 0-100 conservative
+    if(w.state==='INSUFFICIENT_SAMPLE'||w.state==='DATA_INCOMPLETE'||w.state==='UNVERIFIED')return null;
+    let q=30;
+    q+=Math.min(30,(w.tokensSeen.length-1)*10);
+    q+=Math.min(20,Math.floor((w.sigCount||0)/5)*2);
+    q-=Math.min(30,w.insiderFlags*15);
+    return U.clamp(q,0,100);
+  }
+  isQualified(w){
+    // qualified = enough evidence to count as an independent observation (not "smart money")
+    return w&&(w.state==='LIMITED_HISTORY'||w.state==='VERIFIED_HISTORY')&&w.insiderFlags===0&&(w.qualityScore==null||w.qualityScore>=20);
+  }
+}
+const WALLETS=new WalletResearchEngine();
+
+/* ============================================================
+   H. WalletClusterEngine — observable correlated activity
+   ============================================================ */
+class WalletClusterEngine{
+  recompute(){
+    S.clusters.clear();
+    const windowMs=S.settings.clusterWindowMin*60000;
+    // map wallet -> tokens it appears on (from observations)
+    for(const w of S.wallets.values()){
+      if(w.tokensSeen.length<2)continue;
+      // group this wallet's observations per token
+      for(const mint of w.tokensSeen){
+        const obs=w.observations.filter(o=>o.mint===mint); if(!obs.length)continue;
+        const key=mint;
+        let cl=S.clusters.get(key);
+        if(!cl){ cl={id:'cl_'+key.slice(0,8),mint:key,wallets:new Set(),firstAt:obs[0].t,lastAt:obs[0].t,
+          confidence:'LOW',reasons:[],fundingNote:'common funding detection: NOT_SUPPORTED — requires indexer across funding transactions',
+          independenceNote:'correlated activity observed; common ownership NOT proven and NOT assumed'};
+          S.clusters.set(key,cl); }
+        cl.wallets.add(w.address);
+        cl.firstAt=Math.min(cl.firstAt,obs[0].t); cl.lastAt=Math.max(cl.lastAt,obs[obs.length-1].t);
+      }
+    }
+    // finalize
+    for(const cl of S.clusters.values()){
+      cl.rawCount=cl.wallets.size;
+      const qual=[...cl.wallets].filter(a=>WALLETS.isQualified(S.wallets.get(a)));
+      cl.independentQualified=qual.length; // counted separately from raw count, per spec
+      cl.reasons=[];
+      cl.reasons.push(cl.rawCount+' wallets appear as holders on this token while also holding other watched tokens');
+      if(cl.independentQualified>0)cl.reasons.push(cl.independentQualified+' of these have enough history to count as qualified observations');
+      if(cl.rawCount>=3){ cl.confidence='MEDIUM'; } else cl.confidence='LOW';
+      if(cl.rawCount<2){ cl.confidence='INSUFFICIENT_DATA'; cl.reasons.push('fewer than 2 correlated wallets — cluster not established'); }
+      cl.wallets=[...cl.wallets];
+      cl.updatedAt=U.now();
+    }
+    return S.clusters;
+  }
+}
+const CLUSTERS=new WalletClusterEngine();
+
+/* ============================================================
+   I. RiskAnalysisEngine — fail-closed checklist
+   Every check: PASS / FAIL / UNKNOWN / NOT_SUPPORTED. UNKNOWN != PASS.
+   ============================================================ */
+class RiskAnalysisEngine{
+  analyze(c){
+    const checks=[]; const rc=c.rugcheck; const m=c.market;
+    const add=(key,label,state,scope,critical)=>({key,label,state,scope,critical:!!critical});
+    // 1. mint authority
+    if(!rc)checks.push(add('mintAuthority','Mint authority revoked','UNKNOWN','RugCheck report not fetched — authority status unverified',true));
+    else if(rc.mintAuthority===undefined)checks.push(add('mintAuthority','Mint authority revoked','UNKNOWN','field missing in RugCheck response',true));
+    else checks.push(add('mintAuthority','Mint authority revoked',rc.mintAuthority?'FAIL':'PASS',rc.mintAuthority?'mint authority ACTIVE — supply can be inflated':'mintAuthority null — verified revoked',true));
+    // 2. freeze authority
+    if(!rc)checks.push(add('freezeAuthority','Freeze authority revoked','UNKNOWN','RugCheck report not fetched',true));
+    else if(rc.freezeAuthority===undefined)checks.push(add('freezeAuthority','Freeze authority revoked','UNKNOWN','field missing in RugCheck response',true));
+    else checks.push(add('freezeAuthority','Freeze authority revoked',rc.freezeAuthority?'FAIL':'PASS',rc.freezeAuthority?'freeze authority ACTIVE — holder accounts can be frozen':'freezeAuthority null — verified revoked',true));
+    // 3. mutable metadata (non-critical)
+    if(!rc||rc.mutable===undefined)checks.push(add('mutable','Metadata immutable','UNKNOWN','metadata mutability not verified',false));
+    else checks.push(add('mutable','Metadata immutable',rc.mutable?'UNKNOWN':'PASS',rc.mutable?'metadata mutable — name/logo can change (common, not critical)':'metadata immutable',false));
+    // 4. top-holder concentration
+    if(!rc||!Array.isArray(rc.topHolders))checks.push(add('concentration','Top-holder concentration','UNKNOWN','topHolders unavailable (null on some tokens) — distribution unverified',true));
+    else{
+      const top10=rc.topHolders.slice(0,10).reduce((a,h)=>a+(h.pct||0),0);
+      const st=top10>S.settings.top10ConcentrationFailPct?'FAIL':'PASS';
+      checks.push(add('concentration','Top-10 holders ≤ '+S.settings.top10ConcentrationFailPct+'%',st,'top10 hold '+top10.toFixed(1)+'% of supply',true));
+    }
+    // 5. liquidity size
+    if(!m||m.liquidityUsd==null)checks.push(add('liquidity','Liquidity ≥ $'+U.fmtN(S.settings.minLiquidityUsd),'UNKNOWN','liquidity missing — not a zero, just unobserved',true));
+    else checks.push(add('liquidity','Liquidity ≥ $'+U.fmtN(S.settings.minLiquidityUsd),m.liquidityUsd>=S.settings.minLiquidityUsd?'PASS':'FAIL','liquidity '+U.fmt$(m.liquidityUsd),false));
+    // 6. LP lock/burn evidence
+    checks.push(add('lpLock','LP locked/burned evidence','NOT_SUPPORTED','no keyless verifiable LP-lock dataset in-browser — no lock/burn claim made',false));
+    // 7. volume sanity
+    if(!m||m.volume.h24==null)checks.push(add('volume','24h volume present','UNKNOWN','volume missing',false));
+    else checks.push(add('volume','24h volume ≥ $'+U.fmtN(S.settings.minVolume24Usd),m.volume.h24>=S.settings.minVolume24Usd?'PASS':'FAIL','24h volume '+U.fmt$(m.volume.h24),false));
+    // 8. buy/sell balance
+    if(m&&m.txns.h24&&m.txns.h24.buys!=null&&(m.txns.h24.buys+m.txns.h24.sells)>0){
+      const tot=m.txns.h24.buys+m.txns.h24.sells; const ratio=m.txns.h24.buys/tot;
+      const st=(ratio<0.15||ratio>0.92)?'UNKNOWN':'PASS';
+      checks.push(add('balance','Buy/sell balance sane',st,'24h buys '+m.txns.h24.buys+' / sells '+m.txns.h24.sells+(st==='UNKNOWN'?' — extreme imbalance, possible wash or one-sided flow':''),false));
+    }else checks.push(add('balance','Buy/sell balance sane','UNKNOWN','txn counts missing',false));
+    // 9. rugcheck flagged risks
+    if(rc&&rc.rugged)checks.push(add('rugged','Not marked rugged','FAIL','RugCheck marks this token as rugged',true));
+    else if(rc)checks.push(add('rugged','Not marked rugged','PASS','no rugged flag in RugCheck report',true));
+    else checks.push(add('rugged','Not marked rugged','UNKNOWN','RugCheck report not fetched',true));
+    // 10. abnormal volume spike
+    if(m&&m.volume.m5!=null&&m.volume.h24!=null&&m.volume.h24>0){
+      const spike=m.volume.m5/(m.volume.h24/288); // 5m share vs even share (288 5m windows/day)
+      checks.push(add('volSpike','No abnormal volume spike',spike>25?'UNKNOWN':'PASS','5m volume is '+spike.toFixed(1)+'x an even-share window'+(spike>25?' — possible manipulation or news event, unverified':''),false));
+    }else checks.push(add('volSpike','No abnormal volume spike','UNKNOWN','volume windows missing',false));
+    // 11. transaction depth
+    if(m&&m.txns.h24&&m.txns.h24.buys!=null){ const depth=m.txns.h24.buys+(m.txns.h24.sells||0);
+      checks.push(add('txDepth','Adequate transaction depth',depth<30?'UNKNOWN':'PASS','24h txns: '+depth+(depth<30?' — very thin, price easily manipulated':''),false));
+    }else checks.push(add('txDepth','Adequate transaction depth','UNKNOWN','txn counts missing',false));
+    // 12. LP ownership
+    checks.push(add('lpOwner','LP ownership verified','NOT_SUPPORTED','LP token ownership needs lock/burn dataset — unverified',false));
+    // 13. deployer holdings
+    if(rc&&Array.isArray(rc.topHolders)){ const ins=rc.topHolders.filter(h=>h.insider);
+      checks.push(add('devHold','Deployer/insider holdings',ins.length?'UNKNOWN':'PASS',ins.length?ins.length+' insider-flagged holder(s) in top holders — deployer share unverified':'no insider-flagged top holders in RugCheck snapshot',false));
+    }else checks.push(add('devHold','Deployer/insider holdings','UNKNOWN','holder data unavailable',false));
+    // 14. stale/inconsistent market data
+    if(m&&m.observedAt){ const stale=(U.now()-m.observedAt)>3*S.settings.pollIntervalSec*1000;
+      checks.push(add('freshness','Market data not stale',stale?'FAIL':'PASS','market data observed '+U.age(m.observedAt)+' ago',true));
+    }else checks.push(add('freshness','Market data not stale','UNKNOWN','no market observation timestamp',true));
+    // 15. pool identity
+    checks.push(add('poolId','Token/pool identity verified',(m&&m.pairAddress&&m.dexId)?'PASS':'UNKNOWN',(m&&m.pairAddress)?'pair '+U.short(m.pairAddress)+' on '+(m.dexId||'?'):'pair identity not established',true));
+    // 16. malicious-address datasets
+    checks.push(add('malicious','Known malicious-address lists','NOT_SUPPORTED','no keyless malicious-address dataset integrated',false));
+    // verdict
+    const critFail=checks.filter(x=>x.critical&&x.state==='FAIL');
+    const critUnknown=checks.filter(x=>x.critical&&x.state==='UNKNOWN');
+    let verdict;
+    if(critFail.length)verdict='FAIL';
+    else if(critUnknown.length)verdict='UNKNOWN'; // critical UNKNOWN prevents qualification (fail-closed)
+    else verdict='PASS';
+    return {verdict,checks,analyzedAt:U.now(),policyVersion:RISK_POLICY_VERSION,
+      note:'PASS means no critical check failed with available evidence — it does NOT mean safe. NOT_SUPPORTED/UNKNOWN checks remain unverified.'};
+  }
+}
+const RISK=new RiskAnalysisEngine();
+
+/* ============================================================
+   J. CandidateScoringEngine — versioned 0-100 evidence scoring
+   Weights are design weights, not proven predictive. Missing
+   data earns 0 for that component and is labelled.
+   ============================================================ */
+class CandidateScoringEngine{
+  score(c){
+    const w=S.settings.weights; const comps=[];
+    const comp=(key,label,max,points,inputs,evidence,dataState)=>({key,label,max,points:U.clamp(Math.round(points*10)/10,0,max),inputs,evidence,dataState});
+    const m=c.market||{};
+    // 1. Liquidity
+    if(m.liquidityUsd==null)comps.push(comp('liquidity','Liquidity',w.liquidity,0,{liquidityUsd:null},'liquidity unobserved — 0 points (missing data is never full points)','MISSING'));
+    else{ const l=m.liquidityUsd; const pts=l>=100000?1:l>=50000?.8:l>=25000?.6:l>=10000?.45:l>=5000?.3:l>0?.1:0;
+      comps.push(comp('liquidity','Liquidity',w.liquidity,pts*w.liquidity,{liquidityUsd:l},'banded by USD liquidity','LIVE')); }
+    // 2. Activity/volume
+    if(m.volume==null||m.volume.h24==null)comps.push(comp('activity','Activity / volume',w.activity,0,{v24:null},'volume unobserved','MISSING'));
+    else{ const v=m.volume.h24; const pts=v>=250000?1:v>=100000?.8:v>=50000?.6:v>=20000?.45:v>=5000?.25:v>0?.1:0;
+      comps.push(comp('activity','Activity / volume',w.activity,pts*w.activity,{volume24:v},'banded by 24h volume','LIVE')); }
+    // 3. Early-wallet evidence
+    { const ev=c.walletEvidence||[]; const qual=ev.filter(e=>e.qualified);
+      const pts=qual.length>=4?1:qual.length===3?.75:qual.length===2?.5:qual.length===1?.3:0;
+      comps.push(comp('earlyWallets','Early-wallet evidence',w.earlyWallets,pts*w.earlyWallets,{observedWallets:ev.length,qualified:qual.length},
+        qual.length?qual.length+' qualified wallet(s) with early-observation evidence':'no qualified early-wallet evidence — not proof of absence, just unobserved',ev.length?'LIVE':'MISSING')); }
+    // 4. Qualified cluster evidence
+    { const cl=[...S.clusters.values()].find(x=>x.mint===c.mint);
+      if(!cl)comps.push(comp('clusters','Qualified cluster evidence',w.clusters,0,{},'no cluster observed for this token','NOT_OBSERVED'));
+      else{ const pts=cl.confidence==='MEDIUM'?.6:cl.confidence==='LOW'?.3:0;
+        comps.push(comp('clusters','Qualified cluster evidence',w.clusters,pts*w.clusters,{raw:cl.rawCount,independentQualified:cl.independentQualified,confidence:cl.confidence},
+          'cluster confidence '+cl.confidence+'; '+cl.independentQualified+' independent qualified of '+cl.rawCount+' raw','LIVE')); } }
+    // 5. Token/holder distribution
+    { const rc=c.rugcheck;
+      if(!rc||!Array.isArray(rc.topHolders))comps.push(comp('distribution','Token/holder distribution',w.distribution,0,{},'holder distribution unverified (topHolders unavailable)','MISSING'));
+      else{ const top10=rc.topHolders.slice(0,10).reduce((a,h)=>a+(h.pct||0),0);
+        const pts=top10<=20?1:top10<=35?.7:top10<=50?.4:top10<=60?.15:0;
+        comps.push(comp('distribution','Token/holder distribution',w.distribution,pts*w.distribution,{top10Pct:Math.round(top10*10)/10},'banded by top-10 concentration (lower is better)','LIVE')); } }
+    // 6. Risk-adjusted market behavior
+    { let pts=.5; const evid=[]; const inputs={};
+      if(c.risk){ if(c.risk.verdict==='PASS'){pts+=.3;evid.push('risk gates PASS');} else if(c.risk.verdict==='UNKNOWN'){pts+=0;evid.push('risk UNKNOWN — no bonus');} else {pts-=.4;evid.push('risk FAIL penalty');} }
+      else evid.push('risk not analyzed — neutral base');
+      if(m.txns&&m.txns.h24&&m.txns.h24.buys!=null&&(m.txns.h24.buys+m.txns.h24.sells)>0){
+        const r=m.txns.h24.buys/(m.txns.h24.buys+m.txns.h24.sells); inputs.buyRatio=Math.round(r*100)/100;
+        if(r>=0.4&&r<=0.75){pts+=.2;evid.push('healthy buy/sell balance');} else evid.push('imbalanced flow — no bonus'); }
+      comps.push(comp('marketBehavior','Risk-adjusted market behavior',w.marketBehavior,U.clamp(pts,0,1)*w.marketBehavior,inputs,evid.join('; '),'LIVE')); }
+    const total=Math.round(comps.reduce((a,x)=>a+x.points,0)*10)/10;
+    const snapshot={id:U.uid('sc'),mint:c.mint,total,components:comps,weights:JSON.parse(JSON.stringify(w)),
+      scoreVersion:SCORE_VERSION,computedAt:U.now(),
+      disclaimer:'Design weights, not proven predictive. A high score never overrides a failed or unknown mandatory risk gate.'};
+    S.scoreHistory.push(snapshot); if(S.scoreHistory.length>500)S.scoreHistory=S.scoreHistory.slice(-500);
+    c.score=snapshot;
+    return snapshot;
+  }
+}
+const SCORER=new CandidateScoringEngine();
+
+/* ============================================================
+   K. SignalQualificationEngine — gated state machine
+   ============================================================ */
+class SignalQualificationEngine{
+  /* full evaluation of one candidate -> new state + reasons */
+  evaluate(c){
+    const reasons=[]; const t=U.now();
+    const set=(st,why)=>{ if(c.state!==st){c.state=st;c.stateHistory.push({state:st,at:t,reason:why});} return st; };
+    // rejection memory
+    c.rejectionReasons=[];
+    // 1. validation
+    const v=VALIDATOR.validate(c); c.validation=v;
+    if(v.status!=='VALIDATED'){ const why='validation incomplete: '+v.problems.join('; ');
+      c.rejectionReasons.push(why); S.diag.counters.incomplete++; return set('DATA_INCOMPLETE',why); }
+    // 2. v4 OPEN ENTRY (owner typed override 2026-10-13 "All rules remove pannidu"): risk, score and
+    //    wallet evidence are still computed and SHOWN for research, but NONE of them gates a paper entry.
+    const rk=c.risk||RISK.analyze(c); c.risk=rk;
+    const sc=SCORER.score(c);
+    const qualW=(c.walletEvidence||[]).filter(e=>e.qualified).length;
+    // 5. cooldown / duplicate
+    if(c.cooldownUntil&&c.cooldownUntil>t){ const why='cooldown until '+new Date(c.cooldownUntil).toLocaleTimeString();
+      c.rejectionReasons.push(why); return set('WATCHLIST',why); }
+    if(c.signalId&&S.signals.get(c.signalId)&&!S.signals.get(c.signalId).consumed){ return 'PAPER_SIGNAL'; }
+    // ALL GATES PASSED -> create signal
+    const sig={id:U.uid('sig'),mint:c.mint,symbol:c.market.symbol,name:c.market.name,createdAt:t,
+      signalPriceUsd:c.market.priceUsd,signalPriceAt:t,
+      signalPriceNote:'PAPER reference - exact price at signal time. Live price moves; this value never updates.',
+      score:sc.total,scoreVersion:SCORE_VERSION,thresholdsVersion:THRESHOLDS_VERSION,riskPolicyVersion:RISK_POLICY_VERSION,
+      evidence:{liquidityUsd:c.market.liquidityUsd,volume24:c.market.volume.h24,qualifiedWallets:qualW,
+        riskVerdict:rk.verdict,pairAddress:c.market.pairAddress,dexId:c.market.dexId,
+        scoreSnapshotId:sc.id,scoreBreakdown:sc.components},
+      state:'PAPER_SIGNAL',consumed:false,
+      paperOnly:true,note:'PAPER SIGNAL — research only. Not financial advice. Not a guarantee of profit or early entry.'};
+    S.signals.set(sig.id,sig); c.signalId=sig.id; S.diag.counters.signals++;
+    set('PAPER_SIGNAL','v4 open entry: validated identity + fresh market evidence, NO entry screens (risk '+rk.verdict+' / score '+sc.total+' / wallets '+qualW+' = research display only)');
+    S.emit('signal',sig);
+    return 'PAPER_SIGNAL';
+  }
+}
+const QUAL=new SignalQualificationEngine();
+
+/* ============================================================
+   L. PaperPortfolioEngine — $200 virtual, honest accounting
+   ============================================================ */
+class PaperPortfolioEngine{
+  cash(){ return this._cash==null?S.settings.startCapital:this._cash; }
+  setCash(v){ this._cash=Math.round(v*100)/100; }
+  reset(){ this._cash=null; this._peakEq=null; }
+  openCount(){ return [...S.positions.values()].filter(p=>p.status==='OPEN').length; }
+  openPositions(){ return [...S.positions.values()].filter(p=>p.status==='OPEN'); }
+  cost(){ return (S.settings.entrySizeUsd)*(1+(S.settings.feePct+S.settings.slippagePct)/100); }
+  canEnter(){
+    if(S.cycleFrozen)return {ok:false,reason:'TARGET_REACHED — cycle complete, entries frozen'};
+    if(this.openCount()>=S.settings.maxOpenPositions)return {ok:false,reason:'max open positions reached ('+S.settings.maxOpenPositions+')'};
+    if(this.cash()<this.cost())return {ok:false,reason:'insufficient paper cash ('+U.fmt$(this.cash())+' < '+U.fmt$(this.cost())+')'};
+    return {ok:true};
+  }
+  enter(c){
+    const gate=this.canEnter(); if(!gate.ok)return {ok:false,reason:gate.reason};
+    if(!c.market||c.market.priceUsd==null)return {ok:false,reason:'no executable price — stale/missing price is never used for entry'};
+    if((U.now()-c.market.observedAt)>5*60*1000)return {ok:false,reason:'price older than 5 minutes — refresh before entry (stale price never executable)'};
+    const entrySize=Math.min(S.settings.entrySizeUsd,S.settings.startCapital*S.settings.maxPositionPct/100);
+    const fee=entrySize*S.settings.feePct/100, slip=entrySize*S.settings.slippagePct/100;
+    const spend=entrySize+fee+slip;
+    const effPrice=c.market.priceUsd*(1+S.settings.slippagePct/100);
+    const qty=entrySize/effPrice;
+    const pos={id:U.uid('pos'),mint:c.mint,symbol:c.market.symbol,openedAt:U.now(),
+      entryPrice:effPrice,rawEntryPrice:c.market.priceUsd,qty,entrySizeUsd:entrySize,feeUsd:fee,slippageUsd:slip,
+      status:'OPEN',peakPrice:effPrice,entryLiquidity:c.market.liquidityUsd,
+      scoreAtEntry:c.score?c.score.total:null,scoreVersion:SCORE_VERSION,strategy:'early-wallet radar '+APP_VERSION,
+      milestonesHit:[],exitReason:null,closedAt:null,exitPrice:null,exitValueUsd:null,realizedPnl:null,
+      lastPrice:c.market.priceUsd,lastPriceAt:U.now(),paperOnly:true};
+    this.setCash(this.cash()-spend);
+    S.positions.set(pos.id,pos);
+    this._trade({t:U.now(),type:'ENTRY',posId:pos.id,mint:c.mint,symbol:pos.symbol,price:effPrice,qty,usd:entrySize,fee,slip,
+      reason:'signal-qualified entry',scoreVersion:SCORE_VERSION});
+    const sig=c.signalId&&S.signals.get(c.signalId); if(sig){sig.consumed=true;sig.positionId=pos.id;}
+    c.state='PAPER_POSITION_OPEN'; c.stateHistory=c.stateHistory||[]; c.stateHistory.push({state:'PAPER_POSITION_OPEN',at:U.now(),reason:'paper entry '+U.fmt$(entrySize)});
+    S.emit('data');
+    return {ok:true,pos};
+  }
+  exit(pos,reason,price){
+    if(pos.status!=='OPEN')return {ok:false,reason:'position not open'};
+    if(price==null||isNaN(price))return {ok:false,reason:'no executable exit price — marked UNAVAILABLE, position stays open'};
+    const gross=pos.qty*price*(1-S.settings.slippagePct/100);
+    const fee=gross*S.settings.feePct/100;
+    const net=gross-fee;
+    pos.status='CLOSED'; pos.closedAt=U.now(); pos.exitPrice=price; pos.exitValueUsd=Math.round(net*100)/100;
+    pos.realizedPnl=Math.round((net-pos.entrySizeUsd-pos.feeUsd-pos.slippageUsd)*100)/100;
+    pos.exitReason=reason;
+    this.setCash(this.cash()+net);
+    this._trade({t:U.now(),type:'EXIT',posId:pos.id,mint:pos.mint,symbol:pos.symbol,price,qty:pos.qty,usd:Math.round(net*100)/100,fee:Math.round(fee*100)/100,reason});
+    const c=S.candidates.get(pos.mint); if(c){c.state='PAPER_POSITION_CLOSED';c.cooldownUntil=U.now()+S.settings.signalCooldownHours*3600000;
+      c.stateHistory=c.stateHistory||[]; c.stateHistory.push({state:'PAPER_POSITION_CLOSED',at:U.now(),reason});}
+    S.emit('data');
+    return {ok:true,net:pos.exitValueUsd,pnl:pos.realizedPnl};
+  }
+  unrealized(pos){
+    if(pos.status!=='OPEN'||pos.lastPrice==null)return null;
+    return Math.round((pos.qty*pos.lastPrice-pos.entrySizeUsd-pos.feeUsd-pos.slippageUsd)*100)/100;
+  }
+  equity(){ let eq=this.cash(); let anyNull=false;
+    for(const p of this.openPositions()){ if(p.lastPrice==null){anyNull=true;continue;} eq+=p.qty*p.lastPrice; }
+    return {equity:Math.round(eq*100)/100,valuationsComplete:!anyNull}; }
+  stats(){
+    const closed=[...S.positions.values()].filter(p=>p.status==='CLOSED');
+    const wins=closed.filter(p=>(p.realizedPnl||0)>0);
+    const realized=Math.round(closed.reduce((a,p)=>a+(p.realizedPnl||0),0)*100)/100;
+    const eq=this.equity();
+    // max drawdown from equity curve recorded in trades timeline (approx via peak equity tracking)
+    this._peakEq=Math.max(this._peakEq||S.settings.startCapital,eq.equity);
+    const mdd=this._peakEq>0?Math.round((this._peakEq-eq.equity)/this._peakEq*1000)/10:0;
+    return {open:this.openCount(),closed:closed.length,wins:wins.length,
+      winRate:closed.length?Math.round(wins.length/closed.length*100):null,
+      realizedPnl:realized,equity:eq.equity,valuationsComplete:eq.valuationsComplete,maxDrawdownPct:mdd};
+  }
+  checkTarget(){
+    const eq=this.equity();
+    if(!S.cycleFrozen&&eq.valuationsComplete&&eq.equity>=S.settings.targetEquity){
+      S.cycleFrozen=true; S.targetReached=true;
+      this._trade({t:U.now(),type:'TARGET_REACHED',usd:eq.equity,reason:'verified equity >= '+S.settings.targetEquity+' — new entries frozen, cycle marked complete. A target met in paper accounting, not a profit guarantee.'});
+      S.emit('target');
+    }
+  }
+  _trade(ev){ ev.id=U.uid('tr'); S.trades.push(ev); if(S.trades.length>1000)S.trades=S.trades.slice(-1000); }
+}
+const PORT=new PaperPortfolioEngine();
+
+/* ============================================================
+   M. PositionMonitoringEngine — exit policy enforcement
+   ============================================================ */
+class PositionMonitoringEngine{
+  async run(){
+    const open=PORT.openPositions(); if(!open.length)return {checked:0};
+    const mints=[...new Set(open.map(p=>p.mint))];
+    const prices=await DISCOVERY.refreshPricesFor(mints);
+    for(const p of open){
+      const pr=prices[p.mint];
+      if(!pr||!pr.ok||pr.priceUsd==null){ p.priceStale=true; continue; }
+      p.priceStale=false; p.lastPrice=pr.priceUsd; p.lastPriceAt=pr.observedAt;
+      p.peakPrice=Math.max(p.peakPrice,pr.priceUsd);
+      const mult=pr.priceUsd/p.entryPrice;
+      // milestone monitoring (events, not profit guarantees)
+      for(const x of [2,3,5,10]){ if(mult>=x&&!p.milestonesHit.includes(x)){ p.milestonesHit.push(x);
+        PORT._trade({t:U.now(),type:'MILESTONE',posId:p.id,mint:p.mint,symbol:p.symbol,price:pr.priceUsd,reason:x+'x milestone reached (milestone != profit guarantee)'}); } }
+      // stop-loss / invalidation
+      const pnlPct=(pr.priceUsd-p.entryPrice)/p.entryPrice*100;
+      if(pnlPct<=S.settings.stopLossPct){ PORT.exit(p,'stop-loss hit ('+pnlPct.toFixed(1)+'% <= '+S.settings.stopLossPct+'%)',pr.priceUsd); continue; }
+      // trailing profit protection after configured multiple
+      if(mult>=S.settings.trailingAfterX){
+        const drop=(p.peakPrice-pr.priceUsd)/p.peakPrice*100;
+        if(drop>=S.settings.trailingDropPct){ PORT.exit(p,'trailing exit: '+drop.toFixed(1)+'% drop from peak after '+S.settings.trailingAfterX+'x',pr.priceUsd); continue; }
+      }
+      // liquidity deterioration
+      if(p.entryLiquidity&&pr.liquidityUsd!=null&&pr.liquidityUsd<p.entryLiquidity*S.settings.liquidityExitPct/100){
+        PORT.exit(p,'liquidity deterioration: '+U.fmt$(pr.liquidityUsd)+' < '+S.settings.liquidityExitPct+'% of entry liquidity',pr.priceUsd); continue; }
+      // risk deterioration
+      const c=S.candidates.get(p.mint);
+      if(c&&c.risk&&c.risk.verdict==='FAIL'){ PORT.exit(p,'risk deterioration: risk verdict now FAIL',pr.priceUsd); continue; }
+      // max holding period
+      if(S.settings.maxHoldHours>0&&(U.now()-p.openedAt)>S.settings.maxHoldHours*3600000){
+        PORT.exit(p,'max holding period reached ('+S.settings.maxHoldHours+'h)',pr.priceUsd); continue; }
+    }
+    PORT.checkTarget();
+    return {checked:open.length};
+  }
+}
+const MONITOR=new PositionMonitoringEngine();
+
+/* ============================================================
+   N. PersistenceEngine — IndexedDB (localStorage fallback)
+   ============================================================ */
+class PersistenceEngine{
+  constructor(){ this.db=null; this.mode='none'; }
+  async init(){
+    try{
+      this.db=await new Promise((res,rej)=>{
+        const rq=indexedDB.open('jk_solana_radar_db',SCHEMA_VERSION);
+        rq.onupgradeneeded=e=>{ const db=e.target.result;
+          for(const name of ['settings','candidates','wallets','clusters','signals','positions','trades','scores','diag','autopositions','autohistory'])
+            if(!db.objectStoreNames.contains(name))db.createObjectStore(name); };
+        rq.onsuccess=e=>res(e.target.result); rq.onerror=e=>rej(e.target.error); });
+      this.mode='idb'; S.diag.idbAvailable=true; S.diag.storage='IndexedDB (browser-local — can be lost on data clear; not a server backup)';
+    }catch(e){
+      this.mode='localStorage'; S.diag.storage='localStorage fallback (browser-local — can be lost on data clear)';
+    }
+    return this.mode;
+  }
+  async _put(store,key,val){
+    if(this.mode==='idb'){ return new Promise((res,rej)=>{ const tx=this.db.transaction(store,'readwrite');
+      tx.objectStore(store).put(val,key); tx.oncomplete=()=>res(); tx.onerror=e=>rej(e.target.error); }); }
+    localStorage.setItem('jksr_'+store+'_'+key,JSON.stringify(val));
+  }
+  async _get(store,key){
+    if(this.mode==='idb'){ return new Promise((res,rej)=>{ const tx=this.db.transaction(store,'readonly');
+      const rq=tx.objectStore(store).get(key); rq.onsuccess=()=>res(rq.result); rq.onerror=e=>rej(e.target.error); }); }
+    const v=localStorage.getItem('jksr_'+store+'_'+key); return v?JSON.parse(v):null;
+  }
+  async _all(store){
+    if(this.mode==='idb'){ return new Promise((res,rej)=>{ const tx=this.db.transaction(store,'readonly');
+      const rq=tx.objectStore(store).getAll(); rq.onsuccess=()=>res(rq.result||[]); rq.onerror=e=>rej(e.target.error); }); }
+    const out=[]; for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i);
+      if(k&&k.startsWith('jksr_'+store+'_'))out.push(JSON.parse(localStorage.getItem(k))); }
+    return out;
+  }
+  async _clear(store){
+    if(this.mode==='idb'){ return new Promise((res,rej)=>{ const tx=this.db.transaction(store,'readwrite');
+      tx.objectStore(store).clear(); tx.oncomplete=()=>res(); tx.onerror=e=>rej(e.target.error); }); }
+    const rm=[]; for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i);
+      if(k&&k.startsWith('jksr_'+store+'_'))rm.push(k); } rm.forEach(k=>localStorage.removeItem(k));
+  }
+  async saveAll(){
+    try{
+      await this._put('settings','main',S.settings);
+      await this._put('diag','main',S.diag);
+      await this._clear('candidates'); for(const c of S.candidates.values())await this._put('candidates',c.mint,c);
+      await this._clear('wallets'); for(const w of S.wallets.values())await this._put('wallets',w.address,w);
+      await this._clear('signals'); for(const g of S.signals.values())await this._put('signals',g.id,g);
+      await this._clear('positions'); for(const p of S.positions.values())await this._put('positions',p.id,p);
+      await this._clear('trades'); for(const t of S.trades)await this._put('trades',t.id,t);
+      await this._clear('scores'); for(const sc of S.scoreHistory.slice(-200))await this._put('scores',sc.id,sc);
+      await this._put('diag','meta',{cycleFrozen:S.cycleFrozen,targetReached:S.targetReached,cash:PORT.cash(),autoCash:AUTO.cash(),savedAt:U.now(),schemaVersion:SCHEMA_VERSION});
+      await this._clear('autopositions'); for(const p of AUTO.positions.values())await this._put('autopositions',p.id,p);
+      await this._clear('autohistory'); for(const h of AUTO.history.slice(-300))await this._put('autohistory',h.t+'_'+h.type,h);
+    }catch(e){ console.error('save failed',e); S.diag.storage+=' | LAST SAVE FAILED: '+String(e.message||e).slice(0,80); }
+  }
+  async loadAll(){
+    try{
+      const st=await this._get('settings','main'); if(st)S.settings=Object.assign(JSON.parse(JSON.stringify(DEFAULT_SETTINGS)),st,{weights:Object.assign({},DEFAULT_SETTINGS.weights,st.weights||{})});
+      if(!S.settings._v12){ S.settings.pollIntervalSec=10; S.settings.maxTokensPerCycle=12; S.settings.maxRugcheckPerCycle=6; S.settings.walletResearchPerCandidate=5; S.settings._v12=true; }
+      const dg=await this._get('diag','main'); if(dg)S.diag=Object.assign(S.diag,dg,{scanning:false});
+      const meta=await this._get('diag','meta'); if(meta){S.cycleFrozen=!!meta.cycleFrozen;S.targetReached=!!meta.targetReached;if(meta.cash!=null)PORT.setCash(meta.cash);}
+      for(const c of await this._all('candidates'))S.candidates.set(c.mint,c);
+      for(const w of await this._all('wallets'))S.wallets.set(w.address,w);
+      for(const g of await this._all('signals'))S.signals.set(g.id,g);
+      for(const p of await this._all('positions'))S.positions.set(p.id,p);
+      S.trades=await this._all('trades'); S.trades.sort((a,b)=>a.t-b.t);
+      S.scoreHistory=await this._all('scores'); S.scoreHistory.sort((a,b)=>a.computedAt-b.computedAt);
+      try{ for(const p of await this._all('autopositions'))AUTO.positions.set(p.id,p);
+        AUTO.history=await this._all('autohistory'); AUTO.history.sort((a,b)=>a.t-b.t);
+        if(meta&&meta.autoCash!=null)AUTO.setCash(meta.autoCash); }catch(e){ console.log('auto book load',e); }
+    }catch(e){ console.error('load failed',e); }
+  }
+  async wipe(){ for(const s of ['settings','candidates','wallets','clusters','signals','positions','trades','scores','diag','autopositions','autohistory'])await this._clear(s); }
+}
+const DB=new PersistenceEngine();
+
+/* ============================================================
+   Q. ExportImportEngine — JSON/CSV export, validated import
+   ============================================================ */
+class ExportImportEngine{
+  exportJSON(){
+    const dump={schemaVersion:SCHEMA_VERSION,exportedAt:new Date().toISOString(),app:BUILD_MARKER,
+      settings:S.settings,candidates:[...S.candidates.values()],wallets:[...S.wallets.values()],
+      signals:[...S.signals.values()],positions:[...S.positions.values()],trades:S.trades,
+      scoreHistory:S.scoreHistory.slice(-200),meta:{cash:PORT.cash(),cycleFrozen:S.cycleFrozen}};
+    this._download('solana-radar-export-'+new Date().toISOString().slice(0,10)+'.json',JSON.stringify(dump,null,1),'application/json');
+  }
+  exportCSV(){
+    let csv='type,time,symbol,mint,price,qty,usd,fee,reason\n';
+    for(const t of S.trades)csv+=[t.type,new Date(t.t).toISOString(),t.symbol||'',t.mint||'',t.price!=null?t.price:'',t.qty!=null?t.qty:'',t.usd!=null?t.usd:'',t.fee!=null?t.fee:'',(t.reason||'').replace(/,/g,';')].join(',')+'\n';
+    this._download('solana-radar-trades-'+new Date().toISOString().slice(0,10)+'.csv',csv,'text/csv');
+    let csv2='mint,symbol,state,score,risk,liquidity,volume24,firstObserved\n';
+    for(const c of S.candidates.values())csv2+=[c.mint,(c.market&&c.market.symbol)||'',c.state,c.score?c.score.total:'',c.risk?c.risk.verdict:'',(c.market&&c.market.liquidityUsd)||'',(c.market&&c.market.volume.h24)||'',new Date(c.firstObserved).toISOString()].join(',')+'\n';
+    this._download('solana-radar-candidates-'+new Date().toISOString().slice(0,10)+'.csv',csv2,'text/csv');
+  }
+  importJSON(file){
+    const rd=new FileReader();
+    rd.onload=async()=>{ try{
+        const d=JSON.parse(rd.result);
+        if(d.schemaVersion!==SCHEMA_VERSION)throw new Error('schema version mismatch ('+d.schemaVersion+' vs '+SCHEMA_VERSION+')');
+        if(!Array.isArray(d.candidates)||!Array.isArray(d.positions))throw new Error('missing required arrays');
+        if(d.settings)S.settings=Object.assign(JSON.parse(JSON.stringify(DEFAULT_SETTINGS)),d.settings);
+        S.candidates=new Map(d.candidates.map(c=>[c.mint,c]));
+        S.wallets=new Map((d.wallets||[]).map(w=>[w.address,w]));
+        S.signals=new Map((d.signals||[]).map(g=>[g.id,g]));
+        S.positions=new Map((d.positions||[]).map(p=>[p.id,p]));
+        S.trades=d.trades||[]; S.scoreHistory=d.scoreHistory||[];
+        if(d.meta&&d.meta.cash!=null)PORT.setCash(d.meta.cash);
+        await DB.saveAll(); RENDER.all(); U.toast('Import OK — '+S.candidates.size+' candidates restored');
+      }catch(e){ U.toast('Import REJECTED: '+e.message); } };
+    rd.readAsText(file);
+  }
+  async resetAll(){ if(!confirm('Reset ALL data? This wipes candidates, wallets, signals, positions, trades and settings from browser storage.'))return;
+    await DB.wipe(); location.reload(); }
+  _download(name,content,type){
+    const b=new Blob([content],{type}); const a=document.createElement('a');
+    a.href=URL.createObjectURL(b); a.download=name; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+  }
+}
+const XPORT=new ExportImportEngine();
+
+/* ============================================================
+   P. DiagnosticsEngine — counters, health, honest status
+   ============================================================ */
+class DiagnosticsEngine{
+  snapshot(){
+    return {sources:REG.all().map(s=>({id:s.id,label:s.label,status:s.status,lastSuccess:s.lastSuccess,
+      lastError:s.lastError,errorCount:s.errorCount,timeoutCount:s.timeoutCount,rateLimitCount:s.rateLimitCount,requestCount:s.requestCount,note:s.note})),
+      scans:S.diag.scans,lastScanStart:S.diag.lastScanStart,lastScanEnd:S.diag.lastScanEnd,lastScanOk:S.diag.lastScanOk,
+      scanning:S.diag.scanning,counters:S.diag.counters,rejectReasons:S.diag.rejectReasons,
+      storage:S.diag.storage,scoreVersion:SCORE_VERSION,riskPolicyVersion:RISK_POLICY_VERSION,thresholdsVersion:THRESHOLDS_VERSION,
+      monitoringNote:'Monitoring runs ONLY while this browser tab is open. A closed browser = no monitoring, no new data, no exits executed.'};
+  }
+}
+const DIAG=new DiagnosticsEngine();
+
+/* ============================================================
+   O. DashboardRenderer — all 11 sections, real state only
+   ============================================================ */
+const NAV=[['overview','📊','Overview'],['radar','🛰️','Token Radar'],['wallets','👛','Early Wallets'],
+  ['clusters','🕸️','Clusters'],['risk','🛡️','Risk'],['signals','⚡','Signals'],
+  ['portfolio','💼','Portfolio'],['trades','📜','Trades'],['learning','📈','Learning'],['autotrade','🤖','Auto Trade'],
+  ['health','🩺','Health'],['settings','⚙️','Settings']];
+class DashboardRenderer{
+  initNav(){
+    const nav=document.getElementById('mainNav');
+    nav.innerHTML=NAV.map(([id,ic,lb])=>'<button data-p="'+id+'"'+(S.ui.page===id?' class="act"':'')+'><span class="ic">'+ic+'</span>'+lb+'</button>').join('');
+    nav.querySelectorAll('button').forEach(b=>b.onclick=()=>{ S.ui.page=b.dataset.p; this.all(); });
+  }
+  all(){
+    this.initNav();
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('act'));
+    const pg=document.getElementById('page-'+S.ui.page); pg.classList.add('act');
+    ({overview:()=>this.overview(),radar:()=>this.radar(),wallets:()=>this.wallets(),clusters:()=>this.clusters(),
+      risk:()=>this.risk(),signals:()=>this.signals(),portfolio:()=>this.portfolio(),trades:()=>this.trades(),
+      learning:()=>this.learning(),autotrade:()=>this.autotrade(),health:()=>this.health(),settings:()=>this.settings()})[S.ui.page]();
+    if(window.DETAILUI&&S.ui.detail)DETAILUI.render();
+    this.scanPill();
+  }
+  scanPill(){ const p=document.getElementById('scanPill');
+    if(S.diag.scanning){p.textContent='SCANNING…';p.className='hdr-pill on';}
+    else if(S.scanTimer){p.textContent='LIVE · last scan '+(S.diag.lastScanEnd?U.age(S.diag.lastScanEnd)+' ago':'never');p.className='hdr-pill on';}
+    else{p.textContent='SCANNER IDLE';p.className='hdr-pill off';} }
+  badge(txt,cls){ return '<span class="badge '+cls+'">'+U.esc(txt)+'</span>'; }
+  stateBadge(st){ const m={DISCOVERED:'b-info',DATA_VALIDATING:'b-info',DATA_INCOMPLETE:'b-unk',RISK_REVIEW:'b-unk',
+    REJECTED:'b-err',WATCHLIST:'b-cached',PAPER_SIGNAL:'b-pur',PAPER_POSITION_OPEN:'b-live',PAPER_POSITION_CLOSED:'b-dim',OUTCOME_PENDING:'b-cached'};
+    return this.badge(st,m[st]||'b-dim'); }
+  riskBadge(v){ return v?this.badge('RISK '+v,v==='PASS'?'b-pass':v==='FAIL'?'b-fail':'b-unk'):this.badge('RISK NOT RUN','b-dim'); }
+  freshness(ts){ if(!ts)return this.badge('NO DATA','b-dim'); const a=U.now()-ts;
+    if(a<3*60*1000)return this.badge('LIVE '+U.age(ts),'b-live');
+    if(a<15*60*1000)return this.badge('CACHED '+U.age(ts),'b-cached'); return this.badge('STALE '+U.age(ts),'b-stale'); }
+  copyBtn(txt){ return '<button class="btn sm" onclick="event.stopPropagation();navigator.clipboard.writeText(\''+txt+'\');U.toast(\'copied\')">copy</button>'; }
+  links(c){ const mint=c.mint; let h='';
+    h+='<a class="btn sm" target="_blank" href="https://solscan.io/token/'+mint+'">solscan</a>';
+    h+='<a class="btn sm" target="_blank" href="https://dexscreener.com/solana/'+(c.market&&c.market.pairAddress?c.market.pairAddress:mint)+'">dexscreener</a>';
+    h+='<a class="btn sm" target="_blank" href="https://gmgn.ai/sol/token/'+mint+'">gmgn</a>';
+    h+='<a class="btn sm" target="_blank" href="https://www.binance.com/en/markets" title="Binance main markets page - brand-new DEX meme coins are usually NOT listed on Binance; this is an honest main-site link, not a per-token page">binance*</a>';
+    return h; }
+  /* ---------------- 1. OVERVIEW ---------------- */
+  overview(){
+    const st=PORT.stats(); const el=document.getElementById('page-overview');
+    const qualified=[...S.candidates.values()].filter(c=>c.state==='PAPER_SIGNAL'||c.state==='PAPER_POSITION_OPEN').length;
+    const rejected=[...S.candidates.values()].filter(c=>c.state==='REJECTED').length;
+    const incomplete=[...S.candidates.values()].filter(c=>c.state==='DATA_INCOMPLETE'||c.state==='RISK_REVIEW').length;
+    const validated=[...S.candidates.values()].filter(c=>c.validation&&c.validation.status==='VALIDATED').length;
+    const qualW=[...S.wallets.values()].filter(w=>WALLETS.isQualified(w)).length;
+    const qualC=[...S.clusters.values()].filter(c=>c.confidence!=='INSUFFICIENT_DATA'&&c.independentQualified>0).length;
+    const kpis=[['Discovered tokens',S.candidates.size,''],['Validated',validated,''],['Qualified signals',qualified,'info'],
+      ['Rejected',rejected,'bad'],['Data incomplete',incomplete,'warn'],['Wallets researched',S.wallets.size,''],
+      ['Qualified wallets',qualW,''],['Qualified clusters',qualC,''],['Open positions',st.open,'info'],
+      ['Equity',U.fmt$(st.equity)+(st.valuationsComplete?'':' *'),st.equity>=S.settings.startCapital?'':'bad'],
+      ['Realized PnL',U.fmt$(st.realizedPnl),st.realizedPnl>=0?'':'bad'],
+      ['Unrealized PnL',(function(){let u=0,ok=true;for(const p of PORT.openPositions()){const x=PORT.unrealized(p);if(x==null)ok=false;else u+=x;}return U.fmt$(Math.round(u*100)/100)+(ok?'':'*');})(),''],
+      ['Max drawdown',st.maxDrawdownPct+'%','warn'],['Last scan',S.diag.lastScanEnd?U.age(S.diag.lastScanEnd)+' ago':'never',''],
+      ['Scanner',S.scanTimer?'RUNNING':'STOPPED',S.scanTimer?'':'bad']];
+    let h='<div class="grid kpis">'+kpis.map(([l,v,c])=>'<div class="kpi '+c+'"><div class="v">'+v+'</div><div class="l">'+l+'</div></div>').join('')+'</div>';
+    if(!st.valuationsComplete)h+='<div class="note">* some open positions have unavailable valuations (price missing) — they are excluded from equity, not valued at zero.</div>';
+    h+='<div class="card"><h3>Source health</h3>'+REG.all().map(s=>'<div class="kv"><span class="k">'+U.esc(s.label)+'</span><span class="v">'+this.badge(s.status,s.status==='LIVE'?'b-live':s.status==='NOT_OBSERVED'?'b-dim':'b-err')+' '+(s.lastSuccess?'ok '+U.age(s.lastSuccess)+' ago':'no success yet')+'</span></div>').join('')+'</div>';
+    h+='<div class="card"><h3>Controls</h3><div class="row">'
+      +(S.scanTimer?'<button class="btn red" onclick="BOOT.stop()">⏸ STOP scanner</button>':'<button class="btn grn" onclick="BOOT.start()">▶ START scanner</button>')
+      +'<button class="btn" onclick="BOOT.scanNow()">↻ Scan now</button>'
+      +'<span class="small">Monitoring runs only while this tab is open.</span></div></div>';
+    h+='<div class="note">Paper trading only — no real money, no wallet connection, no keys. Discovery is limited to what public keyless feeds expose; this is NOT exhaustive token discovery and NOT a rug detector. A truthful NO QUALIFIED SIGNAL beats a fabricated opportunity.</div>';
+    el.innerHTML=h;
+  }
+  /* ---------------- 2. TOKEN RADAR ---------------- */
+  radar(){
+    const el=document.getElementById('page-radar');
+    let list=[...S.candidates.values()];
+    const f=S.ui.radarFilter, q=S.ui.radarSearch.toLowerCase();
+    if(f==='new24')list=list.filter(c=>U.now()-c.firstObserved<86400000);
+    else if(f==='watchlist')list=list.filter(c=>c.state==='WATCHLIST');
+    else if(f==='signals')list=list.filter(c=>c.state==='PAPER_SIGNAL'||c.state==='PAPER_POSITION_OPEN');
+    else if(f==='rejected')list=list.filter(c=>c.state==='REJECTED');
+    else if(f==='incomplete')list=list.filter(c=>c.state==='DATA_INCOMPLETE'||c.state==='RISK_REVIEW');
+    else if(f==='lowliq')list=list.filter(c=>c.market&&c.market.liquidityUsd!=null&&c.market.liquidityUsd<25000);
+    else if(f==='highvol')list=list.filter(c=>c.market&&c.market.volume.h24!=null&&c.market.volume.h24>50000);
+    else if(f==='unusual')list=list.filter(c=>c.market&&c.market.volume.m5!=null&&c.market.volume.h24>0&&c.market.volume.m5/(c.market.volume.h24/288)>10);
+    else if(f==='earlywallet')list=list.filter(c=>(c.walletEvidence||[]).some(e=>e.qualified));
+    else if(f==='highrisk')list=list.filter(c=>c.risk&&(c.risk.verdict==='FAIL'||c.risk.verdict==='UNKNOWN'));
+    if(q)list=list.filter(c=>(c.mint.toLowerCase().includes(q))||((c.market&&c.market.symbol)||'').toLowerCase().includes(q)||((c.market&&c.market.name)||'').toLowerCase().includes(q));
+    const so=S.ui.radarSort;
+    const rk=c=>c.risk?(c.risk.verdict==='PASS'?2:c.risk.verdict==='UNKNOWN'?1:0):1;
+    list.sort((a,b)=> so==='age'?b.firstObserved-a.firstObserved
+      : so==='liq'?((b.market&&b.market.liquidityUsd)||0)-((a.market&&a.market.liquidityUsd)||0)
+      : so==='vol'?((b.market&&b.market.volume.h24)||0)-((a.market&&a.market.volume.h24)||0)
+      : so==='risk'?rk(b)-rk(a)
+      : ((b.score&&b.score.total)||0)-((a.score&&a.score.total)||0));
+    const page=S.ui.radarPage, per=15, pages=Math.max(1,Math.ceil(list.length/per));
+    const slice=list.slice(page*per,(page+1)*per);
+    let h='<div class="toolbar"><input placeholder="search symbol / mint" value="'+U.esc(S.ui.radarSearch)+'" oninput="S.ui.radarSearch=this.value;S.ui.radarPage=0;RENDER.radar()">'
+      +'<select onchange="S.ui.radarFilter=this.value;S.ui.radarPage=0;RENDER.radar()">'
+      +[['all','All'],['new24','New (24h)'],['watchlist','Watchlist'],['signals','Signals'],['rejected','Rejected'],['incomplete','Data incomplete'],['lowliq','Low liquidity'],['highvol','High volume'],['unusual','Unusual activity'],['earlywallet','Early-wallet activity'],['highrisk','High risk']]
+        .map(([v,l])=>'<option value="'+v+'"'+(f===v?' selected':'')+'>'+l+'</option>').join('')+'</select>'
+      +'<select onchange="S.ui.radarSort=this.value;RENDER.radar()">'
+      +[['score','Sort: score'],['age','Sort: newest'],['liq','Sort: liquidity'],['vol','Sort: volume'],['risk','Sort: risk']]
+        .map(([v,l])=>'<option value="'+v+'"'+(so===v?' selected':'')+'>'+l+'</option>').join('')+'</select></div>';
+    h+='<div class="small" style="margin-bottom:8px">'+list.length+' candidates · page '+(page+1)+'/'+pages+' · first-seen is our observation time, NOT verified launch time · *binance opens Binance main markets (new DEX coins are usually not listed there - honest main-site link, not a per-token page)</div>';
+    if(!slice.length)h+='<div class="empty"><b>No candidates yet.</b><br>Start the scanner on Overview — discovery pulls real tokens from Dexscreener public feeds.</div>';
+    for(const c of slice)h+=this.tokenCard(c);
+    if(pages>1)h+='<div class="pager"><button class="btn sm" '+(page===0?'disabled':'')+' onclick="S.ui.radarPage--;RENDER.radar()">◀ prev</button><button class="btn sm" '+(page>=pages-1?'disabled':'')+' onclick="S.ui.radarPage++;RENDER.radar()">next ▶</button></div>';
+    el.innerHTML=h;
+  }
+  tokenCard(c){
+    const m=c.market||{};
+    const sideCls=c.state==='REJECTED'?'s-fail':(c.state==='PAPER_SIGNAL'||c.state==='PAPER_POSITION_OPEN')?'s-sig':(c.state==='DATA_INCOMPLETE'||c.state==='RISK_REVIEW')?'s-unk':'s-pass';
+    let h='<div class="card tok tappable '+sideCls+'" onclick="openDetail(\'candidate\',\''+c.mint+'\')">';
+    h+='<div class="row"><b style="font-size:15px">'+U.esc(m.symbol||'(no symbol)')+'</b><span class="small">'+U.esc(m.name||'')+'</span><span class="sp"></span>'
+      +this.stateBadge(c.state)+this.riskBadge(c.risk&&c.risk.verdict)+this.freshness(m.observedAt)+'</div>';
+    h+='<div class="row" style="margin:4px 0"><span class="mint">'+c.mint+'</span>'+this.copyBtn(c.mint)+'</div>';
+    h+='<div class="grid kpis" style="grid-template-columns:repeat(auto-fill,minmax(88px,1fr));margin:6px 0">'
+      +'<div class="kpi"><div class="v" style="font-size:14px">'+(m.priceUsd!=null?'$'+m.priceUsd:'—')+'</div><div class="l">price</div></div>'
+      +'<div class="kpi"><div class="v" style="font-size:14px">'+U.fmt$(m.liquidityUsd)+'</div><div class="l">liquidity</div></div>'
+      +'<div class="kpi"><div class="v" style="font-size:14px">'+U.fmt$(m.volume&&m.volume.h24)+'</div><div class="l">vol 24h</div></div>'
+      +'<div class="kpi"><div class="v" style="font-size:14px">'+U.age(c.firstObserved)+'</div><div class="l">first seen</div></div>'
+      +'<div class="kpi"><div class="v" style="font-size:14px">'+(c.score?c.score.total+'/100':'—')+'</div><div class="l">score '+(c.score?c.score.scoreVersion:'')+'</div></div></div>';
+    if(c.score){ h+='<div class="bar"><i style="width:'+U.clamp(c.score.total,0,100)+'%"></i></div>';
+      h+='<details onclick="event.stopPropagation()"><summary>score breakdown (inputs + evidence)</summary>'+c.score.components.map(x=>'<div class="kv"><span class="k">'+x.label+' <span class="small">'+x.dataState+'</span></span><span class="v">'+x.points+'/'+x.max+'</span></div><div class="small" style="padding:0 0 6px 8px">'+U.esc(x.evidence)+'</div>').join('')+'<div class="note">'+U.esc(c.score.disclaimer)+'</div></details>'; }
+    if(c.rejectionReasons&&c.rejectionReasons.length)h+='<div class="note" style="border-color:var(--amb)">Decision reasons: '+c.rejectionReasons.map(U.esc).join(' · ')+'</div>';
+    if(c.lastError)h+='<div class="note" style="border-color:var(--red)">Last source error: '+U.esc(c.lastError)+'</div>';
+    if(c.signalId&&S.signals.get(c.signalId)){ const g=S.signals.get(c.signalId);
+      if(g.signalPriceUsd!=null){ h+='<div style="border:1px dashed var(--pur);border-radius:10px;padding:7px 9px;margin-top:7px">'
+        +'<div class="row"><span class="badge b-pur">BUY ZONE</span><span class="small">paper reference · signal '+U.age(g.createdAt)+' ago</span></div>'
+        +'<div class="kv"><span class="k">signal-time rate (frozen)</span><span class="v" style="color:var(--pur)">$'+g.signalPriceUsd+'</span></div>'
+        +'<div class="kv"><span class="k">exit zone</span><span class="v">1.5x $'+(g.signalPriceUsd*1.5).toPrecision(4)+' · 2x $'+(g.signalPriceUsd*2).toPrecision(4)+' · 3x $'+(g.signalPriceUsd*3).toPrecision(4)+'</span></div>'
+        +'<div class="small" style="color:var(--pur)">PAPER ONLY · signal-time reference — live price may differ</div></div>'; } }
+    h+='<div class="row" style="margin-top:8px" onclick="event.stopPropagation()">'+this.links(c)
+      +'<button class="btn sm" onclick="BOOT.analyzeOne(\''+c.mint+'\')">analyze</button>'
+      +'<button class="btn sm" onclick="DISCOVERY.refreshCandidate(\''+c.mint+'\').then(()=>RENDER.all()).catch(e=>U.toast(e.message))">refresh</button>'
+      +'<span class="sp"></span><span class="small">'+U.esc((c.feeds||[]).join(' + '))+'</span></div>';
+    h+='</div>'; return h;
+  }
+  /* ---------------- 3. EARLY WALLETS ---------------- */
+  wallets(){
+    const el=document.getElementById('page-wallets');
+    let list=[...S.wallets.values()];
+    const q=S.ui.walletSearch.toLowerCase();
+    if(q)list=list.filter(w=>w.address.toLowerCase().includes(q));
+    list.sort((a,b)=>(b.qualityScore||0)-(a.qualityScore||0));
+    let h='<div class="toolbar"><input placeholder="search address" value="'+U.esc(S.ui.walletSearch)+'" oninput="S.ui.walletSearch=this.value;RENDER.wallets()"></div>';
+    h+='<div class="note">Wallet states: VERIFIED_HISTORY / LIMITED_HISTORY / INSUFFICIENT_SAMPLE / DATA_INCOMPLETE / UNVERIFIED. In this single file, full trade reconstruction needs an indexer — so LIMITED_HISTORY is the honest ceiling. Unknown PnL is NOT zero. A wallet is never called smart money for buying a winner.</div>';
+    if(!list.length)h+='<div class="empty"><b>No wallets harvested yet.</b><br>Wallets are collected from RugCheck top-holder reports during analysis.</div>';
+    for(const w of list.slice(0,60)){
+      const sm={VERIFIED_HISTORY:'b-live',LIMITED_HISTORY:'b-cached',INSUFFICIENT_SAMPLE:'b-unk',DATA_INCOMPLETE:'b-err',UNVERIFIED:'b-dim'}[w.state]||'b-dim';
+      h+='<div class="card"><div class="row"><span class="mint">'+U.short(w.address)+'</span>'+this.copyBtn(w.address)
+        +'<a class="btn sm" target="_blank" href="https://solscan.io/account/'+w.address+'">solscan</a><span class="sp"></span>'
+        +this.badge(w.state,sm)+(WALLETS.isQualified(w)?this.badge('QUALIFIED','b-pur'):'')+'</div>'
+        +'<div class="kv"><span class="k">observations</span><span class="v">'+w.observations.length+'</span></div>'
+        +'<div class="kv"><span class="k">tokens seen</span><span class="v">'+w.tokensSeen.length+'</span></div>'
+        +'<div class="kv"><span class="k">recent signatures</span><span class="v">'+(w.sigCount==null?'not researched':w.sigCount)+'</span></div>'
+        +'<div class="kv"><span class="k">quality score</span><span class="v">'+(w.qualityScore==null?'— (insufficient evidence)':w.qualityScore+'/100')+'</span></div>'
+        +'<div class="kv"><span class="k">realized PnL</span><span class="v small">NOT_SUPPORTED</span></div>'
+        +(w.insiderFlags?'<div class="note" style="border-color:var(--red)">⚠ flagged as insider in '+w.insiderFlags+' holder snapshot(s)</div>':'')
+        +'<div class="small">gaps: '+U.esc(w.dataGaps.slice(0,3).join('; '))+'</div>'
+        +'<div class="row" style="margin-top:6px"><button class="btn sm" onclick="BOOT.researchWallet(\''+w.address+'\')">research (RPC)</button></div></div>';
+    }
+    el.innerHTML=h;
+  }
+  /* ---------------- 4. CLUSTERS ---------------- */
+  clusters(){
+    const el=document.getElementById('page-clusters');
+    CLUSTERS.recompute();
+    const list=[...S.clusters.values()].sort((a,b)=>b.rawCount-a.rawCount);
+    let h='<div class="note">Clusters = observable correlated activity (same wallets across watched tokens). This is NOT proof of common ownership, independence, or profitability. Common-funding proof: NOT_SUPPORTED without an indexer.</div>';
+    if(!list.length)h+='<div class="empty"><b>No clusters detected.</b><br>Clusters form when wallets appear as holders on 2+ watched tokens.</div>';
+    for(const cl of list){
+      const c=S.candidates.get(cl.mint); const sym=(c&&c.market&&c.market.symbol)||U.short(cl.mint);
+      h+='<div class="card"><div class="row"><b>'+U.esc(sym)+'</b><span class="sp"></span>'+this.badge('CONF '+cl.confidence,cl.confidence==='MEDIUM'?'b-cached':cl.confidence==='LOW'?'b-info':'b-unk')+'</div>'
+        +'<div class="kv"><span class="k">raw correlated wallets</span><span class="v">'+cl.rawCount+'</span></div>'
+        +'<div class="kv"><span class="k">independent qualified wallets</span><span class="v">'+(cl.independentQualified||0)+' (counted separately)</span></div>'
+        +'<div class="kv"><span class="k">window</span><span class="v">'+S.settings.clusterWindowMin+' min · '+U.age(cl.firstAt)+' → '+U.age(cl.lastAt)+' ago</span></div>'
+        +'<div class="small" style="margin-top:4px">'+cl.reasons.map(U.esc).join('<br>')+'</div>'
+        +'<div class="note">'+U.esc(cl.independenceNote)+'</div>'
+        +'<details><summary>wallets</summary>'+cl.wallets.map(a=>'<div class="row"><span class="mint">'+U.short(a)+'</span>'+this.copyBtn(a)+'</div>').join('')+'</details></div>';
+    }
+    el.innerHTML=h;
+  }
+  /* ---------------- 5. RISK ANALYSIS ---------------- */
+  risk(){
+    const el=document.getElementById('page-risk');
+    const list=[...S.candidates.values()].filter(c=>c.risk).sort((a,b)=>(a.risk.verdict==='FAIL'?-1:0)-(b.risk.verdict==='FAIL'?-1:0));
+    let h='<div class="note">Every check returns PASS / FAIL / UNKNOWN / NOT_SUPPORTED. UNKNOWN never counts as PASS. Policy '+RISK_POLICY_VERSION+'. Nothing here is a complete rug detection. Research display only — under entry-open-v4 these checks do NOT block paper entries.</div>';
+    if(!list.length)h+='<div class="empty"><b>No risk reports yet.</b><br>Tap "analyze" on any token in the Radar.</div>';
+    for(const c of list.slice(0,40)){
+      h+='<div class="card"><div class="row"><b>'+U.esc((c.market&&c.market.symbol)||U.short(c.mint))+'</b><span class="sp"></span>'+this.riskBadge(c.risk.verdict)+'</div>'
+        +c.risk.checks.map(x=>'<div class="chk '+x.state+'"><span class="st">'+x.state+'</span><div><b>'+U.esc(x.label)+'</b><div class="small">'+U.esc(x.scope)+(x.critical?' · <span style="color:var(--red)">critical flag (display only)</span>':'')+'</div></div></div>').join('')
+        +'<div class="small">analyzed '+U.age(c.risk.analyzedAt)+' ago · '+U.esc(c.risk.note)+'</div></div>';
+    }
+    el.innerHTML=h;
+  }
+}
+const RENDER=new DashboardRenderer();
+
+/* ---------------- 6. LIVE SIGNALS (paper only) ---------------- */
+DashboardRenderer.prototype.signals=function(){
+  const el=document.getElementById('page-signals');
+  const list=[...S.signals.values()].sort((a,b)=>b.createdAt-a.createdAt);
+  let h='<div class="note">PAPER ONLY — "Live" means generated from live public data, never real-money execution, no wallet signing. New signals also feed the 🤖 Auto Trade tab (virtual $ bank only).</div>';
+  if(!list.length)h+='<div class="empty"><b>NO QUALIFIED SIGNAL</b><br>No candidate has passed every mandatory gate yet. This is an honest empty state, not a missing feature. The scanner keeps evaluating new discoveries.</div>';
+  for(const g of list){
+    const c=S.candidates.get(g.mint)||{}; const ev=g.evidence||{};
+    h+='<div class="card tok s-sig tappable" id="sig-'+g.id+'" onclick="openDetail(\'signal\',\''+g.id+'\')"><div class="row"><b style="font-size:15px">'+U.esc(g.symbol||'(no symbol)')+'</b>'+this.badge('PAPER_SIGNAL','b-pur')+(g.consumed?this.badge('POSITION OPENED','b-live'):'')+'<span class="sp"></span><span class="scorebig">'+g.score+'</span></div>'
+      +'<div class="mint">'+g.mint+'</div>'
+      +'<div class="kv"><span class="k">signal time</span><span class="v">'+new Date(g.createdAt).toLocaleString()+' ('+U.age(g.createdAt)+' ago)</span></div>'
+      +'<div class="kv" style="border:1px solid var(--pur);border-radius:8px;padding:6px 8px;margin:4px 0"><span class="k">🔒 signal-time rate (frozen)</span><span class="v" style="color:var(--pur)">'+(g.signalPriceUsd!=null?'$'+g.signalPriceUsd:'— (signal predates snapshot feature)')+'</span></div>'
+      +(function(){ const c2=S.candidates.get(g.mint); const lp=c2&&c2.market?c2.market.priceUsd:null; const la=c2&&c2.market?c2.market.observedAt:null;
+        return '<div class="kv"><span class="k">live price now</span><span class="v">'+(lp!=null?'$'+lp+' · '+U.age(la)+' ago':'— unavailable')+'</span></div>'; })()
+      +(g.signalPriceUsd!=null?'<div class="kv"><span class="k">EXIT ZONE targets (from frozen rate)</span><span class="v">1.5x $'+(g.signalPriceUsd*1.5).toPrecision(4)+' · 2x $'+(g.signalPriceUsd*2).toPrecision(4)+' · 3x $'+(g.signalPriceUsd*3).toPrecision(4)+'</span></div>':'')
+      +'<div class="small" style="color:var(--pur)">PAPER ONLY · signal-time reference price — live price may differ</div>'
+      +'<div class="kv"><span class="k">liquidity / vol24</span><span class="v">'+U.fmt$(ev.liquidityUsd)+' / '+U.fmt$(ev.volume24)+'</span></div>'
+      +'<div class="kv"><span class="k">qualified wallets</span><span class="v">'+(ev.qualifiedWallets!=null?ev.qualifiedWallets:'—')+'</span></div>'
+      +'<div class="kv"><span class="k">risk verdict</span><span class="v">'+(ev.riskVerdict||'—')+'</span></div>'
+      +'<div class="kv"><span class="k">versions</span><span class="v small">'+g.scoreVersion+' · '+g.riskPolicyVersion+' · '+g.thresholdsVersion+'</span></div>'
+      +'<div class="note">'+U.esc(g.note)+'</div>'
+      +'<div class="row" onclick="event.stopPropagation()">'+(!g.consumed&&c.market?'<button class="btn grn sm" onclick="BOOT.enterPaper(\''+g.mint+'\')">enter $'+S.settings.entrySizeUsd+' paper</button>':'')
+      +this.links(c)+'</div></div>';
+  }
+  el.innerHTML=h;
+};
+/* ---------------- 7. PAPER PORTFOLIO ---------------- */
+DashboardRenderer.prototype.portfolio=function(){
+  const el=document.getElementById('page-portfolio');
+  const st=PORT.stats(); const open=PORT.openPositions();
+  const closed=[...S.positions.values()].filter(p=>p.status==='CLOSED').sort((a,b)=>b.closedAt-a.closedAt);
+  let h='';
+  if(S.cycleFrozen)h+='<div class="card" style="border-color:var(--amb)"><h3 style="color:var(--amb)">🏁 TARGET_REACHED</h3><div class="small">Verified virtual equity reached $'+S.settings.targetEquity+'. New entries frozen. Cycle marked complete; history preserved. Paper result, not a profit guarantee.</div></div>';
+  h+='<div class="grid kpis">'
+    +'<div class="kpi"><div class="v">'+U.fmt$(PORT.cash())+'</div><div class="l">paper cash</div></div>'
+    +'<div class="kpi '+(st.equity>=S.settings.startCapital?'':'bad')+'"><div class="v">'+U.fmt$(st.equity)+(st.valuationsComplete?'':'*')+'</div><div class="l">equity / $'+S.settings.targetEquity+' target</div></div>'
+    +'<div class="kpi '+(st.realizedPnl>=0?'':'bad')+'"><div class="v">'+U.fmt$(st.realizedPnl)+'</div><div class="l">realized pnl</div></div>'
+    +'<div class="kpi info"><div class="v">'+(st.winRate==null?'—':st.winRate+'%')+'</div><div class="l">win rate ('+st.wins+'/'+st.closed+')</div></div>'
+    +'<div class="kpi warn"><div class="v">'+st.maxDrawdownPct+'%</div><div class="l">max drawdown</div></div></div>';
+  h+='<div class="bar" style="margin:10px 0"><i style="width:'+U.clamp(st.equity/S.settings.targetEquity*100,0,100)+'%"></i></div>';
+  h+='<div class="note">Virtual $'+S.settings.startCapital+' start · $'+S.settings.entrySizeUsd+' entries · fees '+S.settings.feePct+'% + slippage '+S.settings.slippagePct+'% per side (configurable). Stale/missing prices are never executed. Actual real fills would differ — this is accounting simulation only.</div>';
+  h+='<h3 style="margin:12px 0 8px;font-size:14px;color:var(--blu)">Open positions ('+open.length+')</h3>';
+  if(!open.length)h+='<div class="empty"><b>No open positions.</b></div>';
+  for(const p of open){
+    const unr=PORT.unrealized(p); const mult=p.lastPrice?p.lastPrice/p.entryPrice:null;
+    h+='<div class="card tappable" onclick="openDetail(\'portpos\',\''+p.id+'\')"><div class="row"><b>'+U.esc(p.symbol||U.short(p.mint))+'</b>'+this.badge('OPEN','b-live')
+      +(p.priceStale?this.badge('PRICE STALE','b-stale'):'')+(p.milestonesHit.length?this.badge(p.milestonesHit[p.milestonesHit.length-1]+'x HIT','b-pur'):'')
+      +'<span class="sp"></span><span style="font-weight:800;color:'+(unr==null?'var(--dim)':unr>=0?'var(--grn)':'var(--red)')+'">'+(unr==null?'UNAVAILABLE':U.fmt$(unr))+'</span></div>'
+      +'<div class="kv"><span class="k">entry</span><span class="v">$'+p.entryPrice.toPrecision(4)+' · '+U.fmt$(p.entrySizeUsd)+' · '+U.age(p.openedAt)+' ago</span></div>'
+      +'<div class="kv"><span class="k">last price</span><span class="v">'+(p.lastPrice!=null?'$'+p.lastPrice.toPrecision(4)+' · '+U.age(p.lastPriceAt)+' ago':'UNAVAILABLE — not treated as current')+'</span></div>'
+      +'<div class="kv"><span class="k">multiple</span><span class="v">'+(mult?mult.toFixed(2)+'x':'—')+'</span></div>'
+      +'<div class="kv"><span class="k">score at entry</span><span class="v">'+(p.scoreAtEntry==null?'—':p.scoreAtEntry+' ('+p.scoreVersion+')')+'</span></div>'
+      +'<div class="row" style="margin-top:6px" onclick="event.stopPropagation()"><button class="btn red sm" onclick="BOOT.manualExit(\''+p.id+'\')">exit now (paper)</button>'+this.links({mint:p.mint})+'</div></div>';
+  }
+  h+='<h3 style="margin:12px 0 8px;font-size:14px;color:var(--blu)">Closed positions ('+closed.length+')</h3>';
+  if(!closed.length)h+='<div class="empty"><b>No closed positions yet.</b></div>';
+  for(const p of closed.slice(0,25)){
+    h+='<div class="card tappable" onclick="openDetail(\'portpos\',\''+p.id+'\')"><div class="row"><b>'+U.esc(p.symbol||U.short(p.mint))+'</b>'+this.badge('CLOSED','b-dim')
+      +'<span class="sp"></span><span style="font-weight:800;color:'+((p.realizedPnl||0)>=0?'var(--grn)':'var(--red)')+'">'+U.fmt$(p.realizedPnl)+'</span></div>'
+      +'<div class="kv"><span class="k">exit reason</span><span class="v small">'+U.esc(p.exitReason||'—')+'</span></div>'
+      +'<div class="kv"><span class="k">held</span><span class="v">'+U.age(p.openedAt-(p.closedAt-p.openedAt))+' → closed '+U.age(p.closedAt)+' ago</span></div></div>';
+  }
+  el.innerHTML=h;
+};
+/* ---------------- 8. TRADE HISTORY ---------------- */
+DashboardRenderer.prototype.trades=function(){
+  const el=document.getElementById('page-trades');
+  const list=S.trades.slice().reverse();
+  let h='<div class="row" style="margin-bottom:8px"><button class="btn sm" onclick="XPORT.exportCSV()">⬇ CSV export</button><span class="small">'+list.length+' events · full history preserved, losses shown, never reset</span></div>';
+  if(!list.length)h+='<div class="empty"><b>No trade events yet.</b></div>';
+  h+='<div class="card h-scroll"><table><tr><th>time</th><th>type</th><th>token</th><th>price</th><th>usd</th><th>reason</th></tr>';
+  for(const t of list.slice(0,150))h+='<tr><td class="mono">'+new Date(t.t).toLocaleTimeString()+'</td><td>'+t.type+'</td><td>'+U.esc(t.symbol||(t.mint?U.short(t.mint):''))+'</td><td class="mono">'+(t.price!=null?'$'+Number(t.price).toPrecision(4):'')+'</td><td>'+(t.usd!=null?U.fmt$(t.usd):'')+'</td><td class="small">'+U.esc(t.reason||'')+'</td></tr>';
+  h+='</table></div>';
+  el.innerHTML=h;
+};
+/* ---------------- 9. LEARNING & ANALYTICS ---------------- */
+DashboardRenderer.prototype.learning=function(){
+  const el=document.getElementById('page-learning');
+  const st=PORT.stats();
+  const rej={}; for(const c of S.candidates.values())for(const r of (c.rejectionReasons||[]))rej[r]=(rej[r]||0)+1;
+  const topRej=Object.entries(rej).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  const scores=S.scoreHistory.slice(-50).reverse();
+  let h='<div class="grid kpis">'
+    +'<div class="kpi"><div class="v">'+st.closed+'</div><div class="l">closed trades</div></div>'
+    +'<div class="kpi"><div class="v">'+(st.winRate==null?'—':st.winRate+'%')+'</div><div class="l">win rate</div></div>'
+    +'<div class="kpi"><div class="v">'+S.scoreHistory.length+'</div><div class="l">score snapshots</div></div>'
+    +'<div class="kpi"><div class="v">'+Object.values(rej).reduce((a,b)=>a+b,0)+'</div><div class="l">total rejections</div></div></div>';
+  h+='<div class="card"><h3>Top rejection reasons (audit trail)</h3>'
+    +(topRej.length?topRej.map(([r,n])=>'<div class="kv"><span class="k small">'+U.esc(r)+'</span><span class="v">'+n+'</span></div>').join(''):'<div class="small">none yet</div>')+'</div>';
+  h+='<div class="card"><h3>Recent score snapshots ('+SCORE_VERSION+')</h3>'
+    +(scores.length?scores.map(s=>'<div class="kv"><span class="k">'+U.esc((S.candidates.get(s.mint)||{}).market?.symbol||U.short(s.mint))+' <span class="small">'+U.age(s.computedAt)+' ago</span></span><span class="v">'+s.total+'/100</span></div>').join(''):'<div class="small">none yet</div>')+'</div>';
+  h+='<div class="note">Scores are design weights, not validated predictors. Historical snapshots are kept for honest outcome comparison — not to claim predictive power.</div>';
+  el.innerHTML=h;
+};
+/* ---------------- 10. SYSTEM HEALTH ---------------- */
+DashboardRenderer.prototype.health=function(){
+  const el=document.getElementById('page-health'); const d=DIAG.snapshot();
+  let h='<div class="note">'+U.esc(d.monitoringNote)+'</div>';
+  h+='<div class="card"><h3>Data sources</h3>';
+  for(const s of d.sources){
+    h+='<div class="kv"><span class="k">'+U.esc(s.label)+'</span><span class="v">'+this.badge(s.status,s.status==='LIVE'?'b-live':s.status==='NOT_OBSERVED'?'b-dim':'b-err')+'</span></div>'
+      +'<div class="small" style="padding:0 0 6px 4px">last success: '+(s.lastSuccess?new Date(s.lastSuccess).toLocaleTimeString():'never')+' · requests '+s.requestCount+' · errors '+s.errorCount+' · timeouts '+s.timeoutCount+' · rate-limits '+s.rateLimitCount+(s.lastError?'<br>last error: '+U.esc(s.lastError):'')+'<br>'+U.esc(s.note)+'</div>';
+  }
+  h+='</div>';
+  h+='<div class="card"><h3>Scanner</h3>'
+    +'<div class="kv"><span class="k">state</span><span class="v">'+(d.scanning?'SCANNING':S.scanTimer?'RUNNING':'STOPPED')+'</span></div>'
+    +'<div class="kv"><span class="k">scans completed</span><span class="v">'+d.scans+'</span></div>'
+    +'<div class="kv"><span class="k">last scan</span><span class="v">'+(d.lastScanEnd?new Date(d.lastScanEnd).toLocaleTimeString():'never')+' '+(d.lastScanOk==null?'':d.lastScanOk?'(ok)':'(had errors)')+'</span></div>'
+    +'<div class="kv"><span class="k">poll interval</span><span class="v">'+S.settings.pollIntervalSec+'s (conservative)</span></div></div>';
+  h+='<div class="card"><h3>Counters</h3>'+Object.entries(d.counters).map(([k,v])=>'<div class="kv"><span class="k">'+k+'</span><span class="v">'+v+'</span></div>').join('')+'</div>';
+  const rr=Object.entries(d.rejectReasons);
+  h+='<div class="card"><h3>Rejection reasons</h3>'+(rr.length?rr.map(([k,v])=>'<div class="kv"><span class="k small">'+U.esc(k)+'</span><span class="v">'+v+'</span></div>').join(''):'<div class="small">none yet</div>')+'</div>';
+  h+='<div class="card"><h3>Versions & storage</h3>'
+    +'<div class="kv"><span class="k">scoring version</span><span class="v">'+d.scoreVersion+'</span></div>'
+    +'<div class="kv"><span class="k">risk policy</span><span class="v">'+d.riskPolicyVersion+'</span></div>'
+    +'<div class="kv"><span class="k">thresholds</span><span class="v">'+d.thresholdsVersion+'</span></div>'
+    +'<div class="kv"><span class="k">storage</span><span class="v small">'+U.esc(d.storage)+'</span></div></div>';
+  el.innerHTML=h;
+};
+/* ---------------- 11. SETTINGS ---------------- */
+DashboardRenderer.prototype.settings=function(){
+  const el=document.getElementById('page-settings'); const st=S.settings;
+  const num=(key,label,step)=>'<label class="fl">'+label+'</label><input type="number" step="'+(step||1)+'" value="'+st[key]+'" onchange="BOOT.setNum(\''+key+'\',this.value)">';
+  let h='<div class="card"><h3>Scanner</h3>'+num('pollIntervalSec','Poll interval (seconds)')+num('maxTokensPerCycle','Max tokens enriched per cycle')+num('maxRugcheckPerCycle','Max RugCheck reports per cycle')+'</div>';
+  h+='<div class="card"><h3>Radar research display thresholds ('+THRESHOLDS_VERSION+')</h3><div class="small" style="margin-bottom:6px">These tune the research panels ONLY. Under entry-open-v4 they do NOT gate any paper entry or signal.</div>'+num('minLiquidityUsd','Min liquidity USD')+num('minVolume24Usd','Min 24h volume USD')+num('scoreThreshold','Score threshold (0-100)')+num('minQualifiedWallets','Min qualified wallets')+num('signalCooldownHours','Signal cooldown (hours)')+num('top10ConcentrationFailPct','Top-10 concentration FAIL %')+'</div>';
+  h+='<div class="card"><h3>Paper portfolio</h3>'+num('startCapital','Starting capital $')+num('entrySizeUsd','Entry size $')+num('maxPositionPct','Max position % of start')+num('maxOpenPositions','Max open positions')+num('feePct','Fee % per side',0.1)+num('slippagePct','Slippage %',0.1)+num('stopLossPct','Stop-loss % (negative)')+num('trailingAfterX','Trailing after X multiple')+num('trailingDropPct','Trailing drop %')+num('maxHoldHours','Max holding hours (0=off)')+num('liquidityExitPct','Liquidity deterioration exit %')+num('targetEquity','Target equity $')+'</div>';
+  h+='<div class="card"><h3>Auto paper trade (🤖 tab)</h3><label class="fl"><input type="checkbox" style="width:auto" '+(st.autoTradeEnabled?'checked':'')+' onchange="BOOT.setBool(\'autoTradeEnabled\',this.checked)"> Auto paper trade enabled</label><label class="fl"><input type="checkbox" style="width:auto" '+(st.autoStartOnLoad?'checked':'')+' onchange="BOOT.setBool(\'autoStartOnLoad\',this.checked)"> Auto-start scan when app opens</label>'+'<div class="small" style="margin:4px 0">auto rules fixed: $10 dip-limit entries, max 4 slots + 4 pending, NO entry screens (entry-open-v4)</div>'+num('rugLiquidityUsd','Rug: liquidity floor $')+num('rugLiquidityDropPct','Rug: liquidity drop % vs entry')+'</div>';
+  h+='<div class="card"><h3>Score weights ('+SCORE_VERSION+') — must total 100</h3>'
+    +Object.keys(st.weights).map(k=>'<label class="fl">'+k+'</label><input type="number" value="'+st.weights[k]+'" onchange="BOOT.setWeight(\''+k+'\',this.value)">').join('')
+    +'<div class="small" id="wsum">total: '+Object.values(st.weights).reduce((a,b)=>a+(+b||0),0)+'</div></div>';
+  h+='<div class="card"><h3>Data</h3><div class="row"><button class="btn sm" onclick="XPORT.exportJSON()">⬇ JSON export</button><button class="btn sm" onclick="XPORT.exportCSV()">⬇ CSV export</button><label class="btn sm" style="cursor:pointer">⬆ JSON import<input type="file" accept=".json" style="display:none" onchange="XPORT.importJSON(this.files[0])"></label><button class="btn red sm" onclick="XPORT.resetAll()">reset all data</button></div><div class="note">Browser-local records can be lost if browser data is cleared. This is not a secure shared database or backup. No secrets are stored.</div></div>';
+  h+='<div class="card"><h3>Honest limitations</h3><div class="small">• Public endpoints change and rate-limit — discovery is not exhaustive.<br>• Browser polling is not a backend indexer or persistent WebSocket.<br>• Closed browser = no monitoring.<br>• Full wallet PnL reconstruction needs an indexer (NOT_SUPPORTED here).<br>• LP lock/burn and malicious-address datasets are NOT_SUPPORTED keyless in-browser.<br>• Nothing here is financial advice. Paper trading only.</div></div>';
+  el.innerHTML=h;
+};
+/* ---------------- 11b. AUTO PAPER TRADE ---------------- */
+DashboardRenderer.prototype.autotrade=function(){
+  const el=document.getElementById('page-autotrade'); const st=AUTO.stats();
+  SRVBOOK.refresh();
+  let h='<div class="note">PAPER ONLY — two separate virtual books: a 24/7 SERVER book (top) and the local auto book on THIS DEVICE (bottom). Never real money, no wallet signing.</div>';
+  h+=this.serverbook();
+  h+='<div class="note" style="text-align:center;margin:16px 0 4px;font-weight:700">📱 THIS DEVICE (local auto book — runs only while this tab is open)</div>';
+  h+='<div class="kpis">'
+    +'<div class="kpi"><div class="v">'+U.fmt$(AUTO.cash())+'</div><div class="l">auto cash</div></div>'
+    +'<div class="kpi '+(st.equity>=S.settings.startCapital?'':'bad')+'"><div class="v">'+U.fmt$(st.equity)+(st.valuationsComplete?'':'*')+'</div><div class="l">equity</div></div>'
+    +'<div class="kpi"><div class="v">'+st.open+' / '+AUTO_V4.maxSlots+'</div><div class="l">slots used</div></div>'
+    +'<div class="kpi"><div class="v">'+AUTO.pending.size+' / '+AUTO_V4.maxSlots+'</div><div class="l">pending limits</div></div>'
+    +'<div class="kpi '+(st.realized>=0?'':'bad')+'"><div class="v">'+(st.realized>=0?'+':'')+U.fmt$(st.realized)+'</div><div class="l">realized P&L</div></div></div>';
+  h+='<div class="card"><h3>Auto rules (entry-open-v4)</h3>'
+    +'<div class="kv"><span class="k">entry screens</span><span class="v">NONE — owner override 2026-10-13: no liquidity / volume / score / wallet / age / flag / crash screens; every validated coin with fresh market data gets a dip-limit</span></div>'
+    +'<div class="kv"><span class="k">entry</span><span class="v">$'+AUTO_V4.stakeUsd+' dip-limit at signal rate ×0.80 (−'+AUTO_V4.limitBelowSignalPct+'% dip) · pending orders consume NO cash or slots · one per coin · max '+AUTO_V4.maxSlots+' pending</span></div>'
+    +'<div class="kv"><span class="k">fill</span><span class="v">only on a later REAL observation ≤ limit · expires after '+AUTO_V4.limitExpiryMinutes+' min · cancels if slots full or bank short at fill</span></div>'
+    +'<div class="kv"><span class="k">win exit</span><span class="v">auto sell at '+AUTO_V4.tpMultiple+'x entry</span></div>'
+    +'<div class="kv"><span class="k">price stop</span><span class="v">auto exit at −'+Math.round((1-AUTO_V4.stopMultiple)*100)+'%</span></div>'
+    +'<div class="kv"><span class="k">liquidity exit</span><span class="v">defensive exit if liquidity −'+AUTO_V4.defensiveLiqExitDropPct+'% vs entry</span></div>'
+    +'<div class="kv"><span class="k">rug</span><span class="v">liquidity gone per real data (≤ $'+S.settings.rugLiquidityUsd+' or −'+S.settings.rugLiquidityDropPct+'% vs entry) = full position lost</span></div>'
+    +'<div class="kv"><span class="k">time limit</span><span class="v">none — holds until a rule fires</span></div></div>';
+  const open=AUTO.open().sort((a,b)=>b.entryAt-a.entryAt);
+  h+='<div class="card"><h3>Open auto positions ('+open.length+')</h3>';
+  if(!open.length)h+='<div class="small">none — each new PAPER_SIGNAL places a pending dip-limit order'+(S.settings.autoTradeEnabled?'':' (auto trade is OFF in settings)')+'</div>';
+  for(const p of open){
+    const x=p.lastPrice!=null?p.lastPrice/p.entryRate:null;
+    h+='<div class="tok tappable" style="border:1px solid var(--line);border-radius:10px;padding:8px;margin:8px 0" onclick="openDetail(\'autopos\',\''+p.id+'\')">'
+      +'<div class="row"><b>'+U.esc(p.symbol||'(no symbol)')+'</b>'+this.badge('PAPER','b-dim')+(p.priceState==='LIVE'?this.badge('LIVE PRICE','b-live'):this.badge('PRICE UNAVAILABLE','b-err'))+'<span class="sp"></span>'+(x!=null?'<b style="color:'+(x>=1?'var(--grn)':'var(--red)')+'">'+x.toFixed(3)+'x</b>':'')+'</div>'
+      +'<div class="mint">'+p.mint+'</div>'
+      +'<div class="kv"><span class="k">entry (frozen signal rate)</span><span class="v">$'+p.entryRate+' · '+new Date(p.entryAt).toLocaleString()+'</span></div>'
+      +'<div class="kv"><span class="k">live price now</span><span class="v">'+(p.priceState==='LIVE'&&p.lastPrice!=null?'$'+p.lastPrice+' · '+U.age(p.lastPriceAt)+' ago':'— unavailable (no action taken)')+'</span></div>'
+      +(x!=null?'<div class="kv"><span class="k">distance to exits</span><span class="v">'+(x>=1.5?'1.5x REACHED':'+'+((1.5/x-1)*100).toFixed(1)+'% to 1.5x')+' · '+(x<=0.75?'−25% REACHED':((0.75/x-1)*100).toFixed(1)+'% drop to −25%')+'</span></div>':'')
+      +(p.entryLiquidity!=null?'<div class="kv"><span class="k">liquidity at entry</span><span class="v">'+U.fmt$(p.entryLiquidity)+'</span></div>':'')
+      +'<div class="row" style="margin-top:6px" onclick="event.stopPropagation()">'+this.links({mint:p.mint})+'</div>'
+      +'</div>';
+  }
+  h+='</div>';
+  const pends=[...AUTO.pending.values()].sort((a,b)=>b.placedAt-a.placedAt);
+  h+='<div class="card"><h3>Pending dip-limit orders ('+pends.length+' / '+AUTO_V4.maxSlots+')</h3>';
+  if(!pends.length)h+='<div class="small">none — a new PAPER_SIGNAL places one (limit = signal rate ×0.80)</div>';
+  for(const o of pends){
+    h+='<div class="tok" style="border:1px solid var(--line);border-radius:10px;padding:8px;margin:8px 0">'
+      +'<div class="row"><b>'+U.esc(o.symbol||'(no symbol)')+'</b>'+this.badge('PENDING LIMIT','b-dim')+'</div>'
+      +'<div class="mint">'+o.mint+'</div>'
+      +'<div class="kv"><span class="k">limit price</span><span class="v">$'+o.limitPrice+' (signal rate $'+o.signalRate+' ×0.80)</span></div>'
+      +'<div class="kv"><span class="k">placed</span><span class="v">'+new Date(o.placedAt).toLocaleString()+' · expires in '+Math.max(0,Math.round((o.expiryMinutes*60000-(U.now()-o.placedAt))/60000))+' min</span></div>'
+      +'</div>';
+  }
+  h+='</div>';
+  const closed=[...AUTO.positions.values()].filter(p=>p.status==='CLOSED').sort((a,b)=>b.exitAt-a.exitAt);
+  h+='<div class="card"><h3>Closed auto trades ('+closed.length+')</h3>';
+  if(!closed.length)h+='<div class="small">none yet</div>';
+  for(const p of closed){
+    h+='<div class="kv"><span class="k">'+U.esc(p.symbol||U.short(p.mint))+' · '+new Date(p.exitAt).toLocaleString()+'</span><span class="v" style="color:'+((p.realizedPnl||0)>=0?'var(--grn)':'var(--red)')+'">'+((p.realizedPnl||0)>=0?'+':'')+U.fmt$(p.realizedPnl||0)+'</span></div>'
+      +'<div class="small" style="padding:0 0 6px 4px">'+U.esc(p.exitReason||'')+' · exit value '+U.fmt$(p.exitValueUsd)+'</div>';
+  }
+  h+='</div>';
+  h+='<div class="card"><h3>Controls</h3><div class="row">'
+    +'<button class="btn sm" onclick="BOOT.autoCheck()">▶ run price check now</button>'
+    +'<button class="btn red sm" onclick="BOOT.resetAuto()">reset auto book</button></div>'
+    +'<div class="small">Reset wipes auto positions/pending orders/history and refills the virtual $'+S.settings.startCapital+' bank. Cannot touch the manual portfolio.</div></div>';
+  el.innerHTML=h;
+};
+
+/* ---------------- 11c. 24/7 SERVER BOOK (read-only mirror) ---------------- */
+DashboardRenderer.prototype.serverbook=function(){
+  const b=SRVBOOK;
+  let h='<div class="card" style="border-color:var(--pur)"><h3>🛰 24/7 SERVER BOOK (paper only)</h3>';
+  h+='<div class="small">runs 24/7 on a server · this app just mirrors its book.json (updated on every entry/exit + daily) · virtual money only</div>';
+  if(b.state==='loading'||b.state==='idle'){ h+='<div class="small" style="padding:8px 0">contacting server book…</div></div>'; return h; }
+  if(b.state==='missing'){ h+='<div class="note" style="margin-top:8px">book.json NOT PUBLISHED YET — no server state committed so far. This section fills in automatically once it is. Nothing shown rather than fake data.</div></div>'; return h; }
+  if(b.state==='error'&&!b.data){ h+='<div class="note" style="margin-top:8px">server book load FAILED ('+U.esc(String(b.error))+'). Nothing shown rather than guessed data. Will retry.</div></div>'; return h; }
+  const d=b.data; const gen=b.ts(d.generatedAt);
+  h+='<div class="kv"><span class="k">last book update</span><span class="v">'+(gen!=null?new Date(gen).toLocaleString()+' ('+U.age(gen)+' ago)':'unknown')+'</span></div>';
+  if(gen!=null&&(U.now()-gen)>26*3600*1000)h+='<div class="small" style="color:var(--amb)">No daily checkpoint in over 26h — server may be down. Shown as last known state.</div>';
+  else h+='<div class="small">Book values below are as of that update (the server writes on trade events, not every minute). LIVE prices come from this device, labeled with their own age.</div>';
+  if(b.state==='error')h+='<div class="small" style="color:var(--amb)">latest refresh failed ('+U.esc(String(b.error))+') — showing last good snapshot, labeled by its own time.</div>';
+  h+='<div class="kpis">'
+    +'<div class="kpi"><div class="v">'+U.fmt$(d.bank!=null?d.bank:0)+'</div><div class="l">server bank</div></div>'
+    +'<div class="kpi"><div class="v">'+U.fmt$(d.cash!=null?d.cash:0)+'</div><div class="l">server cash</div></div>'
+    +'<div class="kpi '+(d.equity>=d.bank?'':'bad')+'"><div class="v">'+U.fmt$(d.equity!=null?d.equity:0)+'</div><div class="l">equity @ update</div></div>'
+    +'<div class="kpi '+((d.realizedPnl||0)>=0?'':'bad')+'"><div class="v">'+((d.realizedPnl||0)>=0?'+':'')+U.fmt$(d.realizedPnl||0)+'</div><div class="l">realized P&L</div></div></div>';
+  if(d.slotsUsed!=null)h+='<div class="kv"><span class="k">slots used</span><span class="v">'+d.slotsUsed+(d.maxSlots!=null?' / '+d.maxSlots:'')+'</span></div>';
+  if(d.rules){ const r=d.rules; const q=r.qualification||{};
+    h+='<h3 style="margin-top:10px">server rules ('+U.esc(String(r.entryMode||'standard'))+')</h3><div class="small">'
+      +((r.entryMode==='dip-limit-v2'||r.entryMode==='defensive-v3'||r.entryMode==='entry-open-v4')?('entry: LIMIT BUY at signal rate ×0.80 (−'+(r.limitBelowSignalPct||20)+'% dip) · fills only on a real later observation ≤ limit · expires in '+(r.limitExpiryMinutes||60)+' min'+(r.entryMode==='entry-open-v4'?'':' or earlier on disqualification')+' · pending orders do NOT consume cash or slots<br>'):('entry: $'+r.entryUsd+' per qualifying signal<br>'))
+      +(r.entryMode==='entry-open-v4'?('entry screens: NONE (v4 owner override) — no liquidity / volume / score / wallet / age / flag / crash screens; real identity + fresh market evidence only<br>'):('gates: score ≥ '+(q.scoreThreshold!=null?q.scoreThreshold:'—')+' · ≥ '+(q.minQualifiedWallets!=null?q.minQualifiedWallets:'—')+' wallets · liquidity ≥ '+U.fmt$(q.minLiquidityUsd)+' · 24h vol ≥ '+U.fmt$(q.minVolume24Usd)+'<br>'))
+      +'exits from filled entry: '+r.takeProfitMultiple+'x sell · −'+Math.round((1-r.stopMultiple)*100)+'% price stop'+(r.defensiveLiquidityExitDropPct!=null?' · liquidity −'+r.defensiveLiquidityExitDropPct+'% defensive exit':'')+' · rug ≤ '+U.fmt$(r.rugLiquidityUsd)+' or ≥ '+r.rugDropPct+'% liquidity drop = full loss · fee '+r.feePct+'%/side · no time limit</div>'; }
+  const pos=Array.isArray(d.positions)?d.positions:[];
+  h+='<h3 style="margin-top:10px">server positions ('+pos.length+')</h3>';
+  if(!pos.length)h+='<div class="small">none open</div>';
+  for(const p of pos){
+    const open=(p.status||'').toUpperCase()!=='CLOSED';
+    const lp=p.mint?b.live[p.mint]:null;
+    const liveX=(open&&lp&&p.entryRate)?(lp.price/p.entryRate):null;
+    h+='<div class="tok tappable" style="border:1px solid var(--line);border-radius:10px;padding:8px;margin:8px 0" onclick="openDetail(\'srvpos\',\''+p.id+'\')">'
+      +'<div class="row"><b>'+U.esc(p.symbol||'(no symbol)')+'</b>'+this.badge(open?'OPEN':'CLOSED',open?'b-live':'b-dim')+this.badge('PAPER','b-dim')+'<span class="sp"></span>'+(liveX!=null?'<b style="color:'+(liveX>=1?'var(--grn)':'var(--red)')+'">'+liveX.toFixed(3)+'x LIVE</b>':(p.currentX!=null?'<b>'+(+p.currentX).toFixed(3)+'x @ update</b>':''))+'</div>'
+      +(p.mint?'<div class="mint">'+p.mint+'</div>':'')
+      +'<div class="kv"><span class="k">entry rate (frozen)</span><span class="v">'+(p.entryRate!=null?'$'+p.entryRate:'—')+(p.entryAt?' · '+new Date(b.ts(p.entryAt)).toLocaleString():'')+'</span></div>'
+      +(open?'<div class="kv"><span class="k">live price NOW (this device)</span><span class="v">'+(lp?'$'+lp.price+' · '+U.age(lp.at)+' ago':'fetching… (Dexscreener)')+'</span></div>':'')
+      +'<div class="kv"><span class="k">price in book snapshot</span><span class="v">'+(p.lastPrice!=null?'$'+p.lastPrice:'—')+(p.lastPriceAt?' · as of '+new Date(b.ts(p.lastPriceAt)).toLocaleString():'')+'</span></div>'
+      +(p.exitInfo?'<div class="small">'+U.esc(String(p.exitInfo))+'</div>':'')
+      +(p.exitReason?'<div class="small">'+U.esc(String(p.exitReason))+'</div>':'')
+      +(p.mint?'<div class="row" style="margin-top:6px" onclick="event.stopPropagation()">'+this.links({mint:p.mint})+'</div>':'')
+      +'</div>';
+  }
+  const po=Array.isArray(d.pendingOrders)?d.pendingOrders:[];
+  h+='<h3 style="margin-top:10px">pending dip-limit orders ('+po.length+')</h3>';
+  if(!po.length)h+='<div class="small">none pending — the next qualifying signal places a limit buy at −'+((d.rules&&d.rules.limitBelowSignalPct)||20)+'% below its signal rate</div>';
+  for(const o of po){
+    h+='<div class="tok" style="border:1px solid var(--line);border-radius:10px;padding:8px;margin:8px 0">'
+      +'<div class="row"><b>'+U.esc(o.symbol||'(no symbol)')+'</b>'+this.badge(o.status||'PENDING','b-info')+this.badge('PAPER','b-dim')+'</div>'
+      +(o.mint?'<div class="mint">'+o.mint+'</div>':'')
+      +(o.limitPrice!=null?'<div class="kv"><span class="k">limit buy price</span><span class="v">$'+o.limitPrice+'</span></div>':'')
+      +(o.signalPrice!=null?'<div class="kv"><span class="k">signal rate</span><span class="v">$'+o.signalPrice+'</span></div>':'')
+      +(o.expiresAt?'<div class="kv"><span class="k">expires</span><span class="v">'+new Date(b.ts(o.expiresAt)).toLocaleString()+'</span></div>':'')
+      +(o.mint?'<div class="row" style="margin-top:6px" onclick="event.stopPropagation()">'+this.links({mint:o.mint})+'</div>':'')
+      +'</div>';
+  }
+  const hist=Array.isArray(d.historyTail)?d.historyTail.slice(-8).reverse():[];
+  h+='<h3 style="margin-top:10px">recent server history</h3>';
+  if(!hist.length)h+='<div class="small">none yet</div>';
+  for(const e of hist){
+    const et=b.ts(e&&e.t); const txt=(e&&(e.reason||e.type||e.text))||'event';
+    h+='<div class="kv"><span class="k small">'+(et?new Date(et).toLocaleString():'')+'</span><span class="v small">'+U.esc(String(e&&e.type||''))+(e&&e.symbol?' · '+U.esc(String(e.symbol)):'')+(e&&e.usd!=null?' · '+U.fmt$(e.usd):'')+'<br>'+U.esc(String(txt))+'</span></div>';
+  }
+  if(d.valuationNote)h+='<div class="small" style="margin-top:6px">'+U.esc(String(d.valuationNote))+'</div>';
+  if(Array.isArray(d.sourceHealth)&&d.sourceHealth.length)h+='<div class="kv"><span class="k">server data sources</span><span class="v small">'+d.sourceHealth.map(s2=>U.esc(s2.id)+': '+U.esc(s2.status)).join(' · ')+'</span></div>';
+  h+='</div>';
+  return h;
+};
+
+/* ============================================================
+   PIPELINE ORCHESTRATOR + BOOT
+   Discovery -> Validation -> Wallet research -> Clusters ->
+   Validation -> v4 open entry (no screens) -> Paper ledger -> Monitor
+   ============================================================ */
+const BOOT={
+  async init(){
+    await DB.init();
+    await DB.loadAll();
+    RENDER.all();
+    // signal + target banners
+    S.on('signal',g=>{ BOOT.showSigBanner(g); const r=AUTO.onSignal(g); if(r.ok&&r.pend)U.toast('🤖 pending dip-limit: '+(g.symbol||U.short(g.mint))+' limit $'+r.pend.limitPrice); });
+    S.on('target',()=>{ const b=document.getElementById('targetBanner');
+      b.textContent='🏁 TARGET_REACHED — verified paper equity ≥ $'+S.settings.targetEquity+'. Entries frozen. (Simulation result, not profit.)';
+      b.classList.add('show'); });
+    if(S.cycleFrozen){ const b=document.getElementById('targetBanner');
+      b.textContent='🏁 TARGET_REACHED — verified paper equity ≥ $'+S.settings.targetEquity+'. Entries frozen. (Simulation result, not profit.)';
+      b.classList.add('show'); }
+    S.on('data',()=>{ clearTimeout(BOOT._rt); BOOT._rt=setTimeout(()=>{ RENDER.all(); DB.saveAll(); },400); });
+    S.on('scanState',()=>RENDER.scanPill());
+    // suspension/resumption: revalidate after resume, never fabricate activity
+    document.addEventListener('visibilitychange',()=>{
+      if(!document.hidden&&S.scanTimer){ console.log('resumed — revalidating'); BOOT.scanNow(); }
+    });
+    if(S.settings.autoStartOnLoad&&!S.scanTimer)BOOT.start();
+    console.log(BUILD_MARKER,'init ok, storage:',DB.mode);
+  },
+  showSigBanner(g){ const b=document.getElementById('sigBanner');
+    b.innerHTML='⚡ NEW PAPER SIGNAL: '+U.esc(g.symbol||U.short(g.mint))+' — score '+g.score+'/100 · PAPER ONLY · tap to view'
+      +'<span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);cursor:pointer;font-weight:900;padding:2px 8px" onclick="event.stopPropagation();document.getElementById(\'sigBanner\').classList.remove(\'show\')">✕</span>';
+    b.classList.add('show');
+    b.onclick=()=>{ b.classList.remove('show'); S.ui.page='signals'; RENDER.all();
+      setTimeout(()=>{ const el=document.getElementById('sig-'+g.id);
+        if(el){ el.classList.add('flash'); el.scrollIntoView({behavior:'smooth',block:'center'}); } },200); };
+  },
+  start(){
+    if(S.scanTimer)return;
+    S.scanTimer=true;
+    const tick=async()=>{ if(!S.scanTimer)return;
+      try{ await BOOT.scanNow(); }catch(e){ console.log('cycle error',e); }
+      if(S.scanTimer)S.scanTimerId=setTimeout(tick,Math.max(5,S.settings.pollIntervalSec)*1000); };
+    tick();
+    S.priceTimer=setInterval(()=>{ if(S.settings.autoRefreshPrices)MONITOR.run().then(()=>RENDER.all()); },60000);
+    RENDER.scanPill(); U.toast('scanner started — auto-scan every ~'+Math.max(5,S.settings.pollIntervalSec)+'s until STOP (tab-open only)');
+  },
+  stop(){
+    S.scanTimer=false; clearTimeout(S.scanTimerId); clearInterval(S.priceTimer); S.priceTimer=null;
+    RENDER.scanPill(); U.toast('scanner stopped');
+  },
+  async scanNow(){
+    if(S.diag.scanning)return;
+    const r=await DISCOVERY.runCycle();
+    if(r&&r.errors&&r.errors.length)console.log('cycle errors:',r.errors);
+    // light-touch auto analysis for fresh validated candidates (bounded)
+    let analyzed=0;
+    for(const c of S.candidates.values()){
+      if(analyzed>=S.settings.maxRugcheckPerCycle)break;
+      if(c.state==='DISCOVERED'||c.state==='DATA_INCOMPLETE'&&c.market){
+        try{ await BOOT.analyzeOne(c.mint,true); analyzed++; }catch(e){ console.log('analyze err',e); }
+      }
+    }
+    await MONITOR.run();
+    try{ await AUTO.runCycle(); }catch(e){ console.log('auto cycle',e); }
+    RENDER.all(); await DB.saveAll();
+  },
+  /* full per-candidate pipeline */
+  async analyzeOne(mint,quiet){
+    const c=S.candidates.get(mint); if(!c)return;
+    // wallet research source: rugcheck report
+    if(!c.rugcheck||(U.now()-c.rugcheck.fetchedAt)>10*60*1000){
+      try{ c.rugcheck=await DEX.rugcheckReport(mint); c.fieldMeta.rugcheck={source:'rugcheck',observedAt:c.rugcheck.fetchedAt,status:'LIVE'}; }
+      catch(e){ c.fieldMeta.rugcheck={source:'rugcheck',observedAt:U.now(),status:'ERROR'}; c.rugcheckError=String(e.message||e).slice(0,120); }
+    }
+    if(c.rugcheck){
+      WALLETS.harvestFromToken(c);
+      // research top few wallets (bounded, non-insider first)
+      const recs=(c.rugcheck.topHolders||[]).filter(h=>h.address&&!h.insider).slice(0,S.settings.walletResearchPerCandidate||5);
+      for(const h of recs){ try{ await WALLETS.researchWallet(h.address); }catch(e){} }
+      c.walletEvidence=(c.rugcheck.topHolders||[]).filter(h=>h.address).map(h=>{
+        const w=S.wallets.get(h.address);
+        return {address:h.address,pct:h.pct,insider:h.insider,state:w?w.state:'UNVERIFIED',
+          qualified:w?WALLETS.isQualified(w):false,observedAt:U.now()};
+      });
+    }
+    CLUSTERS.recompute();
+    c.risk=RISK.analyze(c);
+    const st=QUAL.evaluate(c);
+    if(!quiet){ RENDER.all(); U.toast('analysis: '+st); }
+    return st;
+  },
+  async enterPaper(mint){
+    const c=S.candidates.get(mint); if(!c)return;
+    if(c.state!=='PAPER_SIGNAL'){ U.toast('not in PAPER_SIGNAL state'); return; }
+    // re-validate freshness right before entry — stale price never executable
+    try{ await DISCOVERY.refreshCandidate(mint); }catch(e){ U.toast('price refresh failed — entry blocked: '+e.message); return; }
+    const r=PORT.enter(c);
+    U.toast(r.ok?('paper entry opened: '+U.fmt$(r.pos.entrySizeUsd)):('entry blocked: '+r.reason));
+    RENDER.all(); DB.saveAll();
+  },
+  async manualExit(posId){
+    const p=S.positions.get(posId); if(!p)return;
+    let price=null;
+    try{ const pr=await DISCOVERY.refreshPricesFor([p.mint]); if(pr[p.mint]&&pr[p.mint].ok)price=pr[p.mint].priceUsd; }catch(e){}
+    const r=PORT.exit(p,'manual exit',price);
+    U.toast(r.ok?('exited: '+U.fmt$(r.net)+' (PnL '+U.fmt$(r.pnl)+')'):('exit blocked: '+r.reason));
+    RENDER.all(); DB.saveAll();
+  },
+  async researchWallet(addr){ U.toast('researching wallet…');
+    await WALLETS.researchWallet(addr); RENDER.all(); DB.saveAll(); },
+  setNum(k,v){ const n=parseFloat(v); if(isNaN(n))return U.toast('invalid number'); S.settings[k]=n; DB.saveAll(); },
+  setBool(k,v){ S.settings[k]=!!v; DB.saveAll(); },
+  async autoCheck(){ U.toast('🤖 checking open auto positions on real prices…'); await AUTO.runCycle(); RENDER.all(); DB.saveAll(); },
+  resetAuto(){ if(!confirm('Reset the AUTO paper book? Positions/history wiped, virtual $'+S.settings.startCapital+' bank refilled. Manual portfolio untouched.'))return; AUTO.positions.clear(); AUTO.pending.clear(); AUTO.history=[]; AUTO.reset(); DB.saveAll(); RENDER.all(); U.toast('auto book reset'); },
+  setWeight(k,v){ const n=parseFloat(v); if(isNaN(n))return; S.settings.weights[k]=n;
+    const sum=Object.values(S.settings.weights).reduce((a,b)=>a+(+b||0),0);
+    const el=document.getElementById('wsum'); if(el)el.textContent='total: '+sum+(sum===100?' ✓':' ✗ must be 100');
+    if(sum===100)DB.saveAll(); }
+};
+window.addEventListener('load',()=>BOOT.init());
+
+/* ============================================================
+   R. AutoTradeEngine — separate $200 AUTO paper book.
+   entry-open-v4 rules: NO entry screens (owner override) - every
+   validated signal places a $10 dip-limit (-20% limit, 60 min
+   expiry, fills only on a later real observation <= limit), max 4
+   filled slots, exits: 1.5x sell / -25% price stop / liquidity -30%
+   defensive exit / rug (>=90% liq drop) = full loss. No time limit.
+   PAPER ONLY. Runs only while tab is open.
+   ============================================================ */
+/* entry-open-v4 rule parameters for the LOCAL auto book (no entry screens per owner typed override 2026-10-13; exit params agent-set per owner voice note) */
+const AUTO_V4={stakeUsd:10,maxSlots:4,tpMultiple:1.5,stopMultiple:0.75,defensiveLiqExitDropPct:30,limitBelowSignalPct:20,limitExpiryMinutes:60};
+class AutoTradeEngine{
+  constructor(){ this.positions=new Map(); this.pending=new Map(); this._cash=null; this.history=[]; }
+  cash(){ return this._cash==null?S.settings.startCapital:this._cash; }
+  setCash(v){ this._cash=Math.round(v*100)/100; }
+  reset(){ this._cash=null; }
+  open(){ return [...this.positions.values()].filter(p=>p.status==='OPEN'); }
+  fee(){ return AUTO_V4.stakeUsd*S.settings.feePct/100; }
+  cost(){ return AUTO_V4.stakeUsd+this.fee(); }
+  /* entry-open-v4 entry: place a PENDING dip-limit order on ANY validated signal (no cash/slot consumed until a real fill) */
+  onSignal(g){
+    if(!S.settings.autoTradeEnabled)return {ok:false,reason:'auto trade disabled'};
+    if(g.signalPriceUsd==null)return {ok:false,reason:'signal has no frozen signal-time price (legacy signal)'};
+    if([...this.positions.values()].some(p=>p.mint===g.mint&&p.status==='OPEN'))return {ok:false,reason:'position already open for this coin'};
+    if([...this.pending.values()].some(o=>o.mint===g.mint))return {ok:false,reason:'pending limit already placed for this coin'};
+    if(this.pending.size>=AUTO_V4.maxSlots)return {ok:false,reason:'max '+AUTO_V4.maxSlots+' pending limits already placed'};
+    const limitPrice=g.signalPriceUsd*(1-AUTO_V4.limitBelowSignalPct/100);
+    const o={id:U.uid('apend'),mint:g.mint,symbol:g.symbol,signalId:g.id,
+      placedAt:U.now(),signalRate:g.signalPriceUsd,limitPrice,
+      stakeUsd:AUTO_V4.stakeUsd,expiryMinutes:AUTO_V4.limitExpiryMinutes,
+      entryLiquidity:g.evidence?g.evidence.liquidityUsd:null};
+    this.pending.set(o.id,o);
+    this.history.push({t:U.now(),type:'PENDING_PLACED',symbol:g.symbol,mint:g.mint,price:limitPrice,usd:AUTO_V4.stakeUsd,fee:0,reason:'dip-limit placed at $'+limitPrice+' ('+AUTO_V4.limitBelowSignalPct+'% below signal rate $'+g.signalPriceUsd+')'});
+    g.autoConsumed=true;
+    S.emit('data');
+    return {ok:true,pend:o};
+  }
+  /* slot refill: pull qualifying unconsumed signals into free slots */
+  refill(){
+    let filled=0;
+    for(const g of [...S.signals.values()].sort((a,b)=>b.createdAt-a.createdAt)){
+      if(this.pending.size>=AUTO_V4.maxSlots)break;
+      if(g.consumed||g.autoConsumed)continue;
+      if(g.signalPriceUsd==null)continue;
+      const r=this.onSignal(g); if(r.ok)filled++;
+    }
+    return filled;
+  }
+  /* monitoring: pendings fill/expire, open positions exit - real data only, never acts on missing price. */
+  async runCycle(){
+    // 1. pendings: expire, cancel on a blocked fill, or fill on a real observation at/below limit
+    if(this.pending.size){
+      const pmints=[...new Set([...this.pending.values()].map(o=>o.mint))];
+      const ppx=await DISCOVERY.refreshPricesFor(pmints);
+      for(const o of [...this.pending.values()]){
+        if(U.now()-o.placedAt>o.expiryMinutes*60000){
+          this.pending.delete(o.id);
+          this.history.push({t:U.now(),type:'PENDING_EXPIRED',symbol:o.symbol,mint:o.mint,price:o.limitPrice,usd:0,fee:0,reason:'dip-limit expired after '+o.expiryMinutes+' min without a real fill'});
+          continue;
+        }
+        const pr=ppx[o.mint];
+        if(!pr||!pr.ok||pr.priceUsd==null)continue; // honest: no fill on missing data
+        if(pr.priceUsd<=o.limitPrice){
+          if(this.open().length>=AUTO_V4.maxSlots){ this.pending.delete(o.id); this.history.push({t:U.now(),type:'PENDING_CANCELLED',symbol:o.symbol,mint:o.mint,price:pr.priceUsd,usd:0,fee:0,reason:'limit reached but all '+AUTO_V4.maxSlots+' slots full — cancelled'}); continue; }
+          if(this.cash()<this.cost()){ this.pending.delete(o.id); this.history.push({t:U.now(),type:'PENDING_CANCELLED',symbol:o.symbol,mint:o.mint,price:pr.priceUsd,usd:0,fee:0,reason:'limit reached but auto bank insufficient ('+U.fmt$(this.cash())+') — cancelled'}); continue; }
+          const qty=AUTO_V4.stakeUsd/pr.priceUsd;
+          const pos={id:U.uid('ap'),mint:o.mint,symbol:o.symbol,signalId:o.signalId,
+            entryAt:U.now(),entryRate:pr.priceUsd,entrySizeUsd:AUTO_V4.stakeUsd,feeUsd:this.fee(),qty,
+            entryLiquidity:pr.liquidityUsd!=null?pr.liquidityUsd:o.entryLiquidity,
+            status:'OPEN',lastPrice:pr.priceUsd,lastPriceAt:pr.observedAt,priceState:'LIVE',
+            exitAt:null,exitPrice:null,exitReason:null,exitValueUsd:null,realizedPnl:null,
+            rules:'entry-open-v4: no entry screens; dip-limit fill at real observed price; exits 1.5x / -25% price stop / -30% liquidity defensive exit / rug full loss. no time limit. PAPER ONLY.'};
+          this.setCash(this.cash()-this.cost());
+          this.positions.set(pos.id,pos);
+          this.pending.delete(o.id);
+          this.history.push({t:U.now(),type:'AUTO_ENTRY',symbol:o.symbol,mint:o.mint,price:pr.priceUsd,usd:AUTO_V4.stakeUsd,fee:pos.feeUsd,reason:'dip-limit fill at $'+pr.priceUsd+' (real observation <= limit $'+o.limitPrice+')'});
+          U.toast('🤖 dip-limit FILLED: '+(o.symbol||U.short(o.mint))+' @ $'+pr.priceUsd);
+        }
+      }
+    }
+    // 2. open positions: honest exits on real data (rug > defensive liq > 1.5x TP > -25% stop)
+    const open=this.open();
+    if(!open.length){ this.refill(); S.emit('data'); return {checked:0}; }
+    const mints=[...new Set(open.map(p=>p.mint))];
+    const prices=await DISCOVERY.refreshPricesFor(mints);
+    for(const p of open){
+      const pr=prices[p.mint];
+      if(!pr||!pr.ok||pr.priceUsd==null){ p.priceState='UNAVAILABLE'; continue; } // honest: no action on missing data
+      p.lastPrice=pr.priceUsd; p.lastPriceAt=pr.observedAt; p.priceState='LIVE';
+      const x=pr.priceUsd/p.entryRate;
+      // rug check first: liquidity gone per real data
+      if(p.entryLiquidity&&pr.liquidityUsd!=null){
+        const drop=(p.entryLiquidity-pr.liquidityUsd)/p.entryLiquidity*100;
+        if(pr.liquidityUsd<=S.settings.rugLiquidityUsd||drop>=S.settings.rugLiquidityDropPct){
+          this._close(p,0,'RUG PULL — liquidity collapsed ('+U.fmt$(p.entryLiquidity)+' -> '+U.fmt$(pr.liquidityUsd)+', real data). Full position lost.');
+          continue;
+        }
+      }
+      // defensive liquidity exit: -30% vs entry
+      if(p.entryLiquidity&&pr.liquidityUsd!=null){
+        const ldrop=(p.entryLiquidity-pr.liquidityUsd)/p.entryLiquidity*100;
+        if(ldrop>=AUTO_V4.defensiveLiqExitDropPct){
+          this._close(p,pr.priceUsd,'defensive exit — liquidity -'+ldrop.toFixed(1)+'% vs entry (rule: -'+AUTO_V4.defensiveLiqExitDropPct+'%)');
+          continue;
+        }
+      }
+      if(x>=AUTO_V4.tpMultiple){ this._close(p,pr.priceUsd,'1.5x target hit ('+x.toFixed(2)+'x) — auto sell'); continue; }
+      if(x<=AUTO_V4.stopMultiple){ this._close(p,pr.priceUsd,'-25% price stop ('+((x-1)*100).toFixed(1)+'%) — auto exit'); continue; }
+    }
+    this.refill();
+    S.emit('data');
+    return {checked:open.length};
+  }
+  _close(p,exitPrice,reason){
+    p.status='CLOSED'; p.exitAt=U.now(); p.exitReason=reason;
+    if(exitPrice>0){
+      const gross=p.qty*exitPrice; const fee2=gross*S.settings.feePct/100;
+      p.exitValueUsd=Math.round((gross-fee2)*100)/100; p.exitPrice=exitPrice;
+      p.realizedPnl=Math.round((p.exitValueUsd-p.entrySizeUsd-p.feeUsd)*100)/100;
+      this.setCash(this.cash()+p.exitValueUsd);
+    }else{
+      p.exitValueUsd=0; p.exitPrice=0;
+      p.realizedPnl=Math.round(-(p.entrySizeUsd+p.feeUsd)*100)/100; // rug: full loss
+    }
+    this.history.push({t:U.now(),type:p.exitValueUsd>0?'AUTO_EXIT':'RUG_LOSS',symbol:p.symbol,mint:p.mint,price:p.exitPrice,usd:p.exitValueUsd,reason});
+    S.emit('data');
+  }
+  stats(){
+    const closed=[...this.positions.values()].filter(p=>p.status==='CLOSED');
+    const wins=closed.filter(p=>(p.realizedPnl||0)>0);
+    let eq=this.cash(),ok=true;
+    for(const p of this.open()){ if(p.lastPrice==null){ok=false;continue;} eq+=p.qty*p.lastPrice; }
+    return {open:this.open().length,closed:closed.length,wins:wins.length,rugs:closed.filter(p=>p.exitValueUsd===0).length,
+      realized:Math.round(closed.reduce((a,p)=>a+(p.realizedPnl||0),0)*100)/100,
+      equity:Math.round(eq*100)/100,valuationsComplete:ok};
+  }
+}
+const AUTO=new AutoTradeEngine();
+
+/* ============================================================
+   S. SRVBOOK — read-only mirror of the 24/7 server-side paper
+   book published at ./book.json (committed by us when the trade
+   agent sends updates: on every entry/exit + daily). The book
+   file ages between events — its generatedAt is always labeled
+   "last book update", never "live". This device fetches CURRENT
+   prices for open mints itself (Dexscreener) with their own
+   freshness labels. Missing/failed file states are honest.
+   ============================================================ */
+const SRVBOOK={state:'idle',data:null,fetchedAt:0,error:null,lastTry:0,live:{},liveAt:0,
+  ts(g){ if(g==null)return null; if(typeof g==='number')return g>1e12?g:g*1000; const t=Date.parse(g); return isNaN(t)?null:t; },
+  async refresh(force){
+    const now=U.now();
+    if(!force&&now-this.lastTry<60000)return; // throttle: at most one fetch/min
+    this.lastTry=now; if(!this.data)this.state='loading';
+    try{
+      const r=await fetch('book.json?ts='+now,{cache:'no-store'});
+      if(r.status===404){ this.state='missing'; this.data=null; this.error=null; }
+      else if(!r.ok){ this.state='error'; this.error='HTTP '+r.status; }
+      else{ const j=await r.json(); this.data=j; this.state='ok'; this.error=null; }
+      this.fetchedAt=U.now();
+    }catch(e){ this.state='error'; this.error=String((e&&e.message)||e); }
+    this.refreshLive();
+    if(typeof S!=='undefined'&&S.ui&&S.ui.page==='autotrade')try{RENDER.all();}catch(e){}
+  },
+  /* current prices for open server positions, fetched by THIS device */
+  async refreshLive(force){
+    if(!this.data)return;
+    const mints=[...new Set((this.data.positions||[]).filter(p=>(p.status||'').toUpperCase()!=='CLOSED'&&p.mint).map(p=>p.mint))];
+    if(!mints.length)return;
+    const now=U.now(); if(!force&&now-this.liveAt<45000)return; this.liveAt=now;
+    try{
+      const pr=await DISCOVERY.refreshPricesFor(mints);
+      for(const m of Object.keys(pr||{}))if(pr[m]&&pr[m].ok&&pr[m].priceUsd!=null)this.live[m]={price:pr[m].priceUsd,at:pr[m].observedAt||U.now()};
+      if(S.ui&&S.ui.page==='autotrade')try{RENDER.all();}catch(e){}
+    }catch(e){ /* keep old live marks, they carry their own timestamps */ }
+  }
+};
+
+/* ============================================================
+   T. DETAILUI — drill-down detail overlay. Tapping any coin,
+   signal, or position opens a full in-app detail view with
+   everything available for it + the complete link set
+   (GMGN · Dexscreener · Solscan · Binance). Missing data is
+   labeled honestly, never invented.
+   ============================================================ */
+const DETAILUI={
+  open(kind,key){ S.ui.detail={kind,key}; this.render(); },
+  close(){ S.ui.detail=null; const ov=document.getElementById('detailOverlay'); if(ov)ov.innerHTML=''; },
+  render(){
+    const ov=document.getElementById('detailOverlay'); if(!ov)return;
+    const d=S.ui.detail; if(!d){ ov.innerHTML=''; return; }
+    let body='';
+    try{
+      if(d.kind==='candidate')body=this.candidate(d.key);
+      else if(d.kind==='signal')body=this.signal(d.key);
+      else if(d.kind==='autopos')body=this.autopos(d.key);
+      else if(d.kind==='srvpos')body=this.srvpos(d.key);
+      else if(d.kind==='portpos')body=this.portpos(d.key);
+    }catch(e){ body='<div class="note">detail render error: '+U.esc(String(e))+'</div>'; }
+    ov.innerHTML='<div class="dov" onclick="if(event.target===this)DETAILUI.close()"><div class="dov-panel">'
+      +'<div class="row" style="position:sticky;top:0;background:var(--bg);z-index:2;padding:4px 0 8px"><b style="font-size:15px">🔍 DETAIL</b><span class="sp"></span><button class="btn sm" onclick="DETAILUI.close()">✕ close</button></div>'
+      +(body||'<div class="note">Record not found — it may have been wiped or rotated out.</div>')+'</div></div>';
+  },
+  linksFor(mint,pair){
+    return '<div class="row" style="margin:8px 0;flex-wrap:wrap">'+RENDER.links({mint,market:pair?{pairAddress:pair}:null})+'</div>'
+      +'<div class="small" style="margin-bottom:6px">*binance opens Binance main markets — new DEX coins are usually not listed there (honest main-site link).</div>';
+  },
+  kv(k,v){ return '<div class="kv"><span class="k">'+k+'</span><span class="v">'+v+'</span></div>'; },
+  /* ---- TOKEN (radar candidate) ---- */
+  candidate(mint){
+    const c=S.candidates.get(mint); if(!c)return null;
+    const m=c.market||{};
+    let h='<div class="row"><b style="font-size:17px">'+U.esc(m.symbol||'(no symbol)')+'</b><span class="small">'+U.esc(m.name||'')+'</span><span class="sp"></span>'
+      +RENDER.stateBadge(c.state)+RENDER.riskBadge(c.risk&&c.risk.verdict)+RENDER.freshness(m.observedAt)+'</div>';
+    h+='<div class="row" style="margin:4px 0"><span class="mint">'+mint+'</span>'+RENDER.copyBtn(mint)+'</div>';
+    h+=this.linksFor(mint,m.pairAddress);
+    h+='<div class="card"><h3>Market (as observed)</h3>'
+      +this.kv('price',m.priceUsd!=null?'$'+m.priceUsd:'—')
+      +this.kv('liquidity',U.fmt$(m.liquidityUsd))
+      +this.kv('volume 24h',U.fmt$(m.volume&&m.volume.h24))
+      +(m.pairAddress?this.kv('pair','<span class="small">'+m.pairAddress+'</span>'):'')
+      +this.kv('price observed',m.observedAt?new Date(m.observedAt).toLocaleString()+' ('+U.age(m.observedAt)+' ago)':'never')
+      +this.kv('first seen by us',new Date(c.firstObserved).toLocaleString()+' (our observation time, NOT verified launch time)')+'</div>';
+    if(c.score){
+      h+='<div class="card"><h3>Score '+c.score.total+'/100 <span class="small">'+c.score.scoreVersion+'</span></h3>'
+        +'<div class="bar" style="margin:6px 0"><i style="width:'+U.clamp(c.score.total,0,100)+'%"></i></div>'
+        +c.score.components.map(x=>'<div class="kv"><span class="k">'+x.label+' <span class="small">'+x.dataState+'</span></span><span class="v">'+x.points+'/'+x.max+'</span></div><div class="small" style="padding:0 0 6px 8px">'+U.esc(x.evidence)+'</div>').join('')
+        +'<div class="note">'+U.esc(c.score.disclaimer)+'</div></div>';
+    }else h+='<div class="note">No score computed for this token yet.</div>';
+    if(c.risk)h+='<div class="card"><h3>Risk review</h3>'+this.kv('verdict',c.risk.verdict||'NOT RUN')+(c.risk.reasons?'<div class="small">'+[].concat(c.risk.reasons).map(U.esc).join('<br>')+'</div>':'')+'</div>';
+    if(c.rejectionReasons&&c.rejectionReasons.length)h+='<div class="note" style="border-color:var(--amb)">Decision reasons: '+c.rejectionReasons.map(U.esc).join(' · ')+'</div>';
+    if(c.lastError)h+='<div class="note" style="border-color:var(--red)">Last source error: '+U.esc(c.lastError)+'</div>';
+    if(c.signalId&&S.signals.get(c.signalId))h+=this.signalBlock(S.signals.get(c.signalId));
+    return h;
+  },
+  signalBlock(g){
+    const ev=g.evidence||{};
+    return '<div class="card" style="border-color:var(--pur)"><h3>📡 Signal '+g.score+'/100 '+RENDER.badge('PAPER_SIGNAL','b-pur')+'</h3>'
+      +this.kv('signal time',new Date(g.createdAt).toLocaleString()+' ('+U.age(g.createdAt)+' ago)')
+      +this.kv('🔒 signal-time rate (frozen)','<span style="color:var(--pur)">'+(g.signalPriceUsd!=null?'$'+g.signalPriceUsd:'— legacy signal')+'</span>')
+      +(g.signalPriceUsd!=null?this.kv('exit zones','1.5x $'+(g.signalPriceUsd*1.5).toPrecision(4)+' · 2x $'+(g.signalPriceUsd*2).toPrecision(4)+' · 3x $'+(g.signalPriceUsd*3).toPrecision(4)):'')
+      +this.kv('liquidity / vol24',U.fmt$(ev.liquidityUsd)+' / '+U.fmt$(ev.volume24))
+      +this.kv('qualified wallets',ev.qualifiedWallets!=null?ev.qualifiedWallets:'—')
+      +this.kv('risk verdict',ev.riskVerdict||'—')
+      +this.kv('versions','<span class="small">'+g.scoreVersion+' · '+g.riskPolicyVersion+' · '+g.thresholdsVersion+'</span>')
+      +'<div class="note">'+U.esc(g.note||'')+'</div></div>';
+  },
+  /* ---- SIGNAL ---- */
+  signal(id){
+    const g=S.signals.get(id); if(!g)return null;
+    const c=S.candidates.get(g.mint);
+    let h='<div class="row"><b style="font-size:17px">'+U.esc(g.symbol||'(no symbol)')+'</b>'+RENDER.badge('PAPER_SIGNAL','b-pur')+(g.consumed?RENDER.badge('POSITION OPENED','b-live'):'')+'<span class="sp"></span><span class="scorebig">'+g.score+'</span></div>';
+    h+='<div class="row" style="margin:4px 0"><span class="mint">'+g.mint+'</span>'+RENDER.copyBtn(g.mint)+'</div>';
+    h+=this.linksFor(g.mint,(c&&c.market)?c.market.pairAddress:null);
+    h+=this.signalBlock(g);
+    if(c)h+='<div class="row"><button class="btn sm" onclick="DETAILUI.open(\'candidate\',\''+g.mint+'\')">open token detail (score breakdown, market) →</button></div>';
+    else h+='<div class="note">Token candidate record not in store — score breakdown unavailable.</div>';
+    if(c&&c.market&&!g.consumed)h+='<div class="row"><button class="btn grn sm" onclick="event.stopPropagation();BOOT.enterPaper(\''+g.mint+'\')">enter $'+S.settings.entrySizeUsd+' paper</button></div>';
+    return h;
+  },
+  /* ---- LOCAL AUTO BOOK position ---- */
+  autopos(id){
+    const p=AUTO.positions.get(id); if(!p)return null;
+    const x=p.lastPrice!=null?p.lastPrice/p.entryRate:null;
+    let h='<div class="row"><b style="font-size:17px">'+U.esc(p.symbol||'(no symbol)')+'</b>'+RENDER.badge(p.status,p.status==='OPEN'?'b-live':'b-dim')+RENDER.badge('PAPER','b-dim')+RENDER.badge('THIS DEVICE','b-info')+'<span class="sp"></span>'+(x!=null&&p.status==='OPEN'?'<b style="color:'+(x>=1?'var(--grn)':'var(--red)')+'">'+x.toFixed(3)+'x</b>':'')+'</div>';
+    h+='<div class="row" style="margin:4px 0"><span class="mint">'+p.mint+'</span>'+RENDER.copyBtn(p.mint)+'</div>';
+    h+=this.linksFor(p.mint,null);
+    h+='<div class="card"><h3>Position (local auto book)</h3>'
+      +this.kv('entry (frozen signal rate)','$'+p.entryRate+' · '+new Date(p.entryAt).toLocaleString())
+      +this.kv('size','$'+p.entrySizeUsd+' + fee $'+p.feeUsd+' · qty '+p.qty.toLocaleString())
+      +(p.entryLiquidity!=null?this.kv('liquidity at entry',U.fmt$(p.entryLiquidity)):'')
+      +this.kv('live price',p.priceState==='LIVE'&&p.lastPrice!=null?'$'+p.lastPrice+' · '+U.age(p.lastPriceAt)+' ago':'UNAVAILABLE — no action taken')
+      +(x!=null&&p.status==='OPEN'?this.kv('distance to exits',(x>=1.5?'1.5x REACHED':'+'+((1.5/x-1)*100).toFixed(1)+'% to 1.5x')+' · '+(x<=0.75?'−25% REACHED':((0.75/x-1)*100).toFixed(1)+'% drop to −25%')):'');
+    if(p.status==='CLOSED')h+=this.kv('exit',U.esc(p.exitReason||''))+this.kv('exit value / realized',U.fmt$(p.exitValueUsd)+' / '+((p.realizedPnl||0)>=0?'+':'')+U.fmt$(p.realizedPnl||0))+this.kv('closed',new Date(p.exitAt).toLocaleString());
+    h+='<div class="small" style="margin-top:4px">'+U.esc(p.rules||'')+'</div></div>';
+    if(S.candidates.get(p.mint))h+='<div class="row"><button class="btn sm" onclick="DETAILUI.open(\'candidate\',\''+p.mint+'\')">open token detail →</button></div>';
+    return h;
+  },
+  /* ---- SERVER BOOK position (data: book.json only — honest labels) ---- */
+  srvpos(id){
+    const d=SRVBOOK.data; if(!d)return null;
+    const p=(d.positions||[]).find(x=>x.id===id); if(!p)return null;
+    const open=(p.status||'').toUpperCase()!=='CLOSED';
+    const lp=p.mint?SRVBOOK.live[p.mint]:null;
+    const liveX=(open&&lp&&p.entryRate)?(lp.price/p.entryRate):null;
+    let h='<div class="row"><b style="font-size:17px">'+U.esc(p.symbol||'(no symbol)')+'</b>'+RENDER.badge(open?'OPEN':'CLOSED',open?'b-live':'b-dim')+RENDER.badge('PAPER','b-dim')+RENDER.badge('24/7 SERVER','b-pur')+'<span class="sp"></span>'+(liveX!=null?'<b style="color:'+(liveX>=1?'var(--grn)':'var(--red)')+'">'+liveX.toFixed(3)+'x LIVE</b>':'')+'</div>';
+    h+='<div class="row" style="margin:4px 0"><span class="mint">'+(p.mint||'—')+'</span>'+(p.mint?RENDER.copyBtn(p.mint):'')+'</div>';
+    if(p.mint)h+=this.linksFor(p.mint,null);
+    h+='<div class="card"><h3>Position (24/7 server book)</h3>'
+      +this.kv('entry rate (frozen)',(p.entryRate!=null?'$'+p.entryRate:'—')+(p.entryAt?' · '+new Date(SRVBOOK.ts(p.entryAt)).toLocaleString():''))
+      +(p.entrySizeUsd!=null?this.kv('size','$'+p.entrySizeUsd+(p.feeUsd!=null?' + fee $'+p.feeUsd:'')+(p.qty?' · qty '+Math.round(p.qty).toLocaleString():'')):'')
+      +(p.entryLiquidity!=null?this.kv('liquidity at entry',U.fmt$(p.entryLiquidity)):'')
+      +(open?this.kv('live price NOW (this device)',lp?'$'+lp.price+' · '+U.age(lp.at)+' ago':'fetching… (Dexscreener)'):'')
+      +this.kv('price in book snapshot',(p.lastPrice!=null?'$'+p.lastPrice:'—')+(p.lastPriceAt?' · as of '+new Date(SRVBOOK.ts(p.lastPriceAt)).toLocaleString():''))
+      +(p.currentX!=null?this.kv('multiple @ book update',(+p.currentX).toFixed(3)+'x'):'')
+      +(p.exitReason?this.kv('exit',U.esc(p.exitReason)):'')
+      +(p.exitValueUsd!=null?this.kv('exit value / realized',U.fmt$(p.exitValueUsd)+' / '+((p.realizedPnl||0)>=0?'+':'')+U.fmt$(p.realizedPnl||0)):'')
+      +(p.exitAt?this.kv('closed',new Date(SRVBOOK.ts(p.exitAt)).toLocaleString()):'')
+      +(p.rules?'<div class="small" style="margin-top:4px">'+U.esc(p.rules)+'</div>':'')+'</div>';
+    h+='<div class="note">Score breakdown, wallet evidence and risk verdict are NOT AVAILABLE server-side — book.json carries position facts only. Not invented here. Book last updated: '+(SRVBOOK.ts(d.generatedAt)?new Date(SRVBOOK.ts(d.generatedAt)).toLocaleString():'unknown')+'.</div>';
+    if(S.candidates.get(p.mint))h+='<div class="row"><button class="btn sm" onclick="DETAILUI.open(\'candidate\',\''+p.mint+'\')">open token detail (this device has it) →</button></div>';
+    return h;
+  },
+  /* ---- MANUAL PORTFOLIO position ---- */
+  portpos(id){
+    const p=S.positions.get(id); if(!p)return null;
+    const unr=p.status==='OPEN'?PORT.unrealized(p):null;
+    let h='<div class="row"><b style="font-size:17px">'+U.esc(p.symbol||U.short(p.mint))+'</b>'+RENDER.badge(p.status,p.status==='OPEN'?'b-live':'b-dim')+RENDER.badge('MANUAL BOOK','b-info')+'<span class="sp"></span>'+(p.status==='CLOSED'?'<b style="color:'+((p.realizedPnl||0)>=0?'var(--grn)':'var(--red)')+'">'+U.fmt$(p.realizedPnl)+'</b>':'')+'</div>';
+    h+='<div class="row" style="margin:4px 0"><span class="mint">'+p.mint+'</span>'+RENDER.copyBtn(p.mint)+'</div>';
+    h+=this.linksFor(p.mint,null);
+    h+='<div class="card"><h3>Position (manual paper book)</h3>'
+      +this.kv('entry','$'+p.entryPrice.toPrecision(4)+' · '+U.fmt$(p.entrySizeUsd)+' · '+new Date(p.openedAt).toLocaleString())
+      +this.kv('last price',p.lastPrice!=null?'$'+p.lastPrice.toPrecision(4)+' · '+U.age(p.lastPriceAt)+' ago'+(p.priceStale?' (STALE — not treated as current)':''):'UNAVAILABLE — not treated as current')
+      +(p.status==='OPEN'?this.kv('unrealized',unr==null?'UNAVAILABLE':U.fmt$(unr)):'')
+      +this.kv('score at entry',p.scoreAtEntry==null?'—':p.scoreAtEntry+' ('+p.scoreVersion+')')
+      +(p.milestonesHit&&p.milestonesHit.length?this.kv('milestones',p.milestonesHit.map(m2=>m2+'x').join(' · ')):'')
+      +(p.status==='CLOSED'?this.kv('exit',U.esc(p.exitReason||''))+this.kv('realized',U.fmt$(p.realizedPnl)):'');
+    h+='</div>';
+    if(p.status==='OPEN')h+='<div class="row"><button class="btn red sm" onclick="event.stopPropagation();BOOT.manualExit(\''+p.id+'\');DETAILUI.close()">exit now (paper)</button></div>';
+    if(S.candidates.get(p.mint))h+='<div class="row"><button class="btn sm" onclick="DETAILUI.open(\'candidate\',\''+p.mint+'\')">open token detail →</button></div>';
+    return h;
+  }
+};
+function openDetail(kind,key){ DETAILUI.open(kind,key); }
+
+</script>
+</body>
+</html>

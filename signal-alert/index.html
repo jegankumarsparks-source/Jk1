@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Solana Early Buy Alerts</title>
+<style>
+:root{--bg:#070b12;--card:#101827;--card2:#16213a;--line:#1f2d4a;--tx:#e6edf7;--mut:#8a9bb8;--g:#19e68c;--a:#ffb020;--r:#ff4d5e}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.45 system-ui,sans-serif;padding-bottom:76px}
+header{position:sticky;top:0;background:#0a101c;border-bottom:1px solid var(--line);padding:10px 14px;z-index:5}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.sp{flex:1}
+.pill{padding:2px 9px;border-radius:99px;font-size:12px;font-weight:700;border:1px solid}
+.g{color:var(--g);border-color:var(--g)}.a{color:var(--a);border-color:var(--a)}.r{color:var(--r);border-color:var(--r)}.m{color:var(--mut);border-color:var(--line)}
+main{padding:12px}.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px}
+.card.q{border-left:4px solid var(--g)}.card.rj{border-left:4px solid var(--r)}.card.w{border-left:4px solid var(--a)}
+.k{color:var(--mut);font-size:12px}.mono{font-family:ui-monospace,monospace;word-break:break-all;font-size:12px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;margin-top:6px}
+nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:#0a101c;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+nav button{flex:1;background:none;border:0;color:var(--mut);padding:14px 4px;font-size:13px;font-weight:600}nav button.on{color:var(--g);border-top:2px solid var(--g)}
+button.b{background:var(--card2);color:var(--tx);border:1px solid var(--line);border-radius:8px;padding:8px 12px;font-size:13px}
+a{color:#6db3ff}.hit{color:var(--g);font-weight:700}.miss{color:var(--mut)}
+#pop{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;z-index:20;padding:20px}
+#pop .box{background:#06150f;border:2px solid var(--g);border-radius:16px;padding:18px;max-width:420px;width:100%;animation:pulse 1.2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 #19e68c66}50%{box-shadow:0 0 28px 6px #19e68c66}}
+.banner{padding:8px 12px;border-radius:8px;margin-bottom:10px;font-weight:600}
+.banner.r{background:#3a0f15;color:var(--r)}.banner.a{background:#3a2a08;color:var(--a)}
+h3{margin:14px 0 6px;font-size:13px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em}
+</style></head><body>
+<header><div class="row"><b>SOL EARLY BUY ALERTS</b><span id="mode" class="pill m">...</span><span class="sp"></span><span id="conn" class="pill m">connecting</span></div>
+<div class="k" id="sub">loading...</div></header>
+<main id="main"></main>
+<div id="pop"><div class="box"><div class="pill g" style="display:inline-block">NEW QUALIFIED SIGNAL</div><h2 id="pt" style="margin:8px 0"></h2><div id="pb"></div>
+<div class="row" style="margin-top:12px"><button class="b" id="pd">Details</button><button class="b" id="px">Dismiss</button></div></div></div>
+<nav><button data-t="sig" class="on">Signals</button><button data-t="rej">Rejected</button><button data-t="out">Outcomes</button><button data-t="sys">System</button></nav>
+<script>
+"use strict";
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let D={health:null,signals:[],rej:[]},tab='sig',detail=null,popQueue=[];
+const LS={get:(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}}};
+let muted=LS.get('muted',false);
+const ist=t=>new Date(t*1000).toLocaleString('en-IN',{timeZone:'Asia/Kolkata',hour12:false});
+const ago=t=>{const s=Date.now()/1000-t;return s<90?Math.round(s)+'s ago':s<5400?Math.round(s/60)+' min ago':Math.round(s/3600)+' h ago'};
+// ---- audio: only after a user gesture; test button + mute; never a storm (1 sound per popup, 8s cooldown)
+let ac=null,lastSound=0;
+function unlock(){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();if(ac.state==='suspended')ac.resume()}catch{}}
+function beep(force){const n=Date.now();if(muted&&!force)return false;if(!force&&n-lastSound<8000)return false;unlock();if(!ac||ac.state!=='running')return false;lastSound=n;
+ [660,880,1100].forEach((f,i)=>{const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=f;o.connect(g);g.connect(ac.destination);const t=ac.currentTime+i*.18;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.25,t+.03);g.gain.exponentialRampToValueAtTime(.0001,t+.16);o.start(t);o.stop(t+.17)});return true}
+document.addEventListener('click',unlock,{once:false,passive:true});
+// ---- data
+async function j(p){const r=await fetch(p+'?t='+Date.now(),{cache:'no-store'});if(!r.ok)throw new Error(p+' '+r.status);return r.json()}
+async function load(){
+ try{const [h,s,r]=await Promise.all([j('data/health.json'),j('data/signals.json'),j('data/rejections.json').catch(()=>[])]);D={health:h,signals:s,rej:r};D.err=null}catch(e){D.err=e.message}
+ detectNew();render();
+}
+function detectNew(){
+ if(D.err)return;const seen=LS.get('seen',null);const live=D.signals.filter(s=>s.mode==='LIVE'&&s.telegram);
+ if(seen===null){LS.set('seen',live.map(s=>s.id));return} // first open: no popup storm for history
+ const fresh=live.filter(s=>!seen.includes(s.id)&&Date.now()/1000-s.signalTime<3600);
+ LS.set('seen',live.map(s=>s.id));
+ if(fresh.length){popQueue=[fresh[fresh.length-1]];showPop(fresh.length)} // one popup max, for latest
+}
+function showPop(n){const s=popQueue[0];$('#pt').textContent=(s.symbol||'?')+(n>1?'  (+'+(n-1)+' more)':'');
+ $('#pb').innerHTML=`<div class="k">Mint</div><div class="mono">${esc(s.mint)}</div><div class="grid"><div><div class="k">Reference</div>$${esc(s.refPrice)}</div><div><div class="k">Buy</div>$${Math.round(s.topBuy.spentUsd)}</div><div><div class="k">Wallets</div>${s.independent}</div><div><div class="k">Liquidity</div>$${Math.round(s.liquidityUsd)}</div></div><div class="k" style="margin-top:8px">QUALIFIED - NOT A GUARANTEE</div>`;
+ $('#pop').style.display='flex';beep(false);
+ if('Notification' in window&&Notification.permission==='granted'&&document.hidden)try{new Notification('Qualified signal: '+s.symbol,{body:s.mint,tag:'sig-'+s.id})}catch{}}
+$('#px').onclick=()=>{$('#pop').style.display='none'};
+$('#pd').onclick=()=>{$('#pop').style.display='none';detail=popQueue[0].id;tab='sig';render()};
+// ---- render
+function outcomeChips(s){const o=s.outcome||{};const mk=(l)=>{const h=o.hit?.[l];return h?`<span class="hit">${l}x ✔ ${h.atMin}m${h.executableByLiquidity?'':' (liq?)'}</span>`:(o.status==='PENDING VALIDATION'?`<span class="miss">${l}x PENDING</span>`:`<span class="miss">${l}x no</span>`)};return [1.5,2,3].map(mk).join(' · ')}
+function sigCard(s){const o=s.outcome||{};return `<div class="card q" data-id="${esc(s.id)}"><div class="row"><b>${esc(s.symbol)}</b><span class="pill ${s.mode==='LIVE'?'g':'a'}">${s.mode==='LIVE'?'QUALIFIED':'TEST'}</span><span class="sp"></span><span class="k">${ago(s.signalTime)}</span></div>
+ <div class="grid"><div><div class="k">Reference</div>$${esc(s.refPrice)}</div><div><div class="k">Confirmed buy</div>${s.topBuy.spentSol!=null?(+s.topBuy.spentSol).toFixed(2)+' SOL / ':''}$${Math.round(s.topBuy.spentUsd)}</div><div><div class="k">Wallets</div>${s.independent} (${esc(s.walletQuality)})</div><div><div class="k">Liquidity</div>$${Math.round(s.liquidityUsd)}</div></div>
+ <div style="margin-top:6px">${outcomeChips(s)}</div><div class="k">Telegram: ${s.telegram?.sent?'delivered '+ago(s.telegram.at):'<span style="color:var(--r)">NOT DELIVERED '+esc(s.telegram?.error||'')+'</span>'}</div></div>`}
+function detailView(s){const o=s.outcome||{};return `<button class="b" id="back">← Back</button><div class="card q" style="margin-top:10px"><b>${esc(s.symbol)}</b> <span class="pill ${s.mode==='LIVE'?'g':'a'}">${s.mode}</span>
+ <div class="k">Mint</div><div class="mono">${esc(s.mint)}</div><div class="k">Signal time (IST)</div>${ist(s.signalTime)}
+ <div class="grid"><div><div class="k">Reference price</div>$${esc(s.refPrice)}<div class="k">${esc(s.refSource)}</div></div><div><div class="k">Score</div>${esc(s.score)}</div><div><div class="k">Est. exit cost</div>${esc(s.exitCostPct)}%</div><div><div class="k">Max up / down</div>${(o.maxUp||0).toFixed(2)}x / ${(o.maxDown||0).toFixed(2)}x</div></div>
+ <h3>Why qualified</h3><div>${(s.why||[]).map(esc).join('<br>')}</div>${s.warns?.length?`<h3>Data-quality warnings</h3><div style="color:var(--a)">${s.warns.map(esc).join('<br>')}</div>`:''}
+ <h3>Outcome (vs signal reference price)</h3><div>${outcomeChips(s)}</div><div class="k">Status: ${esc(o.status)}${o.liquidityCollapse?' · LIQUIDITY COLLAPSE':''}</div>
+ <div class="k">Windows: ${[5,10,30,60].map(w=>`${w}m ${o.snap?.[w]?o.snap[w].x+'x':'PENDING'}`).join(' · ')}</div>
+ <h3>Links</h3><div class="row"><a target="_blank" rel="noopener" href="https://gmgn.ai/sol/token/${encodeURIComponent(s.mint)}">GMGN</a><a target="_blank" rel="noopener" href="https://dexscreener.com/solana/${encodeURIComponent(s.pair||s.mint)}">Dexscreener</a><a target="_blank" rel="noopener" href="https://solscan.io/token/${encodeURIComponent(s.mint)}">Solscan</a><a target="_blank" rel="noopener" href="https://solscan.io/tx/${encodeURIComponent(s.topBuy.signature)}">Buy tx</a><a target="_blank" rel="noopener" href="https://www.binance.com/en/search?q=${encodeURIComponent(s.symbol)}">Binance</a></div></div>`}
+function render(){
+ const h=D.health,m=$('#main');const now=Date.now()/1000;
+ if(D.err||!h){$('#conn').className='pill r';$('#conn').textContent='NO DATA';$('#sub').textContent='Cannot load scanner data: '+(D.err||'');m.innerHTML='<div class="banner r">Scanner data unavailable. Nothing shown is live.</div>';return}
+ const age=now-(h.lastScanAt||0);const ok=h.lastCycleOk&&age<900;
+ $('#conn').className='pill '+(ok?'g':'r');$('#conn').textContent=ok?'SCANNER OK':(age>=900?'SCANNER STALE':'SCANNER ERROR');
+ $('#mode').className='pill '+(h.mode==='LIVE'?'g':'a');$('#mode').textContent=h.mode==='LIVE'?'LIVE DATA':'TEST DATA';
+ $('#sub').textContent='Last successful scan: '+(h.lastScanAt?ist(h.lastScanAt)+' IST ('+ago(h.lastScanAt)+')':'never');
+ let html='';
+ if(!ok)html+=`<div class="banner r">Scanner has not completed a scan recently. No new alerts can be expected.</div>`;
+ if(h.mode!=='LIVE')html+=`<div class="banner a">TEST mode: signals below are not live market signals.</div>`;
+ const bad=Object.entries(h.sources||{}).filter(([k,v])=>v!=='ok');if(bad.length)html+=`<div class="banner a">Data source issue: ${bad.map(([k,v])=>esc(k+' '+v)).join(', ')} - failing closed.</div>`;
+ const sigs=[...D.signals].sort((a,b)=>b.signalTime-a.signalTime);
+ if(tab==='sig'){
+  if(detail){const s=sigs.find(x=>x.id===detail);html+=s?detailView(s):'';m.innerHTML=html;$('#back')&&($('#back').onclick=()=>{detail=null;render()});return}
+  html+=sigs.length?sigs.slice(0,30).map(sigCard).join(''):`<div class="card"><b>NO QUALIFIED SIGNAL</b><div class="k">Last cycle watched ${h.pairsWatched??'?'} pairs, ${h.newBuys??0} new confirmed buys. The engine does not manufacture alerts.</div></div>`;
+ }else if(tab==='rej'){
+  html+='<div class="k">Candidates seen but not alerted, with the reason (latest first).</div>';
+  html+=[...D.rej].reverse().slice(0,60).map(r=>`<div class="card ${r.status==='REJECTED'?'rj':'w'}"><div class="row"><b>${esc(r.symbol||r.mint.slice(0,6))}</b><span class="pill ${r.status==='REJECTED'?'r':'a'}">${esc(r.status)}</span><span class="sp"></span><span class="k">${ago(r.t)}</span></div><div>${(r.reasons||[]).map(esc).join('<br>')}</div></div>`).join('')||'<div class="card k">None recorded yet.</div>';
+ }else if(tab==='out'){
+  const live=sigs.filter(s=>s.mode==='LIVE'),res=live.filter(s=>s.outcome.status.startsWith('RESOLVED')),hit=res.filter(s=>s.outcome.hit['1.5']);
+  html+=`<div class="card"><b>Measured outcomes (LIVE only)</b><div class="grid"><div><div class="k">Alerts</div>${live.length}</div><div><div class="k">Resolved (60m)</div>${res.length}</div><div><div class="k">1.5x hits</div>${hit.length}</div><div><div class="k">Hit rate</div>${res.length>=30?(100*hit.length/res.length).toFixed(0)+'%':'INSUFFICIENT SAMPLE (need 30, have '+res.length+')'}</div></div><div class="k">Prices are Dexscreener marks vs the signal reference price; exit costs are estimates. Not a guarantee.</div></div>`;
+  html+=sigs.map(s=>`<div class="card"><b>${esc(s.symbol)}</b> <span class="k">${ago(s.signalTime)} · ${esc(s.outcome.status)}</span><div>${outcomeChips(s)}</div></div>`).join('');
+ }else{
+  html+=`<div class="card"><b>System health</b><div class="grid"><div><div class="k">Mode</div>${esc(h.mode)}</div><div><div class="k">Cycle time</div>${esc(h.cycleSec)}s</div><div><div class="k">Pairs watched</div>${esc(h.pairsWatched)}</div><div><div class="k">New buys last cycle</div>${esc(h.newBuys)}</div><div><div class="k">SOL/USD</div>$${esc(h.solUsd)}</div><div><div class="k">Telegram</div>${h.telegramConfigured?'configured (delivery shown per signal)':'<span style="color:var(--r)">NOT CONFIGURED</span>'}</div></div></div>`;
+  html+=`<div class="card"><b>Data sources</b>${Object.entries(h.sources||{}).map(([k,v])=>`<div class="row"><span>${esc(k)}</span><span class="sp"></span><span class="pill ${v==='ok'?'g':'a'}">${esc(v)}</span></div>`).join('')}<div class="k">API calls this cycle: ${esc(JSON.stringify(h.apiStats||{}))}</div></div>`;
+  html+=`<div class="card"><b>Alert sound</b><div class="row" style="margin-top:8px"><button class="b" id="tst">Test sound</button><button class="b" id="mut">${muted?'Unmute':'Mute'}</button><button class="b" id="ntf">Enable notifications</button></div><div class="k" style="margin-top:6px">Sound and popups only work while this page is open and the browser allows audio. Telegram is the independent channel when the page is closed.</div><div class="k" id="sres"></div></div>`;
+  html+=`<div class="card"><b>Last errors</b><div class="k">${(h.errors||[]).slice(0,5).map(esc).join('<br>')||'none'}</div></div>`;
+  m.innerHTML=html;
+  $('#tst').onclick=()=>{unlock();const ok=beep(true);$('#sres').textContent=ok?'Played. If you heard nothing, check phone volume/silent switch.':'Browser blocked audio. Tap again.'};
+  $('#mut').onclick=()=>{muted=!muted;LS.set('muted',muted);render()};
+  $('#ntf').onclick=()=>{if(!('Notification' in window)){$('#sres').textContent='Notifications not supported here.';return}Notification.requestPermission().then(p=>{$('#sres').textContent='Notification permission: '+p})};
+  return}
+ m.innerHTML=html;
+ m.querySelectorAll('[data-id]').forEach(el=>el.onclick=()=>{detail=el.dataset.id;render();scrollTo(0,0)});
+}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{tab=b.dataset.t;detail=null;document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));render()});
+load();setInterval(load,30000);
+</script></body></html>
