@@ -15,7 +15,7 @@ main{padding:12px}.card{background:var(--card);border:1px solid var(--line);bord
 nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:#0a101c;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
 nav button{flex:1;background:none;border:0;color:var(--mut);padding:14px 4px;font-size:13px;font-weight:600}nav button.on{color:var(--g);border-top:2px solid var(--g)}
 button.b{background:var(--card2);color:var(--tx);border:1px solid var(--line);border-radius:8px;padding:8px 12px;font-size:13px}
-a{color:#6db3ff}.hit{color:var(--g);font-weight:700}.miss{color:var(--mut)}
+a{color:#6db3ff}.coin-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.coin-links a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--card2);text-decoration:none}.hit{color:var(--g);font-weight:700}.miss{color:var(--mut)}
 #pop{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;z-index:20;padding:20px}
 #pop .box{background:#06150f;border:2px solid var(--g);border-radius:16px;padding:18px;max-width:420px;width:100%;animation:pulse 1.2s infinite}
 @keyframes pulse{0%,100%{box-shadow:0 0 0 0 #19e68c66}50%{box-shadow:0 0 28px 6px #19e68c66}}
@@ -83,17 +83,24 @@ $('#px').onclick=()=>{$('#pop').style.display='none'};
 $('#pd').onclick=()=>{$('#pop').style.display='none';detail=popQueue[0].id;tab='sig';render()};
 // ---- render
 function outcomeChips(s){const o=s.outcome||{};const mk=(l)=>{const h=o.hit?.[l];return h?`<span class="hit">${l}x ✔ ${h.atMin}m${h.executableByLiquidity?'':' (liq?)'}</span>`:(o.status==='PENDING VALIDATION'?`<span class="miss">${l}x PENDING</span>`:`<span class="miss">${l}x no</span>`)};return [1.5,2,3].map(mk).join(' · ')}
+function coinLinks(s){
+ if(!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(s?.mint||''))return '<div class="k">Links unavailable: missing or invalid mint.</div>';
+ const mint=encodeURIComponent(s.mint);
+ const dex=typeof s.chartUrl==='string'&&/^https:\/\/dexscreener\.com\/solana\/[a-zA-Z0-9]+$/.test(s.chartUrl)?s.chartUrl:'https://dexscreener.com/solana/'+encodeURIComponent(s.pair||s.mint);
+ return `<div class="coin-links"><a target="_blank" rel="noopener noreferrer" href="${esc(dex)}">Dexscreener</a><a target="_blank" rel="noopener noreferrer" href="https://gmgn.ai/sol/token/${mint}">GMGN</a><a target="_blank" rel="noopener noreferrer" href="https://solscan.io/token/${mint}">Solscan</a></div><div class="k">Research links only. A link is not a qualification or a safety check.</div>`;
+}
+function candidateCard(s){return `<div class="card w"><div class="row"><b>${esc(s.symbol||s.mint||'Unknown token')}</b><span class="pill a">${esc(['REJECTED','DATA INCOMPLETE','PENDING VALIDATION'].includes(s.status)?s.status:'UNVERIFIED RECORD')}</span></div><div class="k">Not a qualified signal. Legacy or incomplete evidence.</div><div class="mono">${esc(s.mint||'Mint unavailable')}</div>${coinLinks(s)}</div>`}
 function verificationView(s){return `<div class="k" style="margin-top:8px;color:var(--a)">${esc(s.tier||'VERIFICATION INCOMPLETE')}<br>Future exits: UNVERIFIED. A quote does not guarantee your exit.<br>Wallet independence: UNVERIFIED. Addresses may share an owner.</div>`}
 function sigCard(s){const o=s.outcome||{};return `<div class="card q" data-id="${esc(s.id)}"><div class="row"><b>${esc(s.symbol)}</b><span class="pill ${s.mode==='LIVE'?'g':'a'}">${s.mode==='LIVE'?'QUALIFIED':'TEST'}</span><span class="sp"></span><span class="k">${ago(s.signalTime)}</span></div>
  <div class="grid"><div><div class="k">Reference</div>$${esc(s.refPrice)}</div><div><div class="k">Confirmed buy</div>${s.topBuy.spentSol!=null?(+s.topBuy.spentSol).toFixed(2)+' SOL / ':''}$${Math.round(s.topBuy.spentUsd)}</div><div><div class="k">Wallets</div>${s.walletCount??s.independent} addresses (${esc(s.walletQuality)})</div><div><div class="k">Liquidity</div>$${Math.round(s.liquidityUsd)}</div></div>
- ${verificationView(s)}<div style="margin-top:6px">${outcomeChips(s)}</div><div class="k">Telegram: ${s.telegram?.sent?'delivered '+ago(s.telegram.at):'<span style="color:var(--r)">NOT DELIVERED '+esc(s.telegram?.error||'')+'</span>'}</div></div>`}
+ ${coinLinks(s)}${verificationView(s)}<div style="margin-top:6px">${outcomeChips(s)}</div><div class="k">Telegram: ${s.telegram?.sent?'delivered '+ago(s.telegram.at):'<span style="color:var(--r)">NOT DELIVERED '+esc(s.telegram?.error||'')+'</span>'}</div></div>`}
 function detailView(s){const o=s.outcome||{};return `<button class="b" id="back">← Back</button><div class="card q" style="margin-top:10px"><b>${esc(s.symbol)}</b> <span class="pill ${s.mode==='LIVE'?'g':'a'}">${s.mode}</span>
  <div class="k">Mint</div><div class="mono">${esc(s.mint)}</div><div class="k">Signal time (IST)</div>${ist(s.signalTime)}
  <div class="grid"><div><div class="k">Reference price</div>$${esc(s.refPrice)}<div class="k">${esc(s.refSource)}</div></div><div><div class="k">Score</div>${esc(s.score)}</div><div><div class="k">Est. exit cost</div>${esc(s.exitCostPct)}%</div><div><div class="k">Max up / down</div>${(o.maxUp||0).toFixed(2)}x / ${(o.maxDown||0).toFixed(2)}x</div></div>
  ${verificationView(s)}<h3>Field evidence</h3><div class="k">${Object.entries(s.verification||{}).map(([k,v])=>esc(k+': '+v)).join('<br>')}</div><h3>Why qualified</h3><div>${(s.why||[]).map(esc).join('<br>')}</div>${s.warns?.length?`<h3>Data-quality warnings</h3><div style="color:var(--a)">${s.warns.map(esc).join('<br>')}</div>`:''}
  <h3>Outcome (vs signal reference price)</h3><div>${outcomeChips(s)}</div><div class="k">Status: ${esc(o.status)}${o.liquidityCollapse?' · LIQUIDITY COLLAPSE':''}</div>
  <div class="k">Windows: ${[5,10,30,60].map(w=>`${w}m ${o.snap?.[w]?.status|| (o.snap?.[w]?.x!=null?o.snap[w].x+'x':'PENDING')}`).join(' · ')}</div>
- <h3>Links</h3><div class="row"><a target="_blank" rel="noopener" href="https://gmgn.ai/sol/token/${encodeURIComponent(s.mint)}">GMGN</a><a target="_blank" rel="noopener" href="https://dexscreener.com/solana/${encodeURIComponent(s.pair||s.mint)}">Dexscreener</a><a target="_blank" rel="noopener" href="https://solscan.io/token/${encodeURIComponent(s.mint)}">Solscan</a><a target="_blank" rel="noopener" href="https://solscan.io/tx/${encodeURIComponent(s.topBuy.signature)}">Buy tx</a><a target="_blank" rel="noopener" href="https://www.binance.com/en/search?q=${encodeURIComponent(s.symbol)}">Binance</a></div></div>`}
+ <h3>Links</h3>${coinLinks(s)}<div class="row"><a target="_blank" rel="noopener" href="https://gmgn.ai/sol/token/${encodeURIComponent(s.mint)}">GMGN</a><a target="_blank" rel="noopener" href="https://dexscreener.com/solana/${encodeURIComponent(s.pair||s.mint)}">Dexscreener</a><a target="_blank" rel="noopener" href="https://solscan.io/token/${encodeURIComponent(s.mint)}">Solscan</a><a target="_blank" rel="noopener" href="https://solscan.io/tx/${encodeURIComponent(s.topBuy.signature)}">Buy tx</a><a target="_blank" rel="noopener" href="https://www.binance.com/en/search?q=${encodeURIComponent(s.symbol)}">Binance</a></div></div>`}
 function render(){
  const h=D.health,m=$('#main');const now=Date.now()/1000;
  if(D.err||!h){$('#conn').className='pill r';$('#conn').textContent='NO DATA';$('#sub').textContent='Cannot load scanner data: '+(D.err||'');m.innerHTML='<div class="banner r">Scanner data unavailable. Nothing shown is live.</div>';return}
@@ -108,14 +115,15 @@ function render(){
  if(h.mode!=='LIVE')html+=`<div class="banner a">TEST mode: signals below are not live market signals.</div>`;
  const bad=Object.entries(h.sources||{}).filter(([k,v])=>v!=='ok');if(bad.length)html+=`<div class="banner a">Data source issue: ${bad.map(([k,v])=>esc(k+' '+v)).join(', ')} - failing closed.</div>`;
  const hidden=D.signals.filter(s=>!displayEntry(s)).length;
- if(hidden)html+=`<div class="banner a">${hidden} legacy or incomplete record(s) withheld. They are not qualified signals.</div>`;
+ if(hidden)html+=`<div class="banner a">${hidden} legacy or incomplete record(s) shown as unverified. They are not qualified signals.</div>`;
  const sigs=D.signals.filter(displayEntry).sort((a,b)=>b.signalTime-a.signalTime);
  if(tab==='sig'){
   if(detail){const s=sigs.find(x=>x.id===detail);html+=s?detailView(s):'';m.innerHTML=html;$('#back')&&($('#back').onclick=()=>{detail=null;render()});return}
   html+=sigs.length?sigs.slice(0,30).map(sigCard).join(''):`<div class="card"><b>NO QUALIFIED SIGNAL</b><div class="k">Last cycle watched ${h.pairsWatched??'?'} pairs, ${h.newBuys??0} buy candidates. The engine does not manufacture alerts.</div></div>`;
+  html+=D.signals.filter(s=>!displayEntry(s)).slice(-30).reverse().map(candidateCard).join('');
  }else if(tab==='rej'){
   html+='<div class="k">Candidates seen but not alerted, with the reason (latest first).</div>';
-  html+=[...D.rej].reverse().slice(0,60).map(r=>`<div class="card ${r.status==='REJECTED'?'rj':'w'}"><div class="row"><b>${esc(r.symbol||r.mint.slice(0,6))}</b><span class="pill ${r.status==='REJECTED'?'r':'a'}">${esc(r.status)}</span><span class="sp"></span><span class="k">${ago(r.t)}</span></div><div>${(r.reasons||[]).map(esc).join('<br>')}</div></div>`).join('')||'<div class="card k">None recorded yet.</div>';
+  html+=[...D.rej].reverse().slice(0,60).map(r=>`<div class="card ${r.status==='REJECTED'?'rj':'w'}"><div class="row"><b>${esc(r.symbol||r.mint.slice(0,6))}</b><span class="pill ${r.status==='REJECTED'?'r':'a'}">${esc(r.status)}</span><span class="sp"></span><span class="k">${ago(r.t)}</span></div><div>${(r.reasons||[]).map(esc).join('<br>')}</div><div class="mono">${esc(r.mint||'Mint unavailable')}</div>${coinLinks(r)}</div>`).join('')||'<div class="card k">None recorded yet.</div>';
  }else if(tab==='out'){
   const live=sigs.filter(s=>s.mode==='LIVE'),res=live.filter(s=>s.outcome.status.startsWith('RESOLVED')),hit=res.filter(s=>s.outcome.hit['1.5']);
   html+=`<div class="card"><b>Measured outcomes (LIVE only)</b><div class="grid"><div><div class="k">Alerts</div>${live.length}</div><div><div class="k">Resolved (60m)</div>${res.length}</div><div><div class="k">1.5x hits</div>${hit.length}</div><div><div class="k">Hit rate</div>${res.length>=30?(100*hit.length/res.length).toFixed(0)+'%':'INSUFFICIENT SAMPLE (need 30, have '+res.length+')'}</div></div><div class="k">Prices are Dexscreener marks vs the signal reference price; exit costs are estimates. Not a guarantee.</div></div>`;
@@ -131,6 +139,7 @@ function render(){
   $('#ntf').onclick=()=>{if(!('Notification' in window)){$('#sres').textContent='Notifications not supported here.';return}Notification.requestPermission().then(p=>{$('#sres').textContent='Notification permission: '+p})};
   return}
  m.innerHTML=html;
+ m.querySelectorAll('.coin-links a').forEach(a=>a.onclick=e=>e.stopPropagation());
  m.querySelectorAll('[data-id]').forEach(el=>el.onclick=()=>{detail=el.dataset.id;render();scrollTo(0,0)});
 }
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{tab=b.dataset.t;detail=null;document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));render()});
