@@ -10,18 +10,20 @@ export function walletQuality(w,hist){
 // Independence: wallets funded by the same funder are one cluster.
 export function independentWallets(wallets,funders={}){
   const groups=new Set(); let unknown=0;
-  for(const w of wallets){const f=funders[w]; if(f) groups.add(f); else {groups.add('self:'+w); unknown++;}}
+  for(const w of wallets){const f=funders[w]; if(f) groups.add(f); else {unknown++;}}
   return {count:groups.size,fundingUnknown:unknown};
 }
 export function evaluate(cand,now=Date.now()/1000){
   const reasons=[],warns=[]; const fail=(s,r)=>({status:s,reasons:[r,...reasons],warns});
   const {buys,market,safety,solUsdAt,solUsdFetchedAt,hist,funders}=cand;
-  if(!buys?.length) return fail('NOT OBSERVED','no confirmed buys');
+  if(!buys?.length) return fail('NOT OBSERVED','no observed buy candidates');
+  if(buys.some(b=>b.buyEvidence!=='VERIFIED_SWAP_AND_SPEND')) return fail('PENDING VALIDATION','balance changes are candidates only; swap instruction and exact quote spend not verified');
+  if(!Number.isFinite(market?.priceUsd)||market.priceUsd<=0||!Number.isFinite(market?.liquidityUsd)||market.liquidityUsd<=0||!Number.isFinite(market?.fetchedAt)) return fail('DATA INCOMPLETE','invalid market price, liquidity or timestamp');
   if(!market||market.priceUsd==null||market.liquidityUsd==null) return fail('DATA INCOMPLETE','market data missing');
   if(now-market.fetchedAt>C.minMarketFreshSec) return fail('DATA INCOMPLETE','market data stale');
   if(!solUsdFetchedAt||now-solUsdFetchedAt>C.minSolUsdFreshSec) return fail('DATA INCOMPLETE','SOL/USD price stale');
   if(!safety||safety.checked!==true) return fail('PENDING VALIDATION','safety checks not completed');
-  const recent=buys.filter(b=>now-b.blockTime<=C.maxTxAgeSec);
+  const recent=buys.filter(b=>Number.isFinite(b.blockTime)&&now>=b.blockTime&&now-b.blockTime<=C.clusterWindowSec);
   if(!recent.length) return fail('REJECTED','buys too old');
   const sig=recent.filter(b=>b.spentUsd>=C.minBuyUsd||(b.spentSol!=null&&b.spentSol>=C.minBuySol-1e-6));
   const wallets=[...new Set(recent.map(b=>b.signer))];
@@ -34,7 +36,7 @@ export function evaluate(cand,now=Date.now()/1000){
   if(safety.freezeAuthority) reasons.push('freeze authority present');
   if(safety.rugged||safety.rugDanger) reasons.push('rug/danger flag: '+(safety.rugReason||'source flag'));
   if(safety.top10Pct!=null&&safety.top10Pct>C.maxTop10HolderPct) reasons.push(`top10 holders ${safety.top10Pct}% > ${C.maxTop10HolderPct}%`);
-  if(safety.top10Pct==null) warns.push('holder concentration unknown');
+  
   if(market.liquidityUsd<C.minLiquidityUsd) reasons.push(`liquidity $${Math.round(market.liquidityUsd)} < $${C.minLiquidityUsd}`);
   if(market.liquidityDropPct>30) reasons.push('liquidity fell >30% recently');
   if((market.vol5m??0)<C.minVol5mUsd) reasons.push('5m volume too low');
@@ -45,6 +47,11 @@ export function evaluate(cand,now=Date.now()/1000){
   if(slip>C.maxSlippagePct) warns.push(`buy size ${slip.toFixed(1)}% of liquidity`);
   if(exitCost>=33) reasons.push('1.5x upside consumed by costs');
   if(reasons.length) return {status:'REJECTED',reasons,warns};
+  if(safety.top10Pct==null) return fail('DATA INCOMPLETE','holder concentration unknown');
+  if(safety.authoritiesVerified!==true) return fail('PENDING VALIDATION','mint/freeze authority evidence incomplete');
+  if(safety.sellabilityVerified!==true||safety.exitQuoteVerified!==true) return fail('PENDING VALIDATION','sellability and executable exit quote not verified');
+  if(!Number.isFinite(market.liquidityDropPct)) return fail('DATA INCOMPLETE','liquidity history not measured');
+  if(wallets.length>1&&ind.fundingUnknown) return fail('PENDING VALIDATION','wallet independence not verified');
   // scoring (explainable)
   const q=wallets.map(w=>walletQuality(w,hist));
   const credible=q.filter(x=>x.credible).length;
