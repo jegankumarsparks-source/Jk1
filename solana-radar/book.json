@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "generatedAt": "2026-10-14T10:45:40.401282+00:00",
-  "lastCheckedAt": "2026-10-14T10:45:36.357Z",
+  "generatedAt": "2026-10-14T10:50:48.666140+00:00",
+  "lastCheckedAt": "2026-10-14T10:50:44.529Z",
   "paperOnly": true,
   "bank": 200,
   "cash": 61.23,
@@ -675,7 +675,7 @@
       "entryLiquidity": 3353.27,
       "status": "OPEN",
       "lastPrice": 2.681e-06,
-      "lastPriceAt": 1791974733375,
+      "lastPriceAt": 1791975041381,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -879,7 +879,7 @@
       "entryLiquidity": 2598.31,
       "status": "OPEN",
       "lastPrice": 2.231e-06,
-      "lastPriceAt": 1791974733394,
+      "lastPriceAt": 1791975041465,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -978,7 +978,7 @@
       "entryLiquidity": 2640.55,
       "status": "OPEN",
       "lastPrice": 2.405e-06,
-      "lastPriceAt": 1791974733488,
+      "lastPriceAt": 1791975041513,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -8530,18 +8530,23 @@
       "status": "PENDING",
       "score": null,
       "signalLiquidity": 3233.29
+    },
+    {
+      "id": "limit_sig_open_mv7zo7va_49zwym",
+      "signalId": "sig_open_mv7zo7va_49zwym",
+      "mint": "DYGVA5qwt9fHbJb6Ve4Vsn1F3BhKPP99GcPRP7ZKpump",
+      "symbol": "RSI",
+      "signalPrice": 6.375e-06,
+      "limitPrice": 5.1e-06,
+      "createdAt": 1791975042262,
+      "expiresAt": 1791978642262,
+      "status": "PENDING",
+      "score": null,
+      "signalLiquidity": 5049.82
     }
   ],
   "rulesVersion": "entry-open-v4",
   "historyTail": [
-    {
-      "t": 1791955065517,
-      "type": "LIMIT_CANCELLED",
-      "mint": "9bRLLRassBs1xtK29z73vZmyi1H2uHnMN8F5vdWpump",
-      "symbol": "Genesis",
-      "price": 1.7728e-05,
-      "reason": "60-minute signal expiry"
-    },
     {
       "t": 1791955066158,
       "type": "LIMIT_CANCELLED",
@@ -8950,6 +8955,16 @@
       "price": 6.771e-05,
       "usd": 16.22,
       "reason": "TP - observed 1.6304x >=1.5x"
+    },
+    {
+      "t": 1791975042263,
+      "type": "LIMIT_PLACED",
+      "mint": "DYGVA5qwt9fHbJb6Ve4Vsn1F3BhKPP99GcPRP7ZKpump",
+      "symbol": "RSI",
+      "price": 5.1e-06,
+      "signalPrice": 6.375e-06,
+      "usd": 10,
+      "reason": "entry-open-v4: -20% limit, expires in 60 minutes; no cash/slot consumed"
     }
   ],
   "sourceHealth": [
@@ -8958,12 +8973,12 @@
       "label": "Dexscreener (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791974736104,
+      "lastSuccess": 1791975044308,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
       "rateLimitCount": 0,
-      "requestCount": 25,
+      "requestCount": 24,
       "note": "REST market feed \u2014 not a complete historical on-chain feed. Rate limits apply.",
       "backoffUntil": 0
     },
