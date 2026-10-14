@@ -79,13 +79,14 @@ function detailView(s){const o=s.outcome||{};return `<button class="b" id="back"
 function render(){
  const h=D.health,m=$('#main');const now=Date.now()/1000;
  if(D.err||!h){$('#conn').className='pill r';$('#conn').textContent='NO DATA';$('#sub').textContent='Cannot load scanner data: '+(D.err||'');m.innerHTML='<div class="banner r">Scanner data unavailable. Nothing shown is live.</div>';return}
- const age=now-(h.lastScanAt||0);const ok=h.lastCycleOk&&age<900;
- $('#conn').className='pill '+(ok?'g':'r');$('#conn').textContent=ok?'SCAN RECENT':(age>=900?'SCANNER STALE':'SCANNER ERROR');
+ const age=now-(h.lastScanAt||0);const fresh=age<1500;const ok=fresh&&h.lastCycleOk;
+ $('#conn').className='pill '+(ok?'g':(fresh?'a':'r'));$('#conn').textContent=ok?'SCAN RECENT':(fresh?'SCAN DEGRADED':'SCANNER STALE');
  $('#mode').className='pill '+(h.mode==='LIVE'?'g':'a');$('#mode').textContent=h.mode==='LIVE'?'LIVE DATA':'TEST DATA';
  $('#sub').textContent='Last successful scan: '+(h.lastScanAt?ist(h.lastScanAt)+' IST ('+ago(h.lastScanAt)+')':'never');
  let html='';
  html+=`<div class="banner a">${esc(h.releaseStatus||'OBSERVATION ONLY - signal validation incomplete')}</div>`;
- if(!ok)html+=`<div class="banner r">Scanner has not completed a scan recently. No new alerts can be expected.</div>`;
+ if(!fresh)html+=`<div class="banner r">Scanner has not completed a scan recently. No new alerts can be expected.</div>`;
+ else if(!h.lastCycleOk)html+=`<div class="banner a">Last cycle completed with partial pair coverage - failing closed, scanner is up.</div>`;
  if(h.mode!=='LIVE')html+=`<div class="banner a">TEST mode: signals below are not live market signals.</div>`;
  const bad=Object.entries(h.sources||{}).filter(([k,v])=>v!=='ok');if(bad.length)html+=`<div class="banner a">Data source issue: ${bad.map(([k,v])=>esc(k+' '+v)).join(', ')} - failing closed.</div>`;
  const sigs=[...D.signals].sort((a,b)=>b.signalTime-a.signalTime);
