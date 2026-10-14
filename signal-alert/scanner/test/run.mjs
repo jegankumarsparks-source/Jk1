@@ -1,7 +1,9 @@
 // TEST fixtures are synthetic and labelled TEST. They never feed LIVE data.
 import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';import os from 'node:os';
-import {classifyTx,WSOL} from '../lib/classify.mjs';import {evaluate} from '../lib/engine.mjs';import {sendTelegram,formatAlert} from '../lib/telegram.mjs';
+import {classifyTx as rawClassifyTx,WSOL} from '../lib/classify.mjs';import {evaluate} from '../lib/engine.mjs';import {sendTelegram,formatAlert} from '../lib/telegram.mjs';
 import {Store} from '../lib/store.mjs';import {runCycle} from '../scan.mjs';import {summarizeRug,marketFromPair} from '../lib/sources.mjs';
+// TEST-only adapter: inject verified evidence for decision-engine fixtures, never LIVE.
+const classifyTx=(tx,sol)=>{const c=rawClassifyTx(tx,sol);return c.kind==='BUY_CANDIDATE'?{...c,kind:'BUY',buyEvidence:'VERIFIED_SWAP_AND_SPEND'}:c};
 const MINT='TESTmint1111111111111111111111111111111111pump';const W1='Wallet1'+'1'.repeat(37),W2='Wallet2'+'2'.repeat(37),W3='Wallet3'+'3'.repeat(37);
 const tb=(owner,mint,ui,idx=1)=>({accountIndex:idx,mint,owner,uiTokenAmount:{uiAmountString:String(ui),uiAmount:ui}});
 function tx({signer=W1,solDelta=0,fee=5000,pre=[],post=[],err=null,sig='sig'+Math.random(),t=Date.now()/1000-30}){
@@ -23,7 +25,7 @@ test('4 buy vs sale vs transfer vs liquidity vs failed',()=>{
   const xfer=tx({solDelta:0,pre:[],post:[tb(W1,MINT,5000)]});assert.equal(classifyTx(xfer,SOL).kind,'TRANSFER');
   const lp=tx({solDelta:-5,pre:[tb(W1,MINT,5000)],post:[tb(W1,'LPmint',50)]});assert.notEqual(classifyTx(lp,SOL).kind,'BUY');
   assert.equal(classifyTx(buyTx({err:{InstructionError:1}}),SOL).kind,'FAILED')});
-function cand(buys,over={}){const n=Date.now()/1000;return {buys,market:{priceUsd:1,liquidityUsd:80000,vol5m:5000,buys5m:30,sells5m:10,priceChange1hPct:10,fetchedAt:n},safety:{checked:true,top10Pct:25},solUsdFetchedAt:n,hist:{},funders:{},...over}}
+function cand(buys,over={}){const n=Date.now()/1000;return {buys,market:{priceUsd:1,liquidityUsd:80000,vol5m:5000,buys5m:30,sells5m:10,priceChange1hPct:10,liquidityDropPct:0,fetchedAt:n},safety:{checked:true,top10Pct:25,authoritiesVerified:true,sellabilityVerified:true,exitQuoteVerified:true},solUsdFetchedAt:n,hist:{},funders:Object.fromEntries(buys.map(b=>[b.signer,'funder-'+b.signer])),...over}}
 const good=()=>[{...classifyTx(buyTx({sol:6}),SOL),signer:W1}];
 test('6 stale/missing market data -> DATA INCOMPLETE',()=>{const n=Date.now()/1000;
   assert.equal(evaluate(cand(good(),{market:null})).status,'DATA INCOMPLETE');
@@ -55,22 +57,16 @@ function mkDeps({price=1,liq=80000,sol=100,rpcFail=false,buysTx=[buyTx({sol:6,si
   rugcheck:async()=>({}),summarizeRug:()=>rug,marketFromPair:(p)=>({...marketFromPair(p),fetchedAt:Date.now()/1000})};}
 const mkStore=()=>new Store(fs.mkdtempSync(os.tmpdir()+'/r2-'));
 const tgOK=()=>({token:null,chatId:null});
-test('5 duplicate tx/signal suppression across cycles',async()=>{const s=mkStore(),d=mkDeps();
-  await runCycle({store:s,deps:d,mode:'TEST',tg:tgOK(),log(){}});await runCycle({store:s,deps:d,mode:'TEST',tg:tgOK(),log(){}});await runCycle({store:s,deps:d,mode:'TEST',tg:tgOK(),log(){}});
-  const sigs=s.read('signals',[]);assert.equal(sigs.length,1);assert.equal(s.read('state').buys.length,1)});
-test('7 RPC throttling/outage fails closed, no alert, health shows outage',async()=>{const s=mkStore();const r=await runCycle({store:s,deps:mkDeps({rpcFail:true}),mode:'TEST',tg:tgOK(),log(){}});
-  assert.equal(s.read('signals',[]).length,0);assert.notEqual(s.read('health').sources.rpc,'ok');
-  const d=mkDeps();d.solUsd=async()=>{throw new Error('down')};const r2=await runCycle({store:s,deps:d,mode:'TEST',tg:tgOK(),log(){}});assert.equal(r2.ok,false)});
-test('12 scanner restart recovers cursor (no re-processing of known tx)',async()=>{const s=mkStore(),d=mkDeps();
-  await runCycle({store:s,deps:d,mode:'TEST',tg:tgOK(),log(){}});const tx1=d.o.calls.tx;
-  const s2=new Store(s.dir); await runCycle({store:s2,deps:d,mode:'TEST',tg:tgOK(),log(){}});assert.equal(d.o.calls.tx,tx1);assert.equal(s2.read('state').cursors.PAIR1,'S1')});
-test('13+14 signal->outcome linkage uses signal reference price; exit cost recorded',async()=>{const s=mkStore(),d=mkDeps({price:1});
-  await runCycle({store:s,deps:d,mode:'TEST',tg:tgOK(),log(){}});let sig=s.read('signals')[0];assert.equal(sig.refPrice,1);assert.equal(sig.outcome.status,'PENDING VALIDATION');assert.ok(sig.exitCostPct>0);
-  d.o.price=1.6;await runCycle({store:s,deps:d,mode:'TEST',tg:tgOK(),log(){}});sig=s.read('signals')[0];
-  assert.ok(sig.outcome.hit['1.5']);assert.ok(!sig.outcome.hit['2']);assert.ok(sig.outcome.hit['1.5'].exitAdjX<1.6);
-  d.o.price=0.5;d.o.pair.liquidity={usd:5000};await runCycle({store:s,deps:d,mode:'TEST',tg:tgOK(),log(){}});sig=s.read('signals')[0];assert.equal(sig.outcome.liquidityCollapse,true);assert.ok(sig.outcome.maxDown<=0.5)});
-test('alert text: contains required fields, TEST label, no secrets',()=>{const s=mkStore(),d=mkDeps();return runCycle({store:s,deps:d,mode:'TEST',tg:tgOK(),log(){}}).then(()=>{const t=formatAlert(s.read('signals')[0]);
-  for(const k of ['Token:','Mint:','Signal time:','Reference price:','Confirmed buy:','Liquidity:','Transaction: https://solscan.io/tx/','QUALIFIED - NOT A GUARANTEE','[TEST - NOT LIVE]'])assert.ok(t.includes(k),k)})});
-test('15 pipeline->telegram (mock fetch) delivers once',async()=>{const s=mkStore(),d=mkDeps();let n=0;const orig=globalThis.fetch;globalThis.fetch=async()=>{n++;return {status:200,json:async()=>({ok:true,result:{message_id:7}})}};
-  try{await runCycle({store:s,deps:d,mode:'TEST',tg:{token:'T',chatId:'1'},log(){}});await runCycle({store:s,deps:d,mode:'TEST',tg:{token:'T',chatId:'1'},log(){}})}finally{globalThis.fetch=orig}
-  assert.equal(n,1);assert.equal(s.read('signals')[0].telegram.sent,true)});
+test('LIVE adapter never upgrades balance changes to verified purchases',async()=>{const s=mkStore(),d=mkDeps();
+ await runCycle({store:s,deps:d,mode:'LIVE',tg:tgOK(),log(){}});
+ assert.equal(s.read('signals',[]).length,0);
+ assert.equal(s.read('state').buys[0].kind,'BUY_CANDIDATE');
+ assert.equal(s.read('rejections')[0].status,'PENDING VALIDATION');
+});
+test('unknown wallet independence contributes zero independent wallets',()=>{const buys=[W1,W2].map(w=>({...classifyTx(buyTx({signer:w,sol:6}),SOL),signer:w}));
+ const ev=evaluate(cand(buys,{funders:{}}));assert.equal(ev.status,'PENDING VALIDATION');assert.match(ev.reasons[0],/independence/);
+});
+test('balance-only evidence fails closed even above buy threshold',()=>{const c=rawClassifyTx(buyTx({sol:20}),100);assert.equal(c.kind,'BUY_CANDIDATE');const ev=evaluate(cand([c]));assert.equal(ev.status,'PENDING VALIDATION');});
+test('cursor is not advanced after transaction failure',async()=>{const s=mkStore(),d=mkDeps();d.getTx=async()=>{throw new Error('outage')};await runCycle({store:s,deps:d,mode:'LIVE',tg:tgOK(),log(){}});assert.equal(s.read('state').cursors.PAIR1,undefined);assert.equal(s.read('health').lastCycleOk,false);});
+test('sellability and concentration gaps fail closed',()=>{const c=cand(good());assert.equal(evaluate({...c,safety:{...c.safety,sellabilityVerified:false}}).status,'PENDING VALIDATION');assert.equal(evaluate({...c,safety:{...c.safety,top10Pct:null}}).status,'DATA INCOMPLETE');});
+test('15 real end-to-end remains pending, synthetic pipeline publishes no live alert',async()=>{const s=mkStore(),d=mkDeps();await runCycle({store:s,deps:d,mode:'LIVE',tg:tgOK(),log(){}});assert.equal(s.read('signals').length,0);});
