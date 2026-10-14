@@ -39,7 +39,8 @@ table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:8px 4px;b
 <div class="sheet" id="sheet" onclick="if(event.target==this)this.classList.remove('on')"><div id="sheetc"></div></div>
 <div class="side" id="side"><div class="row"><b>Settings</b><button class="btn s" onclick="side(0)">X</button></div>
 <label>Paper start capital $</label><input id="cStart" type="number"><label>Bet per coin $</label><input id="cBet" type="number"><label>Max open positions</label><input id="cMax" type="number"><label>Min score to auto-buy (0-100)</label><input id="cMin" type="number">
-<label>Auto paper-buy</label><button class="btn s" id="cAuto" onclick="toggleAuto()"></button>
+<label>Data mode</label><button class="btn s" id="cMode" onclick="toggleMode()"></button>
+<label>Auto paper-buy (phone mode)</label><button class="btn s" id="cAuto" onclick="toggleAuto()"></button>
 <div style="margin-top:14px"><button class="btn" onclick="saveCfg()">Save</button> <button class="btn s" onclick="exportJ()">Export</button></div>
 <div style="margin-top:14px"><button class="btn d" onclick="resetAll()">Reset book</button></div>
 <p class="m" style="font-size:11px">Paper money only. No wallet, no keys, no real trades. Fills include 3% simulated slippage/fees.</p></div>
@@ -111,9 +112,11 @@ function dayKey(t){return new Date(t).toLocaleDateString('en-CA',{timeZone:'Asia
 function dayWise(st){const m={};for(const p of st.pos)if(!p.open){const d=dayKey(p.exitTime);m[d]=m[d]||{pnl:0,n:0,w:0};const r=p.banked-p.cost;m[d].pnl+=r;m[d].n++;if(r>0)m[d].w++;}return m}
 // ===== DATA + UI =====
 const KEY='jkpl_v1',DX='https://api.dexscreener.com';
-let ST=load();let RADAR=[];let FIL='all',lastScan=0,scanning=false,errs=0,lastErr='';
+const SRV='https://paper-lab.jegankumarsparks.workers.dev/api/book';let MODE=localStorage.getItem('jkpl_mode')||'server';let PH=load();let ST=PH;let RADAR=[];let FIL='all',lastScan=0,scanning=false,errs=0,lastErr='';
 function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.pos)return Object.assign({cfg:{...CFG_DEFAULT},seen:{}},s,{cfg:Object.assign({},CFG_DEFAULT,s.cfg)})}catch(e){}return {cfg:{...CFG_DEFAULT},pos:[],seen:{},created:Date.now(),log:[]}}
-function save(){localStorage.setItem(KEY,JSON.stringify(ST))}
+function save(){if(MODE==='server')return;localStorage.setItem(KEY,JSON.stringify(ST))}
+async function loadServer(){try{const r=await fetch(SRV,{cache:'no-store'});if(!r.ok)throw new Error('server '+r.status);const b=await r.json();b.cfg=Object.assign({},CFG_DEFAULT,b.cfg);b.pos=b.pos||[];ST=b;RADAR=b.radar||[];lastScan=b.lastScan||0;errs=b.err?1:0;lastErr=b.err||'';}catch(e){errs++;lastErr='server unreachable: '+e.message}render()}
+function setMode(m){MODE=m;localStorage.setItem('jkpl_mode',m);if(m==='server'){loadServer()}else{ST=PH;RADAR=[];lastScan=0;errs=0;render();scan()}side(0)}
 const $=id=>document.getElementById(id);
 const usd=(n,d=2)=>(n<0?'-':'')+'$'+Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
 const cls=n=>n>0?'g':n<0?'r':'m';
@@ -132,6 +135,7 @@ async function discover(){
 async function fetchTokens(addrs){const out=[];for(let i=0;i<addrs.length;i+=30){try{const r=await jget(DX+'/tokens/v1/solana/'+addrs.slice(i,i+30).join(','));out.push(...r)}catch(e){errs++;lastErr=e.message}}return out}
 function groupByMint(pairs){const g={};for(const p of pairs){const m=p.baseToken&&p.baseToken.address;if(!m)continue;(g[m]=g[m]||[]).push(p)}return g}
 async function scan(){
+ if(MODE==='server'){return loadServer()}
  if(scanning)return;scanning=true;$('hSt').textContent='scanning...';
  try{
   const now=Date.now();const d=await discover();
@@ -158,8 +162,8 @@ async function scan(){
  scanning=false;render();
 }
 function buy(c,auto){const now=Date.now();const p=newPos({mint:c.mint,sym:c.sym,name:c.name},c.e.price,ST.cfg,now,c.e.tier||'-',c.e.score);p.auto=!!auto;p.why=c.e.why;p.entryMc=c.e.mc;p.entryLiq=c.e.liq;ST.pos.push(p);save()}
-function manualBuy(m){const c=RADAR.find(x=>x.mint===m);if(!c)return;if(summarize(ST).cash<ST.cfg.bet){alert('Not enough paper cash');return}if(ST.pos.some(x=>x.open&&x.mint===m)){alert('Already open');return}buy(c,false);closeSheet();render();tab(1)}
-function sellNow(id){const p=ST.pos.find(x=>x.id===id);if(!p||!p.open)return;const ev=[];const price=p.last;const v=p.rem*price*(1-ST.cfg.friction);p.banked+=v;p.rem=0;p.open=false;p.exitTime=Date.now();p.reason='MANUAL SELL';p.exitMult=p.mult;p.pnl=p.banked-p.cost;p.events.push({t:Date.now(),e:'MANUAL SELL',m:p.mult,u:v});save();closeSheet();render()}
+function manualBuy(m){if(MODE==='server'){alert('24/7 Server mode is read-only. Switch to Phone mode in the side panel to paper-buy by hand.');return}const c=RADAR.find(x=>x.mint===m);if(!c)return;if(summarize(ST).cash<ST.cfg.bet){alert('Not enough paper cash');return}if(ST.pos.some(x=>x.open&&x.mint===m)){alert('Already open');return}buy(c,false);closeSheet();render();tab(1)}
+function sellNow(id){if(MODE==='server'){alert('24/7 Server mode is read-only.');return}const p=ST.pos.find(x=>x.id===id);if(!p||!p.open)return;const ev=[];const price=p.last;const v=p.rem*price*(1-ST.cfg.friction);p.banked+=v;p.rem=0;p.open=false;p.exitTime=Date.now();p.reason='MANUAL SELL';p.exitMult=p.mult;p.pnl=p.banked-p.cost;p.events.push({t:Date.now(),e:'MANUAL SELL',m:p.mult,u:v});save();closeSheet();render()}
 function closeSheet(){$('sheet').classList.remove('on')}
 function pill(t){return '<span class="pill '+(t==='2x'?'t2':t==='3x'?'t3':t==='5x'?'t5':'tn')+'">'+(t?t+' potential':'watch')+'</span>'}
 function pcol(v){return '<span class="'+cls(v)+'">'+(v>0?'+':'')+(v||0).toFixed(0)+'%</span>'}
@@ -199,21 +203,22 @@ function renderBank(){
 function tierStats(){const t={};ST.pos.filter(p=>!p.open).forEach(p=>{const k=p.tier;t[k]=t[k]||{n:0,w:0,x2:0,x3:0,x5:0};t[k].n++;if(p.banked>p.cost)t[k].w++;if(p.tp2)t[k].x2++;if(p.tp3)t[k].x3++;if(p.tp5)t[k].x5++});
  const ks=Object.keys(t);return '<table><tr><th>Tier</th><th>N</th><th>Win</th><th>2x</th><th>3x</th><th>5x</th></tr>'+(ks.map(k=>'<tr><td>'+k+'</td><td>'+t[k].n+'</td><td>'+t[k].w+'</td><td>'+t[k].x2+'</td><td>'+t[k].x3+'</td><td>'+t[k].x5+'</td></tr>').join('')||'<tr><td colspan=6 class="m">Need closed trades</td></tr>')+'</table>'}
 function renderSys(){
- $('sys').innerHTML='<div class="note"><b>How this runs</b><br>This page scans Dexscreener every '+ST.cfg.scanSec+'s while it is open (data: token profiles, boosts, pump/raydium search). Your paper book is saved in this phone browser. When the page is closed, prices are NOT tracked. Always-on server mode is a separate step.</div>'
+ $('sys').innerHTML='<div class="note"><b>Mode: '+(MODE==='server'?'24/7 SERVER (a Cloudflare cron scans every 2 minutes even when this page is closed; this page just displays the server book)':'PHONE (this page scans while open; book saved in this browser)')+'</b><br>Phone mode: this page scans Dexscreener every '+ST.cfg.scanSec+'s while it is open (data: token profiles, boosts, pump/raydium search). Your paper book is saved in this phone browser. When the page is closed, prices are NOT tracked. Always-on server mode is a separate step.</div>'
  +'<div class="note">Last scan: '+(lastScan?new Date(lastScan).toLocaleTimeString('en-IN',{timeZone:'Asia/Kolkata'}):'never')+'<br>Coins seen: '+RADAR.length+' | Errors in a row: '+errs+(lastErr?'<br>Last error: '+esc(lastErr):'')+'<br>Auto-buy: <b>'+(ST.cfg.auto?'ON':'OFF')+'</b> | min score '+ST.cfg.minScore+' | bet '+usd(ST.cfg.bet,0)+' | max open '+ST.cfg.maxOpen+'</div>'
  +'<div class="note">Gates for auto-buy: liq &ge; $'+ST.cfg.minLiq+', MC &le; $'+(ST.cfg.maxMc/1e6)+'M, age 8m-36h, 5m buyers &ge; 55%, 1h change &lt; +400%, liq/MC &ge; 4%. Score blends 5m/1h momentum, buy pressure, volume/liquidity turnover, headroom to $5M MC and liquidity depth. Potential tier: 5x needs &ge;5x headroom, 3x &ge;3x, 2x &ge;2x. Scores are heuristics, not predictions.</div>'
  +'<div class="note">Paper only. No wallet connected, no real orders. 3% simulated slippage/fee on every buy and sell.</div><button class="btn" onclick="scan()">Scan now</button>'
 }
 function summaryHdr(){const s=summarize(ST);$('hEq').textContent=usd(s.equity);$('hBank').textContent=usd(s.bank);const pe=$('hPnl');pe.textContent=usd(s.pnl);pe.className=cls(s.pnl);
- $('hSt').textContent=(scanning?'scanning... ':'')+'Last scan '+(lastScan?Math.round((Date.now()-lastScan)/1000)+'s ago':'never')+' | open '+ST.pos.filter(p=>p.open).length+' | '+(errs?'<errors>':'live')}
+ $('hSt').textContent=(scanning?'scanning... ':'')+'Last scan '+(lastScan?Math.round((Date.now()-lastScan)/1000)+'s ago':'never')+' | '+(MODE==='server'?'SERVER 24/7':'PHONE')+' | open '+ST.pos.filter(p=>p.open).length+' | '+(errs?'<errors>':'live')}
 function render(){summaryHdr();renderRadar();renderPos();renderBank();renderSys()}
 function tab(i){document.querySelectorAll('.tabs button').forEach((b,j)=>b.classList.toggle('on',j==i));document.querySelectorAll('.pg').forEach((p,j)=>p.classList.toggle('on',j==i));scrollTo(0,0)}
 document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>tab(+b.dataset.t));
 document.querySelectorAll('.flt button').forEach(b=>b.onclick=()=>{FIL=b.dataset.f;document.querySelectorAll('.flt button').forEach(x=>x.classList.toggle('on',x===b));renderRadar()});
-function side(o){$('side').classList.toggle('on',!!o);if(o){$('cStart').value=ST.cfg.start;$('cBet').value=ST.cfg.bet;$('cMax').value=ST.cfg.maxOpen;$('cMin').value=ST.cfg.minScore;$('cAuto').textContent='Auto-buy: '+(ST.cfg.auto?'ON':'OFF')}}
-function toggleAuto(){ST.cfg.auto=!ST.cfg.auto;$('cAuto').textContent='Auto-buy: '+(ST.cfg.auto?'ON':'OFF');save()}
-function saveCfg(){const n=(i,d)=>{const v=parseFloat($(i).value);return v>0?v:d};ST.cfg.start=n('cStart',500);ST.cfg.bet=n('cBet',20);ST.cfg.maxOpen=n('cMax',10);ST.cfg.minScore=n('cMin',62);save();side(0);render()}
+function side(o){$('side').classList.toggle('on',!!o);if(o){$('cStart').value=ST.cfg.start;$('cBet').value=ST.cfg.bet;$('cMax').value=ST.cfg.maxOpen;$('cMin').value=ST.cfg.minScore;$('cAuto').textContent='Auto-buy: '+(ST.cfg.auto?'ON':'OFF');$('cMode').textContent='Mode: '+(MODE==='server'?'24/7 SERVER':'PHONE (page open)')+' - tap to switch'}}
+function toggleMode(){setMode(MODE==='server'?'phone':'server')}
+function toggleAuto(){if(MODE==='server')return;ST.cfg.auto=!ST.cfg.auto;$('cAuto').textContent='Auto-buy: '+(ST.cfg.auto?'ON':'OFF');save()}
+function saveCfg(){if(MODE==='server'){alert('Settings apply to Phone mode. The 24/7 server uses its defaults.');return}const n=(i,d)=>{const v=parseFloat($(i).value);return v>0?v:d};ST.cfg.start=n('cStart',500);ST.cfg.bet=n('cBet',20);ST.cfg.maxOpen=n('cMax',10);ST.cfg.minScore=n('cMin',62);save();side(0);render()}
 function exportJ(){const b=new Blob([JSON.stringify(ST,null,1)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='paper-lab-book.json';a.click()}
-function resetAll(){if(confirm('Reset the whole paper book?')){ST={cfg:ST.cfg,pos:[],seen:{},created:Date.now(),log:[]};save();side(0);render()}}
-render();scan();setInterval(()=>{if(!document.hidden)scan()},ST.cfg.scanSec*1000);setInterval(summaryHdr,5000);document.addEventListener('visibilitychange',()=>{if(!document.hidden&&Date.now()-lastScan>20000)scan()});
+function resetAll(){if(MODE==='server'){alert('Server book is managed by the server.');return}if(confirm('Reset the whole paper book?')){ST={cfg:ST.cfg,pos:[],seen:{},created:Date.now(),log:[]};save();side(0);render()}}
+render();scan();setInterval(()=>{if(!document.hidden)scan()},MODE==='server'?20000:ST.cfg.scanSec*1000);setInterval(summaryHdr,5000);document.addEventListener('visibilitychange',()=>{if(!document.hidden&&Date.now()-lastScan>20000)scan()});
 </script></body></html>
