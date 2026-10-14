@@ -70,10 +70,10 @@ export async function runCycle({store,deps=S,mode=process.env.MODE||'LIVE',tg={t
     }
     const ev=evaluate({releasePolicy,buys,market,safety,solUsdFetchedAt:sol.fetchedAt,hist,funders:{}},t0);
     const key=mint+':'+ev.independent+':'+Math.floor((ev.totalUsd||0)/500);
-    if(ev.status!=='QUALIFIED'){rej.push({t:t0,mint,symbol:market.symbol,status:ev.status,reasons:ev.reasons,warns:ev.warns});continue}
+    if(ev.status!=='QUALIFIED'){rej.push({t:t0,mint,pair:p.pairAddress,chartUrl:p.url,symbol:market.symbol,status:ev.status,reasons:ev.reasons,warns:ev.warns});continue}
     if(sigs.some(s=>s.key===key||(s.mint===mint&&t0-s.signalTime<C.dedupeWindowSec&&s.independent>=ev.independent&&ev.totalUsd<s.totalUsd*1.5)))continue; // dedupe: only materially new
     const wq=ev.wallets.map(w=>walletQuality(w,hist).label);
-    const sig={schemaVersion:2,status:mode==='LIVE'?'QUALIFIED':'TEST',id:'S'+Math.floor(t0)+mint.slice(0,4),key,mode,mint,symbol:market.symbol,pair:p.pairAddress,signalTime:t0,refPrice:market.priceUsd,refSource:market.source,liquidityUsd:market.liquidityUsd,
+    const sig={schemaVersion:2,status:mode==='LIVE'?'QUALIFIED':'TEST',id:'S'+Math.floor(t0)+mint.slice(0,4),key,mode,mint,symbol:market.symbol,pair:p.pairAddress,chartUrl:p.url,signalTime:t0,refPrice:market.priceUsd,refSource:market.source,liquidityUsd:market.liquidityUsd,
       topBuy:ev.topBuy,independent:ev.independent,walletCount:ev.walletCount,tier:ev.tier,verification:ev.verification,exitEvidence:safety.exitEvidence,observedSell:safety.observedSellVerified,totalUsd:ev.totalUsd,score:ev.score,why:ev.why,warns:ev.warns,exitCostPct:ev.exitCostPct,walletQuality:[...new Set(wq)].join('/'),
       detectedAt:t0,obsLatencySec:+(t0-ev.topBuy.blockTime).toFixed(1),outcome:{status:'PENDING VALIDATION',maxUp:1,maxDown:1,hit:{},snap:{}}};
     const r=await sendTelegram({...tg,text:formatAlert(sig),key:'tg:'+key,ledger});
