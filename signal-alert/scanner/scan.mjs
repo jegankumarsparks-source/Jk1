@@ -4,17 +4,18 @@ import {classifyTx} from './lib/classify.mjs';
 import {provePumpBuy} from './lib/pump-proof.mjs';
 import {fetchMintEvidence} from './lib/mint-evidence.mjs';
 import {provePumpSell} from './lib/pump-sell-proof.mjs';
+import {fetchExitEvidence} from './lib/exit-evidence.mjs';
 import {evaluate,walletQuality} from './lib/engine.mjs';
 import {formatAlert,sendTelegram} from './lib/telegram.mjs';
 import * as S from './lib/sources.mjs';
 const now=()=>Date.now()/1000;
 const MAX_TX=+process.env.MAX_TX||40, MAX_PAIRS=+process.env.MAX_PAIRS||12;
 
-export async function runCycle({store,deps=S,mode=process.env.MODE||'LIVE',tg={token:process.env.TG_TOKEN,chatId:process.env.TG_CHAT_ID},log=console.log}={}){
+export async function runCycle({store,deps=S,mode=process.env.MODE||'LIVE',tg={token:process.env.TG_TOKEN,chatId:process.env.TG_CHAT_ID},log=console.log,releasePolicy=process.env.RELEASE_POLICY||'STRICT'}={}){
   const t0=now(); const health=store.read('health',{});
   const st=store.read('state',{cursors:{},buys:[],watch:[],marketHistory:{}});st.marketHistory??={};st.sells??=[]; const sigs=store.read('signals',[]);
   const ledger=store.read('tg_ledger',{}); const seenTx=new Set(st.buys.map(b=>b.signature)); const rej=store.read('rejections',[]);
-  const h={mode,releaseStatus:'OBSERVATION ONLY - signal validation incomplete',cycleStart:t0,sources:{},errors:[]};
+  const h={mode,releaseStatus:releasePolicy==='TIERED_PROVABLE'?'TIERED ALERTS - future exits and wallet independence UNVERIFIED':'OBSERVATION ONLY - signal validation incomplete',cycleStart:t0,sources:{},errors:[]};
   let sol; try{sol=await deps.solUsd();h.sources.solUsd='ok'}catch(e){h.sources.solUsd='DOWN';h.errors.push('solUsd '+e.message);store.write('health',{...health,...h,lastCycleOk:false});return {ok:false,reason:'SOL/USD unavailable - fail closed'}}
   // 1 discovery: boosted + latest profiles + top boosts (solana), then market snapshot per mint
   let mints=[];
@@ -55,13 +56,25 @@ export async function runCycle({store,deps=S,mode=process.env.MODE||'LIVE',tg={t
     market.liquidityDropPct=previous?Math.max(0,(previous.liquidityUsd-market.liquidityUsd)/previous.liquidityUsd*100):null;
     if(deps.rpc)try{const mintEvidence=await fetchMintEvidence(mint,deps.rpc);safety={...safety,...mintEvidence};if(mintEvidence.unsupportedExtensions?.length){safety.checked=false;}}catch(e){h.errors.push('mint evidence unavailable');safety.authoritiesVerified=false;}
     history.push({t:t0,liquidityUsd:market.liquidityUsd});st.marketHistory[mint]=history.filter(x=>t0-x.t<=3600);
-    const ev=evaluate({buys,market,safety,solUsdFetchedAt:sol.fetchedAt,hist,funders:{}},t0);
+    if(releasePolicy==='TIERED_PROVABLE'){
+      safety.observedSellVerified=st.sells.some(s=>s.mint===mint&&s.pair===p.pairAddress&&t0>=s.blockTime&&t0-s.blockTime<=C.clusterWindowSec);
+      const biggest=buys.filter(b=>b.buyEvidence==='VERIFIED_SWAP_AND_SPEND').sort((a,b)=>b.spentUsd-a.spentUsd)[0];
+      if(biggest&&safety.observedSellVerified){
+        const exit=await (deps.fetchExitEvidence||fetchExitEvidence)({mint,amountRaw:biggest.proof.eventBaseRaw});
+        safety.exitQuoteVerified=exit.exitQuoteVerified===true&&now()-exit.fetchedAt<=60;
+        safety.exitEvidence=exit;
+        const minimumUsd=Number(exit.minOutputRaw)/1e9*sol.price;
+        safety.exitQuoteCostPct=100*(1-minimumUsd/(biggest.tokenAmount*market.priceUsd))+C.feePct;
+      }
+      if(rpcFail||h.errors.length)safety.checked=false; // partial coverage never becomes tiered qualification
+    }
+    const ev=evaluate({releasePolicy,buys,market,safety,solUsdFetchedAt:sol.fetchedAt,hist,funders:{}},t0);
     const key=mint+':'+ev.independent+':'+Math.floor((ev.totalUsd||0)/500);
     if(ev.status!=='QUALIFIED'){rej.push({t:t0,mint,symbol:market.symbol,status:ev.status,reasons:ev.reasons,warns:ev.warns});continue}
     if(sigs.some(s=>s.key===key||(s.mint===mint&&t0-s.signalTime<C.dedupeWindowSec&&s.independent>=ev.independent&&ev.totalUsd<s.totalUsd*1.5)))continue; // dedupe: only materially new
     const wq=ev.wallets.map(w=>walletQuality(w,hist).label);
     const sig={id:'S'+Math.floor(t0)+mint.slice(0,4),key,mode,mint,symbol:market.symbol,pair:p.pairAddress,signalTime:t0,refPrice:market.priceUsd,refSource:market.source,liquidityUsd:market.liquidityUsd,
-      topBuy:ev.topBuy,independent:ev.independent,totalUsd:ev.totalUsd,score:ev.score,why:ev.why,warns:ev.warns,exitCostPct:ev.exitCostPct,walletQuality:[...new Set(wq)].join('/'),
+      topBuy:ev.topBuy,independent:ev.independent,walletCount:ev.walletCount,tier:ev.tier,verification:ev.verification,exitEvidence:safety.exitEvidence,observedSell:safety.observedSellVerified,totalUsd:ev.totalUsd,score:ev.score,why:ev.why,warns:ev.warns,exitCostPct:ev.exitCostPct,walletQuality:[...new Set(wq)].join('/'),
       detectedAt:t0,obsLatencySec:+(t0-ev.topBuy.blockTime).toFixed(1),outcome:{status:'PENDING VALIDATION',maxUp:1,maxDown:1,hit:{},snap:{}}};
     const r=await sendTelegram({...tg,text:formatAlert(sig),key:'tg:'+key,ledger});
     sig.telegram={sent:r.sent,error:r.error||null,at:r.sent?now():null,latencySec:r.sent?+(now()-ev.topBuy.blockTime).toFixed(1):null};
