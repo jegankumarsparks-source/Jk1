@@ -1,6 +1,7 @@
 import {CONFIG as C} from './config.mjs';
 import {Store} from './lib/store.mjs';
 import {classifyTx} from './lib/classify.mjs';
+import {provePumpBuy} from './lib/pump-proof.mjs';
 import {evaluate,walletQuality} from './lib/engine.mjs';
 import {formatAlert,sendTelegram} from './lib/telegram.mjs';
 import * as S from './lib/sources.mjs';
@@ -29,7 +30,7 @@ export async function runCycle({store,deps=S,mode=process.env.MODE||'LIVE',tg={t
     let fullyProcessed=list.length<20; // a full page may hide missed events; do not claim complete coverage
     for(const s of list.filter(s=>!s.err&&s.blockTime&&t0-s.blockTime<=C.maxTxAgeSec&&!seenTx.has(s.signature))){
       if(txBudget--<=0){fullyProcessed=false;break;}
-      try{const tx=await deps.getTx(s.signature);const c=classifyTx(tx,sol.price);
+      try{const tx=await deps.getTx(s.signature);const proof=provePumpBuy(tx,sol.price);const c=proof.verified?proof.buy:classifyTx(tx,sol.price);
         if(['BUY','BUY_CANDIDATE'].includes(c.kind)&&c.mint===p.baseToken.address){st.buys.push({...c,pair:p.pairAddress,symbol:p.baseToken.symbol,observedAt:t0});seenTx.add(c.signature);newBuys++}
       }catch(e){fullyProcessed=false;rpcFail++;h.errors.push('tx '+e.message)}
     }
