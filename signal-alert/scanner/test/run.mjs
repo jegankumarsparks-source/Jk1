@@ -70,3 +70,11 @@ test('balance-only evidence fails closed even above buy threshold',()=>{const c=
 test('cursor is not advanced after transaction failure',async()=>{const s=mkStore(),d=mkDeps();d.getTx=async()=>{throw new Error('outage')};await runCycle({store:s,deps:d,mode:'LIVE',tg:tgOK(),log(){}});assert.equal(s.read('state').cursors.PAIR1,undefined);assert.equal(s.read('health').lastCycleOk,false);});
 test('sellability and concentration gaps fail closed',()=>{const c=cand(good());assert.equal(evaluate({...c,safety:{...c.safety,sellabilityVerified:false}}).status,'PENDING VALIDATION');assert.equal(evaluate({...c,safety:{...c.safety,top10Pct:null}}).status,'DATA INCOMPLETE');});
 test('15 real end-to-end remains pending, synthetic pipeline publishes no live alert',async()=>{const s=mkStore(),d=mkDeps();await runCycle({store:s,deps:d,mode:'LIVE',tg:tgOK(),log(){}});assert.equal(s.read('signals').length,0);});
+test('tiered policy keeps threshold, proof and risk gates; never upgrades independence',()=>{
+ const c=cand(good());const policy={...c,releasePolicy:'TIERED_PROVABLE',funders:{},safety:{...c.safety,sellabilityVerified:false,observedSellVerified:true,exitQuoteCostPct:3}};
+ const e=evaluate(policy);assert.equal(e.status,'QUALIFIED');assert.equal(e.independent,null);assert.equal(e.walletCount,1);assert.equal(e.verification.futureSellability,'UNVERIFIED');assert.equal(e.verification.walletIndependence,'UNVERIFIED');
+ for(const field of ['exitQuoteVerified','observedSellVerified','authoritiesVerified'])assert.notEqual(evaluate({...policy,safety:{...policy.safety,[field]:false}}).status,'QUALIFIED');
+ assert.equal(evaluate({...policy,market:{...policy.market,liquidityUsd:1000}}).status,'REJECTED');
+ assert.equal(evaluate({...policy,buys:[{...policy.buys[0],spentSol:1,spentUsd:100}]}).status,'REJECTED');
+ assert.notEqual(evaluate({...policy,releasePolicy:'STRICT'}).status,'QUALIFIED');
+});
