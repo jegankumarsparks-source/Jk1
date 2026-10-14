@@ -3,6 +3,7 @@ import {Store} from './lib/store.mjs';
 import {classifyTx} from './lib/classify.mjs';
 import {provePumpBuy} from './lib/pump-proof.mjs';
 import {fetchMintEvidence} from './lib/mint-evidence.mjs';
+import {provePumpSell} from './lib/pump-sell-proof.mjs';
 import {evaluate,walletQuality} from './lib/engine.mjs';
 import {formatAlert,sendTelegram} from './lib/telegram.mjs';
 import * as S from './lib/sources.mjs';
@@ -11,7 +12,7 @@ const MAX_TX=+process.env.MAX_TX||40, MAX_PAIRS=+process.env.MAX_PAIRS||12;
 
 export async function runCycle({store,deps=S,mode=process.env.MODE||'LIVE',tg={token:process.env.TG_TOKEN,chatId:process.env.TG_CHAT_ID},log=console.log}={}){
   const t0=now(); const health=store.read('health',{});
-  const st=store.read('state',{cursors:{},buys:[],watch:[],marketHistory:{}});st.marketHistory??={}; const sigs=store.read('signals',[]);
+  const st=store.read('state',{cursors:{},buys:[],watch:[],marketHistory:{}});st.marketHistory??={};st.sells??=[]; const sigs=store.read('signals',[]);
   const ledger=store.read('tg_ledger',{}); const seenTx=new Set(st.buys.map(b=>b.signature)); const rej=store.read('rejections',[]);
   const h={mode,releaseStatus:'OBSERVATION ONLY - signal validation incomplete',cycleStart:t0,sources:{},errors:[]};
   let sol; try{sol=await deps.solUsd();h.sources.solUsd='ok'}catch(e){h.sources.solUsd='DOWN';h.errors.push('solUsd '+e.message);store.write('health',{...health,...h,lastCycleOk:false});return {ok:false,reason:'SOL/USD unavailable - fail closed'}}
@@ -31,7 +32,7 @@ export async function runCycle({store,deps=S,mode=process.env.MODE||'LIVE',tg={t
     let fullyProcessed=list.length<20; // a full page may hide missed events; do not claim complete coverage
     for(const s of list.filter(s=>!s.err&&s.blockTime&&t0-s.blockTime<=C.maxTxAgeSec&&!seenTx.has(s.signature))){
       if(txBudget--<=0){fullyProcessed=false;break;}
-      try{const tx=await deps.getTx(s.signature);const proof=provePumpBuy(tx,sol.price);const c=proof.verified?proof.buy:classifyTx(tx,sol.price);
+      try{const tx=await deps.getTx(s.signature);const sellProof=provePumpSell(tx,sol.price);if(sellProof.verified)st.sells.push({...sellProof.sell,observedAt:t0});const proof=provePumpBuy(tx,sol.price);const c=proof.verified?proof.buy:classifyTx(tx,sol.price);
         if(['BUY','BUY_CANDIDATE'].includes(c.kind)&&c.mint===p.baseToken.address){st.buys.push({...c,pair:p.pairAddress,symbol:p.baseToken.symbol,observedAt:t0});seenTx.add(c.signature);newBuys++}
       }catch(e){fullyProcessed=false;rpcFail++;h.errors.push('tx '+e.message)}
     }
@@ -39,6 +40,7 @@ export async function runCycle({store,deps=S,mode=process.env.MODE||'LIVE',tg={t
     if(!fullyProcessed)h.errors.push('transaction coverage incomplete for '+p.pairAddress);
   }
   h.sources.rpc=rpcFail?(rpcFail>=3?'DEGRADED':'PARTIAL'):'ok';
+  st.sells=[...new Map(st.sells.filter(s=>t0-s.blockTime<=3600).map(s=>[s.signature,s])).values()];
   st.buys=st.buys.filter(b=>t0-b.blockTime<=3600);
   // 3 evaluate candidates
   const byMint={};for(const b of st.buys)if(t0-b.blockTime<=C.clusterWindowSec*2)(byMint[b.mint]??=[]).push(b);
