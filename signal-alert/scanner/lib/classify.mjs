@@ -26,7 +26,7 @@ export function classifyTx(tx, solUsd){
     if(spentSol<=0.001&&spentUsdStable<=0.5) return {kind:'TRANSFER',...base,mint:gained[0][0],reason:'token received without paying SOL/stable'};
     const usd=spentUsdStable>0?spentUsdStable:spentSol*solUsd;
     // ignore dust-only purchases where SOL change is just rent
-    return {kind:'BUY',...base,mint:gained[0][0],tokenAmount:gained[0][1],spentSol:spentUsdStable>0?null:spentSol,spentUsd:usd,quote:spentUsdStable>0?'STABLE':'SOL',execPriceUsd:usd/gained[0][1]};
+    return {kind:'BUY_CANDIDATE',buyEvidence:'UNVERIFIED_BALANCE_DELTA',...base,mint:gained[0][0],tokenAmount:gained[0][1],spentSol:spentUsdStable>0?null:spentSol,spentUsd:usd,quote:spentUsdStable>0?'STABLE':'SOL',execPriceUsd:usd/gained[0][1]};
   }
   if(lost.length===1&&gained.length===0&&(solNet>0||usdNet>0)) return {kind:'SELL',...base,mint:lost[0][0]};
   return {kind:'OTHER',...base};
