@@ -50,15 +50,33 @@ async function load(){
  try{const [h,s,r]=await Promise.all([j('data/health.json'),j('data/signals.json'),j('data/rejections.json').catch(()=>[])]);D={health:h,signals:s,rej:r};D.err=null}catch(e){D.err=e.message}
  detectNew();render();
 }
+// Display contract v2: a LIVE label alone is never qualification evidence.
+function qualifiedEntry(s){
+ const v=s?.verification,b=s?.topBuy,e=s?.exitEvidence;
+ return s?.schemaVersion===2&&s.status==='QUALIFIED'&&s.mode==='LIVE'
+  &&s.tier==='BUY VERIFIED - EXIT/INDEPENDENCE UNVERIFIED'
+  &&v?.buy==='VERIFIED'&&v.mintAuthorities==='VERIFIED NULL'
+  &&v.liquidity==='OBSERVED'&&v.poolSell==='OBSERVED RECONCILED'
+  &&v.exitQuote==='INDICATIVE QUOTE AVAILABLE'
+  &&v.futureSellability==='UNVERIFIED'&&v.walletIndependence==='UNVERIFIED'
+  &&b?.buyEvidence==='VERIFIED_SWAP_AND_SPEND'&&b.mint===s.mint&&!!b.signature
+  &&Number.isFinite(s.signalTime)&&Number.isFinite(s.refPrice)&&s.refPrice>0
+  &&Number.isFinite(s.liquidityUsd)&&s.liquidityUsd>=20000
+  &&Number.isFinite(b.spentUsd)&&((Number.isFinite(b.spentSol)&&b.spentSol>=2-1e-6)||b.spentUsd>=500)
+  &&s.observedSell===true&&e?.exitQuoteVerified===true
+  &&e.executionStatus==='NOT VERIFIED'&&Number.isFinite(e.fetchedAt)
+  &&Math.abs(s.signalTime-e.fetchedAt)<=60;
+}
+function displayEntry(s){return qualifiedEntry(s)||(s?.mode==='TEST'&&s.status==='TEST'&&s.schemaVersion===2);}
 function detectNew(){
- if(D.err)return;const seen=LS.get('seen',null);const live=D.signals.filter(s=>s.mode==='LIVE'&&s.telegram);
+ if(D.err)return;const seen=LS.get('seen',null);const live=D.signals.filter(s=>qualifiedEntry(s)&&s.telegram?.sent===true);
  if(seen===null){LS.set('seen',live.map(s=>s.id));return} // first open: no popup storm for history
  const fresh=live.filter(s=>!seen.includes(s.id)&&Date.now()/1000-s.signalTime<3600);
  LS.set('seen',live.map(s=>s.id));
  if(fresh.length){popQueue=[fresh[fresh.length-1]];showPop(fresh.length)} // one popup max, for latest
 }
-function showPop(n){const s=popQueue[0];$('#pt').textContent=(s.symbol||'?')+(n>1?'  (+'+(n-1)+' more)':'');
- $('#pb').innerHTML=`<div class="k">Mint</div><div class="mono">${esc(s.mint)}</div><div class="grid"><div><div class="k">Reference</div>$${esc(s.refPrice)}</div><div><div class="k">Buy</div>$${Math.round(s.topBuy.spentUsd)}</div><div><div class="k">Wallets</div>${s.independent}</div><div><div class="k">Liquidity</div>$${Math.round(s.liquidityUsd)}</div></div><div class="k" style="margin-top:8px">QUALIFIED - NOT A GUARANTEE</div>`;
+function showPop(n){const s=popQueue[0];if(!qualifiedEntry(s))return;$('#pt').textContent=(s.symbol||'?')+(n>1?'  (+'+(n-1)+' more)':'');
+ $('#pb').innerHTML=`<div class="k">Mint</div><div class="mono">${esc(s.mint)}</div><div class="grid"><div><div class="k">Reference</div>$${esc(s.refPrice)}</div><div><div class="k">Buy</div>$${Math.round(s.topBuy.spentUsd)}</div><div><div class="k">Wallets</div>${s.walletCount??'UNVERIFIED'} addresses</div><div><div class="k">Liquidity</div>$${Math.round(s.liquidityUsd)}</div></div><div class="k" style="margin-top:8px">QUALIFIED - NOT A GUARANTEE</div>`;
  $('#pop').style.display='flex';beep(false);
  if('Notification' in window&&Notification.permission==='granted'&&document.hidden)try{new Notification('Qualified signal: '+s.symbol,{body:s.mint,tag:'sig-'+s.id})}catch{}}
 $('#px').onclick=()=>{$('#pop').style.display='none'};
@@ -89,7 +107,9 @@ function render(){
  else if(!h.lastCycleOk)html+=`<div class="banner a">Last cycle completed with partial pair coverage - failing closed, scanner is up.</div>`;
  if(h.mode!=='LIVE')html+=`<div class="banner a">TEST mode: signals below are not live market signals.</div>`;
  const bad=Object.entries(h.sources||{}).filter(([k,v])=>v!=='ok');if(bad.length)html+=`<div class="banner a">Data source issue: ${bad.map(([k,v])=>esc(k+' '+v)).join(', ')} - failing closed.</div>`;
- const sigs=[...D.signals].sort((a,b)=>b.signalTime-a.signalTime);
+ const hidden=D.signals.filter(s=>!displayEntry(s)).length;
+ if(hidden)html+=`<div class="banner a">${hidden} legacy or incomplete record(s) withheld. They are not qualified signals.</div>`;
+ const sigs=D.signals.filter(displayEntry).sort((a,b)=>b.signalTime-a.signalTime);
  if(tab==='sig'){
   if(detail){const s=sigs.find(x=>x.id===detail);html+=s?detailView(s):'';m.innerHTML=html;$('#back')&&($('#back').onclick=()=>{detail=null;render()});return}
   html+=sigs.length?sigs.slice(0,30).map(sigCard).join(''):`<div class="card"><b>NO QUALIFIED SIGNAL</b><div class="k">Last cycle watched ${h.pairsWatched??'?'} pairs, ${h.newBuys??0} buy candidates. The engine does not manufacture alerts.</div></div>`;
