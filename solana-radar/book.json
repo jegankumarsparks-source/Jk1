@@ -1,11 +1,11 @@
 {
   "schema": 1,
-  "generatedAt": "2026-10-14T01:10:03.150885+00:00",
-  "lastCheckedAt": "2026-10-14T01:09:52.859Z",
+  "generatedAt": "2026-10-14T01:15:36.827869+00:00",
+  "lastCheckedAt": "2026-10-14T01:15:24.549Z",
   "paperOnly": true,
   "bank": 200,
   "cash": 40.69,
-  "equity": 77.55,
+  "equity": 77.59,
   "realizedPnl": -119.11,
   "slotsUsed": 4,
   "maxSlots": 4,
@@ -675,7 +675,7 @@
       "entryLiquidity": 3353.27,
       "status": "OPEN",
       "lastPrice": 2.927e-06,
-      "lastPriceAt": 1791940175510,
+      "lastPriceAt": 1791940508564,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -773,8 +773,8 @@
       "qty": 3088326.1272390364,
       "entryLiquidity": 3108.66,
       "status": "OPEN",
-      "lastPrice": 3.183e-06,
-      "lastPriceAt": 1791940175582,
+      "lastPrice": 3.173e-06,
+      "lastPriceAt": 1791940508697,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -786,8 +786,8 @@
       "limitOrderId": "limit_sig_open_mv714yzz_g4n8xz",
       "signalReferencePrice": 4.295e-06,
       "limitPrice": 3.4360000000000006e-06,
-      "lastLiquidityUsd": 3062.69,
-      "currentX": 0.9830142063001852,
+      "lastLiquidityUsd": 3055.01,
+      "currentX": 0.9799258801729462,
       "exitInfo": null
     },
     {
@@ -873,7 +873,7 @@
       "entryLiquidity": 2598.31,
       "status": "OPEN",
       "lastPrice": 2.65e-06,
-      "lastPriceAt": 1791940175658,
+      "lastPriceAt": 1791940508793,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -901,8 +901,8 @@
       "qty": 240789.79051288226,
       "entryLiquidity": 16264.2,
       "status": "OPEN",
-      "lastPrice": 3.626e-05,
-      "lastPriceAt": 1791940175710,
+      "lastPrice": 3.654e-05,
+      "lastPriceAt": 1791940508818,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -914,8 +914,8 @@
       "limitOrderId": "limit_sig_open_mv780wlb_0pffvr",
       "signalReferencePrice": 6.392e-05,
       "limitPrice": 5.1136e-05,
-      "lastLiquidityUsd": 15099.63,
-      "currentX": 0.8731037803997111,
+      "lastLiquidityUsd": 15164.87,
+      "currentX": 0.8798458945340718,
       "exitInfo": null
     }
   ],
@@ -5779,9 +5779,11 @@
       "limitPrice": 2.0912e-06,
       "createdAt": 1791936881253,
       "expiresAt": 1791940481253,
-      "status": "PENDING",
+      "status": "CANCELLED",
       "score": 21.5,
-      "signalLiquidity": 2563.72
+      "signalLiquidity": 2563.72,
+      "cancelledAt": 1791940509207,
+      "cancelReason": "60-minute signal expiry"
     },
     {
       "id": "limit_sig_open_mv7cybxo_tf7coe",
@@ -5792,9 +5794,11 @@
       "limitPrice": 2.6440000000000004e-06,
       "createdAt": 1791936882924,
       "expiresAt": 1791940482924,
-      "status": "PENDING",
+      "status": "CANCELLED",
       "score": 36.5,
-      "signalLiquidity": 3507.64
+      "signalLiquidity": 3507.64,
+      "cancelledAt": 1791940509850,
+      "cancelReason": "60-minute signal expiry"
     },
     {
       "id": "limit_sig_open_mv7cycci_mrga2d",
@@ -5805,9 +5809,11 @@
       "limitPrice": 2.0256e-06,
       "createdAt": 1791936883458,
       "expiresAt": 1791940483458,
-      "status": "PENDING",
+      "status": "CANCELLED",
       "score": 28.5,
-      "signalLiquidity": 2527.71
+      "signalLiquidity": 2527.71,
+      "cancelledAt": 1791940510456,
+      "cancelReason": "60-minute signal expiry"
     },
     {
       "id": "limit_sig_open_mv7d5e5r_hfnp0c",
@@ -6224,56 +6230,36 @@
       "status": "PENDING",
       "score": 48.5,
       "signalLiquidity": 18525.72
+    },
+    {
+      "id": "limit_sig_open_mv7f4co9_68o20m",
+      "signalId": "sig_open_mv7f4co9_68o20m",
+      "mint": "7w4QEJdadrYDFrutU8ZbvoNCYT1FkrhDYFZoeA6Amehm",
+      "symbol": "Company",
+      "signalPrice": 1.931e-05,
+      "limitPrice": 1.5448000000000002e-05,
+      "createdAt": 1791940523049,
+      "expiresAt": 1791944123049,
+      "status": "PENDING",
+      "score": 20,
+      "signalLiquidity": 0.55
+    },
+    {
+      "id": "limit_sig_open_mv7f4d5i_wo9znq",
+      "signalId": "sig_open_mv7f4d5i_wo9znq",
+      "mint": "2CSodUeShMtYMJcCKJNHrjjNbL2RADzXFEK86VuSLURP",
+      "symbol": "SLURPCAT",
+      "signalPrice": 1.417e-05,
+      "limitPrice": 1.1336000000000001e-05,
+      "createdAt": 1791940523670,
+      "expiresAt": 1791944123670,
+      "status": "PENDING",
+      "score": 32.5,
+      "signalLiquidity": 11181.5
     }
   ],
   "rulesVersion": "entry-open-v4",
   "historyTail": [
-    {
-      "t": 1791937861053,
-      "type": "LIMIT_CANCELLED",
-      "mint": "6KBDqTzgRPpa6xWeS5nPCxPwZHCRu1C51mV3S9r3pump",
-      "symbol": "CAT",
-      "price": 3.9296e-05,
-      "reason": "60-minute signal expiry"
-    },
-    {
-      "t": 1791937861750,
-      "type": "LIMIT_CANCELLED",
-      "mint": "6CufRbcpQ6WMUQu3vDoz3Jy36BsnKbtqfyawvURGpump",
-      "symbol": "SAI",
-      "price": 2.4528e-06,
-      "reason": "60-minute signal expiry"
-    },
-    {
-      "t": 1791937874463,
-      "type": "LIMIT_PLACED",
-      "mint": "714We6BWyGYP8Cc5DzcU7VkabsXGa6mycmNVhr3pump",
-      "symbol": "Attention",
-      "price": 0.00016600000000000002,
-      "signalPrice": 0.0002075,
-      "usd": 10,
-      "reason": "entry-open-v4: -20% limit, expires in 60 minutes; no cash/slot consumed"
-    },
-    {
-      "t": 1791937875081,
-      "type": "LIMIT_PLACED",
-      "mint": "EpFTb2XcGiMyGLykZ9VYmyPWz2AHEwAggqSbwJpypump",
-      "symbol": "Imagine",
-      "price": 0.00033256000000000003,
-      "signalPrice": 0.0004157,
-      "usd": 10,
-      "reason": "entry-open-v4: -20% limit, expires in 60 minutes; no cash/slot consumed"
-    },
-    {
-      "t": 1791937876620,
-      "type": "LIMIT_PLACED",
-      "mint": "6vGXr4h347VMKnJLu6kToE9xPDGRNqjBE26Rr3SCpump",
-      "symbol": "ADOG",
-      "price": 2.4720000000000002e-06,
-      "signalPrice": 3.09e-06,
-      "usd": 10,
-      "reason": "entry-open-v4: -20% limit, expires in 60 minutes; no cash/slot consumed"
-    },
     {
       "t": 1791938191656,
       "type": "LIMIT_CANCELLED",
@@ -6679,6 +6665,50 @@
       "signalPrice": 4.651e-05,
       "usd": 10,
       "reason": "entry-open-v4: -20% limit, expires in 60 minutes; no cash/slot consumed"
+    },
+    {
+      "t": 1791940509207,
+      "type": "LIMIT_CANCELLED",
+      "mint": "933Y2juKDcYwi9C9BPtyrcuNgnUeczgYA3AuGwuupump",
+      "symbol": "RTKL",
+      "price": 2.0912e-06,
+      "reason": "60-minute signal expiry"
+    },
+    {
+      "t": 1791940509850,
+      "type": "LIMIT_CANCELLED",
+      "mint": "A5WR25nLkB9PPLtQss9QwW6w92Q2s8quicwKZWyVfxJh",
+      "symbol": "CHAOS",
+      "price": 2.6440000000000004e-06,
+      "reason": "60-minute signal expiry"
+    },
+    {
+      "t": 1791940510456,
+      "type": "LIMIT_CANCELLED",
+      "mint": "Bjabvm5CjYrUtESwDxGUgYeHotYEMbeNHCDBC14Ppump",
+      "symbol": "RET",
+      "price": 2.0256e-06,
+      "reason": "60-minute signal expiry"
+    },
+    {
+      "t": 1791940523049,
+      "type": "LIMIT_PLACED",
+      "mint": "7w4QEJdadrYDFrutU8ZbvoNCYT1FkrhDYFZoeA6Amehm",
+      "symbol": "Company",
+      "price": 1.5448000000000002e-05,
+      "signalPrice": 1.931e-05,
+      "usd": 10,
+      "reason": "entry-open-v4: -20% limit, expires in 60 minutes; no cash/slot consumed"
+    },
+    {
+      "t": 1791940523670,
+      "type": "LIMIT_PLACED",
+      "mint": "2CSodUeShMtYMJcCKJNHrjjNbL2RADzXFEK86VuSLURP",
+      "symbol": "SLURPCAT",
+      "price": 1.1336000000000001e-05,
+      "signalPrice": 1.417e-05,
+      "usd": 10,
+      "reason": "entry-open-v4: -20% limit, expires in 60 minutes; no cash/slot consumed"
     }
   ],
   "sourceHealth": [
@@ -6687,12 +6717,12 @@
       "label": "Dexscreener (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1791940192642,
+      "lastSuccess": 1791940524316,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
       "rateLimitCount": 0,
-      "requestCount": 62,
+      "requestCount": 59,
       "note": "REST market feed \u2014 not a complete historical on-chain feed. Rate limits apply.",
       "backoffUntil": 0
     },
