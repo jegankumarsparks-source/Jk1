@@ -16,6 +16,7 @@ export function independentWallets(wallets,funders={}){
 export function evaluate(cand,now=Date.now()/1000){
   const reasons=[],warns=[]; const fail=(s,r)=>({status:s,reasons:[r,...reasons],warns});
   const {buys,market,safety,solUsdAt,solUsdFetchedAt,hist,funders}=cand;
+  const tiered=cand.releasePolicy==='TIERED_PROVABLE';
   if(!buys?.length) return fail('NOT OBSERVED','no observed buy candidates');
   if(buys.some(b=>b.buyEvidence!=='VERIFIED_SWAP_AND_SPEND')) return fail('PENDING VALIDATION','balance changes are candidates only; swap instruction and exact quote spend not verified');
   if(!Number.isFinite(market?.priceUsd)||market.priceUsd<=0||!Number.isFinite(market?.liquidityUsd)||market.liquidityUsd<=0||!Number.isFinite(market?.fetchedAt)) return fail('DATA INCOMPLETE','invalid market price, liquidity or timestamp');
@@ -49,9 +50,16 @@ export function evaluate(cand,now=Date.now()/1000){
   if(reasons.length) return {status:'REJECTED',reasons,warns};
   if(safety.top10Pct==null) return fail('DATA INCOMPLETE','holder concentration unknown');
   if(safety.authoritiesVerified!==true) return fail('PENDING VALIDATION','mint/freeze authority evidence incomplete');
-  if(safety.sellabilityVerified!==true||safety.exitQuoteVerified!==true) return fail('PENDING VALIDATION','sellability and executable exit quote not verified');
+  if((!tiered&&safety.sellabilityVerified!==true)||safety.exitQuoteVerified!==true) return fail('PENDING VALIDATION','sellability and executable exit quote not verified');
   if(!Number.isFinite(market.liquidityDropPct)) return fail('DATA INCOMPLETE','liquidity history not measured');
-  if(wallets.length>1&&ind.fundingUnknown) return fail('PENDING VALIDATION','wallet independence not verified');
+  if(!tiered&&wallets.length>1&&ind.fundingUnknown) return fail('PENDING VALIDATION','wallet independence not verified');
+  if(tiered){
+    if(safety.observedSellVerified!==true) return fail('PENDING VALIDATION','no recent reconciled sell observed in this pool');
+    if(!sig.length) return fail('REJECTED','verified individual buy threshold not met; unknown independence cannot satisfy cluster gate');
+    if(!Number.isFinite(safety.exitQuoteCostPct)||safety.exitQuoteCostPct>=33) return fail('REJECTED','indicative exit costs too high or incomplete');
+    warns.push('Future executable sellability: UNVERIFIED. A recent sell and quote do not guarantee your exit.');
+    warns.push('Wallet independence: UNVERIFIED. Different addresses may share one owner.');
+  }
   // scoring (explainable)
   const q=wallets.map(w=>walletQuality(w,hist));
   const credible=q.filter(x=>x.credible).length;
@@ -59,12 +67,12 @@ export function evaluate(cand,now=Date.now()/1000){
   const add=(n,t)=>{score+=n;why.push(`+${n} ${t}`)};
   add(sig.length?20:0,'single buy above threshold'); 
   const tier=[...C.tiers].reverse().find(t=>recent.some(b=>(b.spentSol||0)>=t)); if(tier) add(5+tier/2,`buy tier >=${tier} SOL`);
-  if(ind.count>=2) add(10*Math.min(ind.count,4),`${ind.count} independent wallets`);
+  if(!tiered&&ind.count>=2) add(10*Math.min(ind.count,4),`${ind.count} independent wallets`);
   if(credible) add(15*Math.min(credible,2),`${credible} historically credible wallet(s)`); else warns.push('wallet history: DATA INCOMPLETE / INSUFFICIENT SAMPLE');
   if(market.buys5m&&market.sells5m!=null&&market.buys5m>market.sells5m) add(10,'buy>sell flow 5m');
   if(market.liquidityUsd>=100000) add(5,'liquidity >= $100k');
   if(ind.fundingUnknown) warns.push(`${ind.fundingUnknown} wallet funding source unverified`);
   if(score<35) return {status:'REJECTED',reasons:[`score ${score} < 35`],warns,score,why};
-  return {status:'QUALIFIED',reasons:[],warns,score,why,wallets,independent:ind.count,totalUsd,topBuy:recent.slice().sort((a,b)=>b.spentUsd-a.spentUsd)[0],exitCostPct:+exitCost.toFixed(2)};
+  return {status:'QUALIFIED',reasons:[],warns,score,why,wallets,independent:tiered?null:ind.count,walletCount:wallets.length,tier:tiered?'BUY VERIFIED - EXIT/INDEPENDENCE UNVERIFIED':'FULL GATES',verification:{buy:'VERIFIED',mintAuthorities:'VERIFIED NULL',liquidity:'OBSERVED',poolSell:tiered?'OBSERVED RECONCILED':'UNVERIFIED',exitQuote:'INDICATIVE QUOTE AVAILABLE',futureSellability:'UNVERIFIED',walletIndependence:'UNVERIFIED'},totalUsd,topBuy:recent.slice().sort((a,b)=>b.spentUsd-a.spentUsd)[0],exitCostPct:+exitCost.toFixed(2)};
 }
 export function signalKey(c,ev){return c.mint+':'+ev.independent+':'+Math.floor(ev.totalUsd/500)}
