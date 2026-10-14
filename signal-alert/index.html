@@ -79,17 +79,18 @@ function render(){
  const h=D.health,m=$('#main');const now=Date.now()/1000;
  if(D.err||!h){$('#conn').className='pill r';$('#conn').textContent='NO DATA';$('#sub').textContent='Cannot load scanner data: '+(D.err||'');m.innerHTML='<div class="banner r">Scanner data unavailable. Nothing shown is live.</div>';return}
  const age=now-(h.lastScanAt||0);const ok=h.lastCycleOk&&age<900;
- $('#conn').className='pill '+(ok?'g':'r');$('#conn').textContent=ok?'SCANNER OK':(age>=900?'SCANNER STALE':'SCANNER ERROR');
+ $('#conn').className='pill '+(ok?'g':'r');$('#conn').textContent=ok?'SCAN RECENT':(age>=900?'SCANNER STALE':'SCANNER ERROR');
  $('#mode').className='pill '+(h.mode==='LIVE'?'g':'a');$('#mode').textContent=h.mode==='LIVE'?'LIVE DATA':'TEST DATA';
  $('#sub').textContent='Last successful scan: '+(h.lastScanAt?ist(h.lastScanAt)+' IST ('+ago(h.lastScanAt)+')':'never');
  let html='';
+ html+=`<div class="banner a">${esc(h.releaseStatus||'OBSERVATION ONLY - signal validation incomplete')}</div>`;
  if(!ok)html+=`<div class="banner r">Scanner has not completed a scan recently. No new alerts can be expected.</div>`;
  if(h.mode!=='LIVE')html+=`<div class="banner a">TEST mode: signals below are not live market signals.</div>`;
  const bad=Object.entries(h.sources||{}).filter(([k,v])=>v!=='ok');if(bad.length)html+=`<div class="banner a">Data source issue: ${bad.map(([k,v])=>esc(k+' '+v)).join(', ')} - failing closed.</div>`;
  const sigs=[...D.signals].sort((a,b)=>b.signalTime-a.signalTime);
  if(tab==='sig'){
   if(detail){const s=sigs.find(x=>x.id===detail);html+=s?detailView(s):'';m.innerHTML=html;$('#back')&&($('#back').onclick=()=>{detail=null;render()});return}
-  html+=sigs.length?sigs.slice(0,30).map(sigCard).join(''):`<div class="card"><b>NO QUALIFIED SIGNAL</b><div class="k">Last cycle watched ${h.pairsWatched??'?'} pairs, ${h.newBuys??0} new confirmed buys. The engine does not manufacture alerts.</div></div>`;
+  html+=sigs.length?sigs.slice(0,30).map(sigCard).join(''):`<div class="card"><b>NO QUALIFIED SIGNAL</b><div class="k">Last cycle watched ${h.pairsWatched??'?'} pairs, ${h.newBuys??0} buy candidates. The engine does not manufacture alerts.</div></div>`;
  }else if(tab==='rej'){
   html+='<div class="k">Candidates seen but not alerted, with the reason (latest first).</div>';
   html+=[...D.rej].reverse().slice(0,60).map(r=>`<div class="card ${r.status==='REJECTED'?'rj':'w'}"><div class="row"><b>${esc(r.symbol||r.mint.slice(0,6))}</b><span class="pill ${r.status==='REJECTED'?'r':'a'}">${esc(r.status)}</span><span class="sp"></span><span class="k">${ago(r.t)}</span></div><div>${(r.reasons||[]).map(esc).join('<br>')}</div></div>`).join('')||'<div class="card k">None recorded yet.</div>';
@@ -98,7 +99,7 @@ function render(){
   html+=`<div class="card"><b>Measured outcomes (LIVE only)</b><div class="grid"><div><div class="k">Alerts</div>${live.length}</div><div><div class="k">Resolved (60m)</div>${res.length}</div><div><div class="k">1.5x hits</div>${hit.length}</div><div><div class="k">Hit rate</div>${res.length>=30?(100*hit.length/res.length).toFixed(0)+'%':'INSUFFICIENT SAMPLE (need 30, have '+res.length+')'}</div></div><div class="k">Prices are Dexscreener marks vs the signal reference price; exit costs are estimates. Not a guarantee.</div></div>`;
   html+=sigs.map(s=>`<div class="card"><b>${esc(s.symbol)}</b> <span class="k">${ago(s.signalTime)} · ${esc(s.outcome.status)}</span><div>${outcomeChips(s)}</div></div>`).join('');
  }else{
-  html+=`<div class="card"><b>System health</b><div class="grid"><div><div class="k">Mode</div>${esc(h.mode)}</div><div><div class="k">Cycle time</div>${esc(h.cycleSec)}s</div><div><div class="k">Pairs watched</div>${esc(h.pairsWatched)}</div><div><div class="k">New buys last cycle</div>${esc(h.newBuys)}</div><div><div class="k">SOL/USD</div>$${esc(h.solUsd)}</div><div><div class="k">Telegram</div>${h.telegramConfigured?'configured (delivery shown per signal)':'<span style="color:var(--r)">NOT CONFIGURED</span>'}</div></div></div>`;
+  html+=`<div class="card"><b>System health</b><div class="grid"><div><div class="k">Mode</div>${esc(h.mode)}</div><div><div class="k">Cycle time</div>${esc(h.cycleSec)}s</div><div><div class="k">Pairs watched</div>${esc(h.pairsWatched)}</div><div><div class="k">Buy candidates last cycle</div>${esc(h.newBuys)}</div><div><div class="k">SOL/USD</div>$${esc(h.solUsd)}</div><div><div class="k">Telegram</div>${h.telegramConfigured?'configured (delivery shown per signal)':'<span style="color:var(--r)">NOT CONFIGURED</span>'}</div></div></div>`;
   html+=`<div class="card"><b>Data sources</b>${Object.entries(h.sources||{}).map(([k,v])=>`<div class="row"><span>${esc(k)}</span><span class="sp"></span><span class="pill ${v==='ok'?'g':'a'}">${esc(v)}</span></div>`).join('')}<div class="k">API calls this cycle: ${esc(JSON.stringify(h.apiStats||{}))}</div></div>`;
   html+=`<div class="card"><b>Alert sound</b><div class="row" style="margin-top:8px"><button class="b" id="tst">Test sound</button><button class="b" id="mut">${muted?'Unmute':'Mute'}</button><button class="b" id="ntf">Enable notifications</button></div><div class="k" style="margin-top:6px">Sound and popups only work while this page is open and the browser allows audio. Telegram is the independent channel when the page is closed.</div><div class="k" id="sres"></div></div>`;
   html+=`<div class="card"><b>Last errors</b><div class="k">${(h.errors||[]).slice(0,5).map(esc).join('<br>')||'none'}</div></div>`;
