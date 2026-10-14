@@ -2,6 +2,7 @@ import {CONFIG as C} from './config.mjs';
 import {Store} from './lib/store.mjs';
 import {classifyTx} from './lib/classify.mjs';
 import {provePumpBuy} from './lib/pump-proof.mjs';
+import {fetchMintEvidence} from './lib/mint-evidence.mjs';
 import {evaluate,walletQuality} from './lib/engine.mjs';
 import {formatAlert,sendTelegram} from './lib/telegram.mjs';
 import * as S from './lib/sources.mjs';
@@ -10,7 +11,7 @@ const MAX_TX=+process.env.MAX_TX||40, MAX_PAIRS=+process.env.MAX_PAIRS||12;
 
 export async function runCycle({store,deps=S,mode=process.env.MODE||'LIVE',tg={token:process.env.TG_TOKEN,chatId:process.env.TG_CHAT_ID},log=console.log}={}){
   const t0=now(); const health=store.read('health',{});
-  const st=store.read('state',{cursors:{},buys:[],watch:[]}); const sigs=store.read('signals',[]);
+  const st=store.read('state',{cursors:{},buys:[],watch:[],marketHistory:{}});st.marketHistory??={}; const sigs=store.read('signals',[]);
   const ledger=store.read('tg_ledger',{}); const seenTx=new Set(st.buys.map(b=>b.signature)); const rej=store.read('rejections',[]);
   const h={mode,releaseStatus:'OBSERVATION ONLY - signal validation incomplete',cycleStart:t0,sources:{},errors:[]};
   let sol; try{sol=await deps.solUsd();h.sources.solUsd='ok'}catch(e){h.sources.solUsd='DOWN';h.errors.push('solUsd '+e.message);store.write('health',{...health,...h,lastCycleOk:false});return {ok:false,reason:'SOL/USD unavailable - fail closed'}}
@@ -48,6 +49,10 @@ export async function runCycle({store,deps=S,mode=process.env.MODE||'LIVE',tg={t
     let safety={checked:false};
     try{safety=deps.summarizeRug(await deps.rugcheck(mint));h.sources.rugcheck='ok'}catch(e){h.sources.rugcheck='DOWN';h.errors.push('rugcheck '+e.message)}
     const market=deps.marketFromPair(p);
+    const history=st.marketHistory[mint]||[];const previous=history.filter(x=>t0-x.t>=60&&t0-x.t<=900).at(-1);
+    market.liquidityDropPct=previous?Math.max(0,(previous.liquidityUsd-market.liquidityUsd)/previous.liquidityUsd*100):null;
+    if(deps.rpc)try{const mintEvidence=await fetchMintEvidence(mint,deps.rpc);safety={...safety,...mintEvidence};if(mintEvidence.unsupportedExtensions?.length){safety.checked=false;}}catch(e){h.errors.push('mint evidence unavailable');safety.authoritiesVerified=false;}
+    history.push({t:t0,liquidityUsd:market.liquidityUsd});st.marketHistory[mint]=history.filter(x=>t0-x.t<=3600);
     const ev=evaluate({buys,market,safety,solUsdFetchedAt:sol.fetchedAt,hist,funders:{}},t0);
     const key=mint+':'+ev.independent+':'+Math.floor((ev.totalUsd||0)/500);
     if(ev.status!=='QUALIFIED'){rej.push({t:t0,mint,symbol:market.symbol,status:ev.status,reasons:ev.reasons,warns:ev.warns});continue}
