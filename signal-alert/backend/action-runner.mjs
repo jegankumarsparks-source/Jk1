@@ -38,9 +38,9 @@ async function rpc(env,op,p={}){if(env.__metrics)env.__metrics.supabaseRequests+
 async function claimPriority(env){
  const headers={apikey:env.SUPABASE_SERVICE_KEY,authorization:'Bearer '+env.SUPABASE_SERVICE_KEY,'content-type':'application/json'};
  const base=env.SUPABASE_URL.replace(/\/$/,'')+'/rest/v1/signal_alert_outbox';
- const read=async filter=>{env.__metrics.supabaseRequests++;return json(base+'?select=id,body&status=eq.PENDING&order=created.asc&limit=120&'+filter,{headers});};
+ const read=async filter=>{env.__metrics.supabaseRequests++;return json(base+'?select=id,body&status=eq.PENDING&order=created.asc&limit=60&'+filter,{headers});};
  const priority=await read('body=not.like.NEW%20COIN*');let rows=priority;
- if(rows.length<120)rows=rows.concat((await read('body=like.NEW%20COIN*')).slice(0,120-rows.length));
+ if(rows.length<60)rows=rows.concat((await read('body=like.NEW%20COIN*')).slice(0,60-rows.length));
  if(!rows.length)return [];
  env.__metrics.supabaseRequests++;return json(base+'?status=eq.PENDING&id=in.('+rows.map(x=>encodeURIComponent('"'+x.id+'"')).join(',')+')&select=id,body',{method:'PATCH',headers:{...headers,Prefer:'return=representation'},body:JSON.stringify({status:'SENDING'})});
 }
