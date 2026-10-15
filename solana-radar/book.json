@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "generatedAt": "2026-10-15T11:03:05.456889+00:00",
-  "lastCheckedAt": "2026-10-15T11:03:00.793Z",
+  "generatedAt": "2026-10-15T11:18:20.043475+00:00",
+  "lastCheckedAt": "2026-10-15T11:18:15.187Z",
   "paperOnly": true,
   "bank": 200,
   "cash": 92.81,
@@ -885,7 +885,7 @@
       "entryLiquidity": 2598.31,
       "status": "OPEN",
       "lastPrice": 2.248e-06,
-      "lastPriceAt": 1792062177060,
+      "lastPriceAt": 1792063092061,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -984,7 +984,7 @@
       "entryLiquidity": 2640.55,
       "status": "OPEN",
       "lastPrice": 2.236e-06,
-      "lastPriceAt": 1792062177108,
+      "lastPriceAt": 1792063092163,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -1292,7 +1292,7 @@
       "entryLiquidity": 3189.41,
       "status": "OPEN",
       "lastPrice": 2.686e-06,
-      "lastPriceAt": 1792062177233,
+      "lastPriceAt": 1792063092266,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -12308,10 +12308,12 @@
       "limitPrice": 1.336e-05,
       "createdAt": 1792059395237,
       "expiresAt": 1792062995237,
-      "status": "PENDING",
+      "status": "CANCELLED",
       "score": null,
       "signalLiquidity": null,
-      "recoveryNote": "Signal metadata not retained; time and prices recovered from original history event."
+      "recoveryNote": "Signal metadata not retained; time and prices recovered from original history event.",
+      "cancelledAt": 1792063092644,
+      "cancelReason": "60-minute signal expiry"
     },
     {
       "id": "limit_sig_recovered_event_1499",
@@ -12330,14 +12332,6 @@
   ],
   "rulesVersion": "entry-open-v4",
   "historyTail": [
-    {
-      "t": 1792008292425,
-      "type": "LIMIT_CANCELLED",
-      "mint": "4Y3erznsVSJaC7eaw7Row24etKoX8pT2XsG9oCG5pump",
-      "symbol": "PAIR",
-      "price": 9.088e-05,
-      "reason": "60-minute signal expiry"
-    },
     {
       "t": 1792008294051,
       "type": "AUTO_ENTRY",
@@ -12776,6 +12770,14 @@
       "signalPrice": 1.452e-05,
       "usd": 10,
       "reason": "entry-open-v4: -20% limit, expires in 60 minutes; no cash/slot consumed"
+    },
+    {
+      "t": 1792063092644,
+      "type": "LIMIT_CANCELLED",
+      "mint": "23UQPjo1ASYdzk8m7f8zMvDpJwAaGdUndYecigJwpump",
+      "symbol": "Trenchlab",
+      "price": 1.336e-05,
+      "reason": "60-minute signal expiry"
     }
   ],
   "sourceHealth": [
@@ -12784,7 +12786,7 @@
       "label": "Dexscreener (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1792062180498,
+      "lastSuccess": 1792063094974,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
