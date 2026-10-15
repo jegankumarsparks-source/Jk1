@@ -94,7 +94,7 @@ async function dispatchAction(event,env){
  await json(env.SUPABASE_URL+'/rest/v1/signal_alert_meta?on_conflict=key',{method:'POST',headers:{apikey:env.SUPABASE_SERVICE_KEY,authorization:'Bearer '+env.SUPABASE_SERVICE_KEY,'content-type':'application/json',Prefer:'resolution=merge-duplicates,return=representation'},body:JSON.stringify({key:'dispatch',value:state})});console.log(JSON.stringify(state));return state;
 }
 export default {
- async scheduled(event,env,ctx){ctx.waitUntil(event.cron==='1-56/5 * * * *'?dispatchAction(event,env):cycle(env));},
+ async scheduled(event,env,ctx){if(event.cron==='1-56/5 * * * *')ctx.waitUntil(dispatchAction(event,env));},
  async fetch(request,env){
  const url=new URL(request.url);const headers={'content-type':'application/json','access-control-allow-origin':'https://jegankumarsparks-source.github.io','cache-control':'no-store'};
  if(request.method==='GET'&&url.pathname==='/alerts'){const after=url.searchParams.get('after')||'0';if(!/^\d{1,16}$/.test(after))return new Response('Invalid cursor',{status:400});return new Response(JSON.stringify(await rpc(env,'relay',{after})),{headers});}
