@@ -85,7 +85,7 @@ async function cycle(env){
  }
  await rpc(env,'deliveries',{events:deliveryResults});
  }
- health.runtime='GITHUB_ACTIONS';health.cadence='5 minutes best effort; 120-second feed window with gaps';health.dexBackoffUntil=dexBackoffUntil;health.discovered=newly.length;health.coinsChecked=existing.size;health.eventsQueued=eventCount;health.finishedAt=Date.now();health.durationMs=Date.now()-start;health.deliveryEnabled=env.DELIVERY_ENABLED==='true';health.supabaseRequests=env.__metrics.supabaseRequests+2;health.totalExternalCalls=health.externalCalls+health.supabaseRequests;
+ health.runtime='GITHUB_ACTIONS';health.trigger=env.GITHUB_EVENT_NAME||'UNKNOWN';health.runId=env.GITHUB_RUN_ID||null;health.cadence='5 minutes best effort; 120-second feed window with gaps';health.dexBackoffUntil=dexBackoffUntil;health.discovered=newly.length;health.coinsChecked=existing.size;health.eventsQueued=eventCount;health.finishedAt=Date.now();health.durationMs=Date.now()-start;health.deliveryEnabled=env.DELIVERY_ENABLED==='true';health.supabaseRequests=env.__metrics.supabaseRequests+2;health.totalExternalCalls=health.externalCalls+health.supabaseRequests;
  await rpc(env,'health',health);return health;
  }finally{await rpc(env,'release');}
 }
