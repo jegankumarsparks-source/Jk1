@@ -1,147 +1,16 @@
-<!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Solana Early Buy Alerts</title>
-<style>
-:root{--bg:#070b12;--card:#101827;--card2:#16213a;--line:#1f2d4a;--tx:#e6edf7;--mut:#8a9bb8;--g:#19e68c;--a:#ffb020;--r:#ff4d5e}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.45 system-ui,sans-serif;padding-bottom:76px}
-header{position:sticky;top:0;background:#0a101c;border-bottom:1px solid var(--line);padding:10px 14px;z-index:5}
-.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.sp{flex:1}
-.pill{padding:2px 9px;border-radius:99px;font-size:12px;font-weight:700;border:1px solid}
-.g{color:var(--g);border-color:var(--g)}.a{color:var(--a);border-color:var(--a)}.r{color:var(--r);border-color:var(--r)}.m{color:var(--mut);border-color:var(--line)}
-main{padding:12px}.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px}
-.card.q{border-left:4px solid var(--g)}.card.rj{border-left:4px solid var(--r)}.card.w{border-left:4px solid var(--a)}
-.k{color:var(--mut);font-size:12px}.mono{font-family:ui-monospace,monospace;word-break:break-all;font-size:12px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;margin-top:6px}
-nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:#0a101c;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
-nav button{flex:1;background:none;border:0;color:var(--mut);padding:14px 4px;font-size:13px;font-weight:600}nav button.on{color:var(--g);border-top:2px solid var(--g)}
-button.b{background:var(--card2);color:var(--tx);border:1px solid var(--line);border-radius:8px;padding:8px 12px;font-size:13px}
-a{color:#6db3ff}.coin-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.coin-links a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--card2);text-decoration:none}.hit{color:var(--g);font-weight:700}.miss{color:var(--mut)}
-#pop{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;z-index:20;padding:20px}
-#pop .box{background:#06150f;border:2px solid var(--g);border-radius:16px;padding:18px;max-width:420px;width:100%;animation:pulse 1.2s infinite}
-@keyframes pulse{0%,100%{box-shadow:0 0 0 0 #19e68c66}50%{box-shadow:0 0 28px 6px #19e68c66}}
-.banner{padding:8px 12px;border-radius:8px;margin-bottom:10px;font-weight:600}
-.banner.r{background:#3a0f15;color:var(--r)}.banner.a{background:#3a2a08;color:var(--a)}
-h3{margin:14px 0 6px;font-size:13px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em}
-</style></head><body>
-<header><div class="row"><b>SOL EARLY BUY ALERTS</b><span id="mode" class="pill m">...</span><span class="sp"></span><span id="conn" class="pill m">connecting</span></div>
-<div class="k" id="sub">loading...</div></header>
-<main id="main"></main>
-<div id="pop"><div class="box"><div class="pill g" style="display:inline-block">NEW QUALIFIED SIGNAL</div><h2 id="pt" style="margin:8px 0"></h2><div id="pb"></div>
-<div class="row" style="margin-top:12px"><button class="b" id="pd">Details</button><button class="b" id="px">Dismiss</button></div></div></div>
-<nav><button data-t="sig" class="on">Signals</button><button data-t="rej">Rejected</button><button data-t="out">Outcomes</button><button data-t="sys">System</button></nav>
-<script>
-"use strict";
-const $=s=>document.querySelector(s);
-const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let D={health:null,signals:[],rej:[]},tab='sig',detail=null,popQueue=[];
-const LS={get:(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}}};
-let muted=LS.get('muted',false);
-const ist=t=>new Date(t*1000).toLocaleString('en-IN',{timeZone:'Asia/Kolkata',hour12:false});
-const ago=t=>{const s=Date.now()/1000-t;return s<90?Math.round(s)+'s ago':s<5400?Math.round(s/60)+' min ago':Math.round(s/3600)+' h ago'};
-// ---- audio: only after a user gesture; test button + mute; never a storm (1 sound per popup, 8s cooldown)
-let ac=null,lastSound=0;
-function unlock(){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();if(ac.state==='suspended')ac.resume()}catch{}}
-function beep(force){const n=Date.now();if(muted&&!force)return false;if(!force&&n-lastSound<8000)return false;unlock();if(!ac||ac.state!=='running')return false;lastSound=n;
- [660,880,1100].forEach((f,i)=>{const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=f;o.connect(g);g.connect(ac.destination);const t=ac.currentTime+i*.18;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.25,t+.03);g.gain.exponentialRampToValueAtTime(.0001,t+.16);o.start(t);o.stop(t+.17)});return true}
-document.addEventListener('click',unlock,{once:false,passive:true});
-// ---- data
-async function j(p){const r=await fetch(p+'?t='+Date.now(),{cache:'no-store'});if(!r.ok)throw new Error(p+' '+r.status);return r.json()}
-async function load(){
- try{const [h,s,r]=await Promise.all([j('data/health.json'),j('data/signals.json'),j('data/rejections.json').catch(()=>[])]);D={health:h,signals:s,rej:r};D.err=null}catch(e){D.err=e.message}
- detectNew();render();
-}
-// Display contract v2: a LIVE label alone is never qualification evidence.
-function qualifiedEntry(s){
- const v=s?.verification,b=s?.topBuy,e=s?.exitEvidence;
- return s?.schemaVersion===2&&s.status==='QUALIFIED'&&s.mode==='LIVE'
-  &&s.tier==='BUY VERIFIED - EXIT/INDEPENDENCE UNVERIFIED'
-  &&v?.buy==='VERIFIED'&&v.mintAuthorities==='VERIFIED NULL'
-  &&v.liquidity==='OBSERVED'&&v.poolSell==='OBSERVED RECONCILED'
-  &&v.exitQuote==='INDICATIVE QUOTE AVAILABLE'
-  &&v.futureSellability==='UNVERIFIED'&&v.walletIndependence==='UNVERIFIED'
-  &&b?.buyEvidence==='VERIFIED_SWAP_AND_SPEND'&&b.mint===s.mint&&!!b.signature
-  &&Number.isFinite(s.signalTime)&&Number.isFinite(s.refPrice)&&s.refPrice>0
-  &&Number.isFinite(s.liquidityUsd)&&s.liquidityUsd>=20000
-  &&Number.isFinite(b.spentUsd)&&((Number.isFinite(b.spentSol)&&b.spentSol>=2-1e-6)||b.spentUsd>=500)
-  &&s.observedSell===true&&e?.exitQuoteVerified===true
-  &&e.executionStatus==='NOT VERIFIED'&&Number.isFinite(e.fetchedAt)
-  &&Math.abs(s.signalTime-e.fetchedAt)<=60;
-}
-function displayEntry(s){return qualifiedEntry(s)||(s?.mode==='TEST'&&s.status==='TEST'&&s.schemaVersion===2);}
-function detectNew(){
- if(D.err)return;const seen=LS.get('seen',null);const live=D.signals.filter(s=>qualifiedEntry(s)&&s.telegram?.sent===true);
- if(seen===null){LS.set('seen',live.map(s=>s.id));return} // first open: no popup storm for history
- const fresh=live.filter(s=>!seen.includes(s.id)&&Date.now()/1000-s.signalTime<3600);
- LS.set('seen',live.map(s=>s.id));
- if(fresh.length){popQueue=[fresh[fresh.length-1]];showPop(fresh.length)} // one popup max, for latest
-}
-function showPop(n){const s=popQueue[0];if(!qualifiedEntry(s))return;$('#pt').textContent=(s.symbol||'?')+(n>1?'  (+'+(n-1)+' more)':'');
- $('#pb').innerHTML=`<div class="k">Mint</div><div class="mono">${esc(s.mint)}</div><div class="grid"><div><div class="k">Reference</div>$${esc(s.refPrice)}</div><div><div class="k">Buy</div>$${Math.round(s.topBuy.spentUsd)}</div><div><div class="k">Wallets</div>${s.walletCount??'UNVERIFIED'} addresses</div><div><div class="k">Liquidity</div>$${Math.round(s.liquidityUsd)}</div></div><div class="k" style="margin-top:8px">QUALIFIED - NOT A GUARANTEE</div>`;
- $('#pop').style.display='flex';beep(false);
- if('Notification' in window&&Notification.permission==='granted'&&document.hidden)try{new Notification('Qualified signal: '+s.symbol,{body:s.mint,tag:'sig-'+s.id})}catch{}}
-$('#px').onclick=()=>{$('#pop').style.display='none'};
-$('#pd').onclick=()=>{$('#pop').style.display='none';detail=popQueue[0].id;tab='sig';render()};
-// ---- render
-function outcomeChips(s){const o=s.outcome||{};const mk=(l)=>{const h=o.hit?.[l];return h?`<span class="hit">${l}x ✔ ${h.atMin}m${h.executableByLiquidity?'':' (liq?)'}</span>`:(o.status==='PENDING VALIDATION'?`<span class="miss">${l}x PENDING</span>`:`<span class="miss">${l}x no</span>`)};return [1.5,2,3].map(mk).join(' · ')}
-function coinLinks(s){
- if(!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(s?.mint||''))return '<div class="k">Links unavailable: missing or invalid mint.</div>';
- const mint=encodeURIComponent(s.mint);
- const dex=typeof s.chartUrl==='string'&&/^https:\/\/dexscreener\.com\/solana\/[a-zA-Z0-9]+$/.test(s.chartUrl)?s.chartUrl:'https://dexscreener.com/solana/'+encodeURIComponent(s.pair||s.mint);
- return `<div class="coin-links"><a target="_blank" rel="noopener noreferrer" href="${esc(dex)}">Dexscreener</a><a target="_blank" rel="noopener noreferrer" href="https://gmgn.ai/sol/token/${mint}">GMGN</a><a target="_blank" rel="noopener noreferrer" href="https://solscan.io/token/${mint}">Solscan</a></div><div class="k">Research links only. A link is not a qualification or a safety check.</div>`;
-}
-function candidateCard(s){return `<div class="card w"><div class="row"><b>${esc(s.symbol||s.mint||'Unknown token')}</b><span class="pill a">${esc(['REJECTED','DATA INCOMPLETE','PENDING VALIDATION'].includes(s.status)?s.status:'UNVERIFIED RECORD')}</span></div><div class="k">Not a qualified signal. Legacy or incomplete evidence.</div><div class="mono">${esc(s.mint||'Mint unavailable')}</div>${coinLinks(s)}</div>`}
-function verificationView(s){return `<div class="k" style="margin-top:8px;color:var(--a)">${esc(s.tier||'VERIFICATION INCOMPLETE')}<br>Future exits: UNVERIFIED. A quote does not guarantee your exit.<br>Wallet independence: UNVERIFIED. Addresses may share an owner.</div>`}
-function sigCard(s){const o=s.outcome||{};return `<div class="card q" data-id="${esc(s.id)}"><div class="row"><b>${esc(s.symbol)}</b><span class="pill ${s.mode==='LIVE'?'g':'a'}">${s.mode==='LIVE'?'QUALIFIED':'TEST'}</span><span class="sp"></span><span class="k">${ago(s.signalTime)}</span></div>
- <div class="grid"><div><div class="k">Reference</div>$${esc(s.refPrice)}</div><div><div class="k">Confirmed buy</div>${s.topBuy.spentSol!=null?(+s.topBuy.spentSol).toFixed(2)+' SOL / ':''}$${Math.round(s.topBuy.spentUsd)}</div><div><div class="k">Wallets</div>${s.walletCount??s.independent} addresses (${esc(s.walletQuality)})</div><div><div class="k">Liquidity</div>$${Math.round(s.liquidityUsd)}</div></div>
- ${coinLinks(s)}${verificationView(s)}<div style="margin-top:6px">${outcomeChips(s)}</div><div class="k">Telegram: ${s.telegram?.sent?'delivered '+ago(s.telegram.at):'<span style="color:var(--r)">NOT DELIVERED '+esc(s.telegram?.error||'')+'</span>'}</div></div>`}
-function detailView(s){const o=s.outcome||{};return `<button class="b" id="back">← Back</button><div class="card q" style="margin-top:10px"><b>${esc(s.symbol)}</b> <span class="pill ${s.mode==='LIVE'?'g':'a'}">${s.mode}</span>
- <div class="k">Mint</div><div class="mono">${esc(s.mint)}</div><div class="k">Signal time (IST)</div>${ist(s.signalTime)}
- <div class="grid"><div><div class="k">Reference price</div>$${esc(s.refPrice)}<div class="k">${esc(s.refSource)}</div></div><div><div class="k">Score</div>${esc(s.score)}</div><div><div class="k">Est. exit cost</div>${esc(s.exitCostPct)}%</div><div><div class="k">Max up / down</div>${(o.maxUp||0).toFixed(2)}x / ${(o.maxDown||0).toFixed(2)}x</div></div>
- ${verificationView(s)}<h3>Field evidence</h3><div class="k">${Object.entries(s.verification||{}).map(([k,v])=>esc(k+': '+v)).join('<br>')}</div><h3>Why qualified</h3><div>${(s.why||[]).map(esc).join('<br>')}</div>${s.warns?.length?`<h3>Data-quality warnings</h3><div style="color:var(--a)">${s.warns.map(esc).join('<br>')}</div>`:''}
- <h3>Outcome (vs signal reference price)</h3><div>${outcomeChips(s)}</div><div class="k">Status: ${esc(o.status)}${o.liquidityCollapse?' · LIQUIDITY COLLAPSE':''}</div>
- <div class="k">Windows: ${[5,10,30,60].map(w=>`${w}m ${o.snap?.[w]?.status|| (o.snap?.[w]?.x!=null?o.snap[w].x+'x':'PENDING')}`).join(' · ')}</div>
- <h3>Links</h3>${coinLinks(s)}<div class="row"><a target="_blank" rel="noopener" href="https://gmgn.ai/sol/token/${encodeURIComponent(s.mint)}">GMGN</a><a target="_blank" rel="noopener" href="https://dexscreener.com/solana/${encodeURIComponent(s.pair||s.mint)}">Dexscreener</a><a target="_blank" rel="noopener" href="https://solscan.io/token/${encodeURIComponent(s.mint)}">Solscan</a><a target="_blank" rel="noopener" href="https://solscan.io/tx/${encodeURIComponent(s.topBuy.signature)}">Buy tx</a><a target="_blank" rel="noopener" href="https://www.binance.com/en/search?q=${encodeURIComponent(s.symbol)}">Binance</a></div></div>`}
-function render(){
- const h=D.health,m=$('#main');const now=Date.now()/1000;
- if(D.err||!h){$('#conn').className='pill r';$('#conn').textContent='NO DATA';$('#sub').textContent='Cannot load scanner data: '+(D.err||'');m.innerHTML='<div class="banner r">Scanner data unavailable. Nothing shown is live.</div>';return}
- const age=now-(h.lastScanAt||0);const fresh=age<1500;const ok=fresh&&h.lastCycleOk;
- $('#conn').className='pill '+(ok?'g':(fresh?'a':'r'));$('#conn').textContent=ok?'SCAN RECENT':(fresh?'SCAN DEGRADED':'SCANNER STALE');
- $('#mode').className='pill '+(h.mode==='LIVE'?'g':'a');$('#mode').textContent=h.mode==='LIVE'?'LIVE DATA':'TEST DATA';
- $('#sub').textContent='Last successful scan: '+(h.lastScanAt?ist(h.lastScanAt)+' IST ('+ago(h.lastScanAt)+')':'never');
- let html='';
- html+=`<div class="banner a">${esc(h.releaseStatus||'OBSERVATION ONLY - signal validation incomplete')}</div>`;
- if(!fresh)html+=`<div class="banner r">Scanner has not completed a scan recently. No new alerts can be expected.</div>`;
- else if(!h.lastCycleOk)html+=`<div class="banner a">Last cycle completed with partial pair coverage - failing closed, scanner is up.</div>`;
- if(h.mode!=='LIVE')html+=`<div class="banner a">TEST mode: signals below are not live market signals.</div>`;
- const bad=Object.entries(h.sources||{}).filter(([k,v])=>v!=='ok');if(bad.length)html+=`<div class="banner a">Data source issue: ${bad.map(([k,v])=>esc(k+' '+v)).join(', ')} - failing closed.</div>`;
- const hidden=D.signals.filter(s=>!displayEntry(s)).length;
- if(hidden)html+=`<div class="banner a">${hidden} legacy or incomplete record(s) shown as unverified. They are not qualified signals.</div>`;
- const sigs=D.signals.filter(displayEntry).sort((a,b)=>b.signalTime-a.signalTime);
- if(tab==='sig'){
-  if(detail){const s=sigs.find(x=>x.id===detail);html+=s?detailView(s):'';m.innerHTML=html;$('#back')&&($('#back').onclick=()=>{detail=null;render()});return}
-  html+=sigs.length?sigs.slice(0,30).map(sigCard).join(''):`<div class="card"><b>NO QUALIFIED SIGNAL</b><div class="k">Last cycle watched ${h.pairsWatched??'?'} pairs, ${h.newBuys??0} buy candidates. The engine does not manufacture alerts.</div></div>`;
-  html+=D.signals.filter(s=>!displayEntry(s)).slice(-30).reverse().map(candidateCard).join('');
- }else if(tab==='rej'){
-  html+='<div class="k">Candidates seen but not alerted, with the reason (latest first).</div>';
-  html+=[...D.rej].reverse().slice(0,60).map(r=>`<div class="card ${r.status==='REJECTED'?'rj':'w'}"><div class="row"><b>${esc(r.symbol||r.mint.slice(0,6))}</b><span class="pill ${r.status==='REJECTED'?'r':'a'}">${esc(r.status)}</span><span class="sp"></span><span class="k">${ago(r.t)}</span></div><div>${(r.reasons||[]).map(esc).join('<br>')}</div><div class="mono">${esc(r.mint||'Mint unavailable')}</div>${coinLinks(r)}</div>`).join('')||'<div class="card k">None recorded yet.</div>';
- }else if(tab==='out'){
-  const live=sigs.filter(s=>s.mode==='LIVE'),res=live.filter(s=>s.outcome.status.startsWith('RESOLVED')),hit=res.filter(s=>s.outcome.hit['1.5']);
-  html+=`<div class="card"><b>Measured outcomes (LIVE only)</b><div class="grid"><div><div class="k">Alerts</div>${live.length}</div><div><div class="k">Resolved (60m)</div>${res.length}</div><div><div class="k">1.5x hits</div>${hit.length}</div><div><div class="k">Hit rate</div>${res.length>=30?(100*hit.length/res.length).toFixed(0)+'%':'INSUFFICIENT SAMPLE (need 30, have '+res.length+')'}</div></div><div class="k">Prices are Dexscreener marks vs the signal reference price; exit costs are estimates. Not a guarantee.</div></div>`;
-  html+=sigs.map(s=>`<div class="card"><b>${esc(s.symbol)}</b> <span class="k">${ago(s.signalTime)} · ${esc(s.outcome.status)}</span><div>${outcomeChips(s)}</div></div>`).join('');
- }else{
-  html+=`<div class="card"><b>System health</b><div class="grid"><div><div class="k">Mode</div>${esc(h.mode)}</div><div><div class="k">Cycle time</div>${esc(h.cycleSec)}s</div><div><div class="k">Pairs watched</div>${esc(h.pairsWatched)}</div><div><div class="k">Buy candidates last cycle</div>${esc(h.newBuys)}</div><div><div class="k">SOL/USD</div>$${esc(h.solUsd)}</div><div><div class="k">Telegram</div>${h.telegramConfigured?'configured (delivery shown per signal)':'<span style="color:var(--r)">NOT CONFIGURED</span>'}</div></div></div>`;
-  html+=`<div class="card"><b>Data sources</b>${Object.entries(h.sources||{}).map(([k,v])=>`<div class="row"><span>${esc(k)}</span><span class="sp"></span><span class="pill ${v==='ok'?'g':'a'}">${esc(v)}</span></div>`).join('')}<div class="k">API calls this cycle: ${esc(JSON.stringify(h.apiStats||{}))}</div></div>`;
-  html+=`<div class="card"><b>Alert sound</b><div class="row" style="margin-top:8px"><button class="b" id="tst">Test sound</button><button class="b" id="mut">${muted?'Unmute':'Mute'}</button><button class="b" id="ntf">Enable notifications</button></div><div class="k" style="margin-top:6px">Sound and popups only work while this page is open and the browser allows audio. Telegram is the independent channel when the page is closed.</div><div class="k" id="sres"></div></div>`;
-  html+=`<div class="card"><b>Last errors</b><div class="k">${(h.errors||[]).slice(0,5).map(esc).join('<br>')||'none'}</div></div>`;
-  m.innerHTML=html;
-  $('#tst').onclick=()=>{unlock();const ok=beep(true);$('#sres').textContent=ok?'Played. If you heard nothing, check phone volume/silent switch.':'Browser blocked audio. Tap again.'};
-  $('#mut').onclick=()=>{muted=!muted;LS.set('muted',muted);render()};
-  $('#ntf').onclick=()=>{if(!('Notification' in window)){$('#sres').textContent='Notifications not supported here.';return}Notification.requestPermission().then(p=>{$('#sres').textContent='Notification permission: '+p})};
-  return}
- m.innerHTML=html;
- m.querySelectorAll('.coin-links a').forEach(a=>a.onclick=e=>e.stopPropagation());
- m.querySelectorAll('[data-id]').forEach(el=>el.onclick=()=>{detail=el.dataset.id;render();scrollTo(0,0)});
-}
-document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{tab=b.dataset.t;detail=null;document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));render()});
-load();setInterval(load,30000);
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>JK | Launch Radar</title><meta name="theme-color" content="#09090d"><style>
+:root{--bg:#09090d;--surface:#121218;--line:#25252f;--text:#eeeef4;--dim:#a0a0b1;--gold:#ffb800;--green:#65d7ad;--red:#ff667c}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 system-ui,sans-serif;padding-bottom:90px}header{padding:22px 18px 14px;border-bottom:1px solid var(--line);background:radial-gradient(ellipse at top right,#35240e,transparent 65%)}.eyebrow{font-size:11px;letter-spacing:.14em;color:var(--gold);font-weight:700}h1{font-size:27px;letter-spacing:-.05em;margin:6px 0}h2{font-size:17px;margin:0 0 8px}.dim{color:var(--dim);font-size:12px}.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.spread{justify-content:space-between}.tag{font-size:10px;padding:3px 7px;border:1px solid var(--line);border-radius:20px;letter-spacing:.03em;color:var(--gold)}main{padding:16px;max-width:920px;margin:auto}.panel{padding:16px;background:var(--surface);border:1px solid var(--line);border-radius:18px;margin-bottom:12px}.notice{background:#211b10;border-color:#554113;color:#f1c771;font-size:12px}.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px}.stat{padding:16px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(135deg,#1b1915,var(--surface))}.big{font-size:28px;letter-spacing:-.06em;margin-top:6px}.accent{color:var(--gold)}.red{color:var(--red)}.green{color:var(--green)}.mono{font:11px/1.6 ui-monospace,monospace;overflow-wrap:anywhere;margin:7px 0;color:var(--dim)}.metrics{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}.metric{min-width:0}.metric strong{display:block;font-size:16px;overflow-wrap:anywhere}.links{display:flex;gap:6px;flex-wrap:wrap}.links a,button{min-height:44px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#1c1c25;color:var(--text);text-decoration:none;font:12px system-ui}button{cursor:pointer}nav{position:fixed;bottom:0;left:0;right:0;background:#101015;border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom);z-index:10}nav button{flex:1;min-height:58px;border:0;border-radius:0;background:none;color:var(--dim);padding:12px 3px}nav button.on{color:var(--gold);box-shadow:inset 0 2px var(--gold)}input{width:100%;padding:13px;background:#15151d;border:1px solid var(--line);border-radius:12px;color:var(--text);margin-bottom:12px}.error{color:var(--red)}.ladder{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}.level{font-size:11px;border:1px solid var(--line);padding:3px 7px;border-radius:7px;color:var(--dim)}.level.hit{color:var(--green);border-color:#28634e}.empty{padding:35px 12px;text-align:center;color:var(--dim)}@media(min-width:700px){.stats{grid-template-columns:repeat(4,1fr)}#list{display:grid;grid-template-columns:1fr 1fr;gap:12px}}
+</style></head><body><header><div class="row spread"><span class="eyebrow">JK / SIGNAL INTELLIGENCE</span><span class="tag">INFORMATIONAL ONLY</span></div><h1>Launch Radar<span class="accent">.</span></h1><div class="row spread"><span class="dim">First seen. Every outcome. No hindsight.</span><span class="tag" id="connection">CONNECTING</span></div></header><main><div class="panel notice">UNVERIFIED feed observations, not buy advice. Discovery time is not launch time. Feed windows have gaps. Market-cap multiples are not executable returns.</div><div class="dim" style="margin-bottom:12px"><a style="color:var(--gold)" href="legacy.html">Original radar / book / history ↗</a></div><div id="summary"></div><input id="search" placeholder="Search symbol or contract address" aria-label="Search coins"><div id="content"></div></main><nav><button class="on" data-tab="coins">Discoveries</button><button data-tab="milestones">Milestones</button><button data-tab="outcomes">Outcomes</button><button data-tab="health">System</button></nav><script>
+'use strict';const $=s=>document.querySelector(s);const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const usd=n=>Number.isFinite(n)?'$'+n.toLocaleString('en-US',{maximumFractionDigits:2}):'NOT OBSERVED';const stamp=n=>n?new Date(n).toLocaleString('en-IN',{timeZone:'Asia/Kolkata',hour12:false})+' IST':'NOT OBSERVED';let tab='coins',data=null,error=null,endpoint=null;
+function links(c){if(!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(c.mint||''))return '';const m=encodeURIComponent(c.mint);return `<div class="links"><a target="_blank" rel="noopener noreferrer" href="https://dexscreener.com/solana/${m}">Dexscreener ↗</a><a target="_blank" rel="noopener noreferrer" href="https://gmgn.ai/sol/token/${m}">GMGN ↗</a><a target="_blank" rel="noopener noreferrer" href="https://solscan.io/token/${m}">Solscan ↗</a></div>`}
+function coin(c){const m=c.latest;return `<article class="panel"><div class="row spread"><h2>${esc(c.symbol)}</h2><span class="tag">UNVERIFIED</span></div><div class="dim">Detected ${stamp(c.discoveredAt)}</div><div class="mono">${esc(c.mint)}</div><div class="metrics"><div class="metric"><span class="dim">First observed MCAP</span><strong>${usd(m?.baseline)}</strong><span class="dim">${stamp(m?.baselineAt)}</span></div><div class="metric"><span class="dim">Current MCAP</span><strong>${usd(m?.cap)}</strong><span class="dim">${stamp(m?.at)}</span></div><div class="metric"><span class="dim">Observed multiple</span><strong class="${c.dumpObserved?'red':'accent'}">${Number.isFinite(m?.multiple)?m.multiple.toFixed(2)+'x':'NOT OBSERVED'}</strong></div><div class="metric"><span class="dim">Liquidity</span><strong>${usd(m?.liquidityUsd)}</strong></div></div><div class="ladder">${[2,3,5,10,20,30].map(n=>`<span class="level ${c.hits?.some(h=>h.level===n&&h.series===m?.series)?'hit':''}">${n}x</span>`).join('')}</div><div class="dim">Source: ${esc(c.source)}<br>Mark series: ${esc(m?.series||'NOT OBSERVED')}${c.missingSince?'<br><span class="error">Market data missing since '+stamp(c.missingSince)+'. Last marks may be stale.</span>':''}${c.dumpObserved?'<br><span class="red">A 50%+ fall from a first-observed series baseline was recorded.</span>':''}</div><div style="margin-top:12px">${links(c)}</div></article>`}
+function render(){if(!data){$('#content').innerHTML=`<div class="panel empty">${esc(error||'Connecting to the observation worker…')}</div>`;return}const h=data.health;const fresh=!error&&h?.finishedAt&&Date.now()-h.finishedAt<6*60000;$('#connection').textContent=error?'CONNECTION LOST':fresh?'RECENT CYCLE':'STALE / STARTING';$('#connection').style.color=fresh?'var(--green)':'var(--red)';$('#summary').innerHTML=`<div class="stats"><div class="stat"><span class="dim">All detections retained</span><div class="big">${data.counts?.total??0}</div></div><div class="stat"><span class="dim">Cards waiting</span><div class="big">${data.delivery?.filter(x=>x.status==='PENDING').reduce((n,x)=>n+x.count,0)||0}</div></div><div class="stat"><span class="dim">Observed 2x+ coins</span><div class="big green">${data.stats?.hitCoins??'NOT OBSERVED'}</div></div><div class="stat"><span class="dim">Observed 50%+ dumps</span><div class="big red">${data.stats?.dumpCoins??'NOT OBSERVED'}</div></div></div>`;
+const q=$('#search').value.toLowerCase(),coins=(data.coins||[]).filter(c=>(c.symbol+' '+c.mint).toLowerCase().includes(q));let html='';
+if(tab==='coins')html=`<div class="dim" style="margin-bottom:12px">${error?'<span class="error">Connection lost. Showing cached data. </span>':''}Showing latest ${coins.length} stored coins. ${data.counts?.total||0} total retained. No quality gate is applied.</div><div id="list">${coins.map(coin).join('')||'<div class="empty">No matching detections yet.</div>'}</div>`;
+if(tab==='milestones')html=`<div class="panel notice">First OBSERVED marks only. Each source/pool has its own frozen baseline; source switches do not manufacture multiples. Crossings between polls can be missed.</div>`+(data.events||[]).filter(e=>e.body?.startsWith('DISCOVERY')===false&&!e.body?.startsWith('NEW COIN')).map(e=>`<div class="panel"><div class="tag">${esc(e.status)}</div><pre style="white-space:pre-wrap;overflow-wrap:anywhere;font:12px/1.7 system-ui">${esc(e.body)}</pre></div>`).join('');
+if(tab==='outcomes')html=`<div class="panel notice">No win-rate claim. All detections remain in storage, including missing data and dumps. A quoted market-cap spike does not prove a sellable return. Latest ${coins.length} records shown.</div><div id="list">${coins.map(coin).join('')}</div>`;
+if(tab==='health')html=`<div class="panel"><h2>Source & delivery health</h2><div class="dim">Latest completed cycle: ${stamp(h?.finishedAt)}<br>Feed window: ${stamp(h?.windowStart)} to ${stamp(h?.windowEnd)}<br>Cycle target: every two minutes, NOT YET VALIDATED<br>Window gaps exist. No claim of all-launch coverage. CPU/free-tier reliability is under validation.<br>External calls last run: ${h?.externalCalls??'NOT OBSERVED'}<br>Delivery enabled: ${h?.deliveryEnabled?'YES':'NO'}<br>Detected last run: ${h?.discovered??'NOT OBSERVED'}</div><h2 style="margin-top:18px">Sources</h2><div class="dim">${Object.entries(h?.sources||{}).map(([k,v])=>esc(k+': '+v)).join('<br>')}</div><h2 style="margin-top:18px">Delivery ledger</h2><div class="dim">${(data.delivery||[]).map(x=>esc(x.status+': '+x.count)).join('<br>')}<br>DELIVERY_UNKNOWN is never silently resent.</div><h2 style="margin-top:18px">Limits</h2><div class="dim">Free infrastructure; 500 MB shared database limit, finite retention. No trading, signing or paid streams. Cards can queue at high volume. Latest source error: ${esc(h?.errors?.join('; ')||'none recorded')}</div></div>`;
+$('#content').innerHTML=html;}
+async function load(){try{if(!endpoint){const c=await fetch('data/discovery-endpoint.json',{cache:'no-store'});if(!c.ok)throw Error('Observation worker is not connected yet. No live data claimed.');endpoint=(await c.json()).url;if(!/^https:\/\/signal-alert-[a-z0-9-]+\.[a-z0-9-]+\.workers\.dev\/data$/.test(endpoint))throw Error('Invalid worker endpoint');}const r=await fetch(endpoint,{cache:'no-store'});if(!r.ok)throw Error('Worker HTTP '+r.status);data=await r.json();error=null;}catch(e){error=e.message;$('#connection').textContent='NO LIVE CONNECTION';}render();}
+$('#search').oninput=render;document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));render();});load();setInterval(load,30000);
 </script></body></html>
