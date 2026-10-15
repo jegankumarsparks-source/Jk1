@@ -40,7 +40,7 @@ async function claimPriority(env){
  const base=env.SUPABASE_URL.replace(/\/$/,'')+'/rest/v1/signal_alert_outbox';
  const read=async filter=>{env.__metrics.supabaseRequests++;return json(base+'?select=id,body&status=eq.PENDING&order=created.asc&limit=60&'+filter,{headers});};
  const priority=await read('body=not.like.NEW%20COIN*');let rows=priority;
- if(rows.length<60)rows=rows.concat((await read('body=like.NEW%20COIN*')).slice(0,60-rows.length));
+ if(rows.length<60){env.__metrics.supabaseRequests++;const newest=await json(base+'?select=id,body&status=eq.PENDING&order=created.desc&limit=1&body=like.NEW%20COIN*',{headers});const launches=await read('body=like.NEW%20COIN*');rows=rows.concat(newest,launches).filter((x,i,a)=>a.findIndex(y=>y.id===x.id)===i).slice(0,60);}
  if(!rows.length)return [];
  env.__metrics.supabaseRequests++;return json(base+'?status=eq.PENDING&id=in.('+rows.map(x=>encodeURIComponent('"'+x.id+'"')).join(',')+')&select=id,body',{method:'PATCH',headers:{...headers,Prefer:'return=representation'},body:JSON.stringify({status:'SENDING'})});
 }
@@ -85,7 +85,7 @@ async function cycle(env){
  }
  await rpc(env,'deliveries',{events:deliveryResults});
  }
- health.runtime='GITHUB_ACTIONS';health.trigger=env.GITHUB_EVENT_NAME||'UNKNOWN';health.runId=env.GITHUB_RUN_ID||null;health.cadence='5 minutes best effort; 120-second feed window with gaps';health.dexBackoffUntil=dexBackoffUntil;health.discovered=newly.length;health.coinsChecked=existing.size;health.eventsQueued=eventCount;health.finishedAt=Date.now();health.durationMs=Date.now()-start;health.deliveryEnabled=env.DELIVERY_ENABLED==='true';health.supabaseRequests=env.__metrics.supabaseRequests+2;health.totalExternalCalls=health.externalCalls+health.supabaseRequests;
+ health.runtime='GITHUB_ACTIONS';health.trigger=env.GITHUB_EVENT_NAME||'UNKNOWN';try{const ds=await json(env.SUPABASE_URL+'/rest/v1/signal_alert_meta?key=eq.dispatch&select=value',{headers:{apikey:env.SUPABASE_SERVICE_KEY,authorization:'Bearer '+env.SUPABASE_SERVICE_KEY}});const d=ds[0]?.value;if(d?.accepted&&d.at<=start&&start-d.at<180000)health.scheduler={type:'CLOUDFLARE_CRON',scheduledAt:d.scheduledAt,acceptedAt:d.at};}catch{}health.runId=env.GITHUB_RUN_ID||null;health.cadence='5 minutes best effort; 120-second feed window with gaps';health.dexBackoffUntil=dexBackoffUntil;health.discovered=newly.length;health.coinsChecked=existing.size;health.eventsQueued=eventCount;health.finishedAt=Date.now();health.durationMs=Date.now()-start;health.deliveryEnabled=env.DELIVERY_ENABLED==='true';health.supabaseRequests=env.__metrics.supabaseRequests+2;health.totalExternalCalls=health.externalCalls+health.supabaseRequests;
  await rpc(env,'health',health);return health;
  }finally{await rpc(env,'release');}
 }
