@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "generatedAt": "2026-10-15T15:34:58.193097+00:00",
-  "lastCheckedAt": "2026-10-15T15:34:53.678Z",
+  "generatedAt": "2026-10-15T15:45:08.540767+00:00",
+  "lastCheckedAt": "2026-10-15T15:45:03.577Z",
   "paperOnly": true,
   "bank": 200,
   "cash": 79.61,
@@ -885,7 +885,7 @@
       "entryLiquidity": 2598.31,
       "status": "OPEN",
       "lastPrice": 2.248e-06,
-      "lastPriceAt": 1792078490204,
+      "lastPriceAt": 1792079100158,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -984,7 +984,7 @@
       "entryLiquidity": 2640.55,
       "status": "OPEN",
       "lastPrice": 2.32e-06,
-      "lastPriceAt": 1792078490317,
+      "lastPriceAt": 1792079100227,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -1292,7 +1292,7 @@
       "entryLiquidity": 3189.41,
       "status": "OPEN",
       "lastPrice": 2.683e-06,
-      "lastPriceAt": 1792078490428,
+      "lastPriceAt": 1792079100331,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -1390,7 +1390,7 @@
       "entryLiquidity": 2798.66,
       "status": "OPEN",
       "lastPrice": 2.754e-06,
-      "lastPriceAt": 1792078490549,
+      "lastPriceAt": 1792079100465,
       "priceState": "LIVE",
       "exitAt": null,
       "exitPrice": null,
@@ -12886,23 +12886,15 @@
       "limitPrice": 2.1856e-06,
       "createdAt": 1792075408371,
       "expiresAt": 1792079008371,
-      "status": "PENDING",
+      "status": "CANCELLED",
       "score": 35.5,
-      "signalLiquidity": 2667.92
+      "signalLiquidity": 2667.92,
+      "cancelledAt": 1792079100868,
+      "cancelReason": "60-minute signal expiry"
     }
   ],
   "rulesVersion": "entry-open-v4",
   "historyTail": [
-    {
-      "t": 1792064633791,
-      "type": "LIMIT_PLACED",
-      "mint": "7iwzC5orRb13BZ4eML2KRPDPYRfEVHsWUW4uMUZfpump",
-      "symbol": "dopewif",
-      "price": 0.0007142400000000001,
-      "signalPrice": 0.0008928,
-      "usd": 10,
-      "reason": "entry-open-v4: -20% limit, expires in 60 minutes; no cash/slot consumed"
-    },
     {
       "t": 1792064634241,
       "type": "LIMIT_PLACED",
@@ -13330,6 +13322,14 @@
       "signalPrice": 2.732e-06,
       "usd": 10,
       "reason": "entry-open-v4: -20% limit, expires in 60 minutes; no cash/slot consumed"
+    },
+    {
+      "t": 1792079100868,
+      "type": "LIMIT_CANCELLED",
+      "mint": "E2HF9d5oCKzGydAW64tXBnCyL8YLTrYedtb5AwtGotta",
+      "symbol": "GOTTAGO",
+      "price": 2.1856e-06,
+      "reason": "60-minute signal expiry"
     }
   ],
   "sourceHealth": [
@@ -13338,7 +13338,7 @@
       "label": "Dexscreener (public, keyless)",
       "kind": "rest",
       "status": "LIVE",
-      "lastSuccess": 1792078493437,
+      "lastSuccess": 1792079103305,
       "lastError": null,
       "errorCount": 0,
       "timeoutCount": 0,
