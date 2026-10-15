@@ -1457,9 +1457,12 @@ DashboardRenderer.prototype.serverbook=function(){
   if(d.slotsUsed!=null)h+='<div class="kv"><span class="k">slots used</span><span class="v">'+d.slotsUsed+(d.maxSlots!=null?' / '+d.maxSlots:'')+'</span></div>';
   if(d.rules){ const r=d.rules; const q=r.qualification||{};
     h+='<h3 style="margin-top:10px">server rules ('+U.esc(String(r.entryMode||'standard'))+')</h3><div class="small">'
-      +((r.entryMode==='dip-limit-v2'||r.entryMode==='defensive-v3'||r.entryMode==='entry-open-v4')?('entry: LIMIT BUY at signal rate ×0.80 (−'+(r.limitBelowSignalPct||20)+'% dip) · fills only on a real later observation ≤ limit · expires in '+(r.limitExpiryMinutes||60)+' min'+(r.entryMode==='entry-open-v4'?'':' or earlier on disqualification')+' · pending orders do NOT consume cash or slots<br>'):('entry: $'+r.entryUsd+' per qualifying signal<br>'))
-      +(r.entryMode==='entry-open-v4'?('entry screens: NONE (v4 owner override) — no liquidity / volume / score / wallet / age / flag / crash screens; real identity + fresh market evidence only<br>'):('gates: score ≥ '+(q.scoreThreshold!=null?q.scoreThreshold:'—')+' · ≥ '+(q.minQualifiedWallets!=null?q.minQualifiedWallets:'—')+' wallets · liquidity ≥ '+U.fmt$(q.minLiquidityUsd)+' · 24h vol ≥ '+U.fmt$(q.minVolume24Usd)+'<br>'))
-      +'exits from filled entry: '+r.takeProfitMultiple+'x sell · −'+Math.round((1-r.stopMultiple)*100)+'% price stop'+(r.defensiveLiquidityExitDropPct!=null?' · liquidity −'+r.defensiveLiquidityExitDropPct+'% defensive exit':'')+' · rug ≤ '+U.fmt$(r.rugLiquidityUsd)+' or ≥ '+r.rugDropPct+'% liquidity drop = full loss · fee '+r.feePct+'%/side · no time limit</div>'; }
+      +(r.entryMode==='rug-only-v5'
+        ?('entry: $'+r.entryUsd+' immediate at a fresh observed price · no pending dip-limit gate · max '+(q.autoMaxPositions||'50')+' slots<br>'
+          +'exits: rug/full loss only (liquidity ≤ '+U.fmt$(r.rugLiquidityUsd)+' or ≥ '+r.rugDropPct+'% drop) · no take-profit or price stop · fee '+r.feePct+'%/side · no time limit</div>')
+        :(((r.entryMode==='dip-limit-v2'||r.entryMode==='defensive-v3'||r.entryMode==='entry-open-v4')?('entry: LIMIT BUY at signal rate ×0.80 (−'+(r.limitBelowSignalPct||20)+'% dip) · fills only on a real later observation ≤ limit · expires in '+(r.limitExpiryMinutes||60)+' min'+(r.entryMode==='entry-open-v4'?'':' or earlier on disqualification')+' · pending orders do NOT consume cash or slots<br>'):('entry: $'+r.entryUsd+' per qualifying signal<br>'))
+          +(r.entryMode==='entry-open-v4'?('entry screens: NONE (v4 owner override) — no liquidity / volume / score / wallet / age / flag / crash screens; real identity + fresh market evidence only<br>'):('gates: score ≥ '+(q.scoreThreshold!=null?q.scoreThreshold:'—')+' · ≥ '+(q.minQualifiedWallets!=null?q.minQualifiedWallets:'—')+' wallets · liquidity ≥ '+U.fmt$(q.minLiquidityUsd)+' · 24h vol ≥ '+U.fmt$(q.minVolume24Usd)+'<br>'))
+          +'exits from filled entry: '+r.takeProfitMultiple+'x sell · −'+Math.round((1-r.stopMultiple)*100)+'% price stop'+(r.defensiveLiquidityExitDropPct!=null?' · liquidity −'+r.defensiveLiquidityExitDropPct+'% defensive exit':'')+' · rug ≤ '+U.fmt$(r.rugLiquidityUsd)+' or ≥ '+r.rugDropPct+'% liquidity drop = full loss · fee '+r.feePct+'%/side · no time limit</div>')); }
   const pos=Array.isArray(d.positions)?d.positions:[];
   h+='<h3 style="margin-top:10px">server positions ('+pos.length+')</h3>';
   if(!pos.length)h+='<div class="small">none open</div>';
@@ -1480,7 +1483,7 @@ DashboardRenderer.prototype.serverbook=function(){
   }
   const po=Array.isArray(d.pendingOrders)?d.pendingOrders:[];
   h+='<h3 style="margin-top:10px">pending dip-limit orders ('+po.length+')</h3>';
-  if(!po.length)h+='<div class="small">none pending — the next qualifying signal places a limit buy at −'+((d.rules&&d.rules.limitBelowSignalPct)||20)+'% below its signal rate</div>';
+  if(!po.length)h+='<div class="small">'+((d.rules&&d.rules.entryMode==='rug-only-v5')?'none pending — rug-only-v5 enters immediately at fresh observed prices; dip-limit orders are not used':'none pending — the next qualifying signal places a limit buy at −'+((d.rules&&d.rules.limitBelowSignalPct)||20)+'% below its signal rate')+'</div>';
   for(const o of po){
     h+='<div class="tok" style="border:1px solid var(--line);border-radius:10px;padding:8px;margin:8px 0">'
       +'<div class="row"><b>'+U.esc(o.symbol||'(no symbol)')+'</b>'+this.badge(o.status||'PENDING','b-info')+this.badge('PAPER','b-dim')+'</div>'
