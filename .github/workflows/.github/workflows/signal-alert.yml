@@ -1,0 +1,28 @@
+name: Signal Alert scanner
+on:
+  schedule:
+    - cron: '3-58/5 * * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: signal-alert-scanner
+  cancel-in-progress: false
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Observe, store and deliver informational cards
+        env:
+          SUPABASE_URL: ${{ secrets.SIGNAL_ALERT_SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SIGNAL_ALERT_SUPABASE_KEY }}
+          TG_TOKEN: ${{ secrets.SIGNAL_ALERT_TG_TOKEN }}
+          TG_CHAT_ID: '7581932848'
+          WINDOW_MS: '120000'
+          DELIVERY_ENABLED: 'true'
+        run: node signal-alert/backend/action-runner.mjs
