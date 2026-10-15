@@ -47,7 +47,7 @@ async function claimPriority(env){
 async function cycle(env){
  env={...env,__metrics:{supabaseRequests:0}};
  const start=Date.now(),health={start,mode:'INFORMATIONAL_UNVERIFIED',coverage:'INCOMPLETE LAUNCH COVERAGE. Bounded feed windows have gaps. Detection time is not launch time.',sources:{},errors:[],externalCalls:0};
- const lease=await rpc(env,'lease',{until:start+600000,now:start});if(!lease.acquired)return {skipped:'active cycle'};
+ let lease;const leaseWaitStart=Date.now();do{const now=Date.now();lease=await rpc(env,'lease',{until:now+600000,now});if(lease.acquired)break;if(Date.now()-leaseWaitStart>=150000)return {skipped:'active cycle after bounded150secwait'};await delay(5000);}while(true);health.leaseWaitMs=Date.now()-leaseWaitStart;
  try{
  let sol=null;const candidates=new Map();let dexBackoffUntil=0;
  try{env.__metrics.supabaseRequests++;const rows=await json(env.SUPABASE_URL.replace(/\/$/,'')+'/rest/v1/signal_alert_meta?key=eq.health&select=value',{headers:{apikey:env.SUPABASE_SERVICE_KEY,authorization:'Bearer '+env.SUPABASE_SERVICE_KEY}});dexBackoffUntil=Number(rows[0]?.value?.dexBackoffUntil||0);}catch{}
