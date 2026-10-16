@@ -1,6 +1,6 @@
 {
- "generatedAt": 1792189540111,
- "generatedAtIso": "2026-10-16T22:25:40.111Z",
+ "generatedAt": 1792189839772,
+ "generatedAtIso": "2026-10-16T22:30:39.772Z",
  "scanner": "solana-radar-server",
  "runner": "cloudflare-worker-cron",
  "engineSource": "index.html embedded engine, extracted verbatim at run time",
@@ -9,9 +9,9 @@
  "scoreVersion": "score-v1.0",
  "riskPolicyVersion": "risk-v1.0",
  "thresholdsVersion": "thresh-v1.0",
- "cycle": 62,
- "cycleStartedAt": 1792189535481,
- "cycleDurationMs": 4630,
+ "cycle": 63,
+ "cycleStartedAt": 1792189835765,
+ "cycleDurationMs": 4007,
  "schedule": "every 5 min via Cloudflare Workers cron (free tier, keyless data) — runs whether or not any tab is open. Backstop: GitHub Actions cron (throttled in this repo to every few hours).",
  "engineDrift": null,
  "stateRestored": true,
@@ -19,11 +19,11 @@
   {
    "id": "dexscreener",
    "label": "Dexscreener (public, keyless)",
-   "status": "LIVE",
-   "lastSuccess": 1792189540111,
-   "lastError": null,
-   "requestCount": 26,
-   "rateLimitCount": 0
+   "status": "DEGRADED",
+   "lastSuccess": null,
+   "lastError": "HTTP 429",
+   "requestCount": 2,
+   "rateLimitCount": 1
   },
   {
    "id": "rugcheck",
@@ -59,7 +59,7 @@
   "watchlist": 0
  },
  "analyzedThisCycle": 0,
- "signalMarksTracked": 25,
+ "signalMarksTracked": 0,
  "newSignalsThisCycle": [],
  "recentSignals": [
   {
@@ -641,8 +641,8 @@
  ],
  "driver": "worker-budget-v2 2026-10-17",
  "phaseMs": {
-  "t0": 1792189534758,
-  "readMs": 723
+  "t0": 1792189834727,
+  "readMs": 1038
  },
  "dexBackoffUntil": 1792190439475,
  "dexBackoffStrikes": 3,
