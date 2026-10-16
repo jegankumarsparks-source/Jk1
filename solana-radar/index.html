@@ -1116,21 +1116,25 @@ class DashboardRenderer{
     const v=SRVSCAN;
     let h='<div class="card" style="border-color:var(--grn)"><h3>🛰 24/7 SERVER SCANNER (paper only)</h3>';
     h+='<div class="small">runs every ~5 min on a free server, whether or not this tab is open · same engine rules as the in-tab scanner (extracted verbatim, unchanged) · this app mirrors its server-scan.json · virtual/paper only</div>';
+    h+='<div class="small" style="margin-top:4px">new-signal alerts on this tab: <a href="#" onclick="SRVALERT.toggleMute();return false">'+(SRVALERT.muted?'🔕 muted — tap to unmute':'🔔 on — tap to mute')+'</a> · <a href="#" onclick="SRVALERT.test();return false">🔊 test sound</a> <span style="opacity:.75">(popup+sound fire only while this tab is open — browser rule)</span></div>';
     if(v.state==='missing'){ h+='<div class="note" style="margin-top:8px">server-scan.json NOT PUBLISHED YET — no server cycle committed so far. This fills in automatically once one lands. Nothing shown rather than fake data.</div></div>'; return h; }
     if(v.state==='error'){ h+='<div class="note" style="margin-top:8px">server feed fetch failed: '+U.esc(String(v.error||'unknown'))+' · last tried '+U.age(v.lastTry)+' ago · showing nothing rather than stale-as-live.</div></div>'; return h; }
     if(v.state==='loading'||!v.data){ h+='<div class="note" style="margin-top:8px">loading server feed…</div></div>'; return h; }
     const d=v.data;
     h+='<div class="kv"><span class="k">last server cycle</span><span class="v">'+this.freshness(d.generatedAt)+' · cycle #'+d.cycle+' · '+new Date(d.generatedAt).toLocaleString()+'</span></div>';
     if(Array.isArray(d.sources))h+='<div class="kv"><span class="k">server sources</span><span class="v small">'+d.sources.map(x=>U.esc(x.id)+': '+U.esc(x.status)).join(' · ')+'</span></div>';
+    if(d.driver)h+='<div class="kv"><span class="k">server driver</span><span class="v small">'+U.esc(String(d.driver))+(d.phaseMs&&d.phaseMs.discoveryMs!=null?' · discovery '+(d.phaseMs.discoveryMs/1000).toFixed(1)+'s':'')+(d.dexBackoffUntil&&d.dexBackoffUntil>U.now()?' · dexscreener 429 cooldown until '+new Date(d.dexBackoffUntil).toLocaleTimeString()+' (auto-resumes)':'')+'</span></div>';
+    if(Array.isArray(d.errors)&&d.errors.length)h+='<div class="small" style="color:var(--amb)">server notes: '+d.errors.slice(0,2).map(x=>U.esc(String(x))).join(' · ')+'</div>';
     if(d.counts)h+='<div class="kv"><span class="k">server counts</span><span class="v small">'+d.counts.total+' candidates tracked · '+d.counts.paperSignals+' paper signals open · lifetime signals '+((d.counters&&d.counters.signals)!=null?d.counters.signals:'—')+' · discovered '+((d.counters&&d.counters.discovered)!=null?d.counters.discovered:'—')+'</span></div>';
     const sigs=Array.isArray(d.recentSignals)?d.recentSignals.slice(0,5):[];
     h+='<h3 style="margin-top:10px">latest server paper signals</h3>';
     if(!sigs.length)h+='<div class="small">none yet — a truthful NO SIGNAL beats a fabricated one</div>';
     for(const g of sigs){
-      const ml=(g.milestonesHit&&g.milestonesHit.length)?' · hit '+g.milestonesHit.map(m=>m.x+'x').join(','):'';
+      const ml=(g.milestonesHit&&g.milestonesHit.length)?' · hit '+g.milestonesHit.map(m=>m.x+'x '+new Date(m.at).toLocaleTimeString()).join(', '):'';
+      const dump=g.dumpHit?'<br><span style="color:var(--red)">⚠ dumped to '+g.dumpHit.multiple+'x at '+new Date(g.dumpHit.at).toLocaleString()+' (observed mark, same signal)</span>':'';
       const mult=(g.multiple!=null)?' · now '+g.multiple+'x (observed mark)':'';
       h+='<div class="kv"><span class="k">'+new Date(g.createdAt).toLocaleString()+'</span><span class="v">⚡ '+U.esc(g.symbol||U.short(g.mint))+' · score '+g.score+' · risk '+U.esc(String(g.riskVerdict||'?'))+' @ $'+g.signalPriceUsd+mult+ml
-        +(g.links?'<br><span class="row" style="margin-top:4px"><a class="btn sm" target="_blank" href="'+g.links.dexscreener+'">dexscreener</a><a class="btn sm" target="_blank" href="'+g.links.gmgn+'">gmgn</a><a class="btn sm" target="_blank" href="'+g.links.solscan+'">solscan</a></span>':'')
+        +(g.links?'<br><span class="row" style="margin-top:4px"><a class="btn sm" target="_blank" href="'+g.links.dexscreener+'">dexscreener</a><a class="btn sm" target="_blank" href="'+g.links.gmgn+'">gmgn</a><a class="btn sm" target="_blank" href="'+g.links.solscan+'">solscan</a></span>':'')+dump
         +'</span></div>';
     }
     h+='<div class="small" style="margin-top:6px">signal price is frozen at signal time; multiples/milestones are observed Dexscreener marks, never executable fills. The separate in-tab scanner below still runs only while this tab is open.</div>';
@@ -1487,7 +1491,7 @@ DashboardRenderer.prototype.serverbook=function(){
     h+='<h3 style="margin-top:10px">server rules ('+U.esc(String(r.entryMode||'standard'))+')</h3><div class="small">'
       +(r.entryMode==='rug-only-v5'
         ?('entry: $'+r.entryUsd+' immediate at a fresh observed price · no pending dip-limit gate · max '+(q.autoMaxPositions||'50')+' slots<br>'
-          +'exits: rug/full loss only (liquidity ≤ '+U.fmt$(r.rugLiquidityUsd)+' or ≥ '+r.rugDropPct+'% drop) · no take-profit or price stop · fee '+r.feePct+'%/side · no time limit</div>')
+          +'exits: '+(r.takeProfitMultiple!=null?('take-profit at '+r.takeProfitMultiple+'x · '):'')+'rug/full loss only (liquidity ≤ '+U.fmt$(r.rugLiquidityUsd)+' or ≥ '+r.rugDropPct+'% drop)'+(r.stopMultiple!=null?(' · price stop −'+Math.round((1-r.stopMultiple)*100)+'%'):'')+' · fee '+r.feePct+'%/side · no time limit</div>')
         :(((r.entryMode==='dip-limit-v2'||r.entryMode==='defensive-v3'||r.entryMode==='entry-open-v4')?('entry: LIMIT BUY at signal rate ×0.80 (−'+(r.limitBelowSignalPct||20)+'% dip) · fills only on a real later observation ≤ limit · expires in '+(r.limitExpiryMinutes||60)+' min'+(r.entryMode==='entry-open-v4'?'':' or earlier on disqualification')+' · pending orders do NOT consume cash or slots<br>'):('entry: $'+r.entryUsd+' per qualifying signal<br>'))
           +(r.entryMode==='entry-open-v4'?('entry screens: NONE (v4 owner override) — no liquidity / volume / score / wallet / age / flag / crash screens; real identity + fresh market evidence only<br>'):('gates: score ≥ '+(q.scoreThreshold!=null?q.scoreThreshold:'—')+' · ≥ '+(q.minQualifiedWallets!=null?q.minQualifiedWallets:'—')+' wallets · liquidity ≥ '+U.fmt$(q.minLiquidityUsd)+' · 24h vol ≥ '+U.fmt$(q.minVolume24Usd)+'<br>'))
           +'exits from filled entry: '+r.takeProfitMultiple+'x sell · −'+Math.round((1-r.stopMultiple)*100)+'% price stop'+(r.defensiveLiquidityExitDropPct!=null?' · liquidity −'+r.defensiveLiquidityExitDropPct+'% defensive exit':'')+' · rug ≤ '+U.fmt$(r.rugLiquidityUsd)+' or ≥ '+r.rugDropPct+'% liquidity drop = full loss · fee '+r.feePct+'%/side · no time limit</div>')); }
@@ -1815,6 +1819,7 @@ const SRVBOOK={state:'idle',data:null,fetchedAt:0,error:null,lastTry:0,live:{},l
       else if(!r.ok){ this.state='error'; this.error='HTTP '+r.status; }
       else{ const j=await r.json(); this.data=j; this.state='ok'; this.error=null; }
       this.fetchedAt=U.now();
+      if(this.state==='ok')try{SRVALERT.check(this.data);}catch(e){}
     }catch(e){ this.state='error'; this.error=String((e&&e.message)||e); }
     this.refreshLive();
     if(typeof S!=='undefined'&&S.ui&&S.ui.page==='autotrade')try{RENDER.all();}catch(e){}
@@ -1851,8 +1856,56 @@ const SRVSCAN={state:'idle',data:null,fetchedAt:0,error:null,lastTry:0,
       else if(!r.ok){ this.state='error'; this.error='HTTP '+r.status; }
       else{ const j=await r.json(); this.data=j; this.state='ok'; this.error=null; }
       this.fetchedAt=U.now();
+      if(this.state==='ok')try{SRVALERT.check(this.data);}catch(e){}
     }catch(e){ this.state='error'; this.error=String((e&&e.message)||e); }
     if(typeof S!=='undefined'&&S.ui&&S.ui.page==='overview')try{RENDER.all();}catch(e){}
+  }
+};
+
+/* ============================================================
+   S2b. SRVALERT — popup + sound when the 24/7 SERVER scanner
+   publishes a NEW paper signal (fires only while this tab is
+   open; Telegram remains the closed-tab channel). No fake
+   alerts: first load just records the latest signal id.
+   ============================================================ */
+const SRVALERT={
+  muted:localStorage.getItem('jk_srv_mute')==='1',
+  lastId:localStorage.getItem('jk_srv_last_sig')||null,
+  _ctx:null,
+  beep(){ if(this.muted)return; try{
+    this._ctx=this._ctx||new (window.AudioContext||window.webkitAudioContext)();
+    const ctx=this._ctx; if(ctx.state==='suspended')ctx.resume();
+    const t0=ctx.currentTime;
+    [0,0.18,0.36].forEach((off,i)=>{ const o=ctx.createOscillator(),g=ctx.createGain();
+      o.type='sine'; o.frequency.value=i===1?1180:880; o.connect(g); g.connect(ctx.destination);
+      g.gain.setValueAtTime(0.0001,t0+off); g.gain.exponentialRampToValueAtTime(0.22,t0+off+0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001,t0+off+0.16); o.start(t0+off); o.stop(t0+off+0.18); });
+  }catch(e){} },
+  toggleMute(){ this.muted=!this.muted; localStorage.setItem('jk_srv_mute',this.muted?'1':'0'); RENDER.all(); },
+  test(){ this.beep(); U.toast(this.muted?'sound is MUTED — unmute first':'test sound played (if the browser allowed audio)'); },
+  popup(g){
+    let el=document.getElementById('srvSigPop');
+    if(!el){ el=document.createElement('div'); el.id='srvSigPop'; document.body.appendChild(el); }
+    el.style.cssText='position:fixed;left:12px;right:12px;top:12px;z-index:9999;background:linear-gradient(135deg,#0d3320,#123d2a);border:2px solid var(--grn);border-radius:12px;padding:12px 14px;box-shadow:0 6px 30px rgba(0,0,0,.6);font-size:14px';
+    el.innerHTML='<b>⚡ NEW 24/7 SERVER PAPER SIGNAL</b><br><b style="font-size:16px">'+U.esc(g.symbol||U.short(g.mint))+'</b> · score '+g.score+' · risk '+U.esc(String(g.riskVerdict||'?'))+' · @ $'+g.signalPriceUsd
+      +(g.links?'<br><a class="btn sm" target="_blank" href="'+g.links.dexscreener+'">dexscreener</a> <a class="btn sm" target="_blank" href="'+g.links.gmgn+'">gmgn</a>':'')
+      +' <span style="float:right;cursor:pointer" onclick="document.getElementById(\'srvSigPop\').style.display=\'none\'">✕ close</span>'
+      +'<div class="small">paper only, not advice · fires only while this tab is open</div>';
+    el.style.display='block';
+    clearTimeout(this._pt); this._pt=setTimeout(()=>{ el.style.display='none'; },30000);
+    this.beep();
+  },
+  check(d){
+    const sigs=d&&Array.isArray(d.recentSignals)?d.recentSignals:null;
+    if(!sigs||!sigs.length)return;
+    const newest=sigs[0];
+    if(this.lastId===null){ this.lastId=newest.id; localStorage.setItem('jk_srv_last_sig',this.lastId); return; }
+    if(newest.id!==this.lastId){
+      const fresh=[];
+      for(const g of sigs){ if(g.id===this.lastId)break; fresh.push(g); }
+      this.lastId=newest.id; localStorage.setItem('jk_srv_last_sig',this.lastId);
+      fresh.reverse().slice(-3).forEach((g,i)=>setTimeout(()=>this.popup(g),i*1200));
+    }
   }
 };
 

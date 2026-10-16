@@ -141,7 +141,8 @@ async function runCycle(env){
         g.lastPrice=pr.priceUsd; g.lastPriceAt=pr.observedAt;
         g.multiple=g.signalPriceUsd?Math.round(pr.priceUsd/g.signalPriceUsd*100)/100:null;
         const ml=milestones[g.id]=milestones[g.id]||{hit:[]};
-        if(g.multiple!=null)for(const x of [2,3,5,10]){
+        if(g.multiple!=null&&g.multiple<=0.5&&!g.dumpHit)g.dumpHit={at:U.now(),price:pr.priceUsd,multiple:g.multiple};
+      if(g.multiple!=null)for(const x of [1.5,2,3,5,10]){
           if(g.multiple>=x&&!ml.hit.find(h=>h.x===x))ml.hit.push({x,at:U.now(),price:pr.priceUsd});
         }
         g.milestonesHit=ml.hit;
@@ -184,7 +185,7 @@ async function runCycle(env){
       pairAddress:g.evidence?g.evidence.pairAddress:null,dexId:g.evidence?g.evidence.dexId:null,
       lastPrice:g.lastPrice!=null?g.lastPrice:null,lastPriceAt:g.lastPriceAt||null,
       multiple:g.multiple!=null?g.multiple:null,
-      milestonesHit:g.milestonesHit||[],
+      milestonesHit:g.milestonesHit||[],dumpHit:g.dumpHit||null,
       links:{dexscreener:'https://dexscreener.com/solana/'+(g.evidence&&g.evidence.pairAddress?g.evidence.pairAddress:g.mint),
         gmgn:'https://gmgn.ai/sol/token/'+g.mint,solscan:'https://solscan.io/token/'+g.mint},
       paperOnly:true};
