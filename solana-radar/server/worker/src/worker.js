@@ -105,7 +105,7 @@ async function runCycle(env){
   const errors=[];
   if(drift)errors.push('ENGINE DRIFT: '+drift);
   const DISCOVERY_BUDGET_MS=20000;
-  let dexBackoffUntil=0;
+  let dexBackoffUntil=0, dexStrikes=(st&&st.dexBackoffStrikes)||0;
   if(st&&st.dexBackoffUntil&&st.dexBackoffUntil>Date.now()){
     dexBackoffUntil=st.dexBackoffUntil;
     errors.push('discovery skipped: dexscreener 429 cooldown active until '+new Date(dexBackoffUntil).toISOString()+' (driver-level backoff, engine rules unchanged; heartbeat feed still written)');
@@ -120,8 +120,12 @@ async function runCycle(env){
     const dex429=dex&&dex.status==='DEGRADED'&&String(dex.lastError||'').includes('429');
     const discoveryStalled=(phaseT.discoveryMs||0)>=DISCOVERY_BUDGET_MS;
     if(dex429||discoveryStalled){
-      dexBackoffUntil=Date.now()+10*60*1000;
-      errors.push('dexscreener cooldown armed for 10 min (driver-level; discovery resumes automatically, heartbeats continue)');
+      dexStrikes=Math.min((st&&st.dexBackoffStrikes||0)+1,3);
+      const mins=10*dexStrikes;
+      dexBackoffUntil=Date.now()+mins*60*1000;
+      errors.push('dexscreener cooldown armed for '+mins+' min (strike '+dexStrikes+', driver-level; discovery resumes automatically, heartbeats continue)');
+    }else if(dex&&dex.status==='LIVE'){
+      dexStrikes=0; // source recovered: back to short cooldown next time
     }
   }
 
@@ -259,13 +263,14 @@ async function runCycle(env){
   feed.driver='worker-budget-v2 2026-10-17';
   feed.phaseMs=phaseT;
   feed.dexBackoffUntil=dexBackoffUntil||null;
+  feed.dexBackoffStrikes=dexStrikes||0;
   feed.stateReadError=stateFetchError;
   feed.notes.push('Driver enforces hard per-phase time budgets and always writes this heartbeat feed, even when a data source stalls; a stalled source is labelled in errors, never silent.');
 
   const stateOut=JSON.stringify({schema:1,savedAt:U.now(),cycleBase:cycle,
     counters:S.diag.counters,rejectReasons:S.diag.rejectReasons,
     candidates:[...S.candidates.values()],wallets:[...S.wallets.values()],signals:[...S.signals.values()],
-    scoreHistory:S.scoreHistory.slice(-200),milestones,dexBackoffUntil:dexBackoffUntil||0});
+    scoreHistory:S.scoreHistory.slice(-200),milestones,dexBackoffUntil:dexBackoffUntil||0,dexBackoffStrikes:dexStrikes||0});
 
   /* never overwrite good state with a blank one after a failed state read */
   const ok1=stateFetchError?(console.log('state write SKIPPED - state read failed:',stateFetchError),false)

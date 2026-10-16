@@ -1064,7 +1064,10 @@ class DashboardRenderer{
     this.scanPill();
   }
   scanPill(){ const p=document.getElementById('scanPill');
+    const srv=(typeof SRVSCAN!=='undefined')?SRVSCAN.data:null, srvFresh=srv&&srv.generatedAt&&(U.now()-srv.generatedAt)<15*60*1000;
     if(S.diag.scanning){p.textContent='SCANNING…';p.className='hdr-pill on';}
+    else if(S.scanTimer&&S.diag.lastScanEnd&&(U.now()-S.diag.lastScanEnd)<10*60*1000){p.textContent='LIVE · last scan '+U.age(S.diag.lastScanEnd)+' ago';p.className='hdr-pill on';}
+    else if(srvFresh){p.textContent='🛰 SERVER LIVE · cycle #'+srv.cycle+' · '+U.age(srv.generatedAt)+' ago';p.className='hdr-pill on';}
     else if(S.scanTimer){p.textContent='LIVE · last scan '+(S.diag.lastScanEnd?U.age(S.diag.lastScanEnd)+' ago':'never');p.className='hdr-pill on';}
     else{p.textContent='SCANNER IDLE';p.className='hdr-pill off';} }
   badge(txt,cls){ return '<span class="badge '+cls+'">'+U.esc(txt)+'</span>'; }
@@ -1097,11 +1100,12 @@ class DashboardRenderer{
       ['Equity',U.fmt$(st.equity)+(st.valuationsComplete?'':' *'),st.equity>=S.settings.startCapital?'':'bad'],
       ['Realized PnL',U.fmt$(st.realizedPnl),st.realizedPnl>=0?'':'bad'],
       ['Unrealized PnL',(function(){let u=0,ok=true;for(const p of PORT.openPositions()){const x=PORT.unrealized(p);if(x==null)ok=false;else u+=x;}return U.fmt$(Math.round(u*100)/100)+(ok?'':'*');})(),''],
-      ['Max drawdown',st.maxDrawdownPct+'%','warn'],['Last scan',S.diag.lastScanEnd?U.age(S.diag.lastScanEnd)+' ago':'never',''],
+      ['Max drawdown',st.maxDrawdownPct+'%','warn'],['Last scan',(()=>{const srv=SRVSCAN.data;if(srv&&srv.generatedAt&&(U.now()-srv.generatedAt)<15*60*1000)return '🛰 server '+U.age(srv.generatedAt)+' ago';return S.diag.lastScanEnd?U.age(S.diag.lastScanEnd)+' ago (this tab)':'never';})(),''],
       ['Scanner',S.scanTimer?'RUNNING':'STOPPED',S.scanTimer?'':'bad']];
     let h='<div class="grid kpis">'+kpis.map(([l,v,c])=>'<div class="kpi '+c+'"><div class="v">'+v+'</div><div class="l">'+l+'</div></div>').join('')+'</div>';
     if(!st.valuationsComplete)h+='<div class="note">* some open positions have unavailable valuations (price missing) — they are excluded from equity, not valued at zero.</div>';
-    h+='<div class="card"><h3>Source health</h3>'+REG.all().map(s=>'<div class="kv"><span class="k">'+U.esc(s.label)+'</span><span class="v">'+this.badge(s.status,s.status==='LIVE'?'b-live':s.status==='NOT_OBSERVED'?'b-dim':'b-err')+' '+(s.lastSuccess?'ok '+U.age(s.lastSuccess)+' ago':'no success yet')+'</span></div>').join('')+'</div>';
+    h+='<div class="card"><h3>Source health</h3><div class="small" style="opacity:.75">this tab (in-browser scanner, runs only while open):</div>'+REG.all().map(s=>'<div class="kv"><span class="k">'+U.esc(s.label)+'</span><span class="v">'+this.badge(s.status,s.status==='LIVE'?'b-live':s.status==='NOT_OBSERVED'?'b-dim':'b-err')+' '+(s.lastSuccess?'ok '+U.age(s.lastSuccess)+' ago':'no success yet')+'</span></div>').join('')
+      +(()=>{const srv=SRVSCAN.data;if(!srv||!Array.isArray(srv.sources))return '';return '<div class="small" style="margin-top:8px;opacity:.75">🛰 24/7 server worker (from server-scan.json, cycle #'+(srv.cycle||'?')+' · '+U.age(srv.generatedAt)+' ago):</div>'+srv.sources.map(x=>'<div class="kv"><span class="k">🛰 '+U.esc(x.id)+'</span><span class="v">'+this.badge(x.status,x.status==='LIVE'?'b-live':x.status==='NOT_OBSERVED'?'b-dim':'b-err')+(x.lastError?' · '+U.esc(String(x.lastError)):'')+'</span></div>').join('');})()+'</div>';
     h+=this.serverScannerCard();
     SRVSCAN.refresh();
     h+='<div class="card"><h3>Controls</h3><div class="row">'
