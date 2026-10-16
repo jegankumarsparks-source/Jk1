@@ -59,8 +59,8 @@ async function cycle(env){
  const start=Date.now(),health={start,mode:'INFORMATIONAL_UNVERIFIED',coverage:'INCOMPLETE LAUNCH COVERAGE. Bounded feed windows have gaps. Detection time is not launch time.',sources:{},errors:[],externalCalls:0};
  let lease;const leaseWaitStart=Date.now();do{const now=Date.now();lease=await rpc(env,'lease',{until:now+600000,now});if(lease.acquired)break;if(Date.now()-leaseWaitStart>=360000)return {skipped:'active cycle after bounded360secwait'};await delay(2300);}while(true);health.leaseWaitMs=Date.now()-leaseWaitStart;
  try{
- let sol=null;const candidates=new Map();let dexBackoffUntil=0;
- try{env.__metrics.supabaseRequests++;const rows=await json(env.SUPABASE_URL.replace(/\/$/,'')+'/rest/v1/signal_alert_meta?key=eq.health&select=value',{headers:{apikey:env.SUPABASE_SERVICE_KEY,authorization:'Bearer '+env.SUPABASE_SERVICE_KEY}});dexBackoffUntil=Number(rows[0]?.value?.dexBackoffUntil||0);}catch{}
+ let sol=null;const candidates=new Map();let dexBackoffUntil=0,telegramCooldownUntil=0;
+ try{env.__metrics.supabaseRequests++;const rows=await json(env.SUPABASE_URL.replace(/\/$/,'')+'/rest/v1/signal_alert_meta?key=eq.health&select=value',{headers:{apikey:env.SUPABASE_SERVICE_KEY,authorization:'Bearer '+env.SUPABASE_SERVICE_KEY}});dexBackoffUntil=Number(rows[0]?.value?.dexBackoffUntil||0);telegramCooldownUntil=Number(rows[0]?.value?.telegramCooldownUntil||0);}catch{}
  const noteDexError=e=>{if(e.message.includes('429'))dexBackoffUntil=Date.now()+20*60000;};
  if(Date.now()>=dexBackoffUntil)try{health.externalCalls++;const p=await json('https://api.dexscreener.com/tokens/v1/solana/So11111111111111111111111111111111111111112');const best=p.filter(p=>p.quoteToken?.symbol==='USDC').sort((a,b)=>(b.liquidity?.usd||0)-(a.liquidity?.usd||0))[0];if(best&&+best.priceUsd>0)sol={price:+best.priceUsd,at:Date.now()};}catch(e){noteDexError(e);health.errors.push('SOL/USD not observed: '+e.message);}
  for(const endpoint of ['token-profiles/latest/v1','token-boosts/latest/v1']){if(Date.now()<dexBackoffUntil){health.sources[endpoint]='RATE LIMIT BACKOFF';continue;}try{health.externalCalls++;const rows=await json('https://api.dexscreener.com/'+endpoint);for(const p of rows)if(p.chainId==='solana'&&mintValid(p.tokenAddress))if(!candidates.has(p.tokenAddress))candidates.set(p.tokenAddress,{mint:p.tokenAddress,source:'Dexscreener '+endpoint,receivedAt:Date.now()});health.sources[endpoint]='OBSERVED';}catch(e){noteDexError(e);health.sources[endpoint]='UNAVAILABLE';health.errors.push(endpoint+': '+e.message);}}
@@ -88,14 +88,25 @@ async function cycle(env){
  await rpc(env,'save',{coins:coinsToWrite,events:eventsToWrite});
  health.delivered=0;const deliveryResults=[];
  if(env.TG_TOKEN&&env.TG_CHAT_ID&&env.DELIVERY_ENABLED==='true'){
- const due=await claimPriority(env);
+ // A separate durable key survives a later health-write failure.
+ try{env.__metrics.supabaseRequests++;const rows=await json(env.SUPABASE_URL.replace(/\/$/,'')+'/rest/v1/signal_alert_meta?key=eq.telegram_cooldown&select=value',{headers:{apikey:env.SUPABASE_SERVICE_KEY,authorization:'Bearer '+env.SUPABASE_SERVICE_KEY}});telegramCooldownUntil=Math.max(telegramCooldownUntil,Number(rows[0]?.value?.until||0));}catch(e){health.errors.push('Telegram cooldown check unavailable: '+e.message);telegramCooldownUntil=Math.max(telegramCooldownUntil,Date.now()+60000);}
+ health.telegramCooldownUntil=telegramCooldownUntil;
+ const due=Date.now()<telegramCooldownUntil?[]:await claimPriority(env);
  for(const e of due){
   let result={id:e.id,status:'DELIVERY_UNKNOWN',delivery:{note:'Network result uncertain; do not auto-resend'}};
   try{health.externalCalls++;const r=await fetch('https://api.telegram.org/bot'+env.TG_TOKEN+'/sendMessage',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({chat_id:env.TG_CHAT_ID,text:e.body,disable_web_page_preview:true}),signal:AbortSignal.timeout(8000)});const j=await r.json();
    if(j.ok){result={id:e.id,status:'SENT',delivery:{messageId:j.result.message_id,sentAt:Date.now()}};health.delivered++;}
-   else result={id:e.id,status:r.status===429?'PENDING':'BLOCKED',delivery:{http:r.status}};
+   else if(r.status===429||j.error_code===429){
+    const raw=Number(j.parameters?.retry_after),seconds=Number.isFinite(raw)&&raw>0?Math.ceil(raw):60;
+    telegramCooldownUntil=Date.now()+seconds*1000;health.telegramCooldownUntil=telegramCooldownUntil;
+    result={id:e.id,status:'PENDING',delivery:{http:429,retryAfterSeconds:seconds,retryAfterProvided:Number.isFinite(raw)&&raw>0,retryNotBefore:telegramCooldownUntil}};
+    health.errors.push('Telegram rate limited; remaining batch not attempted; cooldown until '+new Date(telegramCooldownUntil).toISOString());
+    for(let attempt=1;attempt<=3;attempt++)try{env.__metrics.supabaseRequests++;await json(env.SUPABASE_URL.replace(/\/$/,'')+'/rest/v1/signal_alert_meta?on_conflict=key',{method:'POST',headers:{'content-type':'application/json',apikey:env.SUPABASE_SERVICE_KEY,authorization:'Bearer '+env.SUPABASE_SERVICE_KEY,Prefer:'resolution=merge-duplicates,return=representation'},body:JSON.stringify({key:'telegram_cooldown',value:{until:telegramCooldownUntil}})});break;}catch(e){if(attempt===3)health.errors.push('Telegram cooldown persistence failed: '+e.message);else await delay(attempt*2000);}
+   }else result={id:e.id,status:'BLOCKED',delivery:{http:r.status}};
   }catch{}
-  deliveryResults.push(result);await delay(1100);
+  deliveryResults.push(result);
+  if(result.delivery?.http===429){for(const remaining of due.slice(deliveryResults.length))deliveryResults.push({id:remaining.id,status:'PENDING',delivery:{notAttempted:true,reason:'Telegram cooldown',retryNotBefore:telegramCooldownUntil}});break;}
+  await delay(1100);
  }
  // Preserve exact response receipts before the DB write, so a persistence outage
  // cannot erase Telegram message IDs. This log contains no tokens or message bodies.
