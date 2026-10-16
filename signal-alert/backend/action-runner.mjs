@@ -28,11 +28,21 @@ function card(c,event){const m=event.mark||c.latest,b=m?.baseline??event.baselin
 
 const delay=ms=>new Promise(r=>setTimeout(r,ms));
 async function json(url,opt={}){const r=await fetch(url,{...opt,signal:AbortSignal.timeout(9000)});if(!r.ok)throw Error('source HTTP '+r.status);return r.json();}
-async function windowFeed(ms){
- const ws=new WebSocket('wss://pumpportal.fun/api/data');const events=[];let error=false;
- await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(Error('WS connect timeout')),12000);ws.addEventListener('open',()=>{clearTimeout(timer);resolve();},{once:true});ws.addEventListener('error',()=>{clearTimeout(timer);reject(Error('WS connect failed'));},{once:true});});
- ws.addEventListener('message',e=>{try{const x=JSON.parse(e.data);if(mintValid(x.mint)&&['create','migration'].includes(x.txType))events.push({...x,receivedAt:Date.now()});}catch{}});ws.addEventListener('error',()=>error=true);
- ws.send(JSON.stringify({method:'subscribeNewToken'}));ws.send(JSON.stringify({method:'subscribeMigration'}));await delay(ms);ws.close();return {events,error};
+async function windowFeed(ms,provider='PumpPortal'){
+ const fallback=provider==='PumpDev',url=fallback?'wss://pumpdev.io/ws':'wss://pumpportal.fun/api/data';
+ const ws=new WebSocket(url),events=[];let error=false,detail=null,opened=false;
+ ws.addEventListener('error',e=>{error=true;detail=String(e.message||e.error?.message||'WebSocket network error').slice(0,240);});
+ try{
+ await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(Error(provider+' WS connect timeout')),12000);const fail=e=>{clearTimeout(timer);reject(Error(provider+' '+(e.message||'WS connect failed')));};ws.addEventListener('open',()=>{opened=true;clearTimeout(timer);resolve();},{once:true});ws.addEventListener('error',fail,{once:true});ws.addEventListener('close',e=>{if(!opened){clearTimeout(timer);reject(Error(provider+' WS closed before open '+e.code));}},{once:true});});
+ ws.addEventListener('message',e=>{try{const x=JSON.parse(e.data);if(fallback&&x.type==='connectionStatus'&&x.connected===false){error=true;detail='upstream connectionStatus false';}if(x.type==='error'){error=true;detail=String(x.code||x.message||'provider error').slice(0,240);}if(mintValid(x.mint)&&['create','migration'].includes(x.txType)){
+ // PumpDev documents marketCapSol/Quote as fully diluted values, not MCAP.
+ // Use it for discovery only. Dexscreener supplies separate reliable MCAP marks.
+ const item={...x,receivedAt:Date.now(),feedProvider:provider};if(fallback){delete item.marketCapSol;delete item.marketCapQuote;}events.push(item);
+ }}catch{}});
+ ws.addEventListener('close',e=>{if(opened){error=true;detail??='WS closed '+e.code;}});
+ ws.send(JSON.stringify({method:'subscribeNewToken'}));if(!fallback)ws.send(JSON.stringify({method:'subscribeMigration'}));
+ await delay(ms);return {events,error,detail,provider};
+ }finally{if(ws.readyState===1){try{ws.send(JSON.stringify({method:'unsubscribeNewToken'}));if(!fallback)ws.send(JSON.stringify({method:'unsubscribeMigration'}));}catch{}ws.close();}else if(ws.readyState===0){try{ws.close();}catch{}}}
 }
 async function rpc(env,op,p={}){if(env.__metrics)env.__metrics.supabaseRequests++;return json(env.SUPABASE_URL.replace(/\/$/,'')+'/rest/v1/rpc/signal_alert_rpc',{method:'POST',headers:{'content-type':'application/json',apikey:env.SUPABASE_SERVICE_KEY,authorization:'Bearer '+env.SUPABASE_SERVICE_KEY},body:JSON.stringify({op,p})});}
 async function claimPriority(env){
@@ -55,7 +65,11 @@ async function cycle(env){
  if(Date.now()>=dexBackoffUntil)try{health.externalCalls++;const p=await json('https://api.dexscreener.com/tokens/v1/solana/So11111111111111111111111111111111111111112');const best=p.filter(p=>p.quoteToken?.symbol==='USDC').sort((a,b)=>(b.liquidity?.usd||0)-(a.liquidity?.usd||0))[0];if(best&&+best.priceUsd>0)sol={price:+best.priceUsd,at:Date.now()};}catch(e){noteDexError(e);health.errors.push('SOL/USD not observed: '+e.message);}
  for(const endpoint of ['token-profiles/latest/v1','token-boosts/latest/v1']){if(Date.now()<dexBackoffUntil){health.sources[endpoint]='RATE LIMIT BACKOFF';continue;}try{health.externalCalls++;const rows=await json('https://api.dexscreener.com/'+endpoint);for(const p of rows)if(p.chainId==='solana'&&mintValid(p.tokenAddress))if(!candidates.has(p.tokenAddress))candidates.set(p.tokenAddress,{mint:p.tokenAddress,source:'Dexscreener '+endpoint,receivedAt:Date.now()});health.sources[endpoint]='OBSERVED';}catch(e){noteDexError(e);health.sources[endpoint]='UNAVAILABLE';health.errors.push(endpoint+': '+e.message);}}
  health.windowStart=Date.now();
- try{health.externalCalls++;const feed=await windowFeed(Number(env.WINDOW_MS||120000));for(const e of feed.events){const old=candidates.get(e.mint);if(!old)candidates.set(e.mint,{...e,markAt:e.receivedAt,source:'PumpPortal '+e.txType+' (processed/unconfirmed)'});else if(old.marketCapSol===undefined)candidates.set(e.mint,{...e,...old,marketCapSol:e.marketCapSol,markAt:e.receivedAt,symbol:old.symbol||e.symbol});}health.sources.pumpportal=feed.error?'INTERRUPTED':'WINDOW OBSERVED';}catch{health.sources.pumpportal='UNAVAILABLE';health.errors.push('PumpPortal window unavailable');}
+ let feed=null;
+ try{health.externalCalls++;feed=await windowFeed(Number(env.WINDOW_MS||120000));health.sources.pumpportal=feed.error?'INTERRUPTED':'WINDOW OBSERVED';if(feed.error)health.errors.push('PumpPortal window interrupted: '+(feed.detail||'unknown'));}
+ catch(e){health.sources.pumpportal='UNAVAILABLE';health.errors.push('PumpPortal window unavailable: '+String(e.message).slice(0,240));}
+ if(!feed){try{health.externalCalls++;feed=await windowFeed(Number(env.WINDOW_MS||120000),'PumpDev');health.sources.pumpdev=feed.error?'INTERRUPTED':'LAUNCH WINDOW OBSERVED';health.migrationCoverage='DEGRADED: PumpDev fallback is new launches only; global migrations unavailable';if(feed.error)health.errors.push('PumpDev window interrupted: '+(feed.detail||'unknown'));}catch(e){health.sources.pumpdev='UNAVAILABLE';health.errors.push('PumpDev fallback unavailable: '+String(e.message).slice(0,240));}}
+ if(feed){health.launchFeedProvider=feed.provider;health.launchFeedEvents=feed.events.length;for(const e of feed.events){const old=candidates.get(e.mint);if(!old)candidates.set(e.mint,{...e,markAt:e.receivedAt,source:e.feedProvider+' '+e.txType+' (processed/unconfirmed)'});else if(old.marketCapSol===undefined)candidates.set(e.mint,{...e,...old,marketCapSol:e.marketCapSol,markAt:e.receivedAt,symbol:old.symbol||e.symbol});}}
  health.windowEnd=Date.now();
  const existing=new Map((await rpc(env,'load',{mints:[...candidates.keys()]})).map(c=>[c.mint,c]));
  const old=await json(env.SUPABASE_URL+'/rest/v1/signal_alert_coins?select=data&order=checked.asc&limit=180',{headers:{apikey:env.SUPABASE_SERVICE_KEY,authorization:'Bearer '+env.SUPABASE_SERVICE_KEY}});for(const row of old)if(!existing.has(row.data.mint))existing.set(row.data.mint,row.data);
