@@ -1067,7 +1067,8 @@ class DashboardRenderer{
     const srv=(typeof SRVSCAN!=='undefined')?SRVSCAN.data:null, srvFresh=srv&&srv.generatedAt&&(U.now()-srv.generatedAt)<15*60*1000;
     if(S.diag.scanning){p.textContent='SCANNING…';p.className='hdr-pill on';}
     else if(S.scanTimer&&S.diag.lastScanEnd&&(U.now()-S.diag.lastScanEnd)<10*60*1000){p.textContent='LIVE · last scan '+U.age(S.diag.lastScanEnd)+' ago';p.className='hdr-pill on';}
-    else if(srvFresh){p.textContent='🛰 SERVER LIVE · cycle #'+srv.cycle+' · '+U.age(srv.generatedAt)+' ago';p.className='hdr-pill on';}
+    else if(srvFresh&&(U.now()-srv.generatedAt)<10*60*1000){p.textContent='🛰 SERVER LIVE · cycle #'+srv.cycle+' · '+U.age(srv.generatedAt)+' ago';p.className='hdr-pill on';}
+    else if(srvFresh){p.textContent='🛰 SERVER DELAYED · cycle #'+srv.cycle+' · '+U.age(srv.generatedAt)+' ago';p.className='hdr-pill off';}
     else if(S.scanTimer){p.textContent='LIVE · last scan '+(S.diag.lastScanEnd?U.age(S.diag.lastScanEnd)+' ago':'never');p.className='hdr-pill on';}
     else{p.textContent='SCANNER IDLE';p.className='hdr-pill off';} }
   badge(txt,cls){ return '<span class="badge '+cls+'">'+U.esc(txt)+'</span>'; }

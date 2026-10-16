@@ -164,6 +164,17 @@ function publicSignal(g){
 }
 
 /* ---------- main ---------- */
+/* backstop only: if the Cloudflare worker's heartbeat feed is fresh (<12 min),
+   step aside — the worker is the primary 24/7 scanner. */
+try{
+  const cur=JSON.parse(readFileSync(FEED,'utf8'));
+  if(cur&&cur.generatedAt&&(Date.now()-cur.generatedAt)<12*60*1000){
+    console.log('backstop skipped: worker heartbeat fresh (cycle '+cur.cycle+', '+Math.round((Date.now()-cur.generatedAt)/60000)+' min old)');
+    process.exit(0);
+  }
+  console.log('backstop ACTIVE: worker heartbeat stale or missing — running one cycle');
+}catch(e){ console.log('backstop ACTIVE: no readable feed ('+e.message+')'); }
+
 const st=loadState();
 const cycle=st.cycleBase+1;
 const cycleStart=U.now();
@@ -206,7 +217,7 @@ const feed={generatedAt:U.now(),generatedAtIso:new Date().toISOString(),
   buildMarker:E.BUILD_MARKER,appVersion:E.APP_VERSION,scoreVersion:E.SCORE_VERSION,
   riskPolicyVersion:E.RISK_POLICY_VERSION,thresholdsVersion:E.THRESHOLDS_VERSION,
   cycle,cycleStartedAt:cycleStart,cycleDurationMs:U.now()-cycleStart,
-  schedule:'every 5 min via GitHub Actions (keyless, free tier) — runs whether or not any tab is open',
+  schedule:'BACKSTOP via GitHub Actions (keyless, free tier) — runs only when the Cloudflare worker heartbeat is stale (>12 min); primary 24/7 scanner is the Cloudflare worker',
   stateRestored:st.restored,
   sources:REG.all().map(s=>({id:s.id,label:s.label,status:s.status,lastSuccess:s.lastSuccess,lastError:s.lastError,
     requestCount:s.requestCount,rateLimitCount:s.rateLimitCount})),

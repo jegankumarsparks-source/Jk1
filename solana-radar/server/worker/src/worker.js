@@ -10,6 +10,15 @@
    contents API (GH_TOKEN secret, contents scope).
    ============================================================ */
 const REPO='jegankumarsparks-source/Jk1';
+/* free tier allows 50 subrequests per invocation; the engine spends them via
+   global fetch. Count them so the driver can stop optional phases early and
+   always reserve enough for the state+feed writes (heartbeat must never lose
+   the write budget to analysis). */
+let subCount=0;
+{ const _f=globalThis.fetch;
+  globalThis.fetch=(...a)=>{ subCount++; return _f(...a); }; }
+const SUB_CUTOFF_ANALYZE=34; // stop starting new candidate analysis past this
+const SUB_CUTOFF_MARKS=40;   // skip price-mark refresh past this
 let lastWriteError=null; // warm isolates only: surfaced once in the next feed, then cleared
 const STATE_PATH='solana-radar/server/state.json';
 const FEED_PATH='solana-radar/server-scan.json';
@@ -155,6 +164,7 @@ async function runCycle(env){
   for(const c of S.candidates.values()){
     if(analyzed>=S.settings.maxRugcheckPerCycle)break;
     if(Date.now()>deadline){ errors.push('deadline reached — remaining candidates deferred to next cycle'); break; }
+    if(subCount>SUB_CUTOFF_ANALYZE){ errors.push('subrequest budget reached ('+subCount+') — remaining analysis deferred (driver-level, protects heartbeat writes)'); break; }
     if((c.updatedAt||0)<cycleStart)continue;
     if(c.state==='DISCOVERED'||(c.state==='DATA_INCOMPLETE'&&c.market)){
       try{ await analyzeOne(c.mint); analyzed++; }catch(e){ errors.push('analyze '+U.short(c.mint)+': '+(e.message||e)); }
@@ -163,7 +173,8 @@ async function runCycle(env){
 
   /* --- signal milestone marks (observed, never executable) --- */
   let marksTracked=0;
-  { const cut=U.now()-48*3600*1000;
+  if(subCount>SUB_CUTOFF_MARKS){ errors.push('marks refresh skipped: subrequest budget ('+subCount+') reserved for heartbeat writes'); }
+  else { const cut=U.now()-48*3600*1000;
     const recent=[...S.signals.values()].filter(g=>g.createdAt>cut).sort((a,b)=>b.createdAt-a.createdAt).slice(0,25);
     if(recent.length){
       const mints=[...new Set(recent.map(g=>g.mint))];
@@ -275,6 +286,7 @@ async function runCycle(env){
   feed.dexBackoffUntil=dexBackoffUntil||null;
   feed.dexBackoffStrikes=dexStrikes||0;
   feed.stateReadError=stateFetchError;
+  feed.subrequests=subCount;
   feed.notes.push('Driver enforces hard per-phase time budgets and always writes this heartbeat feed, even when a data source stalls; a stalled source is labelled in errors, never silent.');
 
   const stateOut=JSON.stringify({schema:1,savedAt:U.now(),cycleBase:cycle,
