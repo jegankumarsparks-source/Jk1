@@ -1,44 +1,46 @@
 {
- "generatedAt": 1792174535815,
- "generatedAtIso": "2026-10-16T18:15:35.815Z",
+ "generatedAt": 1792176340086,
+ "generatedAtIso": "2026-10-16T18:45:40.086Z",
  "scanner": "solana-radar-server",
+ "runner": "cloudflare-worker-cron",
  "engineSource": "index.html embedded engine, extracted verbatim at run time",
  "buildMarker": "JK-SR-MAX-V1",
  "appVersion": "1.7.1",
  "scoreVersion": "score-v1.0",
  "riskPolicyVersion": "risk-v1.0",
  "thresholdsVersion": "thresh-v1.0",
- "cycle": 33,
- "cycleStartedAt": 1792174529148,
- "cycleDurationMs": 6668,
- "schedule": "every 5 min via GitHub Actions (keyless, free tier) — runs whether or not any tab is open",
+ "cycle": 34,
+ "cycleStartedAt": 1792176336075,
+ "cycleDurationMs": 4011,
+ "schedule": "every 5 min via Cloudflare Workers cron (free tier, keyless data) — runs whether or not any tab is open. Backstop: GitHub Actions cron (throttled in this repo to every few hours).",
+ "engineDrift": null,
  "stateRestored": true,
  "sources": [
   {
    "id": "dexscreener",
    "label": "Dexscreener (public, keyless)",
-   "status": "LIVE",
-   "lastSuccess": 1792174535814,
-   "lastError": null,
-   "requestCount": 39,
-   "rateLimitCount": 0
+   "status": "DEGRADED",
+   "lastSuccess": null,
+   "lastError": "HTTP 429",
+   "requestCount": 2,
+   "rateLimitCount": 1
   },
   {
    "id": "rugcheck",
    "label": "RugCheck (public, keyless)",
-   "status": "LIVE",
-   "lastSuccess": 1792174533212,
+   "status": "NOT_OBSERVED",
+   "lastSuccess": null,
    "lastError": null,
-   "requestCount": 6,
+   "requestCount": 0,
    "rateLimitCount": 0
   },
   {
    "id": "solanarpc",
    "label": "Solana JSON-RPC (PublicNode)",
-   "status": "LIVE",
-   "lastSuccess": 1792174533582,
+   "status": "NOT_OBSERVED",
+   "lastSuccess": null,
    "lastError": null,
-   "requestCount": 30,
+   "requestCount": 0,
    "rateLimitCount": 0
   }
  ],
@@ -56,160 +58,9 @@
   "dataIncomplete": 1,
   "watchlist": 0
  },
- "analyzedThisCycle": 6,
- "signalMarksTracked": 25,
- "newSignalsThisCycle": [
-  {
-   "id": "sig_mvbafy67mujxre",
-   "mint": "3Zjog1txsMMKBU22PmfEazskmpMR5qnJh5CodLhCpump",
-   "symbol": "LADYBONER",
-   "name": "Ladyboner Coin",
-   "createdAt": 1792174530750,
-   "signalPriceUsd": 0.00001898,
-   "score": 20.3,
-   "riskVerdict": "FAIL",
-   "liquidityUsd": null,
-   "volume24": 18651.94,
-   "qualifiedWallets": 3,
-   "pairAddress": "DWX2XZ58otRQ8e9TvxPQgQnBCFwxkLi99y5sf7qt1j2u",
-   "dexId": "pumpfun",
-   "lastPrice": 0.00001898,
-   "lastPriceAt": 1792174533819,
-   "multiple": 1,
-   "milestonesHit": [],
-   "links": {
-    "dexscreener": "https://dexscreener.com/solana/DWX2XZ58otRQ8e9TvxPQgQnBCFwxkLi99y5sf7qt1j2u",
-    "gmgn": "https://gmgn.ai/sol/token/3Zjog1txsMMKBU22PmfEazskmpMR5qnJh5CodLhCpump",
-    "solscan": "https://solscan.io/token/3Zjog1txsMMKBU22PmfEazskmpMR5qnJh5CodLhCpump"
-   },
-   "paperOnly": true
-  },
-  {
-   "id": "sig_mvbafyjikzzm1a",
-   "mint": "8hFZjn3QUtEvP7GqYsYtA9nkBboX8wGr4eWtvThwpump",
-   "symbol": "CLANKER",
-   "name": "clanker",
-   "createdAt": 1792174531230,
-   "signalPriceUsd": 0.00002336,
-   "score": 41.8,
-   "riskVerdict": "UNKNOWN",
-   "liquidityUsd": null,
-   "volume24": 55291.09,
-   "qualifiedWallets": 5,
-   "pairAddress": "7eTzhAXQn13rXnKmDoL4G26rDy7T9kjgVDtV44SsAPrW",
-   "dexId": "pumpfun",
-   "lastPrice": 0.00002336,
-   "lastPriceAt": 1792174533787,
-   "multiple": 1,
-   "milestonesHit": [],
-   "links": {
-    "dexscreener": "https://dexscreener.com/solana/7eTzhAXQn13rXnKmDoL4G26rDy7T9kjgVDtV44SsAPrW",
-    "gmgn": "https://gmgn.ai/sol/token/8hFZjn3QUtEvP7GqYsYtA9nkBboX8wGr4eWtvThwpump",
-    "solscan": "https://solscan.io/token/8hFZjn3QUtEvP7GqYsYtA9nkBboX8wGr4eWtvThwpump"
-   },
-   "paperOnly": true
-  },
-  {
-   "id": "sig_mvbafyx1hnsn4x",
-   "mint": "pbeS17G29TM6kbS6pgezvnH8V8JXN3b6LYd6xRgyway",
-   "symbol": "MIDWAY",
-   "name": "Midway",
-   "createdAt": 1792174531717,
-   "signalPriceUsd": 0.00002291,
-   "score": 52,
-   "riskVerdict": "PASS",
-   "liquidityUsd": 12772.57,
-   "volume24": 156644.03,
-   "qualifiedWallets": 2,
-   "pairAddress": "FRh2hrg1gnzBsc4NwJBvjuvF7Sg8oLLAxmAskDh4hQCY",
-   "dexId": "meteora",
-   "lastPrice": 0.00002291,
-   "lastPriceAt": 1792174533752,
-   "multiple": 1,
-   "milestonesHit": [],
-   "links": {
-    "dexscreener": "https://dexscreener.com/solana/FRh2hrg1gnzBsc4NwJBvjuvF7Sg8oLLAxmAskDh4hQCY",
-    "gmgn": "https://gmgn.ai/sol/token/pbeS17G29TM6kbS6pgezvnH8V8JXN3b6LYd6xRgyway",
-    "solscan": "https://solscan.io/token/pbeS17G29TM6kbS6pgezvnH8V8JXN3b6LYd6xRgyway"
-   },
-   "paperOnly": true
-  },
-  {
-   "id": "sig_mvbafzkot0vpgt",
-   "mint": "5d33RRdTCJjqhZVD85h1M5xK6cUHdAt7BE61XPV7pump",
-   "symbol": "VAULTA",
-   "name": "Vaulta Collectibles",
-   "createdAt": 1792174532568,
-   "signalPriceUsd": 0.00004548,
-   "score": 49.5,
-   "riskVerdict": "PASS",
-   "liquidityUsd": 16483.47,
-   "volume24": 55817.17,
-   "qualifiedWallets": 1,
-   "pairAddress": "EymcB9oCmF366PTidCxKuvajbx1CsrCFJLRRQ3YhSHiM",
-   "dexId": "pumpswap",
-   "lastPrice": 0.00004548,
-   "lastPriceAt": 1792174533705,
-   "multiple": 1,
-   "milestonesHit": [],
-   "links": {
-    "dexscreener": "https://dexscreener.com/solana/EymcB9oCmF366PTidCxKuvajbx1CsrCFJLRRQ3YhSHiM",
-    "gmgn": "https://gmgn.ai/sol/token/5d33RRdTCJjqhZVD85h1M5xK6cUHdAt7BE61XPV7pump",
-    "solscan": "https://solscan.io/token/5d33RRdTCJjqhZVD85h1M5xK6cUHdAt7BE61XPV7pump"
-   },
-   "paperOnly": true
-  },
-  {
-   "id": "sig_mvbafzz67tcu2v",
-   "mint": "AiCc1V168H2yjfCUHXoGDhhkpc2sYuy9WNjJvdGpump",
-   "symbol": "purr",
-   "name": "purr",
-   "createdAt": 1792174533090,
-   "signalPriceUsd": 0.00002122,
-   "score": 54,
-   "riskVerdict": "PASS",
-   "liquidityUsd": 10834.1,
-   "volume24": 90282.86,
-   "qualifiedWallets": 3,
-   "pairAddress": "9ESZUi4ux4F2kEz5uEyMt2LvKRKXP6ws3m6QnfsLgnMH",
-   "dexId": "pumpswap",
-   "lastPrice": 0.00002122,
-   "lastPriceAt": 1792174533664,
-   "multiple": 1,
-   "milestonesHit": [],
-   "links": {
-    "dexscreener": "https://dexscreener.com/solana/9ESZUi4ux4F2kEz5uEyMt2LvKRKXP6ws3m6QnfsLgnMH",
-    "gmgn": "https://gmgn.ai/sol/token/AiCc1V168H2yjfCUHXoGDhhkpc2sYuy9WNjJvdGpump",
-    "solscan": "https://solscan.io/token/AiCc1V168H2yjfCUHXoGDhhkpc2sYuy9WNjJvdGpump"
-   },
-   "paperOnly": true
-  },
-  {
-   "id": "sig_mvbag0cuirrll1",
-   "mint": "GR6QkXU7KhFxVsWYutqnLDS958e76dPjeQPQNUG9pump",
-   "symbol": "FARTSLA",
-   "name": "Farting Tesla Roadster",
-   "createdAt": 1792174533582,
-   "signalPriceUsd": 0.00004467,
-   "score": 52.5,
-   "riskVerdict": "PASS",
-   "liquidityUsd": 16560.46,
-   "volume24": 225796.6,
-   "qualifiedWallets": 1,
-   "pairAddress": "28t4T71VX3sj2N3PhT35JQ1oELDb9Drp966Yisw4zGLB",
-   "dexId": "pumpswap",
-   "lastPrice": 0.00004467,
-   "lastPriceAt": 1792174533625,
-   "multiple": 1,
-   "milestonesHit": [],
-   "links": {
-    "dexscreener": "https://dexscreener.com/solana/28t4T71VX3sj2N3PhT35JQ1oELDb9Drp966Yisw4zGLB",
-    "gmgn": "https://gmgn.ai/sol/token/GR6QkXU7KhFxVsWYutqnLDS958e76dPjeQPQNUG9pump",
-    "solscan": "https://solscan.io/token/GR6QkXU7KhFxVsWYutqnLDS958e76dPjeQPQNUG9pump"
-   },
-   "paperOnly": true
-  }
- ],
+ "analyzedThisCycle": 0,
+ "signalMarksTracked": 0,
+ "newSignalsThisCycle": [],
  "recentSignals": [
   {
    "id": "sig_mvbag0cuirrll1",
@@ -739,10 +590,13 @@
    }
   }
  ],
- "errors": [],
+ "errors": [
+  "discovery: profiles: HTTP 429",
+  "discovery: boosts: source in rate-limit backoff"
+ ],
  "notes": [
   "PAPER ONLY — research signals, not financial advice, never executable trades.",
-  "Engine code is the in-tab scanner engine extracted verbatim from index.html at run time; rules unchanged.",
+  "Engine code is the in-tab scanner engine extracted verbatim from index.html into a static bundle (hash-checked every cycle against the live page; drift is labelled, never silent); rules unchanged.",
   "Signal price is frozen at signal time; lastPrice/multiple are observed Dexscreener marks, not executable fills.",
   "Candidates idle >72h without an unconsumed signal are evicted (state hygiene); signals and wallets bounded."
  ]
