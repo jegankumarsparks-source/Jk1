@@ -90,7 +90,7 @@ a{color:var(--blu);text-decoration:none}
 <body>
 <header>
 <h1>⚡ SOLANA EARLY-WALLET RADAR</h1>
-<span class="hdr-pill b-dim" style="border:none">MAXIMUM EDITION · v1.7.0</span>
+<span class="hdr-pill b-dim" style="border:none">MAXIMUM EDITION · v1.7.1</span>
 <span id="scanPill" class="hdr-pill off">SCANNER IDLE</span>
 <span class="hdr-pill b-dim" style="border:none">PAPER ONLY</span>
 <div class="sub">Research + paper trading only. No real money, no wallet signing, no keys. Public keyless data — every field labelled by source &amp; freshness.</div>
@@ -124,7 +124,7 @@ a{color:var(--blu);text-decoration:none}
    Modules A–Q as separated classes in one file. No frameworks.
    ============================================================ */
 const BUILD_MARKER='JK-SR-MAX-V1';
-const APP_VERSION='1.7.0';
+const APP_VERSION='1.7.1';
 const SCORE_VERSION='score-v1.0';
 const RISK_POLICY_VERSION='risk-v1.0';
 const THRESHOLDS_VERSION='thresh-v1.0';
@@ -1102,12 +1102,40 @@ class DashboardRenderer{
     let h='<div class="grid kpis">'+kpis.map(([l,v,c])=>'<div class="kpi '+c+'"><div class="v">'+v+'</div><div class="l">'+l+'</div></div>').join('')+'</div>';
     if(!st.valuationsComplete)h+='<div class="note">* some open positions have unavailable valuations (price missing) — they are excluded from equity, not valued at zero.</div>';
     h+='<div class="card"><h3>Source health</h3>'+REG.all().map(s=>'<div class="kv"><span class="k">'+U.esc(s.label)+'</span><span class="v">'+this.badge(s.status,s.status==='LIVE'?'b-live':s.status==='NOT_OBSERVED'?'b-dim':'b-err')+' '+(s.lastSuccess?'ok '+U.age(s.lastSuccess)+' ago':'no success yet')+'</span></div>').join('')+'</div>';
+    h+=this.serverScannerCard();
+    SRVSCAN.refresh();
     h+='<div class="card"><h3>Controls</h3><div class="row">'
       +(S.scanTimer?'<button class="btn red" onclick="BOOT.stop()">⏸ STOP scanner</button>':'<button class="btn grn" onclick="BOOT.start()">▶ START scanner</button>')
       +'<button class="btn" onclick="BOOT.scanNow()">↻ Scan now</button>'
       +'<span class="small">Monitoring runs only while this tab is open.</span></div></div>';
     h+='<div class="note">Paper trading only — no real money, no wallet connection, no keys. Discovery is limited to what public keyless feeds expose; this is NOT exhaustive token discovery and NOT a rug detector. A truthful NO QUALIFIED SIGNAL beats a fabricated opportunity.</div>';
     el.innerHTML=h;
+  }
+  /* ---------------- 1b. 24/7 SERVER SCANNER card (read-only mirror of server-scan.json) ---------------- */
+  serverScannerCard(){
+    const v=SRVSCAN;
+    let h='<div class="card" style="border-color:var(--grn)"><h3>🛰 24/7 SERVER SCANNER (paper only)</h3>';
+    h+='<div class="small">runs every ~5 min on a free server, whether or not this tab is open · same engine rules as the in-tab scanner (extracted verbatim, unchanged) · this app mirrors its server-scan.json · virtual/paper only</div>';
+    if(v.state==='missing'){ h+='<div class="note" style="margin-top:8px">server-scan.json NOT PUBLISHED YET — no server cycle committed so far. This fills in automatically once one lands. Nothing shown rather than fake data.</div></div>'; return h; }
+    if(v.state==='error'){ h+='<div class="note" style="margin-top:8px">server feed fetch failed: '+U.esc(String(v.error||'unknown'))+' · last tried '+U.age(v.lastTry)+' ago · showing nothing rather than stale-as-live.</div></div>'; return h; }
+    if(v.state==='loading'||!v.data){ h+='<div class="note" style="margin-top:8px">loading server feed…</div></div>'; return h; }
+    const d=v.data;
+    h+='<div class="kv"><span class="k">last server cycle</span><span class="v">'+this.freshness(d.generatedAt)+' · cycle #'+d.cycle+' · '+new Date(d.generatedAt).toLocaleString()+'</span></div>';
+    if(Array.isArray(d.sources))h+='<div class="kv"><span class="k">server sources</span><span class="v small">'+d.sources.map(x=>U.esc(x.id)+': '+U.esc(x.status)).join(' · ')+'</span></div>';
+    if(d.counts)h+='<div class="kv"><span class="k">server counts</span><span class="v small">'+d.counts.total+' candidates tracked · '+d.counts.paperSignals+' paper signals open · lifetime signals '+((d.counters&&d.counters.signals)!=null?d.counters.signals:'—')+' · discovered '+((d.counters&&d.counters.discovered)!=null?d.counters.discovered:'—')+'</span></div>';
+    const sigs=Array.isArray(d.recentSignals)?d.recentSignals.slice(0,5):[];
+    h+='<h3 style="margin-top:10px">latest server paper signals</h3>';
+    if(!sigs.length)h+='<div class="small">none yet — a truthful NO SIGNAL beats a fabricated one</div>';
+    for(const g of sigs){
+      const ml=(g.milestonesHit&&g.milestonesHit.length)?' · hit '+g.milestonesHit.map(m=>m.x+'x').join(','):'';
+      const mult=(g.multiple!=null)?' · now '+g.multiple+'x (observed mark)':'';
+      h+='<div class="kv"><span class="k">'+new Date(g.createdAt).toLocaleString()+'</span><span class="v">⚡ '+U.esc(g.symbol||U.short(g.mint))+' · score '+g.score+' · risk '+U.esc(String(g.riskVerdict||'?'))+' @ $'+g.signalPriceUsd+mult+ml
+        +(g.links?'<br><span class="row" style="margin-top:4px"><a class="btn sm" target="_blank" href="'+g.links.dexscreener+'">dexscreener</a><a class="btn sm" target="_blank" href="'+g.links.gmgn+'">gmgn</a><a class="btn sm" target="_blank" href="'+g.links.solscan+'">solscan</a></span>':'')
+        +'</span></div>';
+    }
+    h+='<div class="small" style="margin-top:6px">signal price is frozen at signal time; multiples/milestones are observed Dexscreener marks, never executable fills. The separate in-tab scanner below still runs only while this tab is open.</div>';
+    h+='</div>';
+    return h;
   }
   /* ---------------- 2. TOKEN RADAR ---------------- */
   radar(){
@@ -1802,6 +1830,29 @@ const SRVBOOK={state:'idle',data:null,fetchedAt:0,error:null,lastTry:0,live:{},l
       for(const m of Object.keys(pr||{}))if(pr[m]&&pr[m].ok&&pr[m].priceUsd!=null)this.live[m]={price:pr[m].priceUsd,at:pr[m].observedAt||U.now()};
       if(S.ui&&S.ui.page==='autotrade')try{RENDER.all();}catch(e){}
     }catch(e){ /* keep old live marks, they carry their own timestamps */ }
+  }
+};
+
+/* ============================================================
+   S2. SRVSCAN — read-only mirror of the 24/7 server-side
+   scanner feed at ./server-scan.json (committed every ~5 min by
+   the GitHub Actions server scanner, which runs the same engine
+   code as this page). generatedAt is labeled as the last server
+   cycle time, never "live". Missing/failed states are honest.
+   ============================================================ */
+const SRVSCAN={state:'idle',data:null,fetchedAt:0,error:null,lastTry:0,
+  async refresh(force){
+    const now=U.now();
+    if(!force&&now-this.lastTry<60000)return; // throttle: at most one fetch/min
+    this.lastTry=now; if(!this.data)this.state='loading';
+    try{
+      const r=await fetch('server-scan.json?ts='+now,{cache:'no-store'});
+      if(r.status===404){ this.state='missing'; this.data=null; this.error=null; }
+      else if(!r.ok){ this.state='error'; this.error='HTTP '+r.status; }
+      else{ const j=await r.json(); this.data=j; this.state='ok'; this.error=null; }
+      this.fetchedAt=U.now();
+    }catch(e){ this.state='error'; this.error=String((e&&e.message)||e); }
+    if(typeof S!=='undefined'&&S.ui&&S.ui.page==='overview')try{RENDER.all();}catch(e){}
   }
 };
 
