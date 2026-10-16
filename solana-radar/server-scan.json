@@ -1,6 +1,6 @@
 {
- "generatedAt": 1792170961127,
- "generatedAtIso": "2026-10-16T17:16:01.127Z",
+ "generatedAt": 1792171540563,
+ "generatedAtIso": "2026-10-16T17:25:40.563Z",
  "scanner": "solana-radar-server",
  "runner": "cloudflare-worker-cron",
  "engineSource": "index.html embedded engine, extracted verbatim at run time",
@@ -9,9 +9,9 @@
  "scoreVersion": "score-v1.0",
  "riskPolicyVersion": "risk-v1.0",
  "thresholdsVersion": "thresh-v1.0",
- "cycle": 25,
- "cycleStartedAt": 1792170936963,
- "cycleDurationMs": 24164,
+ "cycle": 26,
+ "cycleStartedAt": 1792171536543,
+ "cycleDurationMs": 4020,
  "schedule": "every 5 min via Cloudflare Workers cron (free tier, keyless data) — runs whether or not any tab is open. Backstop: GitHub Actions cron (throttled in this repo to every few hours).",
  "engineDrift": null,
  "stateRestored": true,
@@ -20,28 +20,28 @@
    "id": "dexscreener",
    "label": "Dexscreener (public, keyless)",
    "status": "DEGRADED",
-   "lastSuccess": 1792170937039,
+   "lastSuccess": null,
    "lastError": "HTTP 429",
-   "requestCount": 16,
+   "requestCount": 2,
    "rateLimitCount": 1
   },
   {
    "id": "rugcheck",
    "label": "RugCheck (public, keyless)",
-   "status": "LIVE",
-   "lastSuccess": 1792170957122,
+   "status": "NOT_OBSERVED",
+   "lastSuccess": null,
    "lastError": null,
-   "requestCount": 6,
+   "requestCount": 0,
    "rateLimitCount": 0
   },
   {
    "id": "solanarpc",
    "label": "Solana JSON-RPC (PublicNode)",
-   "status": "DEGRADED",
-   "lastSuccess": 1792170951986,
-   "lastError": "HTTP 429",
-   "requestCount": 15,
-   "rateLimitCount": 1
+   "status": "NOT_OBSERVED",
+   "lastSuccess": null,
+   "lastError": null,
+   "requestCount": 0,
+   "rateLimitCount": 0
   }
  ],
  "counters": {
@@ -58,160 +58,9 @@
   "dataIncomplete": 1,
   "watchlist": 0
  },
- "analyzedThisCycle": 6,
+ "analyzedThisCycle": 0,
  "signalMarksTracked": 0,
- "newSignalsThisCycle": [
-  {
-   "id": "sig_mvb8b1bofg1bxm",
-   "mint": "ENZnR1vAkeAgtP5P3u9PahQMg9YFmCtaKj52vHgxpump",
-   "symbol": "Glow",
-   "name": "Glow",
-   "createdAt": 1792170942324,
-   "signalPriceUsd": 0.00003291,
-   "score": 29.3,
-   "riskVerdict": "UNKNOWN",
-   "liquidityUsd": null,
-   "volume24": 38404.09,
-   "qualifiedWallets": 1,
-   "pairAddress": "TybLXwtg6oHix38KLMqf7m9tbDNHsFmAgvYpsEH9cM3",
-   "dexId": "pumpfun",
-   "lastPrice": null,
-   "lastPriceAt": null,
-   "multiple": null,
-   "milestonesHit": [],
-   "links": {
-    "dexscreener": "https://dexscreener.com/solana/TybLXwtg6oHix38KLMqf7m9tbDNHsFmAgvYpsEH9cM3",
-    "gmgn": "https://gmgn.ai/sol/token/ENZnR1vAkeAgtP5P3u9PahQMg9YFmCtaKj52vHgxpump",
-    "solscan": "https://solscan.io/token/ENZnR1vAkeAgtP5P3u9PahQMg9YFmCtaKj52vHgxpump"
-   },
-   "paperOnly": true
-  },
-  {
-   "id": "sig_mvb8b8s2hkpc5y",
-   "mint": "HWKD7fy3tZB2RjZnBMJgZFZLqPdST4q81WZgpn7dpump",
-   "symbol": "ELON 2028",
-   "name": "ELON ",
-   "createdAt": 1792170951986,
-   "signalPriceUsd": 0.0001038,
-   "score": 72.5,
-   "riskVerdict": "PASS",
-   "liquidityUsd": 26959.87,
-   "volume24": 681054.95,
-   "qualifiedWallets": 4,
-   "pairAddress": "Dwa6rS2NamcK7tuNJE9R9CjjQzu27pddsuCEBkkznzUJ",
-   "dexId": "pumpswap",
-   "lastPrice": null,
-   "lastPriceAt": null,
-   "multiple": null,
-   "milestonesHit": [],
-   "links": {
-    "dexscreener": "https://dexscreener.com/solana/Dwa6rS2NamcK7tuNJE9R9CjjQzu27pddsuCEBkkznzUJ",
-    "gmgn": "https://gmgn.ai/sol/token/HWKD7fy3tZB2RjZnBMJgZFZLqPdST4q81WZgpn7dpump",
-    "solscan": "https://solscan.io/token/HWKD7fy3tZB2RjZnBMJgZFZLqPdST4q81WZgpn7dpump"
-   },
-   "paperOnly": true
-  },
-  {
-   "id": "sig_mvb8bccipbggdk",
-   "mint": "9KcwEpr7TnnaTuoXVcc3J4wxq5ptVr7fsH53w9M7pump",
-   "symbol": "HUGO",
-   "name": "The First Human Companion",
-   "createdAt": 1792170956610,
-   "signalPriceUsd": 0.00004375,
-   "score": 36.8,
-   "riskVerdict": "PASS",
-   "liquidityUsd": 16067.5,
-   "volume24": 49978.94,
-   "qualifiedWallets": 0,
-   "pairAddress": "FttgEbLRxhbRuKb1oDQPaHJhhZRNg7ExRhyDZsmPDXDY",
-   "dexId": "pumpswap",
-   "lastPrice": null,
-   "lastPriceAt": null,
-   "multiple": null,
-   "milestonesHit": [],
-   "links": {
-    "dexscreener": "https://dexscreener.com/solana/FttgEbLRxhbRuKb1oDQPaHJhhZRNg7ExRhyDZsmPDXDY",
-    "gmgn": "https://gmgn.ai/sol/token/9KcwEpr7TnnaTuoXVcc3J4wxq5ptVr7fsH53w9M7pump",
-    "solscan": "https://solscan.io/token/9KcwEpr7TnnaTuoXVcc3J4wxq5ptVr7fsH53w9M7pump"
-   },
-   "paperOnly": true
-  },
-  {
-   "id": "sig_mvb8bchc856hmx",
-   "mint": "2aqkYwRa1sZrpvZ5nottuVs3csGtXJEYsc9QRY9wpump",
-   "symbol": "FTC",
-   "name": "Flying Tesla Catster",
-   "createdAt": 1792170956784,
-   "signalPriceUsd": 0.0001746,
-   "score": 57,
-   "riskVerdict": "PASS",
-   "liquidityUsd": 34456.17,
-   "volume24": 266783.93,
-   "qualifiedWallets": 0,
-   "pairAddress": "3qjyD75t7uEa5FL1Bh8MsV97V6qHmhRPmmsxrut7Du4p",
-   "dexId": "pumpswap",
-   "lastPrice": null,
-   "lastPriceAt": null,
-   "multiple": null,
-   "milestonesHit": [],
-   "links": {
-    "dexscreener": "https://dexscreener.com/solana/3qjyD75t7uEa5FL1Bh8MsV97V6qHmhRPmmsxrut7Du4p",
-    "gmgn": "https://gmgn.ai/sol/token/2aqkYwRa1sZrpvZ5nottuVs3csGtXJEYsc9QRY9wpump",
-    "solscan": "https://solscan.io/token/2aqkYwRa1sZrpvZ5nottuVs3csGtXJEYsc9QRY9wpump"
-   },
-   "paperOnly": true
-  },
-  {
-   "id": "sig_mvb8bcm0eu8qcf",
-   "mint": "GePQb6k4ZjsBDTtn2ZMfYRNJH4fzZ6ExKqRzWnCxpump",
-   "symbol": "HAI",
-   "name": "HookAgents",
-   "createdAt": 1792170956952,
-   "signalPriceUsd": 0.00003797,
-   "score": 42,
-   "riskVerdict": "PASS",
-   "liquidityUsd": 15000.72,
-   "volume24": 152328.74,
-   "qualifiedWallets": 0,
-   "pairAddress": "253D2gT9qZD4s2bTW5RfGXoh5emHXVyL3qEiX7LCtb14",
-   "dexId": "pumpswap",
-   "lastPrice": null,
-   "lastPriceAt": null,
-   "multiple": null,
-   "milestonesHit": [],
-   "links": {
-    "dexscreener": "https://dexscreener.com/solana/253D2gT9qZD4s2bTW5RfGXoh5emHXVyL3qEiX7LCtb14",
-    "gmgn": "https://gmgn.ai/sol/token/GePQb6k4ZjsBDTtn2ZMfYRNJH4fzZ6ExKqRzWnCxpump",
-    "solscan": "https://solscan.io/token/GePQb6k4ZjsBDTtn2ZMfYRNJH4fzZ6ExKqRzWnCxpump"
-   },
-   "paperOnly": true
-  },
-  {
-   "id": "sig_mvb8bcqqrkqgkv",
-   "mint": "6xGixJazECxaXE9Q6jACRzLVzB7TgZFknTFHQoynpump",
-   "symbol": "AI",
-   "name": "Analog Inu",
-   "createdAt": 1792170957122,
-   "signalPriceUsd": 0.00001446,
-   "score": 16.5,
-   "riskVerdict": "FAIL",
-   "liquidityUsd": null,
-   "volume24": 124546.9,
-   "qualifiedWallets": 0,
-   "pairAddress": "Fpo8JhT6ooRPcxFgajLRGCm2nKxCgWJZB2TwV6wtu5cH",
-   "dexId": "pumpfun",
-   "lastPrice": null,
-   "lastPriceAt": null,
-   "multiple": null,
-   "milestonesHit": [],
-   "links": {
-    "dexscreener": "https://dexscreener.com/solana/Fpo8JhT6ooRPcxFgajLRGCm2nKxCgWJZB2TwV6wtu5cH",
-    "gmgn": "https://gmgn.ai/sol/token/6xGixJazECxaXE9Q6jACRzLVzB7TgZFknTFHQoynpump",
-    "solscan": "https://solscan.io/token/6xGixJazECxaXE9Q6jACRzLVzB7TgZFknTFHQoynpump"
-   },
-   "paperOnly": true
-  }
- ],
+ "newSignalsThisCycle": [],
  "recentSignals": [
   {
    "id": "sig_mvb8bcqqrkqgkv",
@@ -741,7 +590,10 @@
    }
   }
  ],
- "errors": [],
+ "errors": [
+  "discovery: profiles: HTTP 429",
+  "discovery: boosts: source in rate-limit backoff"
+ ],
  "notes": [
   "PAPER ONLY — research signals, not financial advice, never executable trades.",
   "Engine code is the in-tab scanner engine extracted verbatim from index.html into a static bundle (hash-checked every cycle against the live page; drift is labelled, never silent); rules unchanged.",
