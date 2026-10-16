@@ -26,6 +26,40 @@ function card(c,event){const m=event.mark||c.latest,b=m?.baseline??event.baselin
  'Informational / paper only. Not buy advice. MCAP marks are not executable returns. Coverage has gaps; losses and missing data are retained.'
  ].join('\n');}
 
+// Render delayed deliveries as historical observations without changing stored cards.
+function deliveryCard(e,c,now=Date.now()){
+ const field=name=>e.body.split('\n').find(x=>x.startsWith(name+': '))?.slice(name.length+2);
+ const parsed=Date.parse(field('Observed')||''),at=Number.isFinite(parsed)?parsed:Number(e.created);
+ const age=Number.isFinite(at)?Math.max(0,now-at):null;
+ if(age!==null&&age<=300000)return {text:e.body,delayed:false};
+ const iso=t=>new Date(t).toISOString(),ago=t=>Math.floor(Math.max(0,now-t)/60000)+' min old';
+ const series=field('Source/series'),latest=c?.latest,same=latest?.series===series;
+ const lines=['DELAYED HISTORICAL ALERT - NOT A LIVE SIGNAL',
+  'Original observation: '+(Number.isFinite(at)?iso(at)+' ('+ago(at)+')':'UNKNOWN'),
+  'Delivery prepared: '+iso(now),
+  'This is a queued historical record, not a current opportunity.'];
+ if(latest&&Number.isFinite(latest.at)&&latest.at>at&&same){
+  lines.push('NEWER SAME-POOL/SOURCE OBSERVATION (UNVERIFIED):',
+   'Observed: '+iso(latest.at)+' ('+ago(latest.at)+')'+(now-latest.at>900000?' - STALE':''),
+   'MCAP then: '+money(latest.cap)+'; multiple vs original series baseline: '+(Number.isFinite(latest.multiple)?(latest.multiple<0.01?latest.multiple.toPrecision(3):latest.multiple.toFixed(2))+'x':'NOT OBSERVED'),
+   'Liquidity then: '+money(latest.liquidityUsd));
+ }else if(latest&&latest.series!==series){
+  lines.push('Latest stored mark is from a DIFFERENT POOL/SOURCE. No comparable newer same-series state is available here. Do not combine baselines.',
+   'Other source observed: '+(Number.isFinite(latest.at)?iso(latest.at):'UNKNOWN')+'; series: '+String(latest.series||'UNKNOWN'));
+ }else lines.push('Newer same-pool/source state: NOT OBSERVED OR UNAVAILABLE. Current state is unknown.');
+ if(c?.series?.[series]?.dump)lines.push('DUMP WAS OBSERVED in this same series. Lowest observed MCAP: '+money(c.series[series].low)+'. The old milestone is not a current gain.');
+ lines.push('--- ORIGINAL HISTORICAL OBSERVATION ---',e.body.replace(/^Current MCAP:/m,'MCAP at original observation:').replace(/^Multiple:/m,'Original observed multiple:'));
+ return {text:lines.join('\n'),delayed:true,observationAt:Number.isFinite(at)?at:null};
+}
+async function deliveryStates(env,due){
+ if(!due.length)return new Map();
+ const mints=[...new Set(due.map(e=>e.mint||e.id.split(':')[0]).filter(mintValid))];
+ if(!mints.length)return new Map();
+ env.__metrics.supabaseRequests++;
+ const rows=await json(env.SUPABASE_URL.replace(/\/$/,'')+'/rest/v1/signal_alert_coins?select=mint,data&mint=in.('+mints.join(',')+')',{headers:{apikey:env.SUPABASE_SERVICE_KEY,authorization:'Bearer '+env.SUPABASE_SERVICE_KEY}});
+ return new Map(rows.map(r=>[r.mint||r.data?.mint,r.data]));
+}
+
 const delay=ms=>new Promise(r=>setTimeout(r,ms));
 async function json(url,opt={}){const r=await fetch(url,{...opt,signal:AbortSignal.timeout(9000)});if(!r.ok)throw Error('source HTTP '+r.status);return r.json();}
 async function windowFeed(ms,provider='PumpPortal'){
@@ -48,11 +82,11 @@ async function rpc(env,op,p={}){if(env.__metrics)env.__metrics.supabaseRequests+
 async function claimPriority(env){
  const headers={apikey:env.SUPABASE_SERVICE_KEY,authorization:'Bearer '+env.SUPABASE_SERVICE_KEY,'content-type':'application/json'};
  const base=env.SUPABASE_URL.replace(/\/$/,'')+'/rest/v1/signal_alert_outbox';
- const read=async filter=>{env.__metrics.supabaseRequests++;return json(base+'?select=id,body&status=eq.PENDING&order=created.asc&limit=60&'+filter,{headers});};
+ const read=async filter=>{env.__metrics.supabaseRequests++;return json(base+'?select=id,mint,body,created&status=eq.PENDING&order=created.asc&limit=60&'+filter,{headers});};
  const priority=await read('body=not.like.NEW%20COIN*');let rows=priority;
- if(rows.length<60){env.__metrics.supabaseRequests++;const newest=await json(base+'?select=id,body&status=eq.PENDING&order=created.desc&limit=1&body=like.NEW%20COIN*',{headers});const launches=await read('body=like.NEW%20COIN*');rows=rows.concat(newest,launches).filter((x,i,a)=>a.findIndex(y=>y.id===x.id)===i).slice(0,60);}
+ if(rows.length<60){env.__metrics.supabaseRequests++;const newest=await json(base+'?select=id,mint,body,created&status=eq.PENDING&order=created.desc&limit=1&body=like.NEW%20COIN*',{headers});const launches=await read('body=like.NEW%20COIN*');rows=rows.concat(newest,launches).filter((x,i,a)=>a.findIndex(y=>y.id===x.id)===i).slice(0,60);}
  if(!rows.length)return [];
- env.__metrics.supabaseRequests++;return json(base+'?status=eq.PENDING&id=in.('+rows.map(x=>encodeURIComponent('"'+x.id+'"')).join(',')+')&select=id,body',{method:'PATCH',headers:{...headers,Prefer:'return=representation'},body:JSON.stringify({status:'SENDING'})});
+ env.__metrics.supabaseRequests++;return json(base+'?status=eq.PENDING&id=in.('+rows.map(x=>encodeURIComponent('"'+x.id+'"')).join(',')+')&select=id,mint,body,created',{method:'PATCH',headers:{...headers,Prefer:'return=representation'},body:JSON.stringify({status:'SENDING'})});
 }
 async function cycle(env){
  env={...env,__metrics:{supabaseRequests:0}};
@@ -92,10 +126,13 @@ async function cycle(env){
  try{env.__metrics.supabaseRequests++;const rows=await json(env.SUPABASE_URL.replace(/\/$/,'')+'/rest/v1/signal_alert_meta?key=eq.telegram_cooldown&select=value',{headers:{apikey:env.SUPABASE_SERVICE_KEY,authorization:'Bearer '+env.SUPABASE_SERVICE_KEY}});telegramCooldownUntil=Math.max(telegramCooldownUntil,Number(rows[0]?.value?.until||0));}catch(e){health.errors.push('Telegram cooldown check unavailable: '+e.message);telegramCooldownUntil=Math.max(telegramCooldownUntil,Date.now()+60000);}
  health.telegramCooldownUntil=telegramCooldownUntil;
  const due=Date.now()<telegramCooldownUntil?[]:await claimPriority(env);
+ let states=new Map();try{states=await deliveryStates(env,due);}catch(e){health.errors.push('Delayed card state unavailable: '+String(e.message).slice(0,160));}
+ health.historicalDeliveryFormat='v1';health.delayedDelivered=0;
  for(const e of due){
+  const rendered=deliveryCard(e,states.get(e.mint||e.id.split(':')[0]));
   let result={id:e.id,status:'DELIVERY_UNKNOWN',delivery:{note:'Network result uncertain; do not auto-resend'}};
-  try{health.externalCalls++;const r=await fetch('https://api.telegram.org/bot'+env.TG_TOKEN+'/sendMessage',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({chat_id:env.TG_CHAT_ID,text:e.body,disable_web_page_preview:true}),signal:AbortSignal.timeout(8000)});const j=await r.json();
-   if(j.ok){result={id:e.id,status:'SENT',delivery:{messageId:j.result.message_id,sentAt:Date.now()}};health.delivered++;}
+  try{health.externalCalls++;const r=await fetch('https://api.telegram.org/bot'+env.TG_TOKEN+'/sendMessage',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({chat_id:env.TG_CHAT_ID,text:rendered.text,disable_web_page_preview:true}),signal:AbortSignal.timeout(8000)});const j=await r.json();
+   if(j.ok){result={id:e.id,status:'SENT',delivery:{messageId:j.result.message_id,sentAt:Date.now(),delayed:rendered.delayed,observationAt:rendered.observationAt??null}};health.delivered++;if(rendered.delayed)health.delayedDelivered++;}
    else if(r.status===429||j.error_code===429){
     const raw=Number(j.parameters?.retry_after),seconds=Number.isFinite(raw)&&raw>0?Math.ceil(raw):60;
     telegramCooldownUntil=Date.now()+seconds*1000;health.telegramCooldownUntil=telegramCooldownUntil;
