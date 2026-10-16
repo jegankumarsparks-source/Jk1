@@ -79,6 +79,7 @@ async function engineDrift(html){
 }
 
 async function runCycle(env){
+  subCount=0; // module scope survives warm isolates: reset per invocation
   const deadline=Date.now()+DEADLINE_MS;
   const phaseT={t0:Date.now()};
   let stateText=null,stateFetchError=null;
