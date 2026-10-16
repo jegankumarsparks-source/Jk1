@@ -10,6 +10,7 @@
    contents API (GH_TOKEN secret, contents scope).
    ============================================================ */
 const REPO='jegankumarsparks-source/Jk1';
+let lastWriteError=null; // warm isolates only: surfaced once in the next feed, then cleared
 const STATE_PATH='solana-radar/server/state.json';
 const FEED_PATH='solana-radar/server-scan.json';
 const PAGE_PATH='solana-radar/index.html';
@@ -40,14 +41,14 @@ async function gh(env,method,path,body,raw){
 }
 
 async function putFile(env,path,content,message){
-  for(let a=0;a<2;a++){
+  for(let a=0;a<3;a++){
     try{
       const meta=await gh(env,'GET',path);
       const body={message,content:b64(content),branch:'main'};
       if(meta&&meta.sha)body.sha=meta.sha;
       const r=await gh(env,'PUT',path,body);
       if(r&&r.content)return true;
-    }catch(e){ if(a===1){console.log('putFile failed',path,e.message);return false;} await new Promise(r2=>setTimeout(r2,700)); }
+    }catch(e){ if(a===2){console.log('putFile failed',path,e.message);return false;} await new Promise(r2=>setTimeout(r2,700*(a+1))); }
   }
   return false;
 }
@@ -239,6 +240,16 @@ async function runCycle(env){
       gmgn:'https://gmgn.ai/sol/token/'+c.mint,solscan:'https://solscan.io/token/'+c.mint}}));
   const signals=[...S.signals.values()].sort((a,b)=>b.createdAt-a.createdAt).slice(0,15).map(publicSignal);
 
+  const srcList=REG.all().map(s=>({id:s.id,label:s.label,status:s.status,lastSuccess:s.lastSuccess,lastError:s.lastError,
+    requestCount:s.requestCount,rateLimitCount:s.rateLimitCount}));
+  { const skipped=errors.some(e=>e.indexOf('discovery skipped')===0);
+    for(const s2 of srcList){
+      if((s2.id==='rugcheck'||s2.id==='solanarpc')&&s2.status==='NOT_OBSERVED'){
+        s2.note=skipped?'not exercised - discovery skipped during dexscreener 429 cooldown'
+          :'not exercised this cycle (no refreshed candidates needed them)';
+      }
+    } }
+
   const feed={generatedAt:U.now(),generatedAtIso:new Date().toISOString(),
     scanner:'solana-radar-server',runner:'cloudflare-worker-cron',
     engineSource:'index.html embedded engine, extracted verbatim at run time',
@@ -248,8 +259,7 @@ async function runCycle(env){
     schedule:'every 5 min via Cloudflare Workers cron (free tier, keyless data) — runs whether or not any tab is open. Backstop: GitHub Actions cron (throttled in this repo to every few hours).',
     engineDrift:drift,
     stateRestored:restored,
-    sources:REG.all().map(s=>({id:s.id,label:s.label,status:s.status,lastSuccess:s.lastSuccess,lastError:s.lastError,
-      requestCount:s.requestCount,rateLimitCount:s.rateLimitCount})),
+    sources:srcList,
     counters:S.diag.counters,counts,
     analyzedThisCycle:analyzed,signalMarksTracked:marksTracked,
     newSignalsThisCycle:newSignals.map(publicSignal),
@@ -273,10 +283,12 @@ async function runCycle(env){
     scoreHistory:S.scoreHistory.slice(-200),milestones,dexBackoffUntil:dexBackoffUntil||0,dexBackoffStrikes:dexStrikes||0});
 
   /* never overwrite good state with a blank one after a failed state read */
+  if(lastWriteError){ feed.errors=feed.errors||[]; feed.errors.push('previous cycle: '+lastWriteError); feed.previousWriteError=lastWriteError; }
   const ok1=stateFetchError?(console.log('state write SKIPPED - state read failed:',stateFetchError),false)
     :await putFile(env,STATE_PATH,stateOut,'radar-server: state cycle '+cycle+' (worker)');
   feed.stateWritten=ok1;
   const ok2=await putFile(env,FEED_PATH,JSON.stringify(feed,null,1),'radar-server: scan cycle '+cycle+' '+new Date().toISOString()+' (worker)');
+  lastWriteError=(!ok1||!ok2)?('cycle '+cycle+' github write failed (state:'+ok1+' feed:'+ok2+') - one heartbeat lost, writes retried next cycle'):null;
   console.log('worker cycle',cycle,'ok · restored',restored,'· candidates',counts.total,'· new signals',newSignals.length,'· marks',marksTracked,'· state write',ok1,'· feed write',ok2,'· sources',REG.all().map(s=>s.id+':'+s.status).join(','));
 }
 
