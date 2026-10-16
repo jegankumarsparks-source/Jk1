@@ -97,7 +97,16 @@ async function cycle(env){
   }catch{}
   deliveryResults.push(result);await delay(1100);
  }
- await rpc(env,'deliveries',{events:deliveryResults});
+ // Preserve exact response receipts before the DB write, so a persistence outage
+ // cannot erase Telegram message IDs. This log contains no tokens or message bodies.
+ console.log(JSON.stringify({type:'DELIVERY_RECEIPTS',runId:env.GITHUB_RUN_ID||null,events:deliveryResults}));
+ let receiptsSaved=false;
+ for(let attempt=1;attempt<=3;attempt++){
+  try{await rpc(env,'deliveries',{events:deliveryResults});receiptsSaved=true;break;}
+  catch(e){console.log(JSON.stringify({type:'RECEIPT_WRITE_FAILED',attempt,error:String(e.message).slice(0,240)}));if(attempt<3)await delay(attempt*2000);}
+ }
+ health.deliveryReceiptsPersisted=receiptsSaved;
+ if(!receiptsSaved)health.errors.push('DELIVERY RECEIPTS NOT PERSISTED: do not resend SENDING rows; recover exact receipts from DELIVERY_RECEIPTS run log');
  }
  health.runtime='GITHUB_ACTIONS';health.trigger=env.GITHUB_EVENT_NAME||'UNKNOWN';try{const ds=await json(env.SUPABASE_URL+'/rest/v1/signal_alert_meta?key=eq.dispatch&select=value',{headers:{apikey:env.SUPABASE_SERVICE_KEY,authorization:'Bearer '+env.SUPABASE_SERVICE_KEY}});const d=ds[0]?.value;if(d?.accepted&&d.at<=start&&start-d.at<180000)health.scheduler={type:'CLOUDFLARE_CRON',scheduledAt:d.scheduledAt,acceptedAt:d.at};}catch{}health.runId=env.GITHUB_RUN_ID||null;health.cadence='5 minutes best effort; 120-second feed window with gaps';health.dexBackoffUntil=dexBackoffUntil;health.discovered=newly.length;health.coinsChecked=existing.size;health.eventsQueued=eventCount;health.finishedAt=Date.now();health.durationMs=Date.now()-start;health.deliveryEnabled=env.DELIVERY_ENABLED==='true';health.supabaseRequests=env.__metrics.supabaseRequests+2;health.totalExternalCalls=health.externalCalls+health.supabaseRequests;
  await rpc(env,'health',health);return health;
