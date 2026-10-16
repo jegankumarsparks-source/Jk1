@@ -1,6 +1,6 @@
 {
- "generatedAt": 1792185657338,
- "generatedAtIso": "2026-10-16T21:20:57.338Z",
+ "generatedAt": 1792185939659,
+ "generatedAtIso": "2026-10-16T21:25:39.659Z",
  "scanner": "solana-radar-server",
  "runner": "cloudflare-worker-cron",
  "engineSource": "index.html embedded engine, extracted verbatim at run time",
@@ -9,9 +9,9 @@
  "scoreVersion": "score-v1.0",
  "riskPolicyVersion": "risk-v1.0",
  "thresholdsVersion": "thresh-v1.0",
- "cycle": 50,
- "cycleStartedAt": 1792185635744,
- "cycleDurationMs": 21594,
+ "cycle": 51,
+ "cycleStartedAt": 1792185935647,
+ "cycleDurationMs": 4012,
  "schedule": "every 5 min via Cloudflare Workers cron (free tier, keyless data) — runs whether or not any tab is open. Backstop: GitHub Actions cron (throttled in this repo to every few hours).",
  "engineDrift": null,
  "stateRestored": true,
@@ -20,28 +20,28 @@
    "id": "dexscreener",
    "label": "Dexscreener (public, keyless)",
    "status": "DEGRADED",
-   "lastSuccess": 1792185653334,
+   "lastSuccess": null,
    "lastError": "HTTP 429",
-   "requestCount": 23,
+   "requestCount": 2,
    "rateLimitCount": 1
   },
   {
    "id": "rugcheck",
    "label": "RugCheck (public, keyless)",
-   "status": "LIVE",
-   "lastSuccess": 1792185653279,
+   "status": "NOT_OBSERVED",
+   "lastSuccess": null,
    "lastError": null,
-   "requestCount": 8,
+   "requestCount": 0,
    "rateLimitCount": 0
   },
   {
    "id": "solanarpc",
    "label": "Solana JSON-RPC (PublicNode)",
-   "status": "DEGRADED",
-   "lastSuccess": 1792185644362,
-   "lastError": "HTTP 429",
-   "requestCount": 4,
-   "rateLimitCount": 1
+   "status": "NOT_OBSERVED",
+   "lastSuccess": null,
+   "lastError": null,
+   "requestCount": 0,
+   "rateLimitCount": 0
   }
  ],
  "counters": {
@@ -58,166 +58,9 @@
   "dataIncomplete": 1,
   "watchlist": 0
  },
- "analyzedThisCycle": 6,
- "signalMarksTracked": 7,
- "newSignalsThisCycle": [
-  {
-   "id": "sig_mvbh28qwcsobk3",
-   "mint": "Hbtqitgirz36pwHhm8XvnPwdYwCwFgU28mUo7TDmpump",
-   "symbol": "Gru",
-   "name": "Rich Gru",
-   "createdAt": 1792185648584,
-   "signalPriceUsd": 0.00003445,
-   "score": 29.3,
-   "riskVerdict": "UNKNOWN",
-   "liquidityUsd": null,
-   "volume24": 33203.56,
-   "qualifiedWallets": 1,
-   "pairAddress": "8TPM1hebBopn7fZnKPxoMuyEMxy4Qw2eJTZxPdrxD1Te",
-   "dexId": "pumpfun",
-   "lastPrice": 0.00003445,
-   "lastPriceAt": 1792185653329,
-   "multiple": 1,
-   "milestonesHit": [],
-   "dumpHit": null,
-   "links": {
-    "dexscreener": "https://dexscreener.com/solana/8TPM1hebBopn7fZnKPxoMuyEMxy4Qw2eJTZxPdrxD1Te",
-    "gmgn": "https://gmgn.ai/sol/token/Hbtqitgirz36pwHhm8XvnPwdYwCwFgU28mUo7TDmpump",
-    "solscan": "https://solscan.io/token/Hbtqitgirz36pwHhm8XvnPwdYwCwFgU28mUo7TDmpump"
-   },
-   "paperOnly": true
-  },
-  {
-   "id": "sig_mvbh2c9bz7qs4l",
-   "mint": "9qMJWVfQpBGQZttMEpqKvQhEqjVKy6hSxZ6M877Spump",
-   "symbol": "AIR",
-   "name": "AirTime",
-   "createdAt": 1792185653135,
-   "signalPriceUsd": 0.00002099,
-   "score": 23.3,
-   "riskVerdict": "UNKNOWN",
-   "liquidityUsd": null,
-   "volume24": 33516.26,
-   "qualifiedWallets": 0,
-   "pairAddress": "G5GpWBzCWnQcQ8yKZxfvWctw8HMS47DUR7njU7mSSaj1",
-   "dexId": "pumpfun",
-   "lastPrice": 0.00002129,
-   "lastPriceAt": 1792185653324,
-   "multiple": 1.01,
-   "milestonesHit": [],
-   "dumpHit": null,
-   "links": {
-    "dexscreener": "https://dexscreener.com/solana/G5GpWBzCWnQcQ8yKZxfvWctw8HMS47DUR7njU7mSSaj1",
-    "gmgn": "https://gmgn.ai/sol/token/9qMJWVfQpBGQZttMEpqKvQhEqjVKy6hSxZ6M877Spump",
-    "solscan": "https://solscan.io/token/9qMJWVfQpBGQZttMEpqKvQhEqjVKy6hSxZ6M877Spump"
-   },
-   "paperOnly": true
-  },
-  {
-   "id": "sig_mvbh2cacecrwfq",
-   "mint": "4treZD6YwEZVppibweU1LWcizA7C33Re2RHU4xZSpump",
-   "symbol": "AIET",
-   "name": "ai-evaluator-ties",
-   "createdAt": 1792185653172,
-   "signalPriceUsd": 0.00001653,
-   "score": 16.5,
-   "riskVerdict": "FAIL",
-   "liquidityUsd": null,
-   "volume24": 101665.77,
-   "qualifiedWallets": 0,
-   "pairAddress": "FtixEqmxTJzDYtdvrgEUTRrj7gaxKs3Xq2Frk3C2sMN3",
-   "dexId": "pumpfun",
-   "lastPrice": 0.00001653,
-   "lastPriceAt": 1792185653303,
-   "multiple": 1,
-   "milestonesHit": [],
-   "dumpHit": null,
-   "links": {
-    "dexscreener": "https://dexscreener.com/solana/FtixEqmxTJzDYtdvrgEUTRrj7gaxKs3Xq2Frk3C2sMN3",
-    "gmgn": "https://gmgn.ai/sol/token/4treZD6YwEZVppibweU1LWcizA7C33Re2RHU4xZSpump",
-    "solscan": "https://solscan.io/token/4treZD6YwEZVppibweU1LWcizA7C33Re2RHU4xZSpump"
-   },
-   "paperOnly": true
-  },
-  {
-   "id": "sig_mvbh2cb5lkzwjm",
-   "mint": "nPD9vif19C2oY1jhHRrAJSSpMu9tJQtibfxoZ4qcxph",
-   "symbol": "XSTOK",
-   "name": "xstok",
-   "createdAt": 1792185653201,
-   "signalPriceUsd": 0.0002613,
-   "score": 31.5,
-   "riskVerdict": "FAIL",
-   "liquidityUsd": 44086.62,
-   "volume24": 344592.03,
-   "qualifiedWallets": 0,
-   "pairAddress": "CxPdeNZn9XTfRZ3Ab6dBmsRygLNCjo41ztH7UuV1eNh3",
-   "dexId": "raydium",
-   "lastPrice": 0.0002613,
-   "lastPriceAt": 1792185653298,
-   "multiple": 1,
-   "milestonesHit": [],
-   "dumpHit": null,
-   "links": {
-    "dexscreener": "https://dexscreener.com/solana/CxPdeNZn9XTfRZ3Ab6dBmsRygLNCjo41ztH7UuV1eNh3",
-    "gmgn": "https://gmgn.ai/sol/token/nPD9vif19C2oY1jhHRrAJSSpMu9tJQtibfxoZ4qcxph",
-    "solscan": "https://solscan.io/token/nPD9vif19C2oY1jhHRrAJSSpMu9tJQtibfxoZ4qcxph"
-   },
-   "paperOnly": true
-  },
-  {
-   "id": "sig_mvbh2cc21zlng4",
-   "mint": "CvmRz15WYyhLRskuUFfRe6EybPjQdUqFA8URVcmSpump",
-   "symbol": "Referral ",
-   "name": "Referral Code",
-   "createdAt": 1792185653234,
-   "signalPriceUsd": 0.00001831,
-   "score": 35.3,
-   "riskVerdict": "PASS",
-   "liquidityUsd": 12051.49,
-   "volume24": 95922.16,
-   "qualifiedWallets": 0,
-   "pairAddress": "EUyunpwVybXKn6oXPqmf67HdoGrX8VSXQZRXkkBuRfBj",
-   "dexId": "pumpswap",
-   "lastPrice": 0.00001831,
-   "lastPriceAt": 1792185653292,
-   "multiple": 1,
-   "milestonesHit": [],
-   "dumpHit": null,
-   "links": {
-    "dexscreener": "https://dexscreener.com/solana/EUyunpwVybXKn6oXPqmf67HdoGrX8VSXQZRXkkBuRfBj",
-    "gmgn": "https://gmgn.ai/sol/token/CvmRz15WYyhLRskuUFfRe6EybPjQdUqFA8URVcmSpump",
-    "solscan": "https://solscan.io/token/CvmRz15WYyhLRskuUFfRe6EybPjQdUqFA8URVcmSpump"
-   },
-   "paperOnly": true
-  },
-  {
-   "id": "sig_mvbh2cdbwr1s51",
-   "mint": "FgJReZeYfmKZeWrCaGYL8gLnUixwBhjdHuRknC6ypump",
-   "symbol": "Doggo",
-   "name": "Dancing Dog",
-   "createdAt": 1792185653279,
-   "signalPriceUsd": 0.0000405,
-   "score": 36.8,
-   "riskVerdict": "PASS",
-   "liquidityUsd": 21143.22,
-   "volume24": 37870.73,
-   "qualifiedWallets": 0,
-   "pairAddress": "DBqbqUehE6kr9c4oGvoESs9JJWJJRoVLgCcSPEePD5qT",
-   "dexId": "pumpswap",
-   "lastPrice": 0.0000405,
-   "lastPriceAt": 1792185653284,
-   "multiple": 1,
-   "milestonesHit": [],
-   "dumpHit": null,
-   "links": {
-    "dexscreener": "https://dexscreener.com/solana/DBqbqUehE6kr9c4oGvoESs9JJWJJRoVLgCcSPEePD5qT",
-    "gmgn": "https://gmgn.ai/sol/token/FgJReZeYfmKZeWrCaGYL8gLnUixwBhjdHuRknC6ypump",
-    "solscan": "https://solscan.io/token/FgJReZeYfmKZeWrCaGYL8gLnUixwBhjdHuRknC6ypump"
-   },
-   "paperOnly": true
-  }
- ],
+ "analyzedThisCycle": 0,
+ "signalMarksTracked": 0,
+ "newSignalsThisCycle": [],
  "recentSignals": [
   {
    "id": "sig_mvbh2cdbwr1s51",
@@ -762,7 +605,11 @@
    }
   }
  ],
- "errors": [],
+ "errors": [
+  "discovery: profiles: HTTP 429",
+  "discovery: boosts: source in rate-limit backoff",
+  "dexscreener cooldown armed for 10 min (strike 1, driver-level; discovery resumes automatically, heartbeats continue)"
+ ],
  "notes": [
   "PAPER ONLY — research signals, not financial advice, never executable trades.",
   "Engine code is the in-tab scanner engine extracted verbatim from index.html into a static bundle (hash-checked every cycle against the live page; drift is labelled, never silent); rules unchanged.",
@@ -772,12 +619,12 @@
  ],
  "driver": "worker-budget-v2 2026-10-17",
  "phaseMs": {
-  "t0": 1792185634714,
-  "readMs": 1030,
-  "discoveryMs": 152
+  "t0": 1792185934854,
+  "readMs": 793,
+  "discoveryMs": 4012
  },
- "dexBackoffUntil": null,
- "dexBackoffStrikes": 0,
+ "dexBackoffUntil": 1792186539659,
+ "dexBackoffStrikes": 1,
  "stateReadError": null,
  "stateWritten": true
 }
