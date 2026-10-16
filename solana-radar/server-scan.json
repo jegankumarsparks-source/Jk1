@@ -1,6 +1,6 @@
 {
- "generatedAt": 1792167046345,
- "generatedAtIso": "2026-10-16T16:10:46.345Z",
+ "generatedAt": 1792167340559,
+ "generatedAtIso": "2026-10-16T16:15:40.559Z",
  "scanner": "solana-radar-server",
  "runner": "cloudflare-worker-cron",
  "engineSource": "index.html embedded engine, extracted verbatim at run time",
@@ -9,9 +9,9 @@
  "scoreVersion": "score-v1.0",
  "riskPolicyVersion": "risk-v1.0",
  "thresholdsVersion": "thresh-v1.0",
- "cycle": 18,
- "cycleStartedAt": 1792167036246,
- "cycleDurationMs": 10099,
+ "cycle": 19,
+ "cycleStartedAt": 1792167336547,
+ "cycleDurationMs": 4012,
  "schedule": "every 5 min via Cloudflare Workers cron (free tier, keyless data) — runs whether or not any tab is open. Backstop: GitHub Actions cron (throttled in this repo to every few hours).",
  "engineDrift": null,
  "stateRestored": true,
@@ -20,27 +20,27 @@
    "id": "dexscreener",
    "label": "Dexscreener (public, keyless)",
    "status": "DEGRADED",
-   "lastSuccess": 1792167036320,
+   "lastSuccess": null,
    "lastError": "HTTP 429",
-   "requestCount": 16,
+   "requestCount": 2,
    "rateLimitCount": 1
   },
   {
    "id": "rugcheck",
    "label": "RugCheck (public, keyless)",
-   "status": "LIVE",
-   "lastSuccess": 1792167041475,
+   "status": "NOT_OBSERVED",
+   "lastSuccess": null,
    "lastError": null,
-   "requestCount": 4,
+   "requestCount": 0,
    "rateLimitCount": 0
   },
   {
    "id": "solanarpc",
    "label": "Solana JSON-RPC (PublicNode)",
-   "status": "LIVE",
-   "lastSuccess": 1792167042341,
+   "status": "NOT_OBSERVED",
+   "lastSuccess": null,
    "lastError": null,
-   "requestCount": 10,
+   "requestCount": 0,
    "rateLimitCount": 0
   }
  ],
@@ -58,60 +58,9 @@
   "dataIncomplete": 1,
   "watchlist": 0
  },
- "analyzedThisCycle": 3,
+ "analyzedThisCycle": 0,
  "signalMarksTracked": 0,
- "newSignalsThisCycle": [
-  {
-   "id": "sig_mvb5zc9xw0wvq2",
-   "mint": "ChxAKf1EBbp5n3kXLxrPKmZR9KRPvPQBdfqWcn3Ppump",
-   "symbol": "ROADSTER",
-   "name": "No Risk No Roadster",
-   "createdAt": 1792167037413,
-   "signalPriceUsd": 0.000002318,
-   "score": 36.5,
-   "riskVerdict": "FAIL",
-   "liquidityUsd": 2462.07,
-   "volume24": 580941.12,
-   "qualifiedWallets": 3,
-   "pairAddress": "2trfr1Ldq66pGNju7cVrERJRH6Yb6sSjFi6B2QUVYf9V",
-   "dexId": "pumpswap",
-   "lastPrice": null,
-   "lastPriceAt": null,
-   "multiple": null,
-   "milestonesHit": [],
-   "links": {
-    "dexscreener": "https://dexscreener.com/solana/2trfr1Ldq66pGNju7cVrERJRH6Yb6sSjFi6B2QUVYf9V",
-    "gmgn": "https://gmgn.ai/sol/token/ChxAKf1EBbp5n3kXLxrPKmZR9KRPvPQBdfqWcn3Ppump",
-    "solscan": "https://solscan.io/token/ChxAKf1EBbp5n3kXLxrPKmZR9KRPvPQBdfqWcn3Ppump"
-   },
-   "paperOnly": true
-  },
-  {
-   "id": "sig_mvb5zg2tij12px",
-   "mint": "4ap92c69E33ecQsxXyJS8DxuDDEgJKnq24gpTMRDpump",
-   "symbol": "TESCREAL",
-   "name": "TESCREAL",
-   "createdAt": 1792167042341,
-   "signalPriceUsd": 0.000004659,
-   "score": 23.3,
-   "riskVerdict": "FAIL",
-   "liquidityUsd": 4144.49,
-   "volume24": 47749.46,
-   "qualifiedWallets": 2,
-   "pairAddress": "8g9pWFrtu8bcEbMeUA8W3RRvPbiZxK8vNhPC2vjZE2y3",
-   "dexId": "pumpswap",
-   "lastPrice": null,
-   "lastPriceAt": null,
-   "multiple": null,
-   "milestonesHit": [],
-   "links": {
-    "dexscreener": "https://dexscreener.com/solana/8g9pWFrtu8bcEbMeUA8W3RRvPbiZxK8vNhPC2vjZE2y3",
-    "gmgn": "https://gmgn.ai/sol/token/4ap92c69E33ecQsxXyJS8DxuDDEgJKnq24gpTMRDpump",
-    "solscan": "https://solscan.io/token/4ap92c69E33ecQsxXyJS8DxuDDEgJKnq24gpTMRDpump"
-   },
-   "paperOnly": true
-  }
- ],
+ "newSignalsThisCycle": [],
  "recentSignals": [
   {
    "id": "sig_mvb5zg2tij12px",
@@ -641,7 +590,10 @@
    }
   }
  ],
- "errors": [],
+ "errors": [
+  "discovery: profiles: HTTP 429",
+  "discovery: boosts: source in rate-limit backoff"
+ ],
  "notes": [
   "PAPER ONLY — research signals, not financial advice, never executable trades.",
   "Engine code is the in-tab scanner engine extracted verbatim from index.html into a static bundle (hash-checked every cycle against the live page; drift is labelled, never silent); rules unchanged.",
