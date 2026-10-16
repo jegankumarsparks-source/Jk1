@@ -1,6 +1,6 @@
 {
- "generatedAt": 1792180840056,
- "generatedAtIso": "2026-10-16T20:00:40.056Z",
+ "generatedAt": 1792181140190,
+ "generatedAtIso": "2026-10-16T20:05:40.190Z",
  "scanner": "solana-radar-server",
  "runner": "cloudflare-worker-cron",
  "engineSource": "index.html embedded engine, extracted verbatim at run time",
@@ -9,9 +9,9 @@
  "scoreVersion": "score-v1.0",
  "riskPolicyVersion": "risk-v1.0",
  "thresholdsVersion": "thresh-v1.0",
- "cycle": 38,
- "cycleStartedAt": 1792180836045,
- "cycleDurationMs": 4011,
+ "cycle": 39,
+ "cycleStartedAt": 1792181136176,
+ "cycleDurationMs": 4014,
  "schedule": "every 5 min via Cloudflare Workers cron (free tier, keyless data) — runs whether or not any tab is open. Backstop: GitHub Actions cron (throttled in this repo to every few hours).",
  "engineDrift": null,
  "stateRestored": true,
@@ -607,12 +607,23 @@
  ],
  "errors": [
   "discovery: profiles: HTTP 429",
-  "discovery: boosts: source in rate-limit backoff"
+  "discovery: boosts: source in rate-limit backoff",
+  "dexscreener cooldown armed for 10 min (driver-level; discovery resumes automatically, heartbeats continue)"
  ],
  "notes": [
   "PAPER ONLY — research signals, not financial advice, never executable trades.",
   "Engine code is the in-tab scanner engine extracted verbatim from index.html into a static bundle (hash-checked every cycle against the live page; drift is labelled, never silent); rules unchanged.",
   "Signal price is frozen at signal time; lastPrice/multiple are observed Dexscreener marks, not executable fills.",
-  "Candidates idle >72h without an unconsumed signal are evicted (state hygiene); signals and wallets bounded."
- ]
+  "Candidates idle >72h without an unconsumed signal are evicted (state hygiene); signals and wallets bounded.",
+  "Driver enforces hard per-phase time budgets and always writes this heartbeat feed, even when a data source stalls; a stalled source is labelled in errors, never silent."
+ ],
+ "driver": "worker-budget-v2 2026-10-17",
+ "phaseMs": {
+  "t0": 1792181134871,
+  "readMs": 1305,
+  "discoveryMs": 4014
+ },
+ "dexBackoffUntil": 1792181740190,
+ "stateReadError": null,
+ "stateWritten": true
 }
