@@ -1,0 +1,241 @@
+/* ============================================================
+   SOLANA EARLY-WALLET RADAR — 24/7 SERVER SCANNER (Cloudflare Worker)
+   Same runner as ../scanner.mjs, ported to a Workers cron trigger
+   (cron every 5 minutes), free tier. Extracts the page's own engine code
+   verbatim from solana-radar/index.html at run time — engine rules
+   never change here. Keyless public data only (Dexscreener /
+   RugCheck / public Solana RPC). Paper only: no real money, no
+   wallet signing, no data API keys. State + public feed live in the
+   repo (server/state.json, ../server-scan.json) via the GitHub
+   contents API (GH_TOKEN secret, contents scope).
+   ============================================================ */
+const REPO='jegankumarsparks-source/Jk1';
+const STATE_PATH='solana-radar/server/state.json';
+const FEED_PATH='solana-radar/server-scan.json';
+const PAGE_PATH='solana-radar/index.html';
+const DEADLINE_MS=25000;
+
+function b64(s){ const bytes=new TextEncoder().encode(s); let bin='';
+  for(let i=0;i<bytes.length;i+=0x8000)bin+=String.fromCharCode.apply(null,bytes.subarray(i,i+0x8000));
+  return btoa(bin); }
+
+async function gh(env,method,path,body,raw){
+  const r=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+path+(method==='GET'&&path.indexOf('?')<0?'?ref=main':''),{
+    method,headers:{Authorization:'Bearer '+env.GH_TOKEN,Accept:raw?'application/vnd.github.raw':'application/vnd.github+json','User-Agent':'jk-radar-scanner'},
+    body:body?JSON.stringify(body):undefined});
+  if(r.status===404)return null;
+  if(!r.ok){ const t=await r.text(); throw new Error('github '+method+' '+path+' -> '+r.status+' '+t.slice(0,160)); }
+  return raw?r.text():r.json();
+}
+
+async function putFile(env,path,content,message){
+  for(let a=0;a<3;a++){
+    try{
+      const meta=await gh(env,'GET',path);
+      const body={message,content:b64(content),branch:'main'};
+      if(meta&&meta.sha)body.sha=meta.sha;
+      const r=await gh(env,'PUT',path,body);
+      if(r&&r.content)return true;
+    }catch(e){ if(a===2){console.log('putFile failed',path,e.message);return false;} await new Promise(r2=>setTimeout(r2,800)); }
+  }
+  return false;
+}
+
+/* The engine ships as a generated static bundle (Workers forbid eval).
+   build-bundle.mjs extracts it VERBATIM from index.html; at run time we
+   re-extract the live page's engine section and compare hashes so any
+   drift is labelled honestly in the feed instead of silently diverging. */
+import * as E from './engine.bundle.js';
+async function engineDrift(html){
+  try{
+    const a=html.indexOf('const BUILD_MARKER=');
+    const b=html.indexOf('class PersistenceEngine');
+    if(a<0||b<0||b<=a)return 'anchors not found in live index.html — running bundled engine';
+    const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(html.slice(a,b)));
+    const hex=[...new Uint8Array(buf)].map(x=>x.toString(16).padStart(2,'0')).join('');
+    return hex===E.ENGINE_HASH?null:('live index.html engine hash '+hex.slice(0,12)+' != bundle '+E.ENGINE_HASH.slice(0,12)+' — running bundled engine, redeploy worker to refresh');
+  }catch(e){ return 'drift check failed: '+String(e.message||e).slice(0,100)+' — running bundled engine'; }
+}
+
+async function runCycle(env){
+  const deadline=Date.now()+DEADLINE_MS;
+  const [html,stateText]=await Promise.all([
+    gh(env,'GET',PAGE_PATH,null,true),
+    gh(env,'GET',STATE_PATH,null,true).catch(()=>null)]);
+  const drift=await engineDrift(html);
+  const {U,S,REG,DISCOVERY,DEX,WALLETS,CLUSTERS,RISK,SCORER,QUAL}=E;
+  /* fresh state each cycle (warm isolates reuse module singletons) */
+  S.candidates.clear(); S.wallets.clear(); S.clusters.clear(); S.signals.clear();
+  S.positions.clear(); S.trades=[]; S.scoreHistory=[];
+
+  /* --- restore state --- */
+  let st=null;
+  try{ st=stateText?JSON.parse(stateText):null; }catch(e){ st=null; }
+  let restored=false,cycleBase=0,milestones={};
+  if(st&&st.schema===1){
+    try{
+      for(const c of st.candidates||[])S.candidates.set(c.mint,c);
+      for(const w of st.wallets||[])S.wallets.set(w.address,w);
+      for(const g of st.signals||[])S.signals.set(g.id,g);
+      S.scoreHistory=st.scoreHistory||[];
+      if(st.counters)S.diag.counters=st.counters;
+      if(st.rejectReasons)S.diag.rejectReasons=st.rejectReasons;
+      restored=true; cycleBase=st.cycleBase||0; milestones=st.milestones||{};
+    }catch(e){ console.log('state restore failed, clean start:',e.message); }
+  }
+
+  const cycle=cycleBase+1;
+  const cycleStart=Date.now();
+  const newSignals=[];
+  S.on('signal',g=>newSignals.push(g));
+  const errors=[];
+  if(drift)errors.push('ENGINE DRIFT: '+drift);
+  try{
+    const r=await DISCOVERY.runCycle();
+    if(r&&r.errors&&r.errors.length)errors.push(...r.errors.map(e=>'discovery: '+e));
+  }catch(e){ errors.push('discovery cycle: '+(e.message||e)); }
+
+  async function analyzeOne(mint){
+    const c=S.candidates.get(mint); if(!c)return null;
+    if(!c.rugcheck||(U.now()-c.rugcheck.fetchedAt)>10*60*1000){
+      try{ c.rugcheck=await DEX.rugcheckReport(mint); c.fieldMeta.rugcheck={source:'rugcheck',observedAt:c.rugcheck.fetchedAt,status:'LIVE'}; }
+      catch(e){ c.fieldMeta.rugcheck={source:'rugcheck',observedAt:U.now(),status:'ERROR'}; c.rugcheckError=String(e.message||e).slice(0,120); }
+    }
+    if(c.rugcheck){
+      WALLETS.harvestFromToken(c);
+      const recs=(c.rugcheck.topHolders||[]).filter(h=>h.address&&!h.insider).slice(0,S.settings.walletResearchPerCandidate||5);
+      for(const h of recs){ if(Date.now()>deadline)break; try{ await WALLETS.researchWallet(h.address); }catch(e){} }
+      c.walletEvidence=(c.rugcheck.topHolders||[]).filter(h=>h.address).map(h=>{
+        const w=S.wallets.get(h.address);
+        return {address:h.address,pct:h.pct,insider:h.insider,state:w?w.state:'UNVERIFIED',
+          qualified:w?WALLETS.isQualified(w):false,observedAt:U.now()};
+      });
+    }
+    CLUSTERS.recompute();
+    c.risk=RISK.analyze(c);
+    return QUAL.evaluate(c);
+  }
+
+  let analyzed=0;
+  for(const c of S.candidates.values()){
+    if(analyzed>=S.settings.maxRugcheckPerCycle)break;
+    if(Date.now()>deadline){ errors.push('deadline reached — remaining candidates deferred to next cycle'); break; }
+    if((c.updatedAt||0)<cycleStart)continue;
+    if(c.state==='DISCOVERED'||(c.state==='DATA_INCOMPLETE'&&c.market)){
+      try{ await analyzeOne(c.mint); analyzed++; }catch(e){ errors.push('analyze '+U.short(c.mint)+': '+(e.message||e)); }
+    }
+  }
+
+  /* --- signal milestone marks (observed, never executable) --- */
+  let marksTracked=0;
+  { const cut=U.now()-48*3600*1000;
+    const recent=[...S.signals.values()].filter(g=>g.createdAt>cut).sort((a,b)=>b.createdAt-a.createdAt).slice(0,25);
+    if(recent.length){
+      const mints=[...new Set(recent.map(g=>g.mint))];
+      let prices={};
+      try{ prices=await DISCOVERY.refreshPricesFor(mints); }catch(e){ errors.push('marks: '+String(e.message||e).slice(0,120)); }
+      for(const g of recent){
+        const pr=prices[g.mint];
+        if(!pr||!pr.ok||pr.priceUsd==null)continue;
+        marksTracked++;
+        g.lastPrice=pr.priceUsd; g.lastPriceAt=pr.observedAt;
+        g.multiple=g.signalPriceUsd?Math.round(pr.priceUsd/g.signalPriceUsd*100)/100:null;
+        const ml=milestones[g.id]=milestones[g.id]||{hit:[]};
+        if(g.multiple!=null)for(const x of [2,3,5,10]){
+          if(g.multiple>=x&&!ml.hit.find(h=>h.x===x))ml.hit.push({x,at:U.now(),price:pr.priceUsd});
+        }
+        g.milestonesHit=ml.hit;
+      }
+    } }
+
+  /* --- eviction (state hygiene, same as scanner.mjs) --- */
+  { const cut=U.now()-72*3600*1000;
+    for(const [m,c] of [...S.candidates]){
+      const sig=c.signalId&&S.signals.get(c.signalId);
+      const keep=(sig&&!sig.consumed)||(c.updatedAt||c.firstObserved||0)>cut;
+      if(!keep)S.candidates.delete(m);
+    }
+    if(S.candidates.size>600){
+      const arr=[...S.candidates.values()].sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));
+      const keep=new Set(arr.slice(0,600).map(c=>c.mint));
+      for(const m of [...S.candidates.keys()])if(!keep.has(m)){
+        const c=S.candidates.get(m); const sig=c.signalId&&S.signals.get(c.signalId);
+        if(!(sig&&!sig.consumed))S.candidates.delete(m);
+      }
+    }
+    if(S.wallets.size>2000){
+      const arr=[...S.wallets.values()].sort((a,b)=>((b.lastResearchAt||b.firstObserved||0)-(a.lastResearchAt||a.firstObserved||0)));
+      const keep=new Set(arr.slice(0,2000).map(w=>w.address));
+      for(const a of [...S.wallets.keys()])if(!keep.has(a))S.wallets.delete(a);
+    }
+    if(S.signals.size>300){
+      const arr=[...S.signals.values()].sort((a,b)=>b.createdAt-a.createdAt);
+      const keep=new Set(arr.slice(0,300).map(g=>g.id));
+      for(const id of [...S.signals.keys()])if(!keep.has(id)){
+        const g=S.signals.get(id); if(g&&g.consumed)S.signals.delete(id); else if(g&&arr.indexOf(g)>=300)S.signals.delete(id);
+      }
+    } }
+
+  function publicSignal(g){
+    return {id:g.id,mint:g.mint,symbol:g.symbol||null,name:g.name||null,createdAt:g.createdAt,
+      signalPriceUsd:g.signalPriceUsd,score:g.score,riskVerdict:g.evidence?g.evidence.riskVerdict:null,
+      liquidityUsd:g.evidence?g.evidence.liquidityUsd:null,volume24:g.evidence?g.evidence.volume24:null,
+      qualifiedWallets:g.evidence?g.evidence.qualifiedWallets:null,
+      pairAddress:g.evidence?g.evidence.pairAddress:null,dexId:g.evidence?g.evidence.dexId:null,
+      lastPrice:g.lastPrice!=null?g.lastPrice:null,lastPriceAt:g.lastPriceAt||null,
+      multiple:g.multiple!=null?g.multiple:null,
+      milestonesHit:g.milestonesHit||[],
+      links:{dexscreener:'https://dexscreener.com/solana/'+(g.evidence&&g.evidence.pairAddress?g.evidence.pairAddress:g.mint),
+        gmgn:'https://gmgn.ai/sol/token/'+g.mint,solscan:'https://solscan.io/token/'+g.mint},
+      paperOnly:true};
+  }
+
+  const all=[...S.candidates.values()];
+  const counts={total:all.length,
+    validated:all.filter(c=>c.validation&&c.validation.status==='VALIDATED').length,
+    paperSignals:all.filter(c=>c.state==='PAPER_SIGNAL').length,
+    dataIncomplete:all.filter(c=>c.state==='DATA_INCOMPLETE').length,
+    watchlist:all.filter(c=>c.state==='WATCHLIST').length};
+  const top=all.filter(c=>c.score).sort((a,b)=>b.score.total-a.score.total).slice(0,10).map(c=>({
+    mint:c.mint,symbol:c.market?c.market.symbol:null,state:c.state,score:c.score.total,
+    riskVerdict:c.risk?c.risk.verdict:null,liquidityUsd:c.market?c.market.liquidityUsd:null,
+    mcap:c.market?c.market.mcap:null,observedAt:c.market?c.market.observedAt:null,
+    links:{dexscreener:'https://dexscreener.com/solana/'+(c.market&&c.market.pairAddress?c.market.pairAddress:c.mint),
+      gmgn:'https://gmgn.ai/sol/token/'+c.mint,solscan:'https://solscan.io/token/'+c.mint}}));
+  const signals=[...S.signals.values()].sort((a,b)=>b.createdAt-a.createdAt).slice(0,15).map(publicSignal);
+
+  const feed={generatedAt:U.now(),generatedAtIso:new Date().toISOString(),
+    scanner:'solana-radar-server',runner:'cloudflare-worker-cron',
+    engineSource:'index.html embedded engine, extracted verbatim at run time',
+    buildMarker:E.BUILD_MARKER,appVersion:E.APP_VERSION,scoreVersion:E.SCORE_VERSION,
+    riskPolicyVersion:E.RISK_POLICY_VERSION,thresholdsVersion:E.THRESHOLDS_VERSION,
+    cycle,cycleStartedAt:cycleStart,cycleDurationMs:U.now()-cycleStart,
+    schedule:'every 5 min via Cloudflare Workers cron (free tier, keyless data) — runs whether or not any tab is open. Backstop: GitHub Actions cron (throttled in this repo to every few hours).',
+    engineDrift:drift,
+    stateRestored:restored,
+    sources:REG.all().map(s=>({id:s.id,label:s.label,status:s.status,lastSuccess:s.lastSuccess,lastError:s.lastError,
+      requestCount:s.requestCount,rateLimitCount:s.rateLimitCount})),
+    counters:S.diag.counters,counts,
+    analyzedThisCycle:analyzed,signalMarksTracked:marksTracked,
+    newSignalsThisCycle:newSignals.map(publicSignal),
+    recentSignals:signals,topCandidates:top,
+    errors:errors.slice(0,20),
+    notes:['PAPER ONLY — research signals, not financial advice, never executable trades.',
+      'Engine code is the in-tab scanner engine extracted verbatim from index.html into a static bundle (hash-checked every cycle against the live page; drift is labelled, never silent); rules unchanged.',
+      'Signal price is frozen at signal time; lastPrice/multiple are observed Dexscreener marks, not executable fills.',
+      'Candidates idle >72h without an unconsumed signal are evicted (state hygiene); signals and wallets bounded.']};
+
+  const stateOut=JSON.stringify({schema:1,savedAt:U.now(),cycleBase:cycle,
+    counters:S.diag.counters,rejectReasons:S.diag.rejectReasons,
+    candidates:[...S.candidates.values()],wallets:[...S.wallets.values()],signals:[...S.signals.values()],
+    scoreHistory:S.scoreHistory.slice(-200),milestones});
+
+  const ok1=await putFile(env,STATE_PATH,stateOut,'radar-server: state cycle '+cycle+' (worker)');
+  const ok2=await putFile(env,FEED_PATH,JSON.stringify(feed,null,1),'radar-server: scan cycle '+cycle+' '+new Date().toISOString()+' (worker)');
+  console.log('worker cycle',cycle,'ok · restored',restored,'· candidates',counts.total,'· new signals',newSignals.length,'· marks',marksTracked,'· state write',ok1,'· feed write',ok2,'· sources',REG.all().map(s=>s.id+':'+s.status).join(','));
+}
+
+export default{
+  async scheduled(event,env,ctx){ ctx.waitUntil(runCycle(env).catch(e=>console.log('cycle error',e&&e.message||e))); },
+  async fetch(req,env){ return new Response(JSON.stringify({ok:true,service:'jk-radar-scanner',note:'cron-only worker; no manual trigger. Feed: '+FEED_PATH}),{headers:{'Content-Type':'application/json'}}); }
+};
