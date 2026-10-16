@@ -1,6 +1,6 @@
 {
- "generatedAt": 1792165841060,
- "generatedAtIso": "2026-10-16T15:50:41.060Z",
+ "generatedAt": 1792166464746,
+ "generatedAtIso": "2026-10-16T16:01:04.746Z",
  "scanner": "solana-radar-server",
  "runner": "cloudflare-worker-cron",
  "engineSource": "index.html embedded engine, extracted verbatim at run time",
@@ -9,9 +9,9 @@
  "scoreVersion": "score-v1.0",
  "riskPolicyVersion": "risk-v1.0",
  "thresholdsVersion": "thresh-v1.0",
- "cycle": 15,
- "cycleStartedAt": 1792165837048,
- "cycleDurationMs": 4012,
+ "cycle": 16,
+ "cycleStartedAt": 1792166436235,
+ "cycleDurationMs": 28511,
  "schedule": "every 5 min via Cloudflare Workers cron (free tier, keyless data) — runs whether or not any tab is open. Backstop: GitHub Actions cron (throttled in this repo to every few hours).",
  "engineDrift": null,
  "stateRestored": true,
@@ -20,48 +20,199 @@
    "id": "dexscreener",
    "label": "Dexscreener (public, keyless)",
    "status": "DEGRADED",
-   "lastSuccess": null,
+   "lastSuccess": 1792166436380,
    "lastError": "HTTP 429",
-   "requestCount": 2,
+   "requestCount": 16,
    "rateLimitCount": 1
   },
   {
    "id": "rugcheck",
    "label": "RugCheck (public, keyless)",
-   "status": "NOT_OBSERVED",
-   "lastSuccess": null,
+   "status": "LIVE",
+   "lastSuccess": 1792166451595,
    "lastError": null,
-   "requestCount": 0,
+   "requestCount": 3,
    "rateLimitCount": 0
   },
   {
    "id": "solanarpc",
    "label": "Solana JSON-RPC (PublicNode)",
-   "status": "NOT_OBSERVED",
-   "lastSuccess": null,
+   "status": "LIVE",
+   "lastSuccess": 1792166460736,
    "lastError": null,
-   "requestCount": 0,
+   "requestCount": 19,
    "rateLimitCount": 0
   }
  ],
  "counters": {
-  "discovered": 85,
+  "discovered": 95,
   "validated": 0,
   "rejected": 0,
   "incomplete": 0,
-  "signals": 50
+  "signals": 53
  },
  "counts": {
-  "total": 85,
-  "validated": 50,
-  "paperSignals": 50,
+  "total": 95,
+  "validated": 53,
+  "paperSignals": 53,
   "dataIncomplete": 0,
   "watchlist": 0
  },
- "analyzedThisCycle": 0,
+ "analyzedThisCycle": 3,
  "signalMarksTracked": 0,
- "newSignalsThisCycle": [],
+ "newSignalsThisCycle": [
+  {
+   "id": "sig_mvb5mo0446xj6y",
+   "mint": "D76bHiftcAiFYznSGCoxWWordS9PnzSejvYxayuhpump",
+   "symbol": "SOCCAR",
+   "name": "Soccar",
+   "createdAt": 1792166446084,
+   "signalPriceUsd": 0.000003759,
+   "score": 33.5,
+   "riskVerdict": "FAIL",
+   "liquidityUsd": null,
+   "volume24": 58416.57,
+   "qualifiedWallets": 4,
+   "pairAddress": "B422QdcnwwZvwH94TWsXcdfpe2k5KqKoZ3mq6MRT1ccr",
+   "dexId": "pumpfun",
+   "lastPrice": null,
+   "lastPriceAt": null,
+   "multiple": null,
+   "milestonesHit": [],
+   "links": {
+    "dexscreener": "https://dexscreener.com/solana/B422QdcnwwZvwH94TWsXcdfpe2k5KqKoZ3mq6MRT1ccr",
+    "gmgn": "https://gmgn.ai/sol/token/D76bHiftcAiFYznSGCoxWWordS9PnzSejvYxayuhpump",
+    "solscan": "https://solscan.io/token/D76bHiftcAiFYznSGCoxWWordS9PnzSejvYxayuhpump"
+   },
+   "paperOnly": true
+  },
+  {
+   "id": "sig_mvb5ms4fvz4sic",
+   "mint": "2ZZFYPDypQcah5tcYhLnpdNmcxLCiec7oA6X6uFnpump",
+   "symbol": "Propy",
+   "name": "Propy",
+   "createdAt": 1792166451423,
+   "signalPriceUsd": 0.000009425,
+   "score": 14.3,
+   "riskVerdict": "FAIL",
+   "liquidityUsd": null,
+   "volume24": 16882.44,
+   "qualifiedWallets": 1,
+   "pairAddress": "2WViYpFzcTDcV8KYWyvuJAVh3SxfpzcFmzChMea3dbyQ",
+   "dexId": "pumpfun",
+   "lastPrice": null,
+   "lastPriceAt": null,
+   "multiple": null,
+   "milestonesHit": [],
+   "links": {
+    "dexscreener": "https://dexscreener.com/solana/2WViYpFzcTDcV8KYWyvuJAVh3SxfpzcFmzChMea3dbyQ",
+    "gmgn": "https://gmgn.ai/sol/token/2ZZFYPDypQcah5tcYhLnpdNmcxLCiec7oA6X6uFnpump",
+    "solscan": "https://solscan.io/token/2ZZFYPDypQcah5tcYhLnpdNmcxLCiec7oA6X6uFnpump"
+   },
+   "paperOnly": true
+  },
+  {
+   "id": "sig_mvb5mzb442n1d9",
+   "mint": "EerxgTnkL6KCNjn8uKMby7ZR8zh91xftS3WFethopump",
+   "symbol": "FTR",
+   "name": "Fraudulent Tesla Roadster",
+   "createdAt": 1792166460736,
+   "signalPriceUsd": 0.000204,
+   "score": 74,
+   "riskVerdict": "PASS",
+   "liquidityUsd": 37400.66,
+   "volume24": 256095.06,
+   "qualifiedWallets": 4,
+   "pairAddress": "8RT2CJdnkTarxAznyYekMjhsYCaicsP3eDHybuhBkm9V",
+   "dexId": "pumpswap",
+   "lastPrice": null,
+   "lastPriceAt": null,
+   "multiple": null,
+   "milestonesHit": [],
+   "links": {
+    "dexscreener": "https://dexscreener.com/solana/8RT2CJdnkTarxAznyYekMjhsYCaicsP3eDHybuhBkm9V",
+    "gmgn": "https://gmgn.ai/sol/token/EerxgTnkL6KCNjn8uKMby7ZR8zh91xftS3WFethopump",
+    "solscan": "https://solscan.io/token/EerxgTnkL6KCNjn8uKMby7ZR8zh91xftS3WFethopump"
+   },
+   "paperOnly": true
+  }
+ ],
  "recentSignals": [
+  {
+   "id": "sig_mvb5mzb442n1d9",
+   "mint": "EerxgTnkL6KCNjn8uKMby7ZR8zh91xftS3WFethopump",
+   "symbol": "FTR",
+   "name": "Fraudulent Tesla Roadster",
+   "createdAt": 1792166460736,
+   "signalPriceUsd": 0.000204,
+   "score": 74,
+   "riskVerdict": "PASS",
+   "liquidityUsd": 37400.66,
+   "volume24": 256095.06,
+   "qualifiedWallets": 4,
+   "pairAddress": "8RT2CJdnkTarxAznyYekMjhsYCaicsP3eDHybuhBkm9V",
+   "dexId": "pumpswap",
+   "lastPrice": null,
+   "lastPriceAt": null,
+   "multiple": null,
+   "milestonesHit": [],
+   "links": {
+    "dexscreener": "https://dexscreener.com/solana/8RT2CJdnkTarxAznyYekMjhsYCaicsP3eDHybuhBkm9V",
+    "gmgn": "https://gmgn.ai/sol/token/EerxgTnkL6KCNjn8uKMby7ZR8zh91xftS3WFethopump",
+    "solscan": "https://solscan.io/token/EerxgTnkL6KCNjn8uKMby7ZR8zh91xftS3WFethopump"
+   },
+   "paperOnly": true
+  },
+  {
+   "id": "sig_mvb5ms4fvz4sic",
+   "mint": "2ZZFYPDypQcah5tcYhLnpdNmcxLCiec7oA6X6uFnpump",
+   "symbol": "Propy",
+   "name": "Propy",
+   "createdAt": 1792166451423,
+   "signalPriceUsd": 0.000009425,
+   "score": 14.3,
+   "riskVerdict": "FAIL",
+   "liquidityUsd": null,
+   "volume24": 16882.44,
+   "qualifiedWallets": 1,
+   "pairAddress": "2WViYpFzcTDcV8KYWyvuJAVh3SxfpzcFmzChMea3dbyQ",
+   "dexId": "pumpfun",
+   "lastPrice": null,
+   "lastPriceAt": null,
+   "multiple": null,
+   "milestonesHit": [],
+   "links": {
+    "dexscreener": "https://dexscreener.com/solana/2WViYpFzcTDcV8KYWyvuJAVh3SxfpzcFmzChMea3dbyQ",
+    "gmgn": "https://gmgn.ai/sol/token/2ZZFYPDypQcah5tcYhLnpdNmcxLCiec7oA6X6uFnpump",
+    "solscan": "https://solscan.io/token/2ZZFYPDypQcah5tcYhLnpdNmcxLCiec7oA6X6uFnpump"
+   },
+   "paperOnly": true
+  },
+  {
+   "id": "sig_mvb5mo0446xj6y",
+   "mint": "D76bHiftcAiFYznSGCoxWWordS9PnzSejvYxayuhpump",
+   "symbol": "SOCCAR",
+   "name": "Soccar",
+   "createdAt": 1792166446084,
+   "signalPriceUsd": 0.000003759,
+   "score": 33.5,
+   "riskVerdict": "FAIL",
+   "liquidityUsd": null,
+   "volume24": 58416.57,
+   "qualifiedWallets": 4,
+   "pairAddress": "B422QdcnwwZvwH94TWsXcdfpe2k5KqKoZ3mq6MRT1ccr",
+   "dexId": "pumpfun",
+   "lastPrice": null,
+   "lastPriceAt": null,
+   "multiple": null,
+   "milestonesHit": [],
+   "links": {
+    "dexscreener": "https://dexscreener.com/solana/B422QdcnwwZvwH94TWsXcdfpe2k5KqKoZ3mq6MRT1ccr",
+    "gmgn": "https://gmgn.ai/sol/token/D76bHiftcAiFYznSGCoxWWordS9PnzSejvYxayuhpump",
+    "solscan": "https://solscan.io/token/D76bHiftcAiFYznSGCoxWWordS9PnzSejvYxayuhpump"
+   },
+   "paperOnly": true
+  },
   {
    "id": "sig_mvb4wyl1wuz774",
    "mint": "1htv5Nzfdy44FJWAdTXZoACJW4BWbB2XwZC6SVopurp",
@@ -361,81 +512,6 @@
     "solscan": "https://solscan.io/token/74Ano8HssvNpWTCrrNY4NkbYiZqnFRVYyTPqrTvEpump"
    },
    "paperOnly": true
-  },
-  {
-   "id": "sig_mvb3790iy7mqsp",
-   "mint": "51y1y7zwzjrnrbyhhq3LcthUNcymhsT2PAKoW6fYpump",
-   "symbol": "HYPERBOLA",
-   "name": "Hyperbola",
-   "createdAt": 1792162367586,
-   "signalPriceUsd": 0.00001142,
-   "score": 23.3,
-   "riskVerdict": "FAIL",
-   "liquidityUsd": 7525.7,
-   "volume24": 26101.98,
-   "qualifiedWallets": 1,
-   "pairAddress": "AXRiwGhdg9xCbFfVNMqayp9qcx2wZ3q2bKw2Rb97otMX",
-   "dexId": "pumpswap",
-   "lastPrice": 0.000003206,
-   "lastPriceAt": 1792164950876,
-   "multiple": 0.28,
-   "milestonesHit": [],
-   "links": {
-    "dexscreener": "https://dexscreener.com/solana/AXRiwGhdg9xCbFfVNMqayp9qcx2wZ3q2bKw2Rb97otMX",
-    "gmgn": "https://gmgn.ai/sol/token/51y1y7zwzjrnrbyhhq3LcthUNcymhsT2PAKoW6fYpump",
-    "solscan": "https://solscan.io/token/51y1y7zwzjrnrbyhhq3LcthUNcymhsT2PAKoW6fYpump"
-   },
-   "paperOnly": true
-  },
-  {
-   "id": "sig_mvb378jhrt8nvg",
-   "mint": "6Hv2fbmmrzxcoqoUkdrGWY5UcFiFpMuuhiTazeXYpump",
-   "symbol": "OVYNS",
-   "name": "OVYNS",
-   "createdAt": 1792162366973,
-   "signalPriceUsd": 0.00001435,
-   "score": 19.5,
-   "riskVerdict": "FAIL",
-   "liquidityUsd": null,
-   "volume24": 59546.08,
-   "qualifiedWallets": 1,
-   "pairAddress": "4AVARr3kRZLVmd1bPCXCaE5FbuokoDxZ8Ehr5gcSNmcN",
-   "dexId": "pumpfun",
-   "lastPrice": 0.000003219,
-   "lastPriceAt": 1792164950883,
-   "multiple": 0.22,
-   "milestonesHit": [],
-   "links": {
-    "dexscreener": "https://dexscreener.com/solana/4AVARr3kRZLVmd1bPCXCaE5FbuokoDxZ8Ehr5gcSNmcN",
-    "gmgn": "https://gmgn.ai/sol/token/6Hv2fbmmrzxcoqoUkdrGWY5UcFiFpMuuhiTazeXYpump",
-    "solscan": "https://solscan.io/token/6Hv2fbmmrzxcoqoUkdrGWY5UcFiFpMuuhiTazeXYpump"
-   },
-   "paperOnly": true
-  },
-  {
-   "id": "sig_mvb3781o4zcjf5",
-   "mint": "9MP3sHYQY6gjUJPNYJLBnLYmVaNBCkmproSQWXArpump",
-   "symbol": "GCBL",
-   "name": "GOAT CABAL",
-   "createdAt": 1792162366332,
-   "signalPriceUsd": 0.00001937,
-   "score": 17.3,
-   "riskVerdict": "FAIL",
-   "liquidityUsd": null,
-   "volume24": 27308.24,
-   "qualifiedWallets": 1,
-   "pairAddress": "8hfBUvZmqbF8tEVk2C2Sm8GmBqHfBxaVcmd1724Bj3Ho",
-   "dexId": "pumpfun",
-   "lastPrice": 0.00002185,
-   "lastPriceAt": 1792162536363,
-   "multiple": 1.13,
-   "milestonesHit": [],
-   "links": {
-    "dexscreener": "https://dexscreener.com/solana/8hfBUvZmqbF8tEVk2C2Sm8GmBqHfBxaVcmd1724Bj3Ho",
-    "gmgn": "https://gmgn.ai/sol/token/9MP3sHYQY6gjUJPNYJLBnLYmVaNBCkmproSQWXArpump",
-    "solscan": "https://solscan.io/token/9MP3sHYQY6gjUJPNYJLBnLYmVaNBCkmproSQWXArpump"
-   },
-   "paperOnly": true
   }
  ],
  "topCandidates": [
@@ -452,6 +528,21 @@
     "dexscreener": "https://dexscreener.com/solana/3QNg1RKG3xH4d4snKmdC5vF6CCP8SBBEfy3NWpT8GR4f",
     "gmgn": "https://gmgn.ai/sol/token/3xmzHi86JTUdye7bUuT9TdBPZLeBK9nBCA44JHRdpump",
     "solscan": "https://solscan.io/token/3xmzHi86JTUdye7bUuT9TdBPZLeBK9nBCA44JHRdpump"
+   }
+  },
+  {
+   "mint": "EerxgTnkL6KCNjn8uKMby7ZR8zh91xftS3WFethopump",
+   "symbol": "FTR",
+   "state": "PAPER_SIGNAL",
+   "score": 74,
+   "riskVerdict": "PASS",
+   "liquidityUsd": 37400.66,
+   "mcap": 204084,
+   "observedAt": 1792166436315,
+   "links": {
+    "dexscreener": "https://dexscreener.com/solana/8RT2CJdnkTarxAznyYekMjhsYCaicsP3eDHybuhBkm9V",
+    "gmgn": "https://gmgn.ai/sol/token/EerxgTnkL6KCNjn8uKMby7ZR8zh91xftS3WFethopump",
+    "solscan": "https://solscan.io/token/EerxgTnkL6KCNjn8uKMby7ZR8zh91xftS3WFethopump"
    }
   },
   {
@@ -573,26 +664,10 @@
     "gmgn": "https://gmgn.ai/sol/token/Diy4Q5aiNEcdn7CWhuwYtuoHtHD9rKBTHCa9hi4qpump",
     "solscan": "https://solscan.io/token/Diy4Q5aiNEcdn7CWhuwYtuoHtHD9rKBTHCa9hi4qpump"
    }
-  },
-  {
-   "mint": "ArenDYANqFNkp8ZqAXt69vT5Dz7WD4zDfSpVw6oPpump",
-   "symbol": "Cartridge",
-   "state": "PAPER_SIGNAL",
-   "score": 49.8,
-   "riskVerdict": "PASS",
-   "liquidityUsd": 29808.58,
-   "mcap": 74203,
-   "observedAt": 1792162536536,
-   "links": {
-    "dexscreener": "https://dexscreener.com/solana/qikS6TVXgNocaDuhRB3B94cyeaUJevP1c7XEyMfYT7Z",
-    "gmgn": "https://gmgn.ai/sol/token/ArenDYANqFNkp8ZqAXt69vT5Dz7WD4zDfSpVw6oPpump",
-    "solscan": "https://solscan.io/token/ArenDYANqFNkp8ZqAXt69vT5Dz7WD4zDfSpVw6oPpump"
-   }
   }
  ],
  "errors": [
-  "discovery: profiles: HTTP 429",
-  "discovery: boosts: source in rate-limit backoff"
+  "deadline reached — remaining candidates deferred to next cycle"
  ],
  "notes": [
   "PAPER ONLY — research signals, not financial advice, never executable trades.",
