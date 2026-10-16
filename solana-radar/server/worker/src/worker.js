@@ -19,9 +19,20 @@ function b64(s){ const bytes=new TextEncoder().encode(s); let bin='';
   for(let i=0;i<bytes.length;i+=0x8000)bin+=String.fromCharCode.apply(null,bytes.subarray(i,i+0x8000));
   return btoa(bin); }
 
+/* race a promise against a hard budget; late rejections are swallowed so a
+   stalled source can never kill the cycle silently */
+function withTimeout(p,ms,label){
+  return new Promise((resolve,reject)=>{
+    const t=setTimeout(()=>reject(new Error(label+' exceeded '+ms+'ms budget')),ms);
+    p.then(v=>{clearTimeout(t);resolve(v);},e=>{clearTimeout(t);reject(e);});
+    p.catch(()=>{});
+  });
+}
+
 async function gh(env,method,path,body,raw){
   const r=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+path+(method==='GET'&&path.indexOf('?')<0?'?ref=main':''),{
     method,headers:{Authorization:'Bearer '+env.GH_TOKEN,Accept:raw?'application/vnd.github.raw':'application/vnd.github+json','User-Agent':'jk-radar-scanner'},
+    signal:AbortSignal.timeout(10000),
     body:body?JSON.stringify(body):undefined});
   if(r.status===404)return null;
   if(!r.ok){ const t=await r.text(); throw new Error('github '+method+' '+path+' -> '+r.status+' '+t.slice(0,160)); }
@@ -29,14 +40,14 @@ async function gh(env,method,path,body,raw){
 }
 
 async function putFile(env,path,content,message){
-  for(let a=0;a<3;a++){
+  for(let a=0;a<2;a++){
     try{
       const meta=await gh(env,'GET',path);
       const body={message,content:b64(content),branch:'main'};
       if(meta&&meta.sha)body.sha=meta.sha;
       const r=await gh(env,'PUT',path,body);
       if(r&&r.content)return true;
-    }catch(e){ if(a===2){console.log('putFile failed',path,e.message);return false;} await new Promise(r2=>setTimeout(r2,800)); }
+    }catch(e){ if(a===1){console.log('putFile failed',path,e.message);return false;} await new Promise(r2=>setTimeout(r2,700)); }
   }
   return false;
 }
@@ -59,9 +70,12 @@ async function engineDrift(html){
 
 async function runCycle(env){
   const deadline=Date.now()+DEADLINE_MS;
-  const [html,stateText]=await Promise.all([
-    gh(env,'GET',PAGE_PATH,null,true),
-    gh(env,'GET',STATE_PATH,null,true).catch(()=>null)]);
+  const phaseT={t0:Date.now()};
+  let stateText=null,stateFetchError=null;
+  const html=await withTimeout(gh(env,'GET',PAGE_PATH,null,true),12000,'page read');
+  try{ stateText=await withTimeout(gh(env,'GET',STATE_PATH,null,true),12000,'state read'); }
+  catch(e){ stateFetchError=String(e.message||e).slice(0,140); }
+  phaseT.readMs=Date.now()-phaseT.t0;
   const drift=await engineDrift(html);
   const {U,S,REG,DISCOVERY,DEX,WALLETS,CLUSTERS,RISK,SCORER,QUAL}=E;
   /* fresh state each cycle (warm isolates reuse module singletons) */
@@ -90,10 +104,26 @@ async function runCycle(env){
   S.on('signal',g=>newSignals.push(g));
   const errors=[];
   if(drift)errors.push('ENGINE DRIFT: '+drift);
-  try{
-    const r=await DISCOVERY.runCycle();
-    if(r&&r.errors&&r.errors.length)errors.push(...r.errors.map(e=>'discovery: '+e));
-  }catch(e){ errors.push('discovery cycle: '+(e.message||e)); }
+  const DISCOVERY_BUDGET_MS=20000;
+  let dexBackoffUntil=0;
+  if(st&&st.dexBackoffUntil&&st.dexBackoffUntil>Date.now()){
+    dexBackoffUntil=st.dexBackoffUntil;
+    errors.push('discovery skipped: dexscreener 429 cooldown active until '+new Date(dexBackoffUntil).toISOString()+' (driver-level backoff, engine rules unchanged; heartbeat feed still written)');
+  }else{
+    const dT=Date.now();
+    try{
+      const r=await withTimeout(DISCOVERY.runCycle(),DISCOVERY_BUDGET_MS,'discovery');
+      if(r&&r.errors&&r.errors.length)errors.push(...r.errors.map(e=>'discovery: '+e));
+    }catch(e){ errors.push('discovery cycle: '+(e.message||e)); }
+    phaseT.discoveryMs=Date.now()-dT;
+    const dex=REG.all().find(s=>s.id==='dexscreener');
+    const dex429=dex&&dex.status==='DEGRADED'&&String(dex.lastError||'').includes('429');
+    const discoveryStalled=(phaseT.discoveryMs||0)>=DISCOVERY_BUDGET_MS;
+    if(dex429||discoveryStalled){
+      dexBackoffUntil=Date.now()+10*60*1000;
+      errors.push('dexscreener cooldown armed for 10 min (driver-level; discovery resumes automatically, heartbeats continue)');
+    }
+  }
 
   async function analyzeOne(mint){
     const c=S.candidates.get(mint); if(!c)return null;
@@ -133,7 +163,7 @@ async function runCycle(env){
     if(recent.length){
       const mints=[...new Set(recent.map(g=>g.mint))];
       let prices={};
-      try{ prices=await DISCOVERY.refreshPricesFor(mints); }catch(e){ errors.push('marks: '+String(e.message||e).slice(0,120)); }
+      try{ prices=await withTimeout(DISCOVERY.refreshPricesFor(mints),8000,'marks refresh'); }catch(e){ errors.push('marks: '+String(e.message||e).slice(0,120)); }
       for(const g of recent){
         const pr=prices[g.mint];
         if(!pr||!pr.ok||pr.priceUsd==null)continue;
@@ -226,12 +256,21 @@ async function runCycle(env){
       'Signal price is frozen at signal time; lastPrice/multiple are observed Dexscreener marks, not executable fills.',
       'Candidates idle >72h without an unconsumed signal are evicted (state hygiene); signals and wallets bounded.']};
 
+  feed.driver='worker-budget-v2 2026-10-17';
+  feed.phaseMs=phaseT;
+  feed.dexBackoffUntil=dexBackoffUntil||null;
+  feed.stateReadError=stateFetchError;
+  feed.notes.push('Driver enforces hard per-phase time budgets and always writes this heartbeat feed, even when a data source stalls; a stalled source is labelled in errors, never silent.');
+
   const stateOut=JSON.stringify({schema:1,savedAt:U.now(),cycleBase:cycle,
     counters:S.diag.counters,rejectReasons:S.diag.rejectReasons,
     candidates:[...S.candidates.values()],wallets:[...S.wallets.values()],signals:[...S.signals.values()],
-    scoreHistory:S.scoreHistory.slice(-200),milestones});
+    scoreHistory:S.scoreHistory.slice(-200),milestones,dexBackoffUntil:dexBackoffUntil||0});
 
-  const ok1=await putFile(env,STATE_PATH,stateOut,'radar-server: state cycle '+cycle+' (worker)');
+  /* never overwrite good state with a blank one after a failed state read */
+  const ok1=stateFetchError?(console.log('state write SKIPPED - state read failed:',stateFetchError),false)
+    :await putFile(env,STATE_PATH,stateOut,'radar-server: state cycle '+cycle+' (worker)');
+  feed.stateWritten=ok1;
   const ok2=await putFile(env,FEED_PATH,JSON.stringify(feed,null,1),'radar-server: scan cycle '+cycle+' '+new Date().toISOString()+' (worker)');
   console.log('worker cycle',cycle,'ok · restored',restored,'· candidates',counts.total,'· new signals',newSignals.length,'· marks',marksTracked,'· state write',ok1,'· feed write',ok2,'· sources',REG.all().map(s=>s.id+':'+s.status).join(','));
 }
