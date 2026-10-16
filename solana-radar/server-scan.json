@@ -1,6 +1,6 @@
 {
- "generatedAt": 1792185939659,
- "generatedAtIso": "2026-10-16T21:25:39.659Z",
+ "generatedAt": 1792186239784,
+ "generatedAtIso": "2026-10-16T21:30:39.784Z",
  "scanner": "solana-radar-server",
  "runner": "cloudflare-worker-cron",
  "engineSource": "index.html embedded engine, extracted verbatim at run time",
@@ -9,9 +9,9 @@
  "scoreVersion": "score-v1.0",
  "riskPolicyVersion": "risk-v1.0",
  "thresholdsVersion": "thresh-v1.0",
- "cycle": 51,
- "cycleStartedAt": 1792185935647,
- "cycleDurationMs": 4012,
+ "cycle": 52,
+ "cycleStartedAt": 1792186235771,
+ "cycleDurationMs": 4013,
  "schedule": "every 5 min via Cloudflare Workers cron (free tier, keyless data) — runs whether or not any tab is open. Backstop: GitHub Actions cron (throttled in this repo to every few hours).",
  "engineDrift": null,
  "stateRestored": true,
@@ -606,9 +606,7 @@
   }
  ],
  "errors": [
-  "discovery: profiles: HTTP 429",
-  "discovery: boosts: source in rate-limit backoff",
-  "dexscreener cooldown armed for 10 min (strike 1, driver-level; discovery resumes automatically, heartbeats continue)"
+  "discovery skipped: dexscreener 429 cooldown active until 2026-10-16T21:35:39.659Z (driver-level backoff, engine rules unchanged; heartbeat feed still written)"
  ],
  "notes": [
   "PAPER ONLY — research signals, not financial advice, never executable trades.",
@@ -619,9 +617,8 @@
  ],
  "driver": "worker-budget-v2 2026-10-17",
  "phaseMs": {
-  "t0": 1792185934854,
-  "readMs": 793,
-  "discoveryMs": 4012
+  "t0": 1792186234756,
+  "readMs": 1015
  },
  "dexBackoffUntil": 1792186539659,
  "dexBackoffStrikes": 1,
