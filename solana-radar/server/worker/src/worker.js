@@ -137,7 +137,7 @@ async function runCycle(env){
         const mins=10*dexStrikes;
         dexBackoffUntil=Date.now()+mins*60*1000;
         errors.push('dexscreener cooldown armed for '+mins+' min (strike '+dexStrikes+' after '+dex429Streak+' consecutive 429 cycles, driver-level; discovery resumes automatically, heartbeats continue)');
-        errors.push('GitHub Actions backstop (separate egress IPs, runs every 5 min) covers discovery during this cooldown');
+        errors.push('GitHub Actions backstop (separate egress IPs) covers discovery when its scheduled run lands — GitHub delays the 5-min cron in practice, so coverage is best-effort');
       }else{
         errors.push('dexscreener 429 this cycle — retrying next cycle (cooldown arms after 2 consecutive 429 cycles)');
       }
@@ -275,7 +275,7 @@ async function runCycle(env){
     buildMarker:E.BUILD_MARKER,appVersion:E.APP_VERSION,scoreVersion:E.SCORE_VERSION,
     riskPolicyVersion:E.RISK_POLICY_VERSION,thresholdsVersion:E.THRESHOLDS_VERSION,
     cycle,cycleStartedAt:cycleStart,cycleDurationMs:U.now()-cycleStart,
-    schedule:'every 5 min via Cloudflare Workers cron (free tier, keyless data) — runs whether or not any tab is open. Backstop: GitHub Actions cron every 5 min (skips while this worker is healthy with dexscreener LIVE; covers discovery from separate egress IPs during dexscreener 429 cooldowns or worker outages).',
+    schedule:'every 5 min via Cloudflare Workers cron (free tier, keyless data) — runs whether or not any tab is open. Backstop: GitHub Actions cron (requested every 5 min; GitHub delays it in practice — observed every 2-3 h). When it runs it skips while this worker is healthy with dexscreener LIVE, and covers discovery from separate egress IPs during dexscreener 429 cooldowns or worker outages.',
     engineDrift:drift,
     stateRestored:restored,
     sources:srcList,
