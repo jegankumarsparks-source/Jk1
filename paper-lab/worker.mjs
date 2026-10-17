@@ -99,10 +99,11 @@ async function run(env){
    const R=[];
    for(const m of Object.keys(g)){const b=pickPair(g[m]);if(!b||!b.baseToken)continue;const e=evalCoin(b,ST.cfg,now);R.push({mint:m,sym:b.baseToken.symbol,name:b.baseToken.name,pair:{priceChange:b.priceChange,volume:{h1:b.volume&&b.volume.h1}},e});}
    R.sort((a,b)=>(b.e.pass-a.e.pass)||(b.e.score-a.e.score));ST.radar=R.slice(0,40);
-   if(ST.cfg.auto){for(const c of R){if(!(c.e.pass&&c.e.tier&&c.e.score>=ST.cfg.minScore-6))continue;
-    if(ST.pos.filter(x=>x.open).length>=ST.cfg.maxOpen)break;
-    if(ST.pos.some(x=>x.mint===c.mint&&(x.open||now-x.entryTime<6*3600e3)))continue;
-    if(summarize(ST).cash<ST.cfg.bet)break;
+   if(ST.cfg.auto){ST.skips=ST.skips||[];const skip=(c,why)=>{ST.skips.push({t:now,sym:c.sym,why});if(ST.skips.length>20)ST.skips=ST.skips.slice(-20)};
+   for(const c of R){if(!(c.e.pass&&c.e.tier&&c.e.score>=ST.cfg.minScore-6))continue;
+    if(ST.pos.filter(x=>x.open).length>=ST.cfg.maxOpen){skip(c,'max open');break}
+    if(ST.pos.some(x=>x.mint===c.mint&&(x.open||now-x.entryTime<6*3600e3))){skip(c,'cooldown');continue}
+    if(summarize(ST).cash<ST.cfg.bet){skip(c,'low cash');break}
     const p=newPos({mint:c.mint,sym:c.sym,name:c.name},c.e.price,ST.cfg,now,c.e.tier,c.e.score);p.auto=true;p.why=c.e.why;p.entryMc=c.e.mc;p.entryLiq=c.e.liq;ST.pos.push(p);}}
   }
   // on degraded discovery: keep last good radar, keep managing positions, no new entries
