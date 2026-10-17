@@ -16,7 +16,9 @@ import * as telegram from './src/adapters/telegram.js';
 const REPO = 'jegankumarsparks-source/Jk1';
 const BASE = 'early-entry-radar';
 const TG_CHANNELS = ['pumpfundotfun']; // config: public-preview channels only (GAP: most CT channels have no preview)
-const SECURITY_BUDGET_PER_CYCLE = 8;   // free-tier safe: each entity costs ~6 API calls
+// Free Workers cap at 50 subrequests/invocation (hit in testing 2026-10-17). Hard budget below.
+const SECURITY_BUDGET_PER_CYCLE = 3;   // each entity costs ~8 subrequests (sec 5 + gates 3)
+const SUBREQUEST_BUDGET = 44;
 const SECURITY_RECHECK_MIN = 30;
 
 const ghHeaders = (env) => ({ authorization: `Bearer ${env.GH_TOKEN}`, accept: 'application/vnd.github+json', 'user-agent': 'jk-early-entry-radar' });
@@ -52,6 +54,10 @@ async function tgSend(env, text, state) {
 
 async function runCycle(env) {
   const t0 = Date.now();
+  globalThis.EER_FETCH_RETRIES = 0; // 50-subrequest cap: no silent retry multiplication inside Workers
+  let subrequests = 0;
+  const realFetch = globalThis.fetch.bind(globalThis);
+  globalThis.fetch = (...a) => { subrequests++; return realFetch(...a); };
   const saved = await ghGet(env, `${BASE}/data/state.json`).catch(() => null);
   const state = saved ? JSON.parse(saved.text) : emptyState();
   if (!state.notifications) state.notifications = [];
@@ -82,7 +88,7 @@ async function runCycle(env) {
     if (ent.kind === 'mint' && (ls.status === 'LAUNCH DETECTED' || ls.status === 'LIVE MARKET VERIFIED')) {
       const lastSec = state.security_results.filter(r => r.entity_id === entityId).slice(-1)[0];
       const stale = !lastSec || (Date.now() - new Date(lastSec.at).getTime()) > SECURITY_RECHECK_MIN * 60000;
-      if (stale && secChecked < SECURITY_BUDGET_PER_CYCLE) {
+      if (stale && secChecked < SECURITY_BUDGET_PER_CYCLE && subrequests < SUBREQUEST_BUDGET - 10) {
         secChecked++;
         const sec = await runSecurityChecks(ent.mint, config);
         persistSecurity(store, entityId, sec);
@@ -115,8 +121,8 @@ async function runCycle(env) {
       const ent = state.entities[tr.entityId];
       tgStatus = await tgSend(env,
         `EARLY-ENTRY RADAR\n${tr.to}\n${ent.name || '?'} (${ent.ticker || '?'})\nmint: ${ent.mint || 'unverified'}\nstate change: ${tr.from || 'new'} -> ${tr.to}\nhttps://jegankumarsparks-source.github.io/Jk1/${BASE}/`, state);
-      state.notifications.push({ key, at: new Date().toISOString(), result: tgStatus });
-      notified++;
+      if (tgStatus === 'sent') { state.notifications.push({ key, at: new Date().toISOString(), result: tgStatus }); notified++; }
+      // not_configured/errors do NOT burn the dedupe key: the alert fires once Telegram is connected
     }
   }
 

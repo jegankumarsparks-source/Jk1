@@ -13,6 +13,29 @@ export function capState(s) {
   return s;
 }
 
+// Repo-backed storage must stay small (GitHub contents API caps ~1MB/file). Keep only
+// the fields the pipeline and dashboard actually use.
+export function slimPayload(source, p) {
+  if (!p || typeof p !== 'object') return p;
+  if (source === 'pumpfun') {
+    const { mint, name, symbol, description, creator, created_timestamp, twitter, telegram, website, complete, bonding_curve } = p;
+    return { mint, name, symbol, description: (description || '').slice(0, 280), creator, created_timestamp, twitter, telegram, website, complete, bonding_curve };
+  }
+  if (source === 'dexscreener') {
+    const { chainId, tokenAddress, url, icon, description, links } = p;
+    return { chainId, tokenAddress, url, icon, description: (description || '').slice(0, 280), links };
+  }
+  if (source === 'geckoterminal') {
+    const a = p.attributes || {};
+    return { attributes: { address: a.address, name: a.name, pool_created_at: a.pool_created_at,
+      base_token_price_usd: a.base_token_price_usd, fdv_usd: a.fdv_usd, market_cap_usd: a.market_cap_usd,
+      reserve_in_usd: a.reserve_in_usd, transactions: a.transactions ? { h24: a.transactions.h24 } : null },
+      relationships: p.relationships ? { base_token: p.relationships.base_token } : undefined };
+  }
+  if (source === 'telegram') return { channel: p.channel, text: (p.text || '').slice(0, 500) };
+  return p;
+}
+
 export function openJsonStore(state) {
   const s = state;
   return {
@@ -25,7 +48,7 @@ export function openJsonStore(state) {
         return { inserted: false, id: ex.id };
       }
       const id = ++s.seq;
-      s.raw_events.push({ id, ...e, url: e.url ?? null, observed_at: e.observed_at ?? null, retrieval_status: e.retrieval_status || 'ok' });
+      s.raw_events.push({ id, ...e, payload: slimPayload(e.source, e.payload), url: e.url ?? null, observed_at: e.observed_at ?? null, retrieval_status: e.retrieval_status || 'ok' });
       return { inserted: true, id };
     },
     upsertEntity(u) {

@@ -39,7 +39,7 @@ export const normalizeName = (s) => (s || '').trim().toLowerCase().replace(/\s+/
 
 // fetch with timeout, retries and exponential backoff. Never throws on HTTP errors;
 // returns a structured result so adapters can record retrieval status honestly.
-export async function fetchJson(url, { timeoutMs = 20000, retries = 2, headers = {} } = {}) {
+export async function fetchJson(url, { timeoutMs = 20000, retries = (globalThis.EER_FETCH_RETRIES ?? 2), headers = {} } = {}) {
   let attempt = 0, lastErr = null;
   while (attempt <= retries) {
     const started = Date.now();
