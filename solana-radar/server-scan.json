@@ -1,6 +1,6 @@
 {
- "generatedAt": 1792227345846,
- "generatedAtIso": "2026-10-17T08:55:45.846Z",
+ "generatedAt": 1792227639232,
+ "generatedAtIso": "2026-10-17T09:00:39.232Z",
  "scanner": "solana-radar-server",
  "runner": "cloudflare-worker-cron",
  "engineSource": "index.html embedded engine, extracted verbatim at run time",
@@ -9,21 +9,21 @@
  "scoreVersion": "score-v1.0",
  "riskPolicyVersion": "risk-v1.0",
  "thresholdsVersion": "thresh-v1.0",
- "cycle": 1,
- "cycleStartedAt": 1792227345685,
- "cycleDurationMs": 161,
+ "cycle": 181,
+ "cycleStartedAt": 1792227635214,
+ "cycleDurationMs": 4018,
  "schedule": "every 5 min via Cloudflare Workers cron (free tier, keyless data) — runs whether or not any tab is open. Backstop: GitHub Actions cron (requested every 5 min; GitHub delays it in practice — observed every 2-3 h). When it runs it skips while this worker is healthy with dexscreener LIVE, and covers discovery from separate egress IPs during dexscreener 429 cooldowns or worker outages.",
  "engineDrift": null,
- "stateRestored": false,
+ "stateRestored": true,
  "sources": [
   {
    "id": "dexscreener",
    "label": "Dexscreener (public, keyless)",
-   "status": "LIVE",
-   "lastSuccess": 1792227345846,
-   "lastError": null,
-   "requestCount": 14,
-   "rateLimitCount": 0
+   "status": "DEGRADED",
+   "lastSuccess": null,
+   "lastError": "HTTP 429",
+   "requestCount": 2,
+   "rateLimitCount": 1
   },
   {
    "id": "rugcheck",
@@ -47,26 +47,643 @@
   }
  ],
  "counters": {
-  "discovered": 12,
+  "discovered": 306,
   "validated": 0,
   "rejected": 0,
-  "incomplete": 0,
-  "signals": 0
+  "incomplete": 102,
+  "signals": 121
  },
  "counts": {
-  "total": 12,
-  "validated": 0,
-  "paperSignals": 0,
-  "dataIncomplete": 0,
+  "total": 309,
+  "validated": 121,
+  "paperSignals": 121,
+  "dataIncomplete": 6,
   "watchlist": 0
  },
  "analyzedThisCycle": 0,
  "signalMarksTracked": 0,
  "newSignalsThisCycle": [],
- "recentSignals": [],
- "topCandidates": [],
+ "recentSignals": [
+  {
+   "id": "sig_mvbzqkeqk0vn22",
+   "mint": "4egapru4zMUtjNuNqr66gn9CukWqPoeyeWbxH1Jxpump",
+   "symbol": "OPTIMUS",
+   "name": "Optimus Prime",
+   "createdAt": 1792217016530,
+   "signalPriceUsd": 0.00001101,
+   "score": 23.5,
+   "riskVerdict": "FAIL",
+   "liquidityUsd": null,
+   "volume24": 73790.89,
+   "qualifiedWallets": 2,
+   "pairAddress": "CFz164q3D1uofcbkfdP4LHdDtmxM6dLheFFy98txeDD4",
+   "dexId": "pumpfun",
+   "lastPrice": 0.000003453,
+   "lastPriceAt": 1792227045117,
+   "multiple": 0.31,
+   "milestonesHit": [],
+   "dumpHit": {
+    "at": 1792218039339,
+    "price": 0.000003979,
+    "multiple": 0.36
+   },
+   "links": {
+    "dexscreener": "https://dexscreener.com/solana/CFz164q3D1uofcbkfdP4LHdDtmxM6dLheFFy98txeDD4",
+    "gmgn": "https://gmgn.ai/sol/token/4egapru4zMUtjNuNqr66gn9CukWqPoeyeWbxH1Jxpump",
+    "solscan": "https://solscan.io/token/4egapru4zMUtjNuNqr66gn9CukWqPoeyeWbxH1Jxpump"
+   },
+   "paperOnly": true
+  },
+  {
+   "id": "sig_mvbzqk5xszncoo",
+   "mint": "rVWG97Yj6ZbuF9zeQo8TosQG6mUcUeL8BocfHu3pump",
+   "symbol": "PRIME",
+   "name": "Optimus Prime",
+   "createdAt": 1792217016213,
+   "signalPriceUsd": 0.00009272,
+   "score": 58,
+   "riskVerdict": "PASS",
+   "liquidityUsd": 25700.69,
+   "volume24": 526152.44,
+   "qualifiedWallets": 2,
+   "pairAddress": "E3uzs2APAc4m6CSTCEZDA65yY1orfTvhCGotWyEjbbzr",
+   "dexId": "pumpswap",
+   "lastPrice": 0.0004054,
+   "lastPriceAt": 1792227045154,
+   "multiple": 4.37,
+   "milestonesHit": [
+    {
+     "x": 1.5,
+     "at": 1792219840862,
+     "price": 0.0004294
+    },
+    {
+     "x": 2,
+     "at": 1792219840862,
+     "price": 0.0004294
+    },
+    {
+     "x": 3,
+     "at": 1792219840862,
+     "price": 0.0004294
+    },
+    {
+     "x": 5,
+     "at": 1792220735486,
+     "price": 0.0007933
+    }
+   ],
+   "dumpHit": null,
+   "links": {
+    "dexscreener": "https://dexscreener.com/solana/E3uzs2APAc4m6CSTCEZDA65yY1orfTvhCGotWyEjbbzr",
+    "gmgn": "https://gmgn.ai/sol/token/rVWG97Yj6ZbuF9zeQo8TosQG6mUcUeL8BocfHu3pump",
+    "solscan": "https://solscan.io/token/rVWG97Yj6ZbuF9zeQo8TosQG6mUcUeL8BocfHu3pump"
+   },
+   "paperOnly": true
+  },
+  {
+   "id": "sig_mvbzqjwsaz1rvb",
+   "mint": "FRypgC2GjcUiEyhpEgdeakxcEBtQ3u2HdSpua3vPpump",
+   "symbol": "HAVEN",
+   "name": "HAVEN",
+   "createdAt": 1792217015884,
+   "signalPriceUsd": 0.000006716,
+   "score": 23.5,
+   "riskVerdict": "FAIL",
+   "liquidityUsd": null,
+   "volume24": 72945.56,
+   "qualifiedWallets": 2,
+   "pairAddress": "FjgDzioc1vRZpC5DUxBgMeiksW69nKtfHkzPH3oEgDtC",
+   "dexId": "pumpfun",
+   "lastPrice": 0.000003604,
+   "lastPriceAt": 1792227045289,
+   "multiple": 0.54,
+   "milestonesHit": [],
+   "dumpHit": null,
+   "links": {
+    "dexscreener": "https://dexscreener.com/solana/FjgDzioc1vRZpC5DUxBgMeiksW69nKtfHkzPH3oEgDtC",
+    "gmgn": "https://gmgn.ai/sol/token/FRypgC2GjcUiEyhpEgdeakxcEBtQ3u2HdSpua3vPpump",
+    "solscan": "https://solscan.io/token/FRypgC2GjcUiEyhpEgdeakxcEBtQ3u2HdSpua3vPpump"
+   },
+   "paperOnly": true
+  },
+  {
+   "id": "sig_mvbzqjnoq4bxpn",
+   "mint": "D6oxgm1qNRC9u13U8y5qiDaH5cj5uHQ3m75u1WqMHu6J",
+   "symbol": "PRIME",
+   "name": "Optimus Prime",
+   "createdAt": 1792217015556,
+   "signalPriceUsd": 0.000003209,
+   "score": 24.5,
+   "riskVerdict": "FAIL",
+   "liquidityUsd": 3034.39,
+   "volume24": 133382.04,
+   "qualifiedWallets": 1,
+   "pairAddress": "Ar4g3hvCrYGK5TQq13yhjMrozR6TC9PK6eajeFSRuhUS",
+   "dexId": "pumpswap",
+   "lastPrice": 0.000002803,
+   "lastPriceAt": 1792227045337,
+   "multiple": 0.87,
+   "milestonesHit": [],
+   "dumpHit": null,
+   "links": {
+    "dexscreener": "https://dexscreener.com/solana/Ar4g3hvCrYGK5TQq13yhjMrozR6TC9PK6eajeFSRuhUS",
+    "gmgn": "https://gmgn.ai/sol/token/D6oxgm1qNRC9u13U8y5qiDaH5cj5uHQ3m75u1WqMHu6J",
+    "solscan": "https://solscan.io/token/D6oxgm1qNRC9u13U8y5qiDaH5cj5uHQ3m75u1WqMHu6J"
+   },
+   "paperOnly": true
+  },
+  {
+   "id": "sig_mvbzqjelpn0w4q",
+   "mint": "DTc5PTmrSrtsRyhfF6pvBQ7N693nNmv17raggAc3sf8J",
+   "symbol": "long",
+   "name": "long boi",
+   "createdAt": 1792217015228,
+   "signalPriceUsd": 0.000003143,
+   "score": 17.3,
+   "riskVerdict": "FAIL",
+   "liquidityUsd": null,
+   "volume24": 37434.53,
+   "qualifiedWallets": 1,
+   "pairAddress": "DWTzWF3JL1QsQSUWp1hFMSqbx2jgzL1kASqxEHeKGt8j",
+   "dexId": "pumpfun",
+   "lastPrice": 0.000003133,
+   "lastPriceAt": 1792227045438,
+   "multiple": 1,
+   "milestonesHit": [],
+   "dumpHit": null,
+   "links": {
+    "dexscreener": "https://dexscreener.com/solana/DWTzWF3JL1QsQSUWp1hFMSqbx2jgzL1kASqxEHeKGt8j",
+    "gmgn": "https://gmgn.ai/sol/token/DTc5PTmrSrtsRyhfF6pvBQ7N693nNmv17raggAc3sf8J",
+    "solscan": "https://solscan.io/token/DTc5PTmrSrtsRyhfF6pvBQ7N693nNmv17raggAc3sf8J"
+   },
+   "paperOnly": true
+  },
+  {
+   "id": "sig_mvbzqj1akcxcmo",
+   "mint": "DcMwUYnPrwz3QH9ZwafFWgVLtuCieHHcphZnD8iJhKUA",
+   "symbol": "PRIME",
+   "name": "Optimus Prime",
+   "createdAt": 1792217014750,
+   "signalPriceUsd": 0.000003285,
+   "score": 33.5,
+   "riskVerdict": "FAIL",
+   "liquidityUsd": 3147.84,
+   "volume24": 200317.41,
+   "qualifiedWallets": 3,
+   "pairAddress": "8Z9FbpSxGvuZv1gYrGhyCe2DuiLkMNnBVjYcJWUds8Fr",
+   "dexId": "pumpswap",
+   "lastPrice": 0.000003528,
+   "lastPriceAt": 1792227045474,
+   "multiple": 1.07,
+   "milestonesHit": [
+    {
+     "x": 1.5,
+     "at": 1792221645065,
+     "price": 0.000005002
+    }
+   ],
+   "dumpHit": null,
+   "links": {
+    "dexscreener": "https://dexscreener.com/solana/8Z9FbpSxGvuZv1gYrGhyCe2DuiLkMNnBVjYcJWUds8Fr",
+    "gmgn": "https://gmgn.ai/sol/token/DcMwUYnPrwz3QH9ZwafFWgVLtuCieHHcphZnD8iJhKUA",
+    "solscan": "https://solscan.io/token/DcMwUYnPrwz3QH9ZwafFWgVLtuCieHHcphZnD8iJhKUA"
+   },
+   "paperOnly": true
+  },
+  {
+   "id": "sig_mvbshksijw366x",
+   "mint": "CMRimD6t4ZwnnBFCPBfjzEVGJtkPUMdmLGcuYPNpump",
+   "symbol": "SCHLONG",
+   "name": "SCHLONG",
+   "createdAt": 1792204839810,
+   "signalPriceUsd": 0.00002739,
+   "score": 23.3,
+   "riskVerdict": "UNKNOWN",
+   "liquidityUsd": null,
+   "volume24": 31152.84,
+   "qualifiedWallets": 0,
+   "pairAddress": "EH5ksa6qtTxZDcWQ3MGnwfju622kvcFL63eD36nc8LBf",
+   "dexId": "pumpfun",
+   "lastPrice": 0.00000216,
+   "lastPriceAt": 1792227045539,
+   "multiple": 0.08,
+   "milestonesHit": [],
+   "dumpHit": {
+    "at": 1792205435646,
+    "price": 0.000002448,
+    "multiple": 0.09
+   },
+   "links": {
+    "dexscreener": "https://dexscreener.com/solana/EH5ksa6qtTxZDcWQ3MGnwfju622kvcFL63eD36nc8LBf",
+    "gmgn": "https://gmgn.ai/sol/token/CMRimD6t4ZwnnBFCPBfjzEVGJtkPUMdmLGcuYPNpump",
+    "solscan": "https://solscan.io/token/CMRimD6t4ZwnnBFCPBfjzEVGJtkPUMdmLGcuYPNpump"
+   },
+   "paperOnly": true
+  },
+  {
+   "id": "sig_mvbshkpl6ro4uo",
+   "mint": "N23Bgy3ox9gMi3K5GD7FVh9ncEm8SyUPwMSPHYEpump",
+   "symbol": "anechoic",
+   "name": "anechoic life",
+   "createdAt": 1792204839705,
+   "signalPriceUsd": 0.000003061,
+   "score": 11.3,
+   "riskVerdict": "FAIL",
+   "liquidityUsd": null,
+   "volume24": 21640.05,
+   "qualifiedWallets": 0,
+   "pairAddress": "CQJTA4irtqfhZPwUSsDVowpwR8bYhCS97LDyTGPcMdp2",
+   "dexId": "pumpfun",
+   "lastPrice": 0.000002933,
+   "lastPriceAt": 1792227045645,
+   "multiple": 0.96,
+   "milestonesHit": [],
+   "dumpHit": null,
+   "links": {
+    "dexscreener": "https://dexscreener.com/solana/CQJTA4irtqfhZPwUSsDVowpwR8bYhCS97LDyTGPcMdp2",
+    "gmgn": "https://gmgn.ai/sol/token/N23Bgy3ox9gMi3K5GD7FVh9ncEm8SyUPwMSPHYEpump",
+    "solscan": "https://solscan.io/token/N23Bgy3ox9gMi3K5GD7FVh9ncEm8SyUPwMSPHYEpump"
+   },
+   "paperOnly": true
+  },
+  {
+   "id": "sig_mvbshkm8ziubr5",
+   "mint": "6jijW4Ne924kqj8XYLKXFrhpeHy5y2qxoKgGzJHQpump",
+   "symbol": "Pluto",
+   "name": "Pluto",
+   "createdAt": 1792204839584,
+   "signalPriceUsd": 0.00002004,
+   "score": 13.5,
+   "riskVerdict": "FAIL",
+   "liquidityUsd": null,
+   "volume24": 90960.34,
+   "qualifiedWallets": 0,
+   "pairAddress": "BP7ndYyafQkZhWzuST2iiGFZGbWgSRGuCXCyRDAW8SPc",
+   "dexId": "pumpfun",
+   "lastPrice": 0.00003221,
+   "lastPriceAt": 1792226441784,
+   "multiple": 1.61,
+   "milestonesHit": [
+    {
+     "x": 1.5,
+     "at": 1792215636005,
+     "price": 0.00003079
+    }
+   ],
+   "dumpHit": null,
+   "links": {
+    "dexscreener": "https://dexscreener.com/solana/BP7ndYyafQkZhWzuST2iiGFZGbWgSRGuCXCyRDAW8SPc",
+    "gmgn": "https://gmgn.ai/sol/token/6jijW4Ne924kqj8XYLKXFrhpeHy5y2qxoKgGzJHQpump",
+    "solscan": "https://solscan.io/token/6jijW4Ne924kqj8XYLKXFrhpeHy5y2qxoKgGzJHQpump"
+   },
+   "paperOnly": true
+  },
+  {
+   "id": "sig_mvbsb592u11gco",
+   "mint": "6U7QrPxAQXCFZMxHeQ6JPE1Y1HsqHtowawYj2Yd7pump",
+   "symbol": "Perpsguy",
+   "name": "Perpsguy",
+   "createdAt": 1792204539734,
+   "signalPriceUsd": 0.0000061,
+   "score": 16.5,
+   "riskVerdict": "FAIL",
+   "liquidityUsd": null,
+   "volume24": 123517.67,
+   "qualifiedWallets": 0,
+   "pairAddress": "DmzsGdfoAPFNJdVF7jxPWbiwgv3A5YT9WsRsPseM9MWB",
+   "dexId": "pumpfun",
+   "lastPrice": 0.000003079,
+   "lastPriceAt": 1792226441877,
+   "multiple": 0.5,
+   "milestonesHit": [],
+   "dumpHit": {
+    "at": 1792215636005,
+    "price": 0.000003079,
+    "multiple": 0.5
+   },
+   "links": {
+    "dexscreener": "https://dexscreener.com/solana/DmzsGdfoAPFNJdVF7jxPWbiwgv3A5YT9WsRsPseM9MWB",
+    "gmgn": "https://gmgn.ai/sol/token/6U7QrPxAQXCFZMxHeQ6JPE1Y1HsqHtowawYj2Yd7pump",
+    "solscan": "https://solscan.io/token/6U7QrPxAQXCFZMxHeQ6JPE1Y1HsqHtowawYj2Yd7pump"
+   },
+   "paperOnly": true
+  },
+  {
+   "id": "sig_mvbsb55sdqsicx",
+   "mint": "jt9Rq3sj3s5Fu43UjAFtaPn13vAq6cqjPEwBdTgpump",
+   "symbol": "Chase",
+   "name": "Dogwitfit",
+   "createdAt": 1792204539616,
+   "signalPriceUsd": 0.000005341,
+   "score": 19.5,
+   "riskVerdict": "FAIL",
+   "liquidityUsd": null,
+   "volume24": 57834.88,
+   "qualifiedWallets": 1,
+   "pairAddress": "Ar59gt2SqewocL6xWSyA2C3YT85Pz6Mt6yg1tP4th7p7",
+   "dexId": "pumpfun",
+   "lastPrice": 0.000003268,
+   "lastPriceAt": 1792226441946,
+   "multiple": 0.61,
+   "milestonesHit": [],
+   "dumpHit": null,
+   "links": {
+    "dexscreener": "https://dexscreener.com/solana/Ar59gt2SqewocL6xWSyA2C3YT85Pz6Mt6yg1tP4th7p7",
+    "gmgn": "https://gmgn.ai/sol/token/jt9Rq3sj3s5Fu43UjAFtaPn13vAq6cqjPEwBdTgpump",
+    "solscan": "https://solscan.io/token/jt9Rq3sj3s5Fu43UjAFtaPn13vAq6cqjPEwBdTgpump"
+   },
+   "paperOnly": true
+  },
+  {
+   "id": "sig_mvbs4ttuthzy3r",
+   "mint": "DarQqJNqFCNmaZbHvU4nmGnNSi6AyzwACQBqauuspump",
+   "symbol": "Perpsguy",
+   "name": "Perpsguy",
+   "createdAt": 1792204244994,
+   "signalPriceUsd": 0.000006936,
+   "score": 28.5,
+   "riskVerdict": "FAIL",
+   "liquidityUsd": 5380.92,
+   "volume24": 103442.42,
+   "qualifiedWallets": 1,
+   "pairAddress": "7wWgLw6oC7HuGus9AqeNfSBGFPrU6wpLT41qYVJ1Ksvn",
+   "dexId": "pumpswap",
+   "lastPrice": 0.000002589,
+   "lastPriceAt": 1792226441992,
+   "multiple": 0.37,
+   "milestonesHit": [],
+   "dumpHit": {
+    "at": 1792204840118,
+    "price": 0.000003309,
+    "multiple": 0.48
+   },
+   "links": {
+    "dexscreener": "https://dexscreener.com/solana/7wWgLw6oC7HuGus9AqeNfSBGFPrU6wpLT41qYVJ1Ksvn",
+    "gmgn": "https://gmgn.ai/sol/token/DarQqJNqFCNmaZbHvU4nmGnNSi6AyzwACQBqauuspump",
+    "solscan": "https://solscan.io/token/DarQqJNqFCNmaZbHvU4nmGnNSi6AyzwACQBqauuspump"
+   },
+   "paperOnly": true
+  },
+  {
+   "id": "sig_mvbq0dn1q6ffqy",
+   "mint": "7tdX2xCUdH7aKRAtzpZ1gtipkJNzB7QMyimksn5ByCzX",
+   "symbol": "HIVEMIND",
+   "name": "hivemind",
+   "createdAt": 1792200678157,
+   "signalPriceUsd": 0.00002525,
+   "score": 60,
+   "riskVerdict": "PASS",
+   "liquidityUsd": 12423.46,
+   "volume24": 259685.75,
+   "qualifiedWallets": 3,
+   "pairAddress": "F5AgZzKAtnADMbHgzbP38wt4Mr1ep1878aHBnK4vfc6w",
+   "dexId": "pumpswap",
+   "lastPrice": 0.000004666,
+   "lastPriceAt": 1792226442083,
+   "multiple": 0.18,
+   "milestonesHit": [],
+   "dumpHit": {
+    "at": 1792204246784,
+    "price": 0.00001222,
+    "multiple": 0.48
+   },
+   "links": {
+    "dexscreener": "https://dexscreener.com/solana/F5AgZzKAtnADMbHgzbP38wt4Mr1ep1878aHBnK4vfc6w",
+    "gmgn": "https://gmgn.ai/sol/token/7tdX2xCUdH7aKRAtzpZ1gtipkJNzB7QMyimksn5ByCzX",
+    "solscan": "https://solscan.io/token/7tdX2xCUdH7aKRAtzpZ1gtipkJNzB7QMyimksn5ByCzX"
+   },
+   "paperOnly": true
+  },
+  {
+   "id": "sig_mvbq0d5wi0rl0z",
+   "mint": "A6Gk99cY86ir38nbL9WBZ67G3hyVjNx7jmx8oDcspump",
+   "symbol": "FMR",
+   "name": "Flying MAGA Roadster",
+   "createdAt": 1792200677540,
+   "signalPriceUsd": 0.0001269,
+   "score": 69,
+   "riskVerdict": "PASS",
+   "liquidityUsd": 29210.93,
+   "volume24": 251744.41,
+   "qualifiedWallets": 3,
+   "pairAddress": "Fnycik3r5qLS1WUPPKH6fpRBAmxK5CQt6CBfwKcc4fx4",
+   "dexId": "pumpswap",
+   "lastPrice": 0.000002086,
+   "lastPriceAt": 1792226442163,
+   "multiple": 0.02,
+   "milestonesHit": [
+    {
+     "x": 1.5,
+     "at": 1792203038243,
+     "price": 0.0003118
+    },
+    {
+     "x": 2,
+     "at": 1792203038243,
+     "price": 0.0003118
+    },
+    {
+     "x": 3,
+     "at": 1792204246784,
+     "price": 0.0004464
+    }
+   ],
+   "dumpHit": {
+    "at": 1792206635594,
+    "price": 0.000002576,
+    "multiple": 0.02
+   },
+   "links": {
+    "dexscreener": "https://dexscreener.com/solana/Fnycik3r5qLS1WUPPKH6fpRBAmxK5CQt6CBfwKcc4fx4",
+    "gmgn": "https://gmgn.ai/sol/token/A6Gk99cY86ir38nbL9WBZ67G3hyVjNx7jmx8oDcspump",
+    "solscan": "https://solscan.io/token/A6Gk99cY86ir38nbL9WBZ67G3hyVjNx7jmx8oDcspump"
+   },
+   "paperOnly": true
+  },
+  {
+   "id": "sig_mvbq0ckbm1iyfc",
+   "mint": "7TiAAj7UBBAeEbiXJ1cvjxknT16EuL6GjVaT4ckLpump",
+   "symbol": "WISH",
+   "name": "Wishwave",
+   "createdAt": 1792200676763,
+   "signalPriceUsd": 0.000007547,
+   "score": 18.3,
+   "riskVerdict": "FAIL",
+   "liquidityUsd": null,
+   "volume24": 10834.68,
+   "qualifiedWallets": 2,
+   "pairAddress": "2ESfh4bcJbA4irFjSofkvCRNdTAcy6oY2Bz4fRH7XTjn",
+   "dexId": "pumpfun",
+   "lastPrice": 0.000007345,
+   "lastPriceAt": 1792226442169,
+   "multiple": 0.97,
+   "milestonesHit": [],
+   "dumpHit": null,
+   "links": {
+    "dexscreener": "https://dexscreener.com/solana/2ESfh4bcJbA4irFjSofkvCRNdTAcy6oY2Bz4fRH7XTjn",
+    "gmgn": "https://gmgn.ai/sol/token/7TiAAj7UBBAeEbiXJ1cvjxknT16EuL6GjVaT4ckLpump",
+    "solscan": "https://solscan.io/token/7TiAAj7UBBAeEbiXJ1cvjxknT16EuL6GjVaT4ckLpump"
+   },
+   "paperOnly": true
+  }
+ ],
+ "topCandidates": [
+  {
+   "mint": "3xmzHi86JTUdye7bUuT9TdBPZLeBK9nBCA44JHRdpump",
+   "symbol": "Audaster",
+   "state": "PAPER_SIGNAL",
+   "score": 85,
+   "riskVerdict": "PASS",
+   "liquidityUsd": 102625.63,
+   "mcap": 1286887,
+   "observedAt": 1792161982373,
+   "links": {
+    "dexscreener": "https://dexscreener.com/solana/3QNg1RKG3xH4d4snKmdC5vF6CCP8SBBEfy3NWpT8GR4f",
+    "gmgn": "https://gmgn.ai/sol/token/3xmzHi86JTUdye7bUuT9TdBPZLeBK9nBCA44JHRdpump",
+    "solscan": "https://solscan.io/token/3xmzHi86JTUdye7bUuT9TdBPZLeBK9nBCA44JHRdpump"
+   }
+  },
+  {
+   "mint": "EerxgTnkL6KCNjn8uKMby7ZR8zh91xftS3WFethopump",
+   "symbol": "FTR",
+   "state": "PAPER_SIGNAL",
+   "score": 74,
+   "riskVerdict": "PASS",
+   "liquidityUsd": 2451.84,
+   "mcap": 2139,
+   "observedAt": 1792184441743,
+   "links": {
+    "dexscreener": "https://dexscreener.com/solana/8RT2CJdnkTarxAznyYekMjhsYCaicsP3eDHybuhBkm9V",
+    "gmgn": "https://gmgn.ai/sol/token/EerxgTnkL6KCNjn8uKMby7ZR8zh91xftS3WFethopump",
+    "solscan": "https://solscan.io/token/EerxgTnkL6KCNjn8uKMby7ZR8zh91xftS3WFethopump"
+   }
+  },
+  {
+   "mint": "o6uNM43AVuQiaEszz6ZXCWerowNMZChyPTjuzUQpump",
+   "symbol": "russIA",
+   "state": "PAPER_SIGNAL",
+   "score": 72.8,
+   "riskVerdict": "PASS",
+   "liquidityUsd": 69200.7,
+   "mcap": 674659,
+   "observedAt": 1792162536377,
+   "links": {
+    "dexscreener": "https://dexscreener.com/solana/7mjSnCockXoq2XcU6vGkbTZdfrWNDSZ5ax5ejMUDtGV1",
+    "gmgn": "https://gmgn.ai/sol/token/o6uNM43AVuQiaEszz6ZXCWerowNMZChyPTjuzUQpump",
+    "solscan": "https://solscan.io/token/o6uNM43AVuQiaEszz6ZXCWerowNMZChyPTjuzUQpump"
+   }
+  },
+  {
+   "mint": "7Jain9Efy7C4HvGkEPkNUUiGUmgu5tkff7NWvCvGpump",
+   "symbol": "Twin",
+   "state": "PAPER_SIGNAL",
+   "score": 72.5,
+   "riskVerdict": "PASS",
+   "liquidityUsd": 35152.69,
+   "mcap": 157430,
+   "observedAt": 1792161982393,
+   "links": {
+    "dexscreener": "https://dexscreener.com/solana/AukiJBz6cqALsxD4eQzYMSrAgq7jZd8GKKBmcZtam5HV",
+    "gmgn": "https://gmgn.ai/sol/token/7Jain9Efy7C4HvGkEPkNUUiGUmgu5tkff7NWvCvGpump",
+    "solscan": "https://solscan.io/token/7Jain9Efy7C4HvGkEPkNUUiGUmgu5tkff7NWvCvGpump"
+   }
+  },
+  {
+   "mint": "C93crDKjUpgRAF9Nedwg3D1xsgnGHP394ohoQvyRpump",
+   "symbol": "Aloooong",
+   "state": "PAPER_SIGNAL",
+   "score": 72.5,
+   "riskVerdict": "PASS",
+   "liquidityUsd": 31551.4,
+   "mcap": 127163,
+   "observedAt": 1792162536863,
+   "links": {
+    "dexscreener": "https://dexscreener.com/solana/AYDdVvfeTWBakGgvnLAHc1nhXhms55AJeioqAeBkKQQ2",
+    "gmgn": "https://gmgn.ai/sol/token/C93crDKjUpgRAF9Nedwg3D1xsgnGHP394ohoQvyRpump",
+    "solscan": "https://solscan.io/token/C93crDKjUpgRAF9Nedwg3D1xsgnGHP394ohoQvyRpump"
+   }
+  },
+  {
+   "mint": "HWKD7fy3tZB2RjZnBMJgZFZLqPdST4q81WZgpn7dpump",
+   "symbol": "ELON 2028",
+   "state": "PAPER_SIGNAL",
+   "score": 72.5,
+   "riskVerdict": "PASS",
+   "liquidityUsd": 18504.62,
+   "mcap": 46642,
+   "observedAt": 1792185259611,
+   "links": {
+    "dexscreener": "https://dexscreener.com/solana/Dwa6rS2NamcK7tuNJE9R9CjjQzu27pddsuCEBkkznzUJ",
+    "gmgn": "https://gmgn.ai/sol/token/HWKD7fy3tZB2RjZnBMJgZFZLqPdST4q81WZgpn7dpump",
+    "solscan": "https://solscan.io/token/HWKD7fy3tZB2RjZnBMJgZFZLqPdST4q81WZgpn7dpump"
+   }
+  },
+  {
+   "mint": "J5ny2yBL2fuVYUZPtq39yR8t2qxDr9A1pehbiBnxpump",
+   "symbol": "FSR",
+   "state": "PAPER_SIGNAL",
+   "score": 71,
+   "riskVerdict": "PASS",
+   "liquidityUsd": 26266.9,
+   "mcap": 98444,
+   "observedAt": 1792161982260,
+   "links": {
+    "dexscreener": "https://dexscreener.com/solana/3wkQyHpqpkCvfXaCWZ1U4Gt2uEm4pdeeTnxnZTPZm668",
+    "gmgn": "https://gmgn.ai/sol/token/J5ny2yBL2fuVYUZPtq39yR8t2qxDr9A1pehbiBnxpump",
+    "solscan": "https://solscan.io/token/J5ny2yBL2fuVYUZPtq39yR8t2qxDr9A1pehbiBnxpump"
+   }
+  },
+  {
+   "mint": "A6Gk99cY86ir38nbL9WBZ67G3hyVjNx7jmx8oDcspump",
+   "symbol": "FMR",
+   "state": "PAPER_SIGNAL",
+   "score": 69,
+   "riskVerdict": "PASS",
+   "liquidityUsd": 2221.21,
+   "mcap": 2048,
+   "observedAt": 1792226442163,
+   "links": {
+    "dexscreener": "https://dexscreener.com/solana/Fnycik3r5qLS1WUPPKH6fpRBAmxK5CQt6CBfwKcc4fx4",
+    "gmgn": "https://gmgn.ai/sol/token/A6Gk99cY86ir38nbL9WBZ67G3hyVjNx7jmx8oDcspump",
+    "solscan": "https://solscan.io/token/A6Gk99cY86ir38nbL9WBZ67G3hyVjNx7jmx8oDcspump"
+   }
+  },
+  {
+   "mint": "G4a7LoNyXGf7ENGMqpqioEwuq9A7z6veuLPAR4Xapump",
+   "symbol": "50",
+   "state": "PAPER_SIGNAL",
+   "score": 65,
+   "riskVerdict": "PASS",
+   "liquidityUsd": 12189.65,
+   "mcap": 20624,
+   "observedAt": 1792199136872,
+   "links": {
+    "dexscreener": "https://dexscreener.com/solana/uqdw8QrQcwSx87B8QdofXNzH7mxC24wubGX9ovsCB23",
+    "gmgn": "https://gmgn.ai/sol/token/G4a7LoNyXGf7ENGMqpqioEwuq9A7z6veuLPAR4Xapump",
+    "solscan": "https://solscan.io/token/G4a7LoNyXGf7ENGMqpqioEwuq9A7z6veuLPAR4Xapump"
+   }
+  },
+  {
+   "mint": "2e3zQiA8JWeDjjVeuqzv9X1Q3aqRRaPqL8UYEbxVpump",
+   "symbol": "NUBI",
+   "state": "PAPER_SIGNAL",
+   "score": 65,
+   "riskVerdict": "PASS",
+   "liquidityUsd": 151886.96,
+   "mcap": 2725468,
+   "observedAt": 1792200638234,
+   "links": {
+    "dexscreener": "https://dexscreener.com/solana/265GQ6QKcEGwNCWsL8CsJzD3iDDRuzwj7K9Pa7vst73M",
+    "gmgn": "https://gmgn.ai/sol/token/2e3zQiA8JWeDjjVeuqzv9X1Q3aqRRaPqL8UYEbxVpump",
+    "solscan": "https://solscan.io/token/2e3zQiA8JWeDjjVeuqzv9X1Q3aqRRaPqL8UYEbxVpump"
+   }
+  }
+ ],
  "errors": [
-  "subrequest budget reached (16) — remaining analysis deferred (driver-level, protects heartbeat writes)"
+  "discovery: profiles: HTTP 429",
+  "discovery: boosts: source in rate-limit backoff",
+  "dexscreener 429 this cycle — retrying next cycle (cooldown arms after 2 consecutive 429 cycles)"
  ],
  "notes": [
   "PAPER ONLY — research signals, not financial advice, never executable trades.",
@@ -77,19 +694,19 @@
  ],
  "driver": "worker-budget-v2 2026-10-17",
  "phaseMs": {
-  "t0": 1792227334582,
-  "readMs": 11103,
-  "discoveryMs": 161
+  "t0": 1792227634610,
+  "readMs": 604,
+  "discoveryMs": 4018
  },
  "dexBackoffUntil": null,
  "dexBackoffStrikes": 0,
- "dex429Streak": 0,
- "stateReadError": "The operation was aborted due to timeout",
- "subrequests": 16,
+ "dex429Streak": 1,
+ "stateReadError": null,
+ "subrequests": 4,
  "subPhases": {
-  "afterDiscovery": 16,
-  "afterAnalysis": 16,
-  "afterMarks": 16
+  "afterDiscovery": 4,
+  "afterAnalysis": 4,
+  "afterMarks": 4
  },
- "stateWritten": false
+ "stateWritten": true
 }
