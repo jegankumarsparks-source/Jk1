@@ -1,6 +1,6 @@
 {
- "generatedAt": 1792202139625,
- "generatedAtIso": "2026-10-17T01:55:39.625Z",
+ "generatedAt": 1792202439720,
+ "generatedAtIso": "2026-10-17T02:00:39.720Z",
  "scanner": "solana-radar-server",
  "runner": "cloudflare-worker-cron",
  "engineSource": "index.html embedded engine, extracted verbatim at run time",
@@ -9,9 +9,9 @@
  "scoreVersion": "score-v1.0",
  "riskPolicyVersion": "risk-v1.0",
  "thresholdsVersion": "thresh-v1.0",
- "cycle": 98,
- "cycleStartedAt": 1792202135604,
- "cycleDurationMs": 4021,
+ "cycle": 99,
+ "cycleStartedAt": 1792202435709,
+ "cycleDurationMs": 4011,
  "schedule": "every 5 min via Cloudflare Workers cron (free tier, keyless data) — runs whether or not any tab is open. Backstop: GitHub Actions cron (requested every 5 min; GitHub delays it in practice — observed every 2-3 h). When it runs it skips while this worker is healthy with dexscreener LIVE, and covers discovery from separate egress IPs during dexscreener 429 cooldowns or worker outages.",
  "engineDrift": null,
  "stateRestored": true,
@@ -33,7 +33,7 @@
    "lastError": null,
    "requestCount": 0,
    "rateLimitCount": 0,
-   "note": "not exercised this cycle (no refreshed candidates needed them)"
+   "note": "not exercised - discovery skipped during dexscreener 429 cooldown"
   },
   {
    "id": "solanarpc",
@@ -43,7 +43,7 @@
    "lastError": null,
    "requestCount": 0,
    "rateLimitCount": 0,
-   "note": "not exercised this cycle (no refreshed candidates needed them)"
+   "note": "not exercised - discovery skipped during dexscreener 429 cooldown"
   }
  ],
  "counters": {
@@ -632,10 +632,7 @@
   }
  ],
  "errors": [
-  "discovery: profiles: HTTP 429",
-  "discovery: boosts: source in rate-limit backoff",
-  "dexscreener cooldown armed for 20 min (strike 2 after 2 consecutive 429 cycles, driver-level; discovery resumes automatically, heartbeats continue)",
-  "GitHub Actions backstop (separate egress IPs) covers discovery when its scheduled run lands — GitHub delays the 5-min cron in practice, so coverage is best-effort"
+  "discovery skipped: dexscreener 429 cooldown active until 2026-10-17T02:15:39.625Z (driver-level backoff, engine rules unchanged; heartbeat feed still written)"
  ],
  "notes": [
   "PAPER ONLY — research signals, not financial advice, never executable trades.",
@@ -646,13 +643,12 @@
  ],
  "driver": "worker-budget-v2 2026-10-17",
  "phaseMs": {
-  "t0": 1792202134751,
-  "readMs": 853,
-  "discoveryMs": 4021
+  "t0": 1792202434644,
+  "readMs": 1065
  },
  "dexBackoffUntil": 1792203339625,
  "dexBackoffStrikes": 2,
- "dex429Streak": 2,
+ "dex429Streak": 0,
  "stateReadError": null,
  "subrequests": 4,
  "stateWritten": true
