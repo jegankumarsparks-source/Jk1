@@ -2,6 +2,7 @@
 // Collects -> ingests -> resolves -> launch status -> security/market gates -> decision -> dashboard JSON -> Telegram.
 // State lives in the Jk1 repo (early-entry-radar/data/state.json); commits via GitHub contents API (GH_TOKEN secret).
 import { openJsonStore, emptyState, capState } from './src/jsonstore.js';
+import { runOutcomeRefresh, summarizeEvaluation } from './src/evaluation.js';
 import { runCollectors } from './src/ingest.js';
 import { ingestMentions } from './src/social.js';
 import { computeLaunchStatus, applyLaunchStatus } from './src/prelaunch.js';
@@ -30,6 +31,11 @@ async function ghGet(env, path) {
   if (r.status === 404) return null;
   if (!r.ok) throw new Error(`gh get ${path}: HTTP ${r.status}`);
   const j = await r.json();
+  if (!j.content && j.download_url) { // contents API omits content for files >1MB
+    const raw = await fetch(j.download_url, { headers: ghHeaders(env) });
+    if (!raw.ok) throw new Error(`gh raw ${path}: HTTP ${raw.status}`);
+    return { sha: j.sha, text: await raw.text() };
+  }
   return { sha: j.sha, text: unb64(j.content.replace(/\n/g, '')) };
 }
 async function ghPut(env, path, text, message, retries = 2) {
@@ -62,16 +68,51 @@ export function mergeStates(a, b) {
       if (e.first_evidence_at < o.first_evidence_at) o.first_evidence_at = e.first_evidence_at; o.launch_status = e.launch_status; }
   }
   Object.assign(out.sources, b.sources);
+  out.outcomes = out.outcomes || {};
+  for (const [id, oc] of Object.entries(b.outcomes || {})) {
+    const ex = out.outcomes[id];
+    if (!ex) out.outcomes[id] = oc;
+    else { // keep richer/earlier-entry record
+      ex.samples = Math.max(ex.samples || 0, oc.samples || 0);
+      ex.max_price = Math.max(ex.max_price, oc.max_price); ex.min_price = Math.min(ex.min_price, oc.min_price);
+      if ((oc.last_price_at || '') > (ex.last_price_at || '')) { ex.current_price = oc.current_price; ex.current_liquidity_usd = oc.current_liquidity_usd; ex.last_price_at = oc.last_price_at; ex.current_ret_pct = oc.current_ret_pct; }
+      if (oc.rug_event && !ex.rug_event) { ex.rug_event = true; ex.rug_at = oc.rug_at; ex.rug_kind = oc.rug_kind; ex.status = oc.status; }
+      ex.max_liquidity_seen_usd = Math.max(ex.max_liquidity_seen_usd || 0, oc.max_liquidity_seen_usd || 0);
+    }
+  }
   return out;
+}
+
+// Keep repo state under the ~1MB contents-API cap: tighter caps in prod + drop stale
+// provisional (mintless) entities that never got a signal decision. Decided entities are kept.
+function pruneState(state) {
+  const caps = { raw_events: 2500, entity_evidence: 4000, mentions: 1500, security_results: 1500,
+    gate_results: 1500, launch_status_log: 300, signal_state_log: 600, source_health: 300,
+    notifications: 200, pending_notifications: 100 };
+  for (const [k, cap] of Object.entries(caps)) if (state[k] && state[k].length > cap) state[k] = state[k].slice(-cap);
+  const decided = new Set(state.signal_state_log.map(r => r.entity_id));
+  const cutoff = Date.now() - 6 * 3600000;
+  for (const [id, e] of Object.entries(state.entities)) {
+    if (e.kind !== 'mint' && !decided.has(id) && e.first_evidence_at && new Date(e.first_evidence_at).getTime() < cutoff)
+      delete state.entities[id];
+  }
+  return state;
 }
 
 async function tgSend(env, text, state) {
   if (!env.TG_TOKEN || !env.TG_CHAT_ID) return 'not_configured';
+  if (state && state.tg_muted_until && Date.now() < new Date(state.tg_muted_until).getTime()) return 'muted';
   try {
     const r = await fetch(`https://api.telegram.org/bot${env.TG_TOKEN}/sendMessage`, { method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ chat_id: env.TG_CHAT_ID, text: text.slice(0, 3900), disable_web_page_preview: true }),
       signal: AbortSignal.timeout(8000) });
+    if (r.status === 429) {
+      let wait = 600;
+      try { const j = await r.json(); wait = (j.parameters && j.parameters.retry_after) || wait; } catch {}
+      if (state) state.tg_muted_until = new Date(Date.now() + (wait + 60) * 1000).toISOString();
+      return 'rate_limited';
+    }
     return r.ok ? 'sent' : `http_${r.status}`;
   } catch (e) { return `error:${String(e).slice(0, 80)}`; }
 }
@@ -147,16 +188,33 @@ async function runCycle(env) {
       state.pending_notifications.push({ key, entityId: tr.entityId, to: tr.to, from: tr.from, queued_at: new Date().toISOString() });
     }
   }
+  // coalesce: if rejections pile up (e.g. after a stall), keep at most 2 and fold the rest into one summary
+  const rej = state.pending_notifications.filter(n => n.to === 'SECURITY REJECTED');
+  if (rej.length > 2) {
+    state.pending_notifications = state.pending_notifications.filter(n => n.to !== 'SECURITY REJECTED' || rej.indexOf(n) < 2);
+    state.pending_notifications.push({ key: `summary:rejections:${new Date().toISOString().slice(0, 13)}`, entityId: null,
+      to: 'SECURITY REJECTED', from: null, summary_count: rej.length - 2, queued_at: new Date().toISOString() });
+    for (const n of rej.slice(2)) state.notifications.push({ key: n.key, at: new Date().toISOString(), result: 'coalesced' });
+  }
+  // QUALIFIED CANDIDATE alerts drain first
+  state.pending_notifications.sort((a, b) => (b.to === 'QUALIFIED CANDIDATE') - (a.to === 'QUALIFIED CANDIDATE'));
   let notified = 0, tgStatus = 'disabled';
   while (state.pending_notifications.length && notified < 3 && subrequests < SUBREQUEST_BUDGET - 6) {
     const n = state.pending_notifications.shift();
     const ent = state.entities[n.entityId];
-    tgStatus = await tgSend(env,
-      `EARLY-ENTRY RADAR\n${n.to}\n${ent && ent.name || '?'} (${ent && ent.ticker || '?'})\nmint: ${(ent && ent.mint) || 'unverified'}\nstate change: ${n.from || 'new'} -> ${n.to}\nhttps://jegankumarsparks-source.github.io/Jk1/${BASE}/`, state);
+    tgStatus = await tgSend(env, n.summary_count
+      ? `EARLY-ENTRY RADAR\n${n.summary_count} further SECURITY REJECTIONS this period (routine, see Rejected tab)\nhttps://jegankumarsparks-source.github.io/Jk1/${BASE}/`
+      : `EARLY-ENTRY RADAR\n${n.to}\n${ent && ent.name || '?'} (${ent && ent.ticker || '?'})\nmint: ${(ent && ent.mint) || 'unverified'}\nstate change: ${n.from || 'new'} -> ${n.to}\nhttps://jegankumarsparks-source.github.io/Jk1/${BASE}/`, state);
     if (tgStatus === 'sent') { state.notifications.push({ key: n.key, at: new Date().toISOString(), result: tgStatus }); notified++; }
-    else if (tgStatus === 'not_configured') { state.pending_notifications.unshift(n); break; } // keep queue, try next cycle
+    else if (tgStatus === 'not_configured' || tgStatus === 'rate_limited' || tgStatus === 'muted') { state.pending_notifications.unshift(n); break; } // keep queue, try later
     else { state.notifications.push({ key: n.key, at: new Date().toISOString(), result: tgStatus }); } // real error: log + move on (no retry storm)
   }
+
+  // 4b. prune for the ~1MB GitHub contents cap (state grew past it 2026-10-17 and stalled cycles)
+  pruneState(state);
+
+  // 4c. STEP 9: paper outcome refresh (budget-limited)
+  const outcomeStats = await runOutcomeRefresh(state, { budget: Math.max(2, 6 - secChecked), subrequests: () => subrequests, subLimit: SUBREQUEST_BUDGET - 6 });
 
   // 5. dashboard data
   capState(state);
@@ -178,6 +236,7 @@ async function runCycle(env) {
     headline: coins.filter(c => c.signal && (c.signal.state === 'QUALIFIED CANDIDATE')).length
       ? `${coins.filter(c => c.signal && c.signal.state === 'QUALIFIED CANDIDATE').length} QUALIFIED CANDIDATE(S)` : 'NO QUALIFIED SIGNAL',
     coins, sources: health, transitions: state.signal_state_log.slice(-50), notifications: state.notifications.slice(-20),
+    evaluation: summarizeEvaluation(state),
     gaps: ['X/Twitter: no free API', 'Reddit: blocked (needs free OAuth app)', 'Discord: needs per-server bot', 'Instagram: no free access', 'GMGN: no API (links from validated mint only)'] };
 
   // Concurrent-writer safe: if state.json changed under us even after sha retry, merge with remote once.
@@ -191,7 +250,7 @@ async function runCycle(env) {
     } else throw e;
   }
   await ghPut(env, `${BASE}/data/feed.json`, JSON.stringify(feed), `early-entry-radar: feed ${feed.headline}`);
-  return { ok: true, cycle_ms: Date.now() - t0, entities: coins.length, secChecked, notified, tgStatus, headline: feed.headline };
+  return { ok: true, cycle_ms: Date.now() - t0, entities: coins.length, secChecked, notified, tgStatus, headline: feed.headline, outcomes: outcomeStats };
 }
 
 function buildFacts(state, entityId, ent, config) {

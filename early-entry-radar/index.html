@@ -27,7 +27,7 @@ main{padding:10px 12px}.card{background:var(--card);border:1px solid var(--line)
 <script>
 const FEED='data/feed.json';
 let feed=null,tab=(location.hash||'#overview').slice(1);
-const TABS=[['overview','Overview'],['radar','Pre-Launch'],['coins','New Coins'],['live','Live'],['candidates','✅ Candidates'],['rejected','⛔ Rejected'],['sources','Sources'],['signals','Signals'],['audit','Audit']];
+const TABS=[['overview','Overview'],['radar','Pre-Launch'],['coins','New Coins'],['live','Live'],['candidates','✅ Candidates'],['rejected','⛔ Rejected'],['evaluation','📊 Paper Eval'],['sources','Sources'],['signals','Signals'],['audit','Audit']];
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const ago=t=>{if(!t)return'?';const s=(Date.now()-new Date(t).getTime())/1e3;return s<60?`${s|0}s`:s<3600?`${s/60|0}m`:`${s/3600|0}h`};
 const badge=(t,c)=>`<span class="badge b-${c}">${esc(t)}</span>`;
@@ -73,6 +73,29 @@ function render(){
   }else if(tab==='rejected'){
     const f=cs.filter(c=>c.signal&&(c.signal.state==='SECURITY REJECTED'||c.signal.state==='SIGNAL INVALIDATED'||c.signal.state==='LIQUIDITY INSUFFICIENT'||c.signal.state==='DATA INCOMPLETE'));
     m.innerHTML=f.length?f.map(card).join(''):'<div class="card">No rejected candidates yet.</div>';
+  }else if(tab==='evaluation'){
+    const ev=feed.evaluation;
+    if(!ev){m.innerHTML='<div class="card">Evaluation tracker not populated yet (worker v2 pending).</div>';}
+    else{
+      const pct=v=>v==null?'?':(v>0?'+':'')+v.toFixed(1)+'%';
+      const grp=Object.entries(ev.by_group||{}).map(([g,v])=>`<div class="card"><div class="name">${esc(g)}</div>
+        <div class="row"><span>tracked</span><span>${v.n} (${esc(v.sample_status)})</span></div>
+        <div class="row"><span>median max upside</span><span>${pct(v.median_max_upside_pct)}</span></div>
+        <div class="row"><span>median max adverse</span><span>${pct(v.median_max_adverse_pct)}</span></div>
+        <div class="row"><span>rug/collapse events</span><span>${v.rug_events}</span></div></div>`).join('');
+      const rows=(ev.rows||[]).map(r=>`<div class="card"><div class="name">${esc(r.name||'(unnamed)')} ${r.ticker?`<span class="sub">$${esc(r.ticker)}</span>`:''}</div>
+        ${r.mint?`<div class="mint">${esc(r.mint)}</div>`:''}
+        <div style="margin-top:6px">${stateBadge(r.entry_state)}${r.rug_event?badge('RUG EVENT','red'):badge(r.status,r.status==='TRACKING'?'blu':'gry')}</div>
+        <div class="row"><span>entry ref</span><span>$${r.entry_price}</span></div>
+        <div class="row"><span>current</span><span>${pct(r.current_ret_pct)}</span></div>
+        <div class="row"><span>max upside / adverse</span><span>${pct(r.max_upside_pct)} / ${pct(r.max_adverse_pct)}</span></div>
+        <div class="row"><span>since</span><span>${ago(r.entry_at)} ago</span></div></div>`).join('');
+      m.innerHTML=`<div class="card"><div class="name">PAPER EVALUATION</div>
+        <div class="row"><span>tracked (incl. rejected)</span><span>${ev.tracked_total}</span></div>
+        <div class="row"><span>actively tracking</span><span>${ev.tracking_active}</span></div>
+        <div class="row"><span>rug/collapse events</span><span>${ev.rug_events_total}</span></div>
+        <div class="sub" style="margin-top:6px">${esc(ev.note)}</div></div>${grp}${rows}`;
+    }
   }else if(tab==='sources'){
     m.innerHTML=Object.entries(feed.sources||{}).map(([k,h])=>`<div class="card"><div class="name">${esc(k)}</div>
       ${badge(h.status,h.status==='LIVE'?'grn':h.status==='DEGRADED'?'ylw':'red')}

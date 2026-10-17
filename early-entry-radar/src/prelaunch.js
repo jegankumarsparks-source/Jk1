@@ -65,6 +65,6 @@ export function applyLaunchStatus(store, entityId, result) {
   const now = nowUTC();
   const prev = store.getEntityLaunchStatus(entityId);
   store.setEntityLaunchStatus(entityId, result.status);
-  store.logLaunchStatus(entityId, prev, result.status, JSON.stringify(result.reasons), now);
+  if (prev !== result.status) store.logLaunchStatus(entityId, prev, result.status, JSON.stringify(result.reasons), now);
   return { from: prev, to: result.status };
 }
