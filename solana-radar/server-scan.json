@@ -1,6 +1,6 @@
 {
- "generatedAt": 1792195539868,
- "generatedAtIso": "2026-10-17T00:05:39.868Z",
+ "generatedAt": 1792195839970,
+ "generatedAtIso": "2026-10-17T00:10:39.970Z",
  "scanner": "solana-radar-server",
  "runner": "cloudflare-worker-cron",
  "engineSource": "index.html embedded engine, extracted verbatim at run time",
@@ -9,9 +9,9 @@
  "scoreVersion": "score-v1.0",
  "riskPolicyVersion": "risk-v1.0",
  "thresholdsVersion": "thresh-v1.0",
- "cycle": 78,
- "cycleStartedAt": 1792195535857,
- "cycleDurationMs": 4011,
+ "cycle": 79,
+ "cycleStartedAt": 1792195835960,
+ "cycleDurationMs": 4010,
  "schedule": "every 5 min via Cloudflare Workers cron (free tier, keyless data) — runs whether or not any tab is open. Backstop: GitHub Actions cron (throttled in this repo to every few hours).",
  "engineDrift": null,
  "stateRestored": true,
@@ -33,7 +33,7 @@
    "lastError": null,
    "requestCount": 0,
    "rateLimitCount": 0,
-   "note": "not exercised - discovery skipped during dexscreener 429 cooldown"
+   "note": "not exercised this cycle (no refreshed candidates needed them)"
   },
   {
    "id": "solanarpc",
@@ -43,7 +43,7 @@
    "lastError": null,
    "requestCount": 0,
    "rateLimitCount": 0,
-   "note": "not exercised - discovery skipped during dexscreener 429 cooldown"
+   "note": "not exercised this cycle (no refreshed candidates needed them)"
   }
  ],
  "counters": {
@@ -636,7 +636,9 @@
   }
  ],
  "errors": [
-  "discovery skipped: dexscreener 429 cooldown active until 2026-10-17T00:05:39.468Z (driver-level backoff, engine rules unchanged; heartbeat feed still written)"
+  "discovery: profiles: HTTP 429",
+  "discovery: boosts: source in rate-limit backoff",
+  "dexscreener cooldown armed for 20 min (strike 2, driver-level; discovery resumes automatically, heartbeats continue)"
  ],
  "notes": [
   "PAPER ONLY — research signals, not financial advice, never executable trades.",
@@ -647,11 +649,12 @@
  ],
  "driver": "worker-budget-v2 2026-10-17",
  "phaseMs": {
-  "t0": 1792195534727,
-  "readMs": 1130
+  "t0": 1792195834675,
+  "readMs": 1285,
+  "discoveryMs": 4010
  },
- "dexBackoffUntil": 1792195539468,
- "dexBackoffStrikes": 1,
+ "dexBackoffUntil": 1792197039970,
+ "dexBackoffStrikes": 2,
  "stateReadError": null,
  "subrequests": 4,
  "stateWritten": true
