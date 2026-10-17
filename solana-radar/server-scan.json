@@ -1,6 +1,6 @@
 {
- "generatedAt": 1792201539596,
- "generatedAtIso": "2026-10-17T01:45:39.596Z",
+ "generatedAt": 1792202139625,
+ "generatedAtIso": "2026-10-17T01:55:39.625Z",
  "scanner": "solana-radar-server",
  "runner": "cloudflare-worker-cron",
  "engineSource": "index.html embedded engine, extracted verbatim at run time",
@@ -9,9 +9,9 @@
  "scoreVersion": "score-v1.0",
  "riskPolicyVersion": "risk-v1.0",
  "thresholdsVersion": "thresh-v1.0",
- "cycle": 97,
- "cycleStartedAt": 1792201535586,
- "cycleDurationMs": 4010,
+ "cycle": 98,
+ "cycleStartedAt": 1792202135604,
+ "cycleDurationMs": 4021,
  "schedule": "every 5 min via Cloudflare Workers cron (free tier, keyless data) — runs whether or not any tab is open. Backstop: GitHub Actions cron (requested every 5 min; GitHub delays it in practice — observed every 2-3 h). When it runs it skips while this worker is healthy with dexscreener LIVE, and covers discovery from separate egress IPs during dexscreener 429 cooldowns or worker outages.",
  "engineDrift": null,
  "stateRestored": true,
@@ -634,7 +634,8 @@
  "errors": [
   "discovery: profiles: HTTP 429",
   "discovery: boosts: source in rate-limit backoff",
-  "dexscreener 429 this cycle — retrying next cycle (cooldown arms after 2 consecutive 429 cycles)"
+  "dexscreener cooldown armed for 20 min (strike 2 after 2 consecutive 429 cycles, driver-level; discovery resumes automatically, heartbeats continue)",
+  "GitHub Actions backstop (separate egress IPs) covers discovery when its scheduled run lands — GitHub delays the 5-min cron in practice, so coverage is best-effort"
  ],
  "notes": [
   "PAPER ONLY — research signals, not financial advice, never executable trades.",
@@ -645,13 +646,13 @@
  ],
  "driver": "worker-budget-v2 2026-10-17",
  "phaseMs": {
-  "t0": 1792201534736,
-  "readMs": 850,
-  "discoveryMs": 4010
+  "t0": 1792202134751,
+  "readMs": 853,
+  "discoveryMs": 4021
  },
- "dexBackoffUntil": null,
- "dexBackoffStrikes": 1,
- "dex429Streak": 1,
+ "dexBackoffUntil": 1792203339625,
+ "dexBackoffStrikes": 2,
+ "dex429Streak": 2,
  "stateReadError": null,
  "subrequests": 4,
  "stateWritten": true
