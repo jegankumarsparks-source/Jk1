@@ -1,6 +1,6 @@
 {
- "generatedAt": 1792200039624,
- "generatedAtIso": "2026-10-17T01:20:39.624Z",
+ "generatedAt": 1792200339918,
+ "generatedAtIso": "2026-10-17T01:25:39.918Z",
  "scanner": "solana-radar-server",
  "runner": "cloudflare-worker-cron",
  "engineSource": "index.html embedded engine, extracted verbatim at run time",
@@ -9,9 +9,9 @@
  "scoreVersion": "score-v1.0",
  "riskPolicyVersion": "risk-v1.0",
  "thresholdsVersion": "thresh-v1.0",
- "cycle": 92,
- "cycleStartedAt": 1792200035612,
- "cycleDurationMs": 4012,
+ "cycle": 93,
+ "cycleStartedAt": 1792200335902,
+ "cycleDurationMs": 4016,
  "schedule": "every 5 min via Cloudflare Workers cron (free tier, keyless data) — runs whether or not any tab is open. Backstop: GitHub Actions cron (requested every 5 min; GitHub delays it in practice — observed every 2-3 h). When it runs it skips while this worker is healthy with dexscreener LIVE, and covers discovery from separate egress IPs during dexscreener 429 cooldowns or worker outages.",
  "engineDrift": null,
  "stateRestored": true,
@@ -632,7 +632,8 @@
  "errors": [
   "discovery: profiles: HTTP 429",
   "discovery: boosts: source in rate-limit backoff",
-  "dexscreener 429 this cycle — retrying next cycle (cooldown arms after 2 consecutive 429 cycles)"
+  "dexscreener cooldown armed for 10 min (strike 1 after 2 consecutive 429 cycles, driver-level; discovery resumes automatically, heartbeats continue)",
+  "GitHub Actions backstop (separate egress IPs) covers discovery when its scheduled run lands — GitHub delays the 5-min cron in practice, so coverage is best-effort"
  ],
  "notes": [
   "PAPER ONLY — research signals, not financial advice, never executable trades.",
@@ -643,13 +644,13 @@
  ],
  "driver": "worker-budget-v2 2026-10-17",
  "phaseMs": {
-  "t0": 1792200034772,
-  "readMs": 840,
-  "discoveryMs": 4012
+  "t0": 1792200334818,
+  "readMs": 1084,
+  "discoveryMs": 4016
  },
- "dexBackoffUntil": null,
- "dexBackoffStrikes": 0,
- "dex429Streak": 1,
+ "dexBackoffUntil": 1792200939918,
+ "dexBackoffStrikes": 1,
+ "dex429Streak": 2,
  "stateReadError": null,
  "subrequests": 4,
  "stateWritten": true
