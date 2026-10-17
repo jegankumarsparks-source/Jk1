@@ -1,6 +1,6 @@
 {
- "generatedAt": 1792199457473,
- "generatedAtIso": "2026-10-17T01:10:57.473Z",
+ "generatedAt": 1792200039624,
+ "generatedAtIso": "2026-10-17T01:20:39.624Z",
  "scanner": "solana-radar-server",
  "runner": "cloudflare-worker-cron",
  "engineSource": "index.html embedded engine, extracted verbatim at run time",
@@ -9,9 +9,9 @@
  "scoreVersion": "score-v1.0",
  "riskPolicyVersion": "risk-v1.0",
  "thresholdsVersion": "thresh-v1.0",
- "cycle": 91,
- "cycleStartedAt": 1792199436419,
- "cycleDurationMs": 21054,
+ "cycle": 92,
+ "cycleStartedAt": 1792200035612,
+ "cycleDurationMs": 4012,
  "schedule": "every 5 min via Cloudflare Workers cron (free tier, keyless data) — runs whether or not any tab is open. Backstop: GitHub Actions cron (requested every 5 min; GitHub delays it in practice — observed every 2-3 h). When it runs it skips while this worker is healthy with dexscreener LIVE, and covers discovery from separate egress IPs during dexscreener 429 cooldowns or worker outages.",
  "engineDrift": null,
  "stateRestored": true,
@@ -20,28 +20,30 @@
    "id": "dexscreener",
    "label": "Dexscreener (public, keyless)",
    "status": "DEGRADED",
-   "lastSuccess": 1792199436575,
+   "lastSuccess": null,
    "lastError": "HTTP 429",
-   "requestCount": 16,
+   "requestCount": 2,
    "rateLimitCount": 1
   },
   {
    "id": "rugcheck",
    "label": "RugCheck (public, keyless)",
-   "status": "LIVE",
-   "lastSuccess": 1792199453469,
+   "status": "NOT_OBSERVED",
+   "lastSuccess": null,
    "lastError": null,
-   "requestCount": 6,
-   "rateLimitCount": 0
+   "requestCount": 0,
+   "rateLimitCount": 0,
+   "note": "not exercised this cycle (no refreshed candidates needed them)"
   },
   {
    "id": "solanarpc",
    "label": "Solana JSON-RPC (PublicNode)",
-   "status": "DEGRADED",
-   "lastSuccess": 1792199449145,
-   "lastError": "HTTP 429",
-   "requestCount": 11,
-   "rateLimitCount": 1
+   "status": "NOT_OBSERVED",
+   "lastSuccess": null,
+   "lastError": null,
+   "requestCount": 0,
+   "rateLimitCount": 0,
+   "note": "not exercised this cycle (no refreshed candidates needed them)"
   }
  ],
  "counters": {
@@ -58,166 +60,9 @@
   "dataIncomplete": 1,
   "watchlist": 0
  },
- "analyzedThisCycle": 6,
+ "analyzedThisCycle": 0,
  "signalMarksTracked": 0,
- "newSignalsThisCycle": [
-  {
-   "id": "sig_mvbpa19qpa3q98",
-   "mint": "9hjHNV5FGV33KFSkjhg9WGJbKjEsWaY6nKCMjgAqpump",
-   "symbol": "SHROUD",
-   "name": "Zk Shroud",
-   "createdAt": 1792199449070,
-   "signalPriceUsd": 0.00001395,
-   "score": 29.6,
-   "riskVerdict": "UNKNOWN",
-   "liquidityUsd": null,
-   "volume24": 25630.46,
-   "qualifiedWallets": 2,
-   "pairAddress": "GbMWWak4TQApkwgPr5d3a9v4iX4baYzZX6RCGCjEoQNY",
-   "dexId": "pumpfun",
-   "lastPrice": null,
-   "lastPriceAt": null,
-   "multiple": null,
-   "milestonesHit": [],
-   "dumpHit": null,
-   "links": {
-    "dexscreener": "https://dexscreener.com/solana/GbMWWak4TQApkwgPr5d3a9v4iX4baYzZX6RCGCjEoQNY",
-    "gmgn": "https://gmgn.ai/sol/token/9hjHNV5FGV33KFSkjhg9WGJbKjEsWaY6nKCMjgAqpump",
-    "solscan": "https://solscan.io/token/9hjHNV5FGV33KFSkjhg9WGJbKjEsWaY6nKCMjgAqpump"
-   },
-   "paperOnly": true
-  },
-  {
-   "id": "sig_mvbpa4key5j4yt",
-   "mint": "A27SALLyyyik4wjaGrzrij77534fxGkE91YPeFp9pump",
-   "symbol": "FDR",
-   "name": "Flying Doge Roadster",
-   "createdAt": 1792199453342,
-   "signalPriceUsd": 0.0002241,
-   "score": 60,
-   "riskVerdict": "PASS",
-   "liquidityUsd": 39563.55,
-   "volume24": 341902.53,
-   "qualifiedWallets": 1,
-   "pairAddress": "GWf6wXLM4PMz6gFtt9es1ybiFKs97TTLBK1VuFGospty",
-   "dexId": "pumpswap",
-   "lastPrice": null,
-   "lastPriceAt": null,
-   "multiple": null,
-   "milestonesHit": [],
-   "dumpHit": null,
-   "links": {
-    "dexscreener": "https://dexscreener.com/solana/GWf6wXLM4PMz6gFtt9es1ybiFKs97TTLBK1VuFGospty",
-    "gmgn": "https://gmgn.ai/sol/token/A27SALLyyyik4wjaGrzrij77534fxGkE91YPeFp9pump",
-    "solscan": "https://solscan.io/token/A27SALLyyyik4wjaGrzrij77534fxGkE91YPeFp9pump"
-   },
-   "paperOnly": true
-  },
-  {
-   "id": "sig_mvbpa4leny8mt1",
-   "mint": "rk5xKahXR86XDQo2zVtmGKJm8FJ1LZNWmnBVxU3pump",
-   "symbol": "DORFFFFFFFFFF",
-   "name": "DORFFFFFFFFFF",
-   "createdAt": 1792199453378,
-   "signalPriceUsd": 0.000004315,
-   "score": 15.5,
-   "riskVerdict": "FAIL",
-   "liquidityUsd": 4074.05,
-   "volume24": 67522.81,
-   "qualifiedWallets": 0,
-   "pairAddress": "EtTBTfvcWet9f3cjovLLRokRg4kkx2w3JtqQgeY1q9ei",
-   "dexId": "pumpswap",
-   "lastPrice": null,
-   "lastPriceAt": null,
-   "multiple": null,
-   "milestonesHit": [],
-   "dumpHit": null,
-   "links": {
-    "dexscreener": "https://dexscreener.com/solana/EtTBTfvcWet9f3cjovLLRokRg4kkx2w3JtqQgeY1q9ei",
-    "gmgn": "https://gmgn.ai/sol/token/rk5xKahXR86XDQo2zVtmGKJm8FJ1LZNWmnBVxU3pump",
-    "solscan": "https://solscan.io/token/rk5xKahXR86XDQo2zVtmGKJm8FJ1LZNWmnBVxU3pump"
-   },
-   "paperOnly": true
-  },
-  {
-   "id": "sig_mvbpa4m87feiie",
-   "mint": "DPLpK6biJy492G81SeskfW6VeYEH5V5YZY8uWsgEpump",
-   "symbol": "MAGA2028",
-   "name": "MAGA 2028",
-   "createdAt": 1792199453408,
-   "signalPriceUsd": 0.0003854,
-   "score": 58,
-   "riskVerdict": "PASS",
-   "liquidityUsd": 52985.74,
-   "volume24": 686897.9,
-   "qualifiedWallets": 0,
-   "pairAddress": "591GQ119jBPLqdJxGaxGvmNSgFUdYgexX6JmRH44M4Z7",
-   "dexId": "pumpswap",
-   "lastPrice": null,
-   "lastPriceAt": null,
-   "multiple": null,
-   "milestonesHit": [],
-   "dumpHit": null,
-   "links": {
-    "dexscreener": "https://dexscreener.com/solana/591GQ119jBPLqdJxGaxGvmNSgFUdYgexX6JmRH44M4Z7",
-    "gmgn": "https://gmgn.ai/sol/token/DPLpK6biJy492G81SeskfW6VeYEH5V5YZY8uWsgEpump",
-    "solscan": "https://solscan.io/token/DPLpK6biJy492G81SeskfW6VeYEH5V5YZY8uWsgEpump"
-   },
-   "paperOnly": true
-  },
-  {
-   "id": "sig_mvbpa4n36q3lq2",
-   "mint": "Atvvy7bkaZLx1ErMrppqv2bHENi6sJrRRkXwhjDupump",
-   "symbol": "Joe",
-   "name": "Average Joe",
-   "createdAt": 1792199453439,
-   "signalPriceUsd": 0.000003775,
-   "score": 15.5,
-   "riskVerdict": "FAIL",
-   "liquidityUsd": 3524.68,
-   "volume24": 57903.99,
-   "qualifiedWallets": 0,
-   "pairAddress": "9fodg55yvXTEHsVxu3iM6RCsYdYo4nyzAjF2BTTaUiLw",
-   "dexId": "pumpswap",
-   "lastPrice": null,
-   "lastPriceAt": null,
-   "multiple": null,
-   "milestonesHit": [],
-   "dumpHit": null,
-   "links": {
-    "dexscreener": "https://dexscreener.com/solana/9fodg55yvXTEHsVxu3iM6RCsYdYo4nyzAjF2BTTaUiLw",
-    "gmgn": "https://gmgn.ai/sol/token/Atvvy7bkaZLx1ErMrppqv2bHENi6sJrRRkXwhjDupump",
-    "solscan": "https://solscan.io/token/Atvvy7bkaZLx1ErMrppqv2bHENi6sJrRRkXwhjDupump"
-   },
-   "paperOnly": true
-  },
-  {
-   "id": "sig_mvbpa4nxmaauzj",
-   "mint": "8XeEkeGfuaMWbpxuYtxrTL62nmN9bT7DEBMyEHnvpump",
-   "symbol": "FTS",
-   "name": "Flying Tesla Sidester",
-   "createdAt": 1792199453469,
-   "signalPriceUsd": 0.00002285,
-   "score": 25.5,
-   "riskVerdict": "UNKNOWN",
-   "liquidityUsd": null,
-   "volume24": 85461.89,
-   "qualifiedWallets": 0,
-   "pairAddress": "9tKRToNToLCXsNfkLWT4DUqoDiPoFhJ1Yj3Zs9iu91nD",
-   "dexId": "pumpfun",
-   "lastPrice": null,
-   "lastPriceAt": null,
-   "multiple": null,
-   "milestonesHit": [],
-   "dumpHit": null,
-   "links": {
-    "dexscreener": "https://dexscreener.com/solana/9tKRToNToLCXsNfkLWT4DUqoDiPoFhJ1Yj3Zs9iu91nD",
-    "gmgn": "https://gmgn.ai/sol/token/8XeEkeGfuaMWbpxuYtxrTL62nmN9bT7DEBMyEHnvpump",
-    "solscan": "https://solscan.io/token/8XeEkeGfuaMWbpxuYtxrTL62nmN9bT7DEBMyEHnvpump"
-   },
-   "paperOnly": true
-  }
- ],
+ "newSignalsThisCycle": [],
  "recentSignals": [
   {
    "id": "sig_mvbpa4nxmaauzj",
@@ -784,7 +629,11 @@
    }
   }
  ],
- "errors": [],
+ "errors": [
+  "discovery: profiles: HTTP 429",
+  "discovery: boosts: source in rate-limit backoff",
+  "dexscreener 429 this cycle — retrying next cycle (cooldown arms after 2 consecutive 429 cycles)"
+ ],
  "notes": [
   "PAPER ONLY — research signals, not financial advice, never executable trades.",
   "Engine code is the in-tab scanner engine extracted verbatim from index.html into a static bundle (hash-checked every cycle against the live page; drift is labelled, never silent); rules unchanged.",
@@ -794,14 +643,14 @@
  ],
  "driver": "worker-budget-v2 2026-10-17",
  "phaseMs": {
-  "t0": 1792199434997,
-  "readMs": 1422,
-  "discoveryMs": 156
+  "t0": 1792200034772,
+  "readMs": 840,
+  "discoveryMs": 4012
  },
  "dexBackoffUntil": null,
  "dexBackoffStrikes": 0,
- "dex429Streak": 0,
+ "dex429Streak": 1,
  "stateReadError": null,
- "subrequests": 35,
+ "subrequests": 4,
  "stateWritten": true
 }
