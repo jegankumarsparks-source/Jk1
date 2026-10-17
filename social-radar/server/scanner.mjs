@@ -104,7 +104,7 @@ for (const ep of ['https://api.dexscreener.com/token-boosts/latest/v1', 'https:/
     upsertCoin(ca, {
       name: a.name?.split(' / ')[0] || coins.get(ca)?.name || '',
       launchAt: a.pool_created_at ? Date.parse(a.pool_created_at) : null,
-      price: +a.base_token_price_usd || null,
+      geckoPrice: +a.base_token_price_usd || null,
       liq: +a.reserve_in_usd || null,
     });
     addSourceToCoin(ca, { type: 'launch', label: 'New pool (just launched)', url: `https://www.geckoterminal.com/solana/pools/${p.id?.replace('solana_', '')}`, time: a.pool_created_at ? Date.parse(a.pool_created_at) : now });
@@ -175,7 +175,7 @@ for (let i = 0; i < cas.length; i += 30) {
     if (p) {
       c.symbol = p.baseToken?.symbol || c.symbol || null;
       c.name = c.name && c.name.length > 3 ? c.name : (p.baseToken?.name || c.name);
-      c.price = +p.priceUsd || c.price || null;
+      c.price = +p.priceUsd || null;
       c.mcap = p.marketCap || p.fdv || c.mcap || null;
       c.liq = p.liquidity?.usd || c.liq || null;
       c.chg24 = p.priceChange?.h24 ?? null;
@@ -195,7 +195,7 @@ const out = [];
 for (const [ca, c] of coins) {
   const s = state.coins[ca] || {};
   const firstSeen = s.firstSeen || c.firstSeen || now;
-  const firstPrice = s.firstPrice || c.price || null;
+  const firstPrice = (s.firstPriceSrc === 'dex' && s.firstPrice) ? s.firstPrice : (c.price || null);
   const fired = s.fired || [];
   const entry = {
     ...c,
@@ -207,7 +207,7 @@ for (const [ca, c] of coins) {
   entry.mult = (entry.price && firstPrice) ? entry.price / firstPrice : null;
   // launch time fallback
   if (!entry.launchAt && c.pairAge) entry.launchAt = c.pairAge;
-  state.coins[ca] = { firstSeen, firstPrice: entry.price || firstPrice, fired, lastSeen: now, symbol: entry.symbol };
+  state.coins[ca] = { firstSeen, firstPrice, firstPriceSrc: firstPrice ? 'dex' : null, fired, lastSeen: now, symbol: entry.symbol };
   // milestone alerts
   if (entry.mult) {
     for (const m of MILESTONES) {
