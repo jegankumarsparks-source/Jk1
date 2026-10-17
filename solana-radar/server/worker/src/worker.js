@@ -121,10 +121,20 @@ async function runCycle(env){
   const heavyDeadline=Date.now()+HEAVY_PHASE_DEADLINE_MS;
   if(S&&S.settings){ S.settings.maxRugcheckPerCycle=Math.min(S.settings.maxRugcheckPerCycle||3,3); S.settings.walletResearchPerCandidate=Math.min(S.settings.walletResearchPerCandidate||3,3); }
   const subPhases={};
+  /* phase alternation: discovery (~13 subrequests) and deep analysis (~20/candidate)
+     cannot both fit the 50-subrequest free-tier budget alongside marks and the
+     guaranteed state+feed writes. Odd cycles discover, even cycles analyze;
+     each runs at least every 10 min. Engine rules untouched - the driver only
+     chooses which phases run this cycle. */
+  const discoveryCycle=(cycle%2===1);
+  const analyzeCutoff=discoveryCycle?SUB_CUTOFF_ANALYZE:30;
   let dexBackoffUntil=0, dexStrikes=(st&&st.dexBackoffStrikes)||0, dex429Streak=0;
   if(st&&st.dexBackoffUntil&&st.dexBackoffUntil>Date.now()){
     dexBackoffUntil=st.dexBackoffUntil;
     errors.push('discovery skipped: dexscreener 429 cooldown active until '+new Date(dexBackoffUntil).toISOString()+' (driver-level backoff, engine rules unchanged; heartbeat feed still written)');
+  }else if(!discoveryCycle){
+    errors.push('discovery paused this cycle (driver-level phase alternation: odd cycles discover, even cycles analyze, so both fit the free-tier subrequest budget; each runs every 10 min)');
+    subPhases.afterDiscovery=subCount;
   }else{
     const dT=Date.now();
     try{
@@ -162,7 +172,7 @@ async function runCycle(env){
     if(c.rugcheck){
       WALLETS.harvestFromToken(c);
       const recs=(c.rugcheck.topHolders||[]).filter(h=>h.address&&!h.insider).slice(0,S.settings.walletResearchPerCandidate||5);
-      for(const h of recs){ if(Date.now()>deadline||Date.now()>heavyDeadline||subCount>SUB_CUTOFF_HARD)break; try{ await WALLETS.researchWallet(h.address); }catch(e){} }
+      for(const h of recs){ if(Date.now()>deadline||Date.now()>heavyDeadline||subCount>34)break; try{ await WALLETS.researchWallet(h.address); }catch(e){} }
       c.walletEvidence=(c.rugcheck.topHolders||[]).filter(h=>h.address).map(h=>{
         const w=S.wallets.get(h.address);
         return {address:h.address,pct:h.pct,insider:h.insider,state:w?w.state:'UNVERIFIED',
@@ -178,7 +188,7 @@ async function runCycle(env){
   for(const c of S.candidates.values()){
     if(analyzed>=Math.min(S.settings.maxRugcheckPerCycle||3,3))break;
     if(Date.now()>deadline||Date.now()>heavyDeadline){ errors.push('deadline reached — remaining candidates deferred to next cycle'); break; }
-    if(subCount>SUB_CUTOFF_ANALYZE){ errors.push('subrequest budget reached ('+subCount+') — remaining analysis deferred (driver-level, protects heartbeat writes)'); break; }
+    if(subCount>analyzeCutoff){ errors.push('subrequest budget reached ('+subCount+') — remaining analysis deferred (driver-level, protects heartbeat writes)'); break; }
     if((c.updatedAt||0)<cycleStart)continue;
     if(c.state==='DISCOVERED'||(c.state==='DATA_INCOMPLETE'&&c.market)){
       try{ await analyzeOne(c.mint); analyzed++; }catch(e){ errors.push('analyze '+U.short(c.mint)+': '+(e.message||e)); }
@@ -190,7 +200,8 @@ async function runCycle(env){
   let marksTracked=0;
   if(subCount>SUB_CUTOFF_MARKS||Date.now()>heavyDeadline){ errors.push('marks refresh skipped: subrequest budget ('+subCount+') reserved for heartbeat writes'); }
   else { const cut=U.now()-48*3600*1000;
-    const recent=[...S.signals.values()].filter(g=>g.createdAt>cut).sort((a,b)=>b.createdAt-a.createdAt).slice(0,25);
+    const allRecent=[...S.signals.values()].filter(g=>g.createdAt>cut).sort((a,b)=>b.createdAt-a.createdAt).slice(0,25);
+    const recent=allRecent.slice((cycle%3)*8,(cycle%3)*8+8); // rotate: 8 marks/cycle, full window every ~15 min
     if(recent.length){
       const mints=[...new Set(recent.map(g=>g.mint))];
       let prices={};
