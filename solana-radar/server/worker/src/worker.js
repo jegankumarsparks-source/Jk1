@@ -185,11 +185,16 @@ async function runCycle(env){
   }
 
   let analyzed=0;
-  for(const c of S.candidates.values()){
+  /* pool per phase: discovery cycles analyze what discovery just refreshed;
+     analysis cycles take the stalest eligible candidates (nothing is refreshed
+     on a paused-discovery cycle, so freshness-based eligibility would starve) */
+  let pool=[...S.candidates.values()];
+  if(discoveryCycle)pool=pool.filter(c=>(c.updatedAt||0)>=cycleStart);
+  else pool=pool.filter(c=>c.state==='DISCOVERED'||(c.state==='DATA_INCOMPLETE'&&c.market)).sort((a,b)=>(a.updatedAt||0)-(b.updatedAt||0));
+  for(const c of pool){
     if(analyzed>=Math.min(S.settings.maxRugcheckPerCycle||3,3))break;
     if(Date.now()>deadline||Date.now()>heavyDeadline){ errors.push('deadline reached — remaining candidates deferred to next cycle'); break; }
     if(subCount>analyzeCutoff){ errors.push('subrequest budget reached ('+subCount+') — remaining analysis deferred (driver-level, protects heartbeat writes)'); break; }
-    if((c.updatedAt||0)<cycleStart)continue;
     if(c.state==='DISCOVERED'||(c.state==='DATA_INCOMPLETE'&&c.market)){
       try{ await analyzeOne(c.mint); analyzed++; }catch(e){ errors.push('analyze '+U.short(c.mint)+': '+(e.message||e)); }
     }
