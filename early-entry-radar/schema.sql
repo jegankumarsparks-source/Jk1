@@ -88,3 +88,23 @@ CREATE TABLE IF NOT EXISTS launch_status_log (
   reasons TEXT NOT NULL,              -- JSON array of human-readable reasons
   at TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS security_results (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  entity_id TEXT NOT NULL,
+  check_name TEXT NOT NULL,
+  result TEXT NOT NULL,               -- PASS | FAIL | UNKNOWN | NOT_APPLICABLE
+  evidence TEXT,                      -- JSON: the actual values observed
+  provider TEXT,                      -- goplus | rugcheck | solana_rpc | jupiter | local
+  limitations TEXT,
+  at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS gate_results (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  entity_id TEXT NOT NULL,
+  gate TEXT NOT NULL,
+  result TEXT NOT NULL,               -- PASS | FAIL | UNKNOWN
+  detail TEXT,                        -- JSON
+  at TEXT NOT NULL
+);
