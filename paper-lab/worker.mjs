@@ -80,6 +80,8 @@ const GT='https://api.geckoterminal.com/api/v2/networks/solana/tokens/';
 async function fetchFallback(mints){const out={};for(const m of mints){try{const r=await jget(GT+m+'/pools');const pools=r&&r.data||[];
  if(!pools.length)continue;pools.sort((a,b)=>parseFloat(b.attributes.reserve_in_usd||0)-parseFloat(a.attributes.reserve_in_usd||0));
  const a=pools[0].attributes;out[m]={price:parseFloat(a.base_token_price_usd)||0,liq:parseFloat(a.reserve_in_usd)||0}}catch(e){}}return out}
+const JUP='https://api.jup.ag/price/v3?ids=';
+async function fetchJupiter(mints){const out={};for(let i=0;i<mints.length;i+=50){try{const r=await jget(JUP+mints.slice(i,i+50).join(','));for(const m of Object.keys(r||{})){const d=r[m];const price=parseFloat(d&&d.usdPrice)||0;if(price>0)out[m]={price,liq:parseFloat(d&&d.liquidity)||null}}}catch(e){}}return out}
 function groupByMint(pairs){const g={};for(const p of pairs){const m=p.baseToken&&p.baseToken.address;if(!m)continue;(g[m]=g[m]||[]).push(p)}return g}
 async function run(env){
  const raw=await env.BOOK.get('book');const ST=raw?JSON.parse(raw):{cfg:{...CFG_DEFAULT},pos:[],created:Date.now()};
@@ -92,9 +94,13 @@ async function run(env){
   for(const p of ST.pos.filter(x=>x.open)){const b=pickPair(g[p.mint]);if(!b)continue;const ev=managePos(p,parseFloat(b.priceUsd)||0,b.liquidity?b.liquidity.usd:null,now,ST.cfg);if(ev.length)p.events.push(...ev);}
   // fallback: keyless GeckoTerminal pricing for open positions Dexscreener missed (e.g. 429)
   const missing=ST.pos.filter(x=>x.open&&!pickPair(g[x.mint])).map(x=>x.mint);
-  let fbUsed=0;
-  if(missing.length){const fb=await fetchFallback(missing);
+  let fbUsed=0;let fbMap={};
+  if(missing.length){const fb=await fetchFallback(missing);fbMap=fb;
    for(const p of ST.pos.filter(x=>x.open)){const f=fb[p.mint];if(!f)continue;const ev=managePos(p,f.price,f.liq,now,ST.cfg);if(ev.length)p.events.push(...ev);if(f.price>0)fbUsed++;}}
+  // second fallback: keyless Jupiter v3 for mints GeckoTerminal also missed
+  let jupUsed=0;const missing2=missing.filter(m=>{const f=fbMap[m];return !f||!f.price});
+  if(missing2.length){const jf=await fetchJupiter(missing2);
+   for(const p of ST.pos.filter(x=>x.open)){const f=jf[p.mint];if(!f)continue;const ev=managePos(p,f.price,f.liq,now,ST.cfg);if(ev.length)p.events.push(...ev);if(f.price>0)jupUsed++;}}
   if(!derr){
    const R=[];
    for(const m of Object.keys(g)){const b=pickPair(g[m]);if(!b||!b.baseToken)continue;const e=evalCoin(b,ST.cfg,now);R.push({mint:m,sym:b.baseToken.symbol,name:b.baseToken.name,pair:{priceChange:b.priceChange,volume:{h1:b.volume&&b.volume.h1}},e});}
@@ -107,9 +113,9 @@ async function run(env){
     const p=newPos({mint:c.mint,sym:c.sym,name:c.name},c.e.price,ST.cfg,now,c.e.tier,c.e.score);p.auto=true;p.why=c.e.why;p.entryMc=c.e.mc;p.entryLiq=c.e.liq;ST.pos.push(p);}}
   }
   // on degraded discovery: keep last good radar, keep managing positions, no new entries
-  if(!derr||prs.length||fbUsed)ST.lastScan=now;
-  ST.err=derr?('dex discovery limited ('+derr+'); radar kept from last good scan; positions via '+(fbUsed?'gecko fallback':(prs.length?'dex tokens':'no price source - paused'))):null;
-  ST.fb=(ST.fb||0)+fbUsed;
+  if(!derr||prs.length||fbUsed||jupUsed)ST.lastScan=now;
+  ST.err=derr?('dex discovery limited ('+derr+'); radar kept from last good scan; positions via '+(fbUsed?'gecko fallback':(jupUsed?'jupiter fallback':(prs.length?'dex tokens':'no price source - paused')))):null;
+  ST.fb=(ST.fb||0)+fbUsed;ST.jup=(ST.jup||0)+jupUsed;
  }catch(e){ST.err=String(e.message||e)}
  ST.server=true;ST.runs=(ST.runs||0)+1;
  await env.BOOK.put('book',JSON.stringify(ST));return ST;
