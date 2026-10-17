@@ -59,7 +59,9 @@ function loadState(){
     S.scoreHistory=st.scoreHistory||[];
     if(st.counters)S.diag.counters=st.counters;
     if(st.rejectReasons)S.diag.rejectReasons=st.rejectReasons;
-    return {restored:true,cycleBase:st.cycleBase||0,milestones:st.milestones||{}};
+    return {restored:true,cycleBase:st.cycleBase||0,milestones:st.milestones||{},
+      carry:{dexBackoffUntil:st.dexBackoffUntil||0,dexBackoffStrikes:st.dexBackoffStrikes||0,
+        dex429Streak:st.dex429Streak||0,lastBackstopTriggerAt:st.lastBackstopTriggerAt||0}};
   }catch(e){ console.log('state restore failed, starting clean:',e.message); return {restored:false,cycleBase:0,milestones:{}}; }
 }
 function saveState(extra){
@@ -70,7 +72,9 @@ function saveState(extra){
   writeFileSync(STATE,JSON.stringify({schema:1,savedAt:U.now(),cycleBase:extra.cycle,
     counters:S.diag.counters,rejectReasons:S.diag.rejectReasons,
     candidates,wallets,signals,scoreHistory:S.scoreHistory.slice(-200),
-    milestones:extra.milestones}));
+    milestones:extra.milestones,
+    dexBackoffUntil:extra.carry.dexBackoffUntil||0,dexBackoffStrikes:extra.carry.dexBackoffStrikes||0,
+    dex429Streak:extra.carry.dex429Streak||0,lastBackstopTriggerAt:extra.carry.lastBackstopTriggerAt||0}));
 }
 
 /* ---------- state hygiene (driver-level): bound growth ---------- */
@@ -168,11 +172,19 @@ function publicSignal(g){
    step aside — the worker is the primary 24/7 scanner. */
 try{
   const cur=JSON.parse(readFileSync(FEED,'utf8'));
-  if(cur&&cur.generatedAt&&(Date.now()-cur.generatedAt)<12*60*1000){
-    console.log('backstop skipped: worker heartbeat fresh (cycle '+cur.cycle+', '+Math.round((Date.now()-cur.generatedAt)/60000)+' min old)');
+  const ageMin=cur&&cur.generatedAt?(Date.now()-cur.generatedAt)/60000:1e9;
+  const dex=cur&&Array.isArray(cur.sources)?cur.sources.find(s=>s.id==='dexscreener'):null;
+  const dexLive=dex&&dex.status==='LIVE';
+  const cooldown=cur&&cur.dexBackoffUntil&&cur.dexBackoffUntil>Date.now();
+  if(ageMin<12&&dexLive&&!cooldown){
+    console.log('backstop skipped: worker heartbeat fresh, dexscreener LIVE, no cooldown armed (cycle '+cur.cycle+', '+Math.round(ageMin)+' min old)');
     process.exit(0);
   }
-  console.log('backstop ACTIVE: worker heartbeat stale or missing — running one cycle');
+  if(cur&&cur.runner==='github-actions-backstop'&&ageMin<8){
+    console.log('backstop skipped: another backstop cycle ran '+Math.round(ageMin)+' min ago (self-throttle)');
+    process.exit(0);
+  }
+  console.log('backstop ACTIVE: '+(ageMin>=12?('worker heartbeat stale ('+Math.round(ageMin)+' min)'):(cooldown?('worker dexscreener in 429 cooldown until '+new Date(cur.dexBackoffUntil).toISOString()):('worker heartbeat fresh but dexscreener '+(dex?dex.status:'unknown'))))+' — covering from GitHub IPs');
 }catch(e){ console.log('backstop ACTIVE: no readable feed ('+e.message+')'); }
 
 const st=loadState();
@@ -213,7 +225,7 @@ const top=all.filter(c=>c.score).sort((a,b)=>b.score.total-a.score.total).slice(
 const signals=[...S.signals.values()].sort((a,b)=>b.createdAt-a.createdAt).slice(0,15).map(publicSignal);
 
 const feed={generatedAt:U.now(),generatedAtIso:new Date().toISOString(),
-  scanner:'solana-radar-server',engineSource:'index.html embedded engine, extracted verbatim at run time',
+  scanner:'solana-radar-server',runner:'github-actions-backstop',engineSource:'index.html embedded engine, extracted verbatim at run time',
   buildMarker:E.BUILD_MARKER,appVersion:E.APP_VERSION,scoreVersion:E.SCORE_VERSION,
   riskPolicyVersion:E.RISK_POLICY_VERSION,thresholdsVersion:E.THRESHOLDS_VERSION,
   cycle,cycleStartedAt:cycleStart,cycleDurationMs:U.now()-cycleStart,
@@ -231,6 +243,6 @@ const feed={generatedAt:U.now(),generatedAtIso:new Date().toISOString(),
     'Signal price is frozen at signal time; lastPrice/multiple are observed Dexscreener marks, not executable fills.',
     'Candidates idle >72h without an unconsumed signal are evicted (state hygiene); signals and wallets bounded.']};
 writeFileSync(FEED,JSON.stringify(feed,null,1));
-saveState({cycle,milestones:st.milestones});
+saveState({cycle,milestones:st.milestones,carry:st.carry||{}});
 console.log('cycle',cycle,'ok · candidates',counts.total,'· signals(lifetime)',S.diag.counters.signals,'· new this cycle',newSignals.length,'· marks',markRes.tracked,'· sources',REG.all().map(s=>s.id+':'+s.status).join(','));
 if(errors.length)console.log('errors:',errors.slice(0,6).join(' | '));

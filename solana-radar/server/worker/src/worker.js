@@ -116,7 +116,7 @@ async function runCycle(env){
   const errors=[];
   if(drift)errors.push('ENGINE DRIFT: '+drift);
   const DISCOVERY_BUDGET_MS=20000;
-  let dexBackoffUntil=0, dexStrikes=(st&&st.dexBackoffStrikes)||0;
+  let dexBackoffUntil=0, dexStrikes=(st&&st.dexBackoffStrikes)||0, dex429Streak=0;
   if(st&&st.dexBackoffUntil&&st.dexBackoffUntil>Date.now()){
     dexBackoffUntil=st.dexBackoffUntil;
     errors.push('discovery skipped: dexscreener 429 cooldown active until '+new Date(dexBackoffUntil).toISOString()+' (driver-level backoff, engine rules unchanged; heartbeat feed still written)');
@@ -131,12 +131,19 @@ async function runCycle(env){
     const dex429=dex&&dex.status==='DEGRADED'&&String(dex.lastError||'').includes('429');
     const discoveryStalled=(phaseT.discoveryMs||0)>=DISCOVERY_BUDGET_MS;
     if(dex429||discoveryStalled){
-      dexStrikes=Math.min((st&&st.dexBackoffStrikes||0)+1,3);
-      const mins=10*dexStrikes;
-      dexBackoffUntil=Date.now()+mins*60*1000;
-      errors.push('dexscreener cooldown armed for '+mins+' min (strike '+dexStrikes+', driver-level; discovery resumes automatically, heartbeats continue)');
-    }else if(dex&&dex.status==='LIVE'){
-      dexStrikes=0; // source recovered: back to short cooldown next time
+      dex429Streak=(st&&st.dex429Streak||0)+1;
+      if(dex429Streak>=2){
+        dexStrikes=Math.min((st&&st.dexBackoffStrikes||0)+1,3);
+        const mins=10*dexStrikes;
+        dexBackoffUntil=Date.now()+mins*60*1000;
+        errors.push('dexscreener cooldown armed for '+mins+' min (strike '+dexStrikes+' after '+dex429Streak+' consecutive 429 cycles, driver-level; discovery resumes automatically, heartbeats continue)');
+        errors.push('GitHub Actions backstop (separate egress IPs, runs every 5 min) covers discovery during this cooldown');
+      }else{
+        errors.push('dexscreener 429 this cycle — retrying next cycle (cooldown arms after 2 consecutive 429 cycles)');
+      }
+    }else{
+      dex429Streak=0;
+      if(dex&&dex.status==='LIVE')dexStrikes=0; // source recovered: back to short cooldown next time
     }
   }
 
@@ -268,7 +275,7 @@ async function runCycle(env){
     buildMarker:E.BUILD_MARKER,appVersion:E.APP_VERSION,scoreVersion:E.SCORE_VERSION,
     riskPolicyVersion:E.RISK_POLICY_VERSION,thresholdsVersion:E.THRESHOLDS_VERSION,
     cycle,cycleStartedAt:cycleStart,cycleDurationMs:U.now()-cycleStart,
-    schedule:'every 5 min via Cloudflare Workers cron (free tier, keyless data) — runs whether or not any tab is open. Backstop: GitHub Actions cron (throttled in this repo to every few hours).',
+    schedule:'every 5 min via Cloudflare Workers cron (free tier, keyless data) — runs whether or not any tab is open. Backstop: GitHub Actions cron every 5 min (skips while this worker is healthy with dexscreener LIVE; covers discovery from separate egress IPs during dexscreener 429 cooldowns or worker outages).',
     engineDrift:drift,
     stateRestored:restored,
     sources:srcList,
@@ -286,14 +293,31 @@ async function runCycle(env){
   feed.phaseMs=phaseT;
   feed.dexBackoffUntil=dexBackoffUntil||null;
   feed.dexBackoffStrikes=dexStrikes||0;
+  feed.dex429Streak=dex429Streak||0;
   feed.stateReadError=stateFetchError;
   feed.subrequests=subCount;
   feed.notes.push('Driver enforces hard per-phase time budgets and always writes this heartbeat feed, even when a data source stalls; a stalled source is labelled in errors, never silent.');
 
+  /* when our dex is in 429 cooldown and the GitHub backstop just wrote a fresh cycle
+     with dexscreener LIVE, inherit its dex row so the page shows one stable truth.
+     dexBackoffUntil stays in the feed, so the backstop keeps covering discovery
+     until our own cooldown expires. */
+  if(dexBackoffUntil>Date.now()){
+    try{
+      const curRaw=await withTimeout(gh(env,'GET',FEED_PATH,null,true),8000,'feed read');
+      const cj=curRaw&&JSON.parse(curRaw);
+      const cdex=cj&&Array.isArray(cj.sources)?cj.sources.find(s=>s.id==='dexscreener'):null;
+      if(cj&&cj.runner==='github-actions-backstop'&&cdex&&cdex.status==='LIVE'&&(Date.now()-(cj.generatedAt||0))<12*60*1000){
+        const fd=feed.sources.find(s=>s.id==='dexscreener');
+        if(fd){ fd.status='LIVE'; fd.note='via GitHub backstop (its cycle '+cj.cycle+', '+Math.round((Date.now()-cj.generatedAt)/60000)+' min ago) while worker dex in 429 cooldown ('+Math.ceil((dexBackoffUntil-Date.now())/60000)+' min left)'; delete fd.lastError; }
+      }
+    }catch(e){ /* keep this worker's own dex row */ }
+  }
+
   const stateOut=JSON.stringify({schema:1,savedAt:U.now(),cycleBase:cycle,
     counters:S.diag.counters,rejectReasons:S.diag.rejectReasons,
     candidates:[...S.candidates.values()],wallets:[...S.wallets.values()],signals:[...S.signals.values()],
-    scoreHistory:S.scoreHistory.slice(-200),milestones,dexBackoffUntil:dexBackoffUntil||0,dexBackoffStrikes:dexStrikes||0});
+    scoreHistory:S.scoreHistory.slice(-200),milestones,dexBackoffUntil:dexBackoffUntil||0,dexBackoffStrikes:dexStrikes||0,dex429Streak:dex429Streak||0});
 
   /* never overwrite good state with a blank one after a failed state read */
   if(lastWriteError){ feed.errors=feed.errors||[]; feed.errors.push('previous cycle: '+lastWriteError); feed.previousWriteError=lastWriteError; }
