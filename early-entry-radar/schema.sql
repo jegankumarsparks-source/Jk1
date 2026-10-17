@@ -108,3 +108,14 @@ CREATE TABLE IF NOT EXISTS gate_results (
   detail TEXT,                        -- JSON
   at TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS signal_state_log (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  entity_id TEXT NOT NULL,
+  from_state TEXT,
+  to_state TEXT NOT NULL,
+  reasons TEXT NOT NULL,              -- JSON array
+  score REAL,
+  score_breakdown TEXT,               -- JSON: per-component values + weights
+  at TEXT NOT NULL
+);
