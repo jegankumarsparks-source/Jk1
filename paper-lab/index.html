@@ -126,12 +126,12 @@ function evalCoin(p,C,now){
 function newPos(coin,price,C,now,tier,score){
  const eff=price*(1+C.friction),cost=C.bet;
  return {id:coin.mint+'_'+now,mint:coin.mint,sym:coin.sym,name:coin.name,entry:price,entryEff:eff,entryTime:now,cost,units:cost/eff,rem:cost/eff,
-  banked:0,tp2:false,tp3:false,tp5:false,peak:1,stop:C.stop,tier,score,open:true,last:price,mult:1,events:[{t:now,e:'BUY',m:1,u:cost}]};
+  banked:0,tp2:false,tp3:false,tp5:false,peak:1,trough:1,stop:C.stop,tier,score,open:true,last:price,mult:1,events:[{t:now,e:'BUY',m:1,u:cost}]};
 }
 // manage one position given fresh price/liq; returns array of events, mutates pos
 function managePos(pos,price,liq,now,C){
  const ev=[];if(!pos.open||!(price>0))return ev;
- pos.last=price;pos.mult=price/pos.entry;if(pos.mult>pos.peak)pos.peak=pos.mult;
+ pos.last=price;pos.mult=price/pos.entry;if(pos.mult>pos.peak)pos.peak=pos.mult;if(pos.trough==null||pos.mult<pos.trough)pos.trough=pos.mult;
  const sell=(frac,why)=>{const u=pos.rem*frac;const v=u*price*(1-C.friction);pos.rem-=u;pos.banked+=v;ev.push({t:now,e:why,m:pos.mult,u:v});};
  const closeAll=(why,val)=>{const v=val===undefined?pos.rem*price*(1-C.friction):val;pos.banked+=v;pos.rem=0;pos.open=false;pos.exitTime=now;pos.reason=why;pos.exitMult=pos.mult;ev.push({t:now,e:why,m:pos.mult,u:v});};
  if(liq!==null&&liq<C.rugLiq){closeAll('RUG',0);}
@@ -263,6 +263,7 @@ function summaryHdr(){const s=summarize(ST);
  $('hSt').textContent=(scanning?'scanning... ':'')+'Last scan '+(lastScan?fmtAgo(lastScan):'never')+' | '+(MODE==='server'?'SERVER 24/7':'PHONE')+' | open '+ST.pos.filter(p=>p.open).length+' | '+(errs?'errors':'live');
  if(lastScan&&lastScan!==prevLastScan){prevLastScan=lastScan;const d=$('dot');d.classList.remove('pulse');void d.offsetWidth;d.classList.add('pulse')}$('dot').classList.toggle('err',!!errs);
  const oc=ST.pos.filter(p=>p.open).length,cb=$('cntOpen');cb.style.display=oc?'inline-block':'none';cb.textContent=oc;}
+function spark(p){const ks=['m5','h1','h6','h24'];return '<div style="display:flex;gap:3px;align-items:flex-end;height:14px;margin-top:4px">'+ks.map(k=>{const v=(p.priceChange&&p.priceChange[k])||0;const h=Math.max(2,Math.min(14,2+Math.abs(v)/400*12));return '<i title="'+k+' '+(v>=0?'+':'')+v+'%" style="display:block;width:8px;height:'+h.toFixed(0)+'px;background:'+(v>=0?'var(--g)':'var(--r)')+';border-radius:1px"></i>'}).join('')+'<small class="m" style="font-size:9px;margin-left:3px">5m 1h 6h 24h</small></div>'}
 function renderRadar(){
  const q=($('rSearch').value||'').toLowerCase();
  let L=RADAR.filter(c=>(FIL==='all'?true:FIL==='wl'?!!WL[c.mint]:FIL==='pass'?c.e.pass:c.e.tier===FIL)&&(!q||(c.sym||'').toLowerCase().includes(q)||(c.name||'').toLowerCase().includes(q)));
@@ -270,22 +271,22 @@ function renderRadar(){
  if(rs==='mc')L=L.slice().sort((a,b)=>b.e.mc-a.e.mc);else if(rs==='h1')L=L.slice().sort((a,b)=>((b.pair.priceChange&&b.pair.priceChange.h1)||0)-((a.pair.priceChange&&a.pair.priceChange.h1)||0));else if(rs==='age')L=L.slice().sort((a,b)=>(a.e.ageMin==null?1e9:a.e.ageMin)-(b.e.ageMin==null?1e9:b.e.ageMin));
  $('radar').innerHTML='<div class="m" style="font-size:11px;margin:0 2px 6px">'+RADAR.length+' coins on radar &middot; '+RADAR.filter(c=>c.e.pass).length+' passing</div>'+(L.length?'':'<div class="note">'+(FIL==='wl'?'No watchlist coins yet. Tap the star on any radar coin to pin it here.':'No coins match yet. Scan runs every '+ST.cfg.scanSec+'s while this page is open.')+'</div>')+L.slice(0,40).map(c=>{const e=c.e,p=c.pair,open=ST.pos.some(x=>x.open&&x.mint===c.mint);
   return '<div class="coin shimmer" onclick="coinSheet(\''+c.mint+'\')"><div class="row"><h4>'+(c.img||c.pair&&c.pair.info&&c.pair.info.imageUrl?'<img loading="lazy" src="'+esc(c.img||c.pair.info.imageUrl)+'" onerror="this.style.display=\'none\'">':'')+esc(c.sym)+pill(e.tier)+(e.pass?'':'<span class="pill tn">gated</span>')+'</h4><div style="text-align:right"><span class="wl'+(WL[c.mint]?' on':'')+'" onclick="toggleWL(\''+c.mint+'\',event)">&#9733;</span> <b class="y">'+e.score+'</b><small class="m">/100</small></div></div>'
-  +'<div class="bar"><i style="width:'+e.score+'%"></i></div><div class="kv"><span>Signal <b>$'+px(e.price)+'</b></span><span>MC <b>$'+short(e.mc)+'</b></span><span>Liq <b>$'+short(e.liq)+'</b></span><span>5m '+pcol(p.priceChange&&p.priceChange.m5)+'</span><span>1h '+pcol(p.priceChange&&p.priceChange.h1)+'</span><span>Age <b>'+(e.ageMin==null?'?':e.ageMin<120?Math.round(e.ageMin)+'m':(e.ageMin/60).toFixed(1)+'h')+'</b></span>'+(open?'<span class="y"><b>OPEN</b></span>':'')+'</div></div>'}).join('')
+  +'<div class="bar"><i style="width:'+e.score+'%"></i></div><div class="kv"><span>Signal <b>$'+px(e.price)+'</b></span><span>MC <b>$'+short(e.mc)+'</b></span><span>Liq <b>$'+short(e.liq)+'</b></span><span>5m '+pcol(p.priceChange&&p.priceChange.m5)+'</span><span>1h '+pcol(p.priceChange&&p.priceChange.h1)+'</span><span>Age <b>'+(e.ageMin==null?'?':e.ageMin<120?Math.round(e.ageMin)+'m':(e.ageMin/60).toFixed(1)+'h')+'</b></span>'+(open?'<span class="y"><b>OPEN</b></span>':'')+'</div>'+spark(p)+'</div>'}).join('')
 }
 // ===== FEATURE 2: Open tab with live target progress =====
 function tgtState(p){if(p.mult>=5)return{next:'done',frac:1};if(p.mult>=3)return{next:'5x',frac:(p.mult-3)/2,to:'5x'};if(p.mult>=2)return{next:'3x',frac:(p.mult-2)/1,to:'3x'};return{next:'2x',frac:p.mult/2,to:'2x'}}
 function tStop(p){const left=ST.cfg.timeStopH*3600000-(Date.now()-p.entryTime);if(p.mult>=1.3)return '<span>T-stop <b class="m">safe</b></span>';if(left<=0)return '<span>T-stop <b class="r">due</b></span>';return '<span>T-stop <b class="'+(left<2*3600000?'r':'')+'">'+fmtDur(left)+'</b></span>'}
 function renderOpen(){
  const op=ST.pos.filter(p=>p.open).sort((a,b)=>b.mult-a.mult);const s0=summarize(ST);
- const row=p=>{const t=tgtState(p);const pct=Math.min(100,p.mult/5*100);
+ const row=p=>{const t=tgtState(p);const pct=Math.min(100,p.mult/5*100);const nv=t.next==='done'?0:p.rem*p.entry*parseFloat(t.next)*(1-ST.cfg.friction);
   return '<div class="coin" onclick="coinSheet(\''+p.mint+'\')"><div class="row"><h4>'+esc(p.sym)+pill(p.tier)+'</h4><div style="text-align:right"><span class="bigx '+(p.mult>=1?'g':'r')+'">'+p.mult.toFixed(2)+'x</span><br><b class="'+cls(p.pnl||0)+'">'+usd(p.pnl||0)+'</b></div></div>'
   +'<div class="barwrap"><div class="bar"><i style="width:'+pct+'%;background:'+(p.mult>=1?'var(--g)':'var(--r)')+'"></i>'
   +'<span class="tl" style="left:40%">2x</span><span class="tl" style="left:60%">3x</span><span class="tl" style="left:100%">5x</span>'
   +'<span class="tk '+(p.tp2?'hit':'')+'" style="left:40%"></span><span class="tk '+(p.tp3?'hit':'')+'" style="left:60%"></span><span class="tk '+(p.tp5?'hit':'')+'" style="left:100%"></span></div></div>'
-  +'<div class="kv"><span>Entry <b>$'+px(p.entry)+'</b></span><span>Live <b>$'+px(p.last)+'</b></span><span>Next <b class="y">'+t.next+'</b></span><span>Peak <b>'+p.peak.toFixed(2)+'x</b></span><span>Stop <b>'+p.stop.toFixed(2)+'x</b></span><span>To stop <b class="r">'+((p.stop/p.mult-1)*100).toFixed(0)+'%</b></span><span>&#9201; <b data-t0="'+p.entryTime+'">'+fmtDur(Date.now()-p.entryTime)+'</b></span>'+tStop(p)+'</div></div>'};
+  +'<div class="kv"><span>Entry <b>$'+px(p.entry)+'</b></span><span>Live <b>$'+px(p.last)+'</b></span><span>Next <b class="y">'+t.next+'</b></span>'+(nv?'<span>@'+t.next+' <b>$'+usd(nv,0)+'</b></span>':'')+'<span>Peak <b>'+p.peak.toFixed(2)+'x</b></span><span>Stop <b>'+p.stop.toFixed(2)+'x</b></span><span>To stop <b class="r">'+((p.stop/p.mult-1)*100).toFixed(0)+'%</b></span><span>&#9201; <b data-t0="'+p.entryTime+'">'+fmtDur(Date.now()-p.entryTime)+'</b></span>'+tStop(p)+'</div></div>'};
  $('open').innerHTML=(s0.cash<ST.cfg.bet?'<div class="note" style="border-color:var(--r)"><b class="r">Out of paper cash</b> - '+usd(s0.cash)+' left, a bet needs '+usd(ST.cfg.bet,0)+'. Auto-buy is paused until a position closes and frees cash.</div>':'')
   +'<details><summary>Exit plan (tap to open)</summary><div class="m" style="font-size:12px">Sell 40% at 2x (stop moves to breakeven), 30% at 3x (stop to 2x), final 30% at 5x. Initial stop -30%. Trailing stop 35% under peak after 2x. 12h time stop if below 1.3x. Rug (liq under $3K) = full loss of the remainder.</div></details>'
-  +(op.length?'<div class="eq" style="margin:8px 0"><div class="box"><small>Open cost</small><span>'+usd(op.reduce((s,p)=>s+p.cost,0),0)+'</span></div><div class="box"><small>Open value</small><span>'+usd(op.reduce((s,p)=>s+p.rem*p.last*(1-ST.cfg.friction),0))+'</span></div><div class="box"><small>Unrealised</small><span class="'+cls(op.reduce((s,p)=>s+(p.pnl||0),0))+'">'+usd(op.reduce((s,p)=>s+(p.pnl||0),0))+'</span></div></div>':'')+'<b>Open ('+op.length+')</b> <span class="m" style="font-size:11px">- live from '+(MODE==='server'?'24/7 server':'this page')+'</span>'+(op.map(row).join('')||'<p class="m">No open positions. Auto-buy is '+(ST.cfg.auto?'ON':'OFF')+'.</p>')
+  +(op.length?'<div class="eq" style="margin:8px 0"><div class="box"><small>Open cost</small><span>'+usd(op.reduce((s,p)=>s+p.cost,0),0)+'</span></div><div class="box"><small>Open value</small><span>'+usd(op.reduce((s,p)=>s+p.rem*p.last*(1-ST.cfg.friction),0))+'</span></div><div class="box"><small>Unrealised</small><span class="'+cls(op.reduce((s,p)=>s+(p.pnl||0),0))+'">'+usd(op.reduce((s,p)=>s+(p.pnl||0),0))+'</span></div></div>':'')+(op.length?'<div class="m" style="font-size:11px;margin-bottom:4px">Open by tier: '+['5x','3x','2x','watch','-'].map(tr=>{const s2=op.filter(p=>p.tier===tr).reduce((a,p)=>a+p.cost,0);return s2?tr+' '+usd(s2,0):null}).filter(Boolean).join(' &middot; ')+'</div>':'')+'<b>Open ('+op.length+')</b> <span class="m" style="font-size:11px">- live from '+(MODE==='server'?'24/7 server':'this page')+'</span>'+(op.map(row).join('')||'<p class="m">No open positions. Auto-buy is '+(ST.cfg.auto?'ON':'OFF')+'.</p>')
 }
 // ===== FEATURE 7: Closed tab search/sort/filter + FEATURE 6 display =====
 function reasonBadge(p){const r=p.reason||'CLOSED';const c=r==='RUG'?'bRUG':r.indexOf('TP')===0?'bTP':r.indexOf('TIME')===0?'bTIME':(p.pnl>0?'bWIN':'bLOSS');return '<span class="badge2 '+c+'">'+esc(r)+'</span>'}
@@ -299,7 +300,7 @@ function renderClosed(){
  if(sort==='pnl')cl.sort((a,b)=>(b.pnl||0)-(a.pnl||0));else if(sort==='mult')cl.sort((a,b)=>(b.exitMult||0)-(a.exitMult||0));else if(sort==='peak')cl.sort((a,b)=>(b.peak||0)-(a.peak||0));else cl.sort((a,b)=>(b.exitTime||0)-(a.exitTime||0));
  const total=cl.length;cl=cl.slice(0,closedShown);
  const row=p=>'<div class="coin" onclick="coinSheet(\''+p.mint+'\')"><div class="row"><h4>'+esc(p.sym)+pill(p.tier)+'</h4><b class="'+cls(p.pnl||0)+'">'+usd(p.pnl||0)+'</b></div>'
-  +'<div class="kv"><span>'+reasonBadge(p)+'</span><span>Exit <b>'+(p.exitMult||p.mult).toFixed(2)+'x</b></span><span>Peak <b>'+p.peak.toFixed(2)+'x</b></span><span>2x '+(p.tp2?'<b class="g">&#10003;</b>':'-')+'</span><span>3x '+(p.tp3?'<b class="y">&#10003;</b>':'-')+'</span><span>5x '+(p.tp5?'<b class="p">&#10003;</b>':'-')+'</span><span>Held <b>'+fmtDur((p.exitTime||p.entryTime)-p.entryTime)+'</b></span><span>'+(p.exitTime?fmtAgo(p.exitTime):'')+'</span>'+postLine(p)+'</div>'
+  +'<div class="kv"><span>'+reasonBadge(p)+'</span><span>Exit <b>'+(p.exitMult||p.mult).toFixed(2)+'x</b></span><span>Peak <b>'+p.peak.toFixed(2)+'x</b></span>'+(p.trough!=null?'<span>Dip <b>'+p.trough.toFixed(2)+'x</b></span>':'')+'<span>2x '+(p.tp2?'<b class="g">&#10003;</b>':'-')+'</span><span>3x '+(p.tp3?'<b class="y">&#10003;</b>':'-')+'</span><span>5x '+(p.tp5?'<b class="p">&#10003;</b>':'-')+'</span><span>R <b class="'+cls(p.pnl||0)+'">'+((p.pnl||0)/(p.cost*0.3)).toFixed(1)+'</b></span><span>Held <b>'+fmtDur((p.exitTime||p.entryTime)-p.entryTime)+'</b></span><span>'+(p.exitTime?fmtAgo(p.exitTime):'')+'</span>'+postLine(p)+'</div>'
   +'<div class="bar"><i style="width:'+Math.min(100,p.peak/5*100)+'%;background:'+(p.pnl>0?'var(--g)':'var(--r)')+'"></i></div></div>';
  $('closed').innerHTML=(cl.map(row).join('')||'<p class="m">No closed trades match.</p>')+(total>closedShown?'<button class="btn s" style="width:100%" onclick="closedShown+=60;renderClosed()">Show more ('+(total-closedShown)+' left)</button>':'')
 }
@@ -314,7 +315,14 @@ function scorecard(){const cl=ST.pos.filter(p=>!p.open);const n=cl.length,w=cl.f
   x2:cl.filter(p=>p.tp2).length,x3:cl.filter(p=>p.tp3).length,x5:cl.filter(p=>p.tp5).length,
   streak:(()=>{const s=cl.slice().sort((a,b)=>(b.exitTime||0)-(a.exitTime||0));let sign=0,n=0;for(const p of s){const sg=p.pnl>0?1:-1;if(!sign){sign=sg;n=1}else if(sg===sign)n++;else break}return {sign,n}})(),
   longW:(()=>{const s=cl.slice().sort((a,b)=>(a.exitTime||0)-(b.exitTime||0));let best=0,r=0;for(const p of s){if(p.pnl>0){r++;if(r>best)best=r}else r=0}return best})(),
-  avgW:w?gw/w:0,avgL:n-w?gl/(n-w):0}}
+  avgW:w?gw/w:0,avgL:n-w?gl/(n-w):0,
+  avgR:(()=>{const rs=cl.filter(p=>p.cost>0).map(p=>(p.pnl||0)/(p.cost*0.3));return rs.length?rs.reduce((a,b)=>a+b,0)/rs.length:0})(),
+  holdW:(()=>{const w2=cl.filter(p=>p.pnl>0);return w2.length?w2.reduce((a,p)=>a+((p.exitTime||p.entryTime)-p.entryTime),0)/w2.length:0})(),
+  holdL:(()=>{const l2=cl.filter(p=>p.pnl<=0);return l2.length?l2.reduce((a,p)=>a+((p.exitTime||p.entryTime)-p.entryTime),0)/l2.length:0})()}}
+function feesPaid(){const fr=ST.cfg.friction;let f=0;for(const p of ST.pos){f+=p.cost-p.cost/(1+fr);for(const e of p.events||[])if(e.e!=='BUY')f+=(e.u||0)*fr/(1-fr)}return f}
+function scoreBuckets(){const cl=ST.pos.filter(p=>!p.open&&p.score!=null);if(!cl.length)return '<p class="m" style="font-size:12px">No closed trades with scores yet.</p>';
+ const B=[['85+',85,101],['75-84',75,85],['62-74',62,75],['<62',0,62]];
+ return '<table><tr><th>Entry score</th><th>Trades</th><th>Win%</th><th>Avg P&amp;L</th></tr>'+B.map(b=>{const g=cl.filter(p=>p.score>=b[1]&&p.score<b[2]);if(!g.length)return '<tr><td>'+b[0]+'</td><td colspan=3 class="m">-</td></tr>';const w=g.filter(p=>p.pnl>0).length;const avg=g.reduce((a,p)=>a+p.pnl,0)/g.length;return '<tr><td>'+b[0]+'</td><td>'+g.length+'</td><td>'+Math.round(w/g.length*100)+'%</td><td class="'+cls(avg)+'">'+usd(avg)+'</td></tr>'}).join('')+'</table>'}
 function ecurve(){const cl=ST.pos.filter(p=>!p.open).sort((a,b)=>a.exitTime-b.exitTime);if(cl.length<2)return '<p class="m" style="font-size:12px">Need 2+ closed trades for the equity curve.</p>';
  let cum=ST.cfg.start,min=cum,max=cum;const pts=[[0,cum]];
  cl.forEach((p,i)=>{cum+=p.pnl;pts.push([i+1,cum]);if(cum<min)min=cum;if(cum>max)max=cum});
@@ -358,7 +366,7 @@ function renderBank(){
  +'<div class="sc"><small>Best trade</small><span class="g">'+(sc.best?usd(sc.best.pnl):'-')+'</span></div><div class="sc"><small>Worst trade</small><span class="r">'+(sc.worst?usd(sc.worst.pnl):'-')+'</span></div><div class="sc"><small>Avg hold</small><span>'+fmtDur(sc.hold)+'</span></div>'
  +'<div class="sc"><small>Avg win</small><span class="g">'+usd(sc.avgW)+'</span></div><div class="sc"><small>Avg loss</small><span class="r">-'+usd(sc.avgL)+'</span></div><div class="sc"><small>Profit factor</small><span>'+(sc.pf>=99?'99+':sc.pf.toFixed(2))+'</span></div>'
  +'<div class="sc"><small>2x hit</small><span class="g">'+sc.x2+'</span></div><div class="sc"><small>3x hit</small><span class="y">'+sc.x3+'</span></div><div class="sc"><small>5x hit</small><span class="p">'+sc.x5+'</span></div>'
- +'<div class="sc"><small>Expectancy</small><span class="'+cls(sc.n?(sc.gw-sc.gl)/sc.n:0)+'">'+usd(sc.n?(sc.gw-sc.gl)/sc.n:0)+'</span></div><div class="sc"><small>Streak</small><span class="'+(sc.streak.sign>0?'g':'r')+'">'+sc.streak.n+(sc.streak.sign>0?'W':'L')+'</span></div><div class="sc"><small>Best streak</small><span class="g">'+sc.longW+'W</span></div><div class="sc"><small>Rugs</small><span class="r">'+sc.rugs+'</span></div></div></details>'
+ +'<div class="sc"><small>Expectancy</small><span class="'+cls(sc.n?(sc.gw-sc.gl)/sc.n:0)+'">'+usd(sc.n?(sc.gw-sc.gl)/sc.n:0)+'</span></div><div class="sc"><small>Streak</small><span class="'+(sc.streak.sign>0?'g':'r')+'">'+sc.streak.n+(sc.streak.sign>0?'W':'L')+'</span></div><div class="sc"><small>Best streak</small><span class="g">'+sc.longW+'W</span></div><div class="sc"><small>Rugs</small><span class="r">'+sc.rugs+'</span></div><div class="sc"><small>Avg R</small><span class="'+cls(sc.avgR)+'">'+sc.avgR.toFixed(2)+'</span></div><div class="sc"><small>Fees sim</small><span>'+usd(feesPaid(),0)+'</span></div><div class="sc"><small>Hold W/L</small><span>'+fmtDur(sc.holdW)+' / '+fmtDur(sc.holdL)+'</span></div></div></details>'
  +'<details open><summary>Equity curve (from day 1)</summary><div class="ecurve" style="margin-top:8px">'+ecurve()+'</div></details>'
  +'<details open><summary>Day-wise profit (IST)</summary><div style="margin-top:8px">'+dchart(dw,days)+'</div><table><tr><th>Day</th><th>Trades</th><th>Wins</th><th>P&amp;L</th></tr>'+(days.map(d=>'<tr><td>'+d+(d===today?' (today)':'')+'</td><td>'+dw[d].n+'</td><td>'+dw[d].w+'</td><td class="'+cls(dw[d].pnl)+'">'+usd(dw[d].pnl)+'</td></tr>').join('')||'<tr><td colspan=4 class="m">No closed trades yet</td></tr>')+'</table>'
  +'<h4 style="margin:10px 0 4px">Month-wise</h4><table>'+(Object.keys(mo).map(k=>'<tr><td>'+k+'</td><td class="'+cls(mo[k])+'">'+usd(mo[k])+'</td></tr>').join('')||'<tr><td class="m">-</td></tr>')+'</table></details>'
@@ -369,6 +377,7 @@ function renderBank(){
  +'<details><summary>Entry hour performance (IST)</summary><div style="margin-top:8px">'+hourStats()+'</div></details>'
  +'<details><summary>After-exit watch (24h)</summary><div style="margin-top:8px">'+postWatch()+'</div></details>'
  +'<details><summary>Hit rate by tier</summary><div style="margin-top:8px">'+tierStats()+'</div></details>'
+ +'<details><summary>Win rate by entry score</summary><div style="margin-top:8px">'+scoreBuckets()+'</div></details>'
 }
 function renderSys(){
  $('sysIn').innerHTML='<div class="note" style="margin-top:10px"><b>Mode: '+(MODE==='server'?'24/7 SERVER':'PHONE')+'</b><br>'+(MODE==='server'?'A Cloudflare cron scans every 2 minutes even when this page is closed; this page just displays the server book.':'This page scans Dexscreener every '+ST.cfg.scanSec+'s while open. When closed, prices are NOT tracked.')+'</div>'

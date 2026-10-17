@@ -35,12 +35,12 @@ function evalCoin(p,C,now){
 function newPos(coin,price,C,now,tier,score){
  const eff=price*(1+C.friction),cost=C.bet;
  return {id:coin.mint+'_'+now,mint:coin.mint,sym:coin.sym,name:coin.name,entry:price,entryEff:eff,entryTime:now,cost,units:cost/eff,rem:cost/eff,
-  banked:0,tp2:false,tp3:false,tp5:false,peak:1,stop:C.stop,tier,score,open:true,last:price,mult:1,events:[{t:now,e:'BUY',m:1,u:cost}]};
+  banked:0,tp2:false,tp3:false,tp5:false,peak:1,trough:1,stop:C.stop,tier,score,open:true,last:price,mult:1,events:[{t:now,e:'BUY',m:1,u:cost}]};
 }
 // manage one position given fresh price/liq; returns array of events, mutates pos
 function managePos(pos,price,liq,now,C){
  const ev=[];if(!pos.open||!(price>0))return ev;
- pos.last=price;pos.mult=price/pos.entry;if(pos.mult>pos.peak)pos.peak=pos.mult;
+ pos.last=price;pos.mult=price/pos.entry;if(pos.mult>pos.peak)pos.peak=pos.mult;if(pos.trough==null||pos.mult<pos.trough)pos.trough=pos.mult;
  const sell=(frac,why)=>{const u=pos.rem*frac;const v=u*price*(1-C.friction);pos.rem-=u;pos.banked+=v;ev.push({t:now,e:why,m:pos.mult,u:v});};
  const closeAll=(why,val)=>{const v=val===undefined?pos.rem*price*(1-C.friction):val;pos.banked+=v;pos.rem=0;pos.open=false;pos.exitTime=now;pos.reason=why;pos.exitMult=pos.mult;ev.push({t:now,e:why,m:pos.mult,u:v});};
  if(liq!==null&&liq<C.rugLiq){closeAll('RUG',0);}
