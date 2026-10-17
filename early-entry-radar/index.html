@@ -26,7 +26,7 @@ main{padding:10px 12px}.card{background:var(--card);border:1px solid var(--line)
 <div id="toast">paper system · no real money · free-tier data</div>
 <script>
 const FEED='data/feed.json';
-let feed=null,tab='overview';
+let feed=null,tab=(location.hash||'#overview').slice(1);
 const TABS=[['overview','Overview'],['radar','Pre-Launch'],['coins','New Coins'],['live','Live'],['candidates','✅ Candidates'],['rejected','⛔ Rejected'],['sources','Sources'],['signals','Signals'],['audit','Audit']];
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const ago=t=>{if(!t)return'?';const s=(Date.now()-new Date(t).getTime())/1e3;return s<60?`${s|0}s`:s<3600?`${s/60|0}m`:`${s/3600|0}h`};
