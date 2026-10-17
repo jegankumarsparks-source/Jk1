@@ -1,0 +1,224 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>JK Paper Lab - Solana 2x/3x/5x</title>
+<style>
+:root{--bg:#0b0e11;--card:#181a20;--card2:#1e2329;--line:#2b3139;--tx:#eaecef;--mut:#848e9c;--y:#fcd535;--g:#0ecb81;--r:#f6465d}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.35 -apple-system,Segoe UI,Roboto,sans-serif;padding-bottom:70px}
+.top{position:sticky;top:0;background:var(--bg);z-index:5;padding:10px 12px;border-bottom:1px solid var(--line)}
+.row{display:flex;align-items:center;justify-content:space-between;gap:8px}.ttl{font-weight:700;font-size:16px}.ttl b{color:var(--y)}
+.badge{font-size:10px;padding:2px 6px;border-radius:4px;background:#2b2f36;color:var(--y);font-weight:700}
+.eq{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:8px}.box{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:7px 8px;text-align:center}
+.box small{display:block;color:var(--mut);font-size:10px;text-transform:uppercase}.box span{font-size:15px;font-weight:700}
+.g{color:var(--g)}.r{color:var(--r)}.m{color:var(--mut)}.y{color:var(--y)}
+.tabs{position:fixed;bottom:0;left:0;right:0;display:flex;background:var(--card);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom);z-index:6}
+.tabs button{flex:1;background:none;border:0;color:var(--mut);padding:12px 0;font-size:13px;font-weight:600}.tabs button.on{color:var(--y);box-shadow:inset 0 2px 0 var(--y)}
+.pg{display:none;padding:10px 12px}.pg.on{display:block}
+.coin{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:8px}
+.coin h4{margin:0;font-size:15px}.pill{display:inline-block;font-size:11px;font-weight:700;padding:2px 7px;border-radius:10px;margin-left:6px}
+.t2{background:#1f3b2f;color:var(--g)}.t3{background:#3b3a1f;color:var(--y)}.t5{background:#3d2a46;color:#e0a3ff}.tn{background:#2b2f36;color:var(--mut)}
+.kv{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:6px;font-size:12px;color:var(--mut)}.kv b{color:var(--tx);font-weight:600}
+.btn{background:var(--y);color:#000;border:0;border-radius:6px;padding:7px 12px;font-weight:700;font-size:13px}.btn.s{background:var(--card2);color:var(--tx);border:1px solid var(--line)}.btn.d{background:var(--r);color:#fff}
+.links{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}.links a{background:var(--card2);border:1px solid var(--line);color:var(--tx);text-decoration:none;font-size:12px;padding:6px 10px;border-radius:6px;font-weight:600}
+.links a.bn{background:#3a3010;color:var(--y);border-color:#5a4a10}
+.bar{height:6px;background:var(--card2);border-radius:3px;margin-top:6px;position:relative;overflow:hidden}.bar i{position:absolute;left:0;top:0;bottom:0;background:var(--y)}
+.sheet{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:20;display:none;align-items:flex-end}.sheet.on{display:flex}.sheet>div{background:var(--bg);width:100%;max-height:90vh;overflow:auto;border-radius:16px 16px 0 0;padding:14px;border-top:1px solid var(--line)}
+.side{position:fixed;top:0;bottom:0;right:-300px;width:280px;background:var(--card);z-index:30;padding:14px;transition:right .2s;border-left:1px solid var(--line);overflow:auto}.side.on{right:0}
+.side label{display:block;margin:10px 0 3px;color:var(--mut);font-size:12px}.side input{width:100%;background:var(--bg);border:1px solid var(--line);color:var(--tx);padding:8px;border-radius:6px}
+table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:8px 4px;border-bottom:1px solid var(--line);text-align:right}td:first-child,th:first-child{text-align:left}th{color:var(--mut);font-weight:600;font-size:11px}
+.bank{background:linear-gradient(135deg,#2a2410,#181a20);border:1px solid #5a4a10;border-radius:12px;padding:14px;text-align:center;margin-bottom:10px}.bank span{font-size:30px;font-weight:800;color:var(--y);display:block}
+.flt button{background:var(--card2);color:var(--mut);border:1px solid var(--line);border-radius:14px;padding:5px 11px;margin-right:6px;font-size:12px}.flt button.on{color:#000;background:var(--y)}
+.note{font-size:12px;color:var(--mut);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:8px;margin-bottom:8px}
+.ev{font-size:12px;color:var(--mut);padding:3px 0;border-bottom:1px dashed var(--line)}
+</style></head><body>
+<div class="top"><div class="row"><div class="ttl">JK <b>Paper Lab</b> <span class="badge">PAPER ONLY</span></div><button class="btn s" onclick="side(1)">&#9776;</button></div>
+<div class="eq"><div class="box"><small>Equity</small><span id="hEq">-</span></div><div class="box"><small>Profit Bank</small><span id="hBank" class="y">-</span></div><div class="box"><small>Total P&amp;L</small><span id="hPnl">-</span></div></div>
+<div class="m" style="font-size:11px;margin-top:6px" id="hSt">starting...</div></div>
+<div class="pg on" id="p0"><div class="flt" style="margin-bottom:8px"><button data-f="all" class="on">All</button><button data-f="2x">2x</button><button data-f="3x">3x</button><button data-f="5x">5x</button></div><div id="radar"></div></div>
+<div class="pg" id="p1"><div id="pos"></div></div>
+<div class="pg" id="p2"><div class="bank"><small class="m">PROFIT BANK (profit from winning closed trades)</small><span id="bBank">-</span></div><div id="bank"></div></div>
+<div class="pg" id="p3"><div id="sys"></div></div>
+<div class="tabs"><button class="on" data-t="0">Radar</button><button data-t="1">Positions</button><button data-t="2">Bank</button><button data-t="3">System</button></div>
+<div class="sheet" id="sheet" onclick="if(event.target==this)this.classList.remove('on')"><div id="sheetc"></div></div>
+<div class="side" id="side"><div class="row"><b>Settings</b><button class="btn s" onclick="side(0)">X</button></div>
+<label>Paper start capital $</label><input id="cStart" type="number"><label>Bet per coin $</label><input id="cBet" type="number"><label>Max open positions</label><input id="cMax" type="number"><label>Min score to auto-buy (0-100)</label><input id="cMin" type="number">
+<label>Data mode</label><button class="btn s" id="cMode" onclick="toggleMode()"></button>
+<label>Auto paper-buy (phone mode)</label><button class="btn s" id="cAuto" onclick="toggleAuto()"></button>
+<div style="margin-top:14px"><button class="btn" onclick="saveCfg()">Save</button> <button class="btn s" onclick="exportJ()">Export</button></div>
+<div style="margin-top:14px"><button class="btn d" onclick="resetAll()">Reset book</button></div>
+<p class="m" style="font-size:11px">Paper money only. No wallet, no keys, no real trades. Fills include 3% simulated slippage/fees.</p></div>
+<script>
+// ===== ENGINE (pure, testable) =====
+const CFG_DEFAULT={start:500,bet:20,maxOpen:10,friction:0.03,auto:true,minScore:62,
+ minLiq:8000,maxMc:3000000,minAgeMin:8,maxAgeH:36,stop:0.70,tp2:0.40,tp3:0.30,timeStopH:12,rugLiq:3000,scanSec:45};
+function pickPair(pairs){let b=null;for(const p of pairs||[]){if(p.chainId!=='solana')continue;if(!b||(p.liquidity&&p.liquidity.usd||0)>(b.liquidity&&b.liquidity.usd||0))b=p;}return b}
+function evalCoin(p,C,now){
+ const liq=p.liquidity&&p.liquidity.usd||0,mc=p.marketCap||p.fdv||0,vol=p.volume||{},tx=p.txns||{},pc=p.priceChange||{};
+ const ageMin=p.pairCreatedAt?(now-p.pairCreatedAt)/60000:null;
+ const m5b=tx.m5?tx.m5.buys:0,m5s=tx.m5?tx.m5.sells:0,h1b=tx.h1?tx.h1.buys:0,h1s=tx.h1?tx.h1.sells:0;
+ const buy5=(m5b+m5s)?m5b/(m5b+m5s):0.5,buy1=(h1b+h1s)?h1b/(h1b+h1s):0.5;
+ const gates=[];
+ gates.push(['Liquidity >= $'+C.minLiq,liq>=C.minLiq]);
+ gates.push(['MCap <= $'+(C.maxMc/1e6)+'M',mc>0&&mc<=C.maxMc]);
+ gates.push(['Age '+C.minAgeMin+'m-'+C.maxAgeH+'h',ageMin!==null&&ageMin>=C.minAgeMin&&ageMin<=C.maxAgeH*60]);
+ gates.push(['Buys > sells (5m)',buy5>=0.55]);
+ gates.push(['Not already vertical (1h < +400%)',(pc.h1||0)<400]);
+ gates.push(['Liq/MCap >= 4%',mc>0&&liq/mc>=0.04]);
+ const pass=gates.every(g=>g[1]);
+ // headroom: how far mcap can plausibly run (target ceiling $5M)
+ const headroom=mc>0?Math.min(10,5e6/mc):0;
+ let s=0;const why=[];
+ const mom=Math.max(0,Math.min(1,((pc.m5||0)+5)/30)); s+=mom*20; if(pc.m5>3)why.push('5m +'+Math.round(pc.m5)+'%');
+ const hm=(pc.h1||0); const h1s_=hm>=10&&hm<=150?1:hm>150&&hm<400?0.5:hm>0?0.4:0; s+=h1s_*15; if(hm>=10)why.push('1h +'+Math.round(hm)+'%');
+ s+=Math.max(0,Math.min(1,(buy5-0.5)/0.3))*15; if(buy5>=0.6)why.push('buyers '+Math.round(buy5*100)+'% (5m)');
+ s+=Math.max(0,Math.min(1,(buy1-0.5)/0.25))*8;
+ const turn=liq?(vol.h1||0)/liq:0; s+=Math.max(0,Math.min(1,turn/3))*12; if(turn>=1)why.push('vol/liq '+turn.toFixed(1)+'x');
+ s+=Math.max(0,Math.min(1,(headroom-1)/4))*15; if(headroom>=3)why.push('room to '+headroom.toFixed(1)+'x');
+ s+=Math.max(0,Math.min(1,(Math.log10(Math.max(liq,1))-3.8)/1.2))*10;
+ const txc=(tx.m5?tx.m5.buys+tx.m5.sells:0); s+=Math.max(0,Math.min(1,txc/150))*5;
+ if(ageMin!==null&&ageMin<20)s-=6; // very new = riskier
+ s=Math.round(Math.max(0,Math.min(100,s)));
+ let tier=null;
+ if(headroom>=5&&s>=C.minScore+6)tier='5x';else if(headroom>=3&&s>=C.minScore)tier='3x';else if(headroom>=2&&s>=C.minScore-6)tier='2x';
+ return {score:s,tier,headroom,gates,pass,why,liq,mc,ageMin,buy5,price:parseFloat(p.priceUsd)||0};
+}
+function newPos(coin,price,C,now,tier,score){
+ const eff=price*(1+C.friction),cost=C.bet;
+ return {id:coin.mint+'_'+now,mint:coin.mint,sym:coin.sym,name:coin.name,entry:price,entryEff:eff,entryTime:now,cost,units:cost/eff,rem:cost/eff,
+  banked:0,tp2:false,tp3:false,tp5:false,peak:1,stop:C.stop,tier,score,open:true,last:price,mult:1,events:[{t:now,e:'BUY',m:1,u:cost}]};
+}
+// manage one position given fresh price/liq; returns array of events, mutates pos
+function managePos(pos,price,liq,now,C){
+ const ev=[];if(!pos.open||!(price>0))return ev;
+ pos.last=price;pos.mult=price/pos.entry;if(pos.mult>pos.peak)pos.peak=pos.mult;
+ const sell=(frac,why)=>{const u=pos.rem*frac;const v=u*price*(1-C.friction);pos.rem-=u;pos.banked+=v;ev.push({t:now,e:why,m:pos.mult,u:v});};
+ const closeAll=(why,val)=>{const v=val===undefined?pos.rem*price*(1-C.friction):val;pos.banked+=v;pos.rem=0;pos.open=false;pos.exitTime=now;pos.reason=why;pos.exitMult=pos.mult;ev.push({t:now,e:why,m:pos.mult,u:v});};
+ if(liq!==null&&liq<C.rugLiq){closeAll('RUG',0);}
+ else{
+  if(pos.mult>=2&&!pos.tp2){pos.tp2=true;sell(C.tp2,'TP 2x');pos.stop=Math.max(pos.stop,1.0);}
+  if(pos.mult>=3&&!pos.tp3){pos.tp3=true;sell(C.tp3/(1-C.tp2),'TP 3x');pos.stop=Math.max(pos.stop,2.0);}
+  if(pos.mult>=5&&!pos.tp5&&pos.open){pos.tp5=true;closeAll('TP 5x');}
+  if(pos.open&&pos.tp2){pos.stop=Math.max(pos.stop,pos.peak*0.65>=1?pos.peak*0.65:pos.stop);}
+  if(pos.open&&pos.mult<=pos.stop){closeAll(pos.tp2?'TRAIL/BE STOP':'STOP');}
+  else if(pos.open&&(now-pos.entryTime)/3600000>=C.timeStopH&&pos.mult<1.3){closeAll('TIME STOP');}
+ }
+ pos.pnl=pos.banked+(pos.open?pos.rem*price*(1-C.friction):0)-pos.cost;
+ return ev;
+}
+function summarize(st){
+ let cash=st.cfg.start,openVal=0,realised=0,bank=0;
+ for(const p of st.pos){cash-=p.cost;cash+=p.banked;if(p.open)openVal+=p.rem*p.last*(1-st.cfg.friction);
+  if(!p.open){const r=p.banked-p.cost;realised+=r;if(r>0)bank+=r;}}
+ return {cash,openVal,equity:cash+openVal,realised,bank,pnl:cash+openVal-st.cfg.start};
+}
+function dayKey(t){return new Date(t).toLocaleDateString('en-CA',{timeZone:'Asia/Kolkata'})}
+function dayWise(st){const m={};for(const p of st.pos)if(!p.open){const d=dayKey(p.exitTime);m[d]=m[d]||{pnl:0,n:0,w:0};const r=p.banked-p.cost;m[d].pnl+=r;m[d].n++;if(r>0)m[d].w++;}return m}
+// ===== DATA + UI =====
+const KEY='jkpl_v1',DX='https://api.dexscreener.com';
+const SRV='https://paper-lab.jegankumarsparks.workers.dev/api/book';let MODE=localStorage.getItem('jkpl_mode')||'server';let PH=load();let ST=PH;let RADAR=[];let FIL='all',lastScan=0,scanning=false,errs=0,lastErr='';
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.pos)return Object.assign({cfg:{...CFG_DEFAULT},seen:{}},s,{cfg:Object.assign({},CFG_DEFAULT,s.cfg)})}catch(e){}return {cfg:{...CFG_DEFAULT},pos:[],seen:{},created:Date.now(),log:[]}}
+function save(){if(MODE==='server')return;localStorage.setItem(KEY,JSON.stringify(ST))}
+async function loadServer(){try{const r=await fetch(SRV,{cache:'no-store'});if(!r.ok)throw new Error('server '+r.status);const b=await r.json();b.cfg=Object.assign({},CFG_DEFAULT,b.cfg);b.pos=b.pos||[];ST=b;RADAR=b.radar||[];lastScan=b.lastScan||0;errs=b.err?1:0;lastErr=b.err||'';}catch(e){errs++;lastErr='server unreachable: '+e.message}render()}
+function setMode(m){MODE=m;localStorage.setItem('jkpl_mode',m);if(m==='server'){loadServer()}else{ST=PH;RADAR=[];lastScan=0;errs=0;render();scan()}side(0)}
+const $=id=>document.getElementById(id);
+const usd=(n,d=2)=>(n<0?'-':'')+'$'+Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
+const cls=n=>n>0?'g':n<0?'r':'m';
+function px(n){if(!n)return '0';if(n>=1)return n.toFixed(3);const s=n.toExponential(3).split('e');return n<0.0001?n.toFixed(10).replace(/0+$/,''):n.toFixed(7)}
+function short(n){return n>=1e6?(n/1e6).toFixed(2)+'M':n>=1e3?(n/1e3).toFixed(1)+'K':Math.round(n)}
+function links(m){return '<div class="links"><a target="_blank" href="https://dexscreener.com/solana/'+m+'">Dexscreener</a><a target="_blank" href="https://gmgn.ai/sol/token/'+m+'">GMGN</a><a target="_blank" href="https://solscan.io/token/'+m+'">Solscan</a><a class="bn" target="_blank" href="https://app.binance.com/uni-qr/web3-token-details?utm_medium=share&tokenCA='+m+'&binanceChainId=CT_501&chain=sol">Binance</a></div>'}
+async function jget(u){const r=await fetch(u);if(!r.ok)throw new Error(u.split('/')[3]+' '+r.status);return r.json()}
+async function discover(){
+ const src=await Promise.allSettled([jget(DX+'/token-profiles/latest/v1'),jget(DX+'/token-boosts/latest/v1'),jget(DX+'/token-boosts/top/v1'),
+  jget(DX+'/latest/dex/search?q=pumpswap%20solana'),jget(DX+'/latest/dex/search?q=pump.fun%20solana'),jget(DX+'/latest/dex/search?q=raydium%20solana')]);
+ const set=new Set(),pairs=[];
+ src.forEach((s,i)=>{if(s.status!=='fulfilled')return;const v=s.value;if(Array.isArray(v))v.forEach(x=>x.chainId==='solana'&&set.add(x.tokenAddress));else (v.pairs||[]).forEach(p=>{if(p.chainId==='solana'){set.add(p.baseToken.address);pairs.push(p)}})});
+ if(![...src].some(s=>s.status==='fulfilled'))throw new Error('all sources failed');
+ return {addrs:[...set],pairs};
+}
+async function fetchTokens(addrs){const out=[];for(let i=0;i<addrs.length;i+=30){try{const r=await jget(DX+'/tokens/v1/solana/'+addrs.slice(i,i+30).join(','));out.push(...r)}catch(e){errs++;lastErr=e.message}}return out}
+function groupByMint(pairs){const g={};for(const p of pairs){const m=p.baseToken&&p.baseToken.address;if(!m)continue;(g[m]=g[m]||[]).push(p)}return g}
+async function scan(){
+ if(MODE==='server'){return loadServer()}
+ if(scanning)return;scanning=true;$('hSt').textContent='scanning...';
+ try{
+  const now=Date.now();const d=await discover();
+  const openM=ST.pos.filter(p=>p.open).map(p=>p.mint);
+  const all=[...new Set([...d.addrs,...openM])];
+  const prs=await fetchTokens(all);const g=groupByMint(prs.concat(d.pairs));
+  // manage open positions first
+  let changed=false;
+  for(const p of ST.pos.filter(x=>x.open)){const b=pickPair(g[p.mint]);if(!b)continue;const ev=managePos(p,parseFloat(b.priceUsd)||0,b.liquidity?b.liquidity.usd:null,now,ST.cfg);if(ev.length){p.events.push(...ev);changed=true;}}
+  // evaluate radar
+  const R=[];
+  for(const m of Object.keys(g)){const b=pickPair(g[m]);if(!b||!b.baseToken)continue;const e=evalCoin(b,ST.cfg,now);R.push({mint:m,sym:b.baseToken.symbol,name:b.baseToken.name,pair:b,e,img:b.info&&b.info.imageUrl});}
+  R.sort((a,b)=>(b.e.pass-a.e.pass)||(b.e.score-a.e.score));RADAR=R.slice(0,60);
+  // auto paper-buy
+  if(ST.cfg.auto){
+   for(const c of R){if(!(c.e.pass&&c.e.tier&&c.e.score>=ST.cfg.minScore-6))continue;
+    if(ST.pos.filter(x=>x.open).length>=ST.cfg.maxOpen)break;
+    if(ST.pos.some(x=>x.mint===c.mint&&(x.open||now-x.entryTime<6*3600e3)))continue; // no rebuys within 6h
+    if(summarize(ST).cash<ST.cfg.bet)break;
+    buy(c,true);changed=true;}
+  }
+  lastScan=now;errs=0;save();
+ }catch(e){errs++;lastErr=e.message}
+ scanning=false;render();
+}
+function buy(c,auto){const now=Date.now();const p=newPos({mint:c.mint,sym:c.sym,name:c.name},c.e.price,ST.cfg,now,c.e.tier||'-',c.e.score);p.auto=!!auto;p.why=c.e.why;p.entryMc=c.e.mc;p.entryLiq=c.e.liq;ST.pos.push(p);save()}
+function manualBuy(m){if(MODE==='server'){alert('24/7 Server mode is read-only. Switch to Phone mode in the side panel to paper-buy by hand.');return}const c=RADAR.find(x=>x.mint===m);if(!c)return;if(summarize(ST).cash<ST.cfg.bet){alert('Not enough paper cash');return}if(ST.pos.some(x=>x.open&&x.mint===m)){alert('Already open');return}buy(c,false);closeSheet();render();tab(1)}
+function sellNow(id){if(MODE==='server'){alert('24/7 Server mode is read-only.');return}const p=ST.pos.find(x=>x.id===id);if(!p||!p.open)return;const ev=[];const price=p.last;const v=p.rem*price*(1-ST.cfg.friction);p.banked+=v;p.rem=0;p.open=false;p.exitTime=Date.now();p.reason='MANUAL SELL';p.exitMult=p.mult;p.pnl=p.banked-p.cost;p.events.push({t:Date.now(),e:'MANUAL SELL',m:p.mult,u:v});save();closeSheet();render()}
+function closeSheet(){$('sheet').classList.remove('on')}
+function pill(t){return '<span class="pill '+(t==='2x'?'t2':t==='3x'?'t3':t==='5x'?'t5':'tn')+'">'+(t?t+' potential':'watch')+'</span>'}
+function pcol(v){return '<span class="'+cls(v)+'">'+(v>0?'+':'')+(v||0).toFixed(0)+'%</span>'}
+function renderRadar(){
+ const L=RADAR.filter(c=>FIL==='all'?true:c.e.tier===FIL);
+ $('radar').innerHTML=(L.length?'':'<div class="note">No coins match yet. Scan runs every '+ST.cfg.scanSec+'s while this page is open.</div>')+L.slice(0,40).map(c=>{const e=c.e,p=c.pair,open=ST.pos.some(x=>x.open&&x.mint===c.mint);
+  return '<div class="coin" onclick="coinSheet(\''+c.mint+'\')"><div class="row"><h4>'+esc(c.sym)+pill(e.tier)+(e.pass?'':'<span class="pill tn">gated</span>')+'</h4><div style="text-align:right"><b class="y">'+e.score+'</b><small class="m">/100</small></div></div>'
+  +'<div class="bar"><i style="width:'+e.score+'%"></i></div><div class="kv"><span>MC <b>$'+short(e.mc)+'</b></span><span>Liq <b>$'+short(e.liq)+'</b></span><span>5m '+pcol(p.priceChange&&p.priceChange.m5)+'</span><span>1h '+pcol(p.priceChange&&p.priceChange.h1)+'</span><span>Age <b>'+(e.ageMin==null?'?':e.ageMin<120?Math.round(e.ageMin)+'m':(e.ageMin/60).toFixed(1)+'h')+'</b></span>'+(open?'<span class="y"><b>OPEN</b></span>':'')+'</div></div>'}).join('')
+}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function coinSheet(m){
+ const c=RADAR.find(x=>x.mint===m),pos=ST.pos.filter(x=>x.mint===m);let h;
+ if(c){const e=c.e,p=c.pair;h='<div class="row"><h3 style="margin:0">'+esc(c.name)+' <span class="m">'+esc(c.sym)+'</span></h3><button class="btn s" onclick="closeSheet()">X</button></div>'+pill(e.tier)
+  +'<div class="kv" style="font-size:13px"><span>Price <b>$'+px(e.price)+'</b></span><span>MC <b>$'+short(e.mc)+'</b></span><span>Liq <b>$'+short(e.liq)+'</b></span><span>Vol 1h <b>$'+short(p.volume&&p.volume.h1||0)+'</b></span><span>Buyers 5m <b>'+Math.round(e.buy5*100)+'%</b></span><span>Headroom <b>'+e.headroom.toFixed(1)+'x</b> to $5M</span></div>'
+  +'<p class="m">'+(e.why.length?'Why: '+esc(e.why.join(', ')):'No strong signal')+'</p>'
+  +e.gates.map(g=>'<div class="ev">'+(g[1]?'<span class="g">PASS</span>':'<span class="r">FAIL</span>')+' '+esc(g[0])+'</div>').join('')
+  +'<div style="margin-top:10px"><button class="btn" onclick="manualBuy(\''+m+'\')">Paper buy '+usd(ST.cfg.bet,0)+'</button></div>'}
+ else{const p0=pos[0];h='<div class="row"><h3 style="margin:0">'+esc(p0.name||p0.sym)+'</h3><button class="btn s" onclick="closeSheet()">X</button></div>'}
+ h+=links(m)+'<p class="m" style="word-break:break-all;font-size:11px">'+m+'</p>';
+ pos.slice().reverse().forEach(p=>{h+='<div class="coin" style="margin-top:10px"><div class="row"><b>'+(p.open?'OPEN':esc(p.reason))+'</b><b class="'+cls(p.pnl||0)+'">'+usd(p.pnl||0)+' ('+p.mult.toFixed(2)+'x)</b></div><div class="kv"><span>Bought <b>'+new Date(p.entryTime).toLocaleString('en-IN',{timeZone:'Asia/Kolkata'})+'</b></span><span>Entry <b>$'+px(p.entry)+'</b></span><span>Cost <b>'+usd(p.cost)+'</b></span><span>Banked <b>'+usd(p.banked)+'</b></span><span>Peak <b>'+p.peak.toFixed(2)+'x</b></span><span>Stop <b>'+p.stop.toFixed(2)+'x</b></span>'+(p.exitTime?'<span>Exit <b>'+new Date(p.exitTime).toLocaleString('en-IN',{timeZone:'Asia/Kolkata'})+'</b></span>':'')+'</div>'+p.events.map(e=>'<div class="ev">'+new Date(e.t).toLocaleTimeString('en-IN',{timeZone:'Asia/Kolkata'})+' - '+esc(e.e)+' @ '+e.m.toFixed(2)+'x ('+usd(e.u)+')</div>').join('')+(p.open?'<div style="margin-top:8px"><button class="btn d" onclick="sellNow(\''+p.id+'\')">Paper sell all now</button></div>':'')+'</div>'});
+ $('sheetc').innerHTML=h;$('sheet').classList.add('on')
+}
+function renderPos(){
+ const op=ST.pos.filter(p=>p.open).sort((a,b)=>b.mult-a.mult),cl=ST.pos.filter(p=>!p.open).sort((a,b)=>b.exitTime-a.exitTime);
+ const row=p=>'<div class="coin" onclick="coinSheet(\''+p.mint+'\')"><div class="row"><h4>'+esc(p.sym)+pill(p.tier)+'</h4><b class="'+cls(p.pnl||0)+'">'+usd(p.pnl||0)+'</b></div><div class="kv"><span>Now <b class="'+(p.mult>=1?'g':'r')+'">'+p.mult.toFixed(2)+'x</b></span><span>Peak <b>'+p.peak.toFixed(2)+'x</b></span><span>Stop <b>'+p.stop.toFixed(2)+'x</b></span><span>2x '+(p.tp2?'&#10003;':'-')+'</span><span>3x '+(p.tp3?'&#10003;':'-')+'</span><span>5x '+(p.tp5?'&#10003;':'-')+'</span>'+(p.open?'':'<span><b>'+esc(p.reason)+'</b></span>')+'</div><div class="bar"><i style="width:'+Math.min(100,p.mult/5*100)+'%"></i></div></div>';
+ $('pos').innerHTML='<div class="note">Exit plan: sell 40% at 2x (stop moves to breakeven), 30% at 3x (stop to 2x), final 30% at 5x. Initial stop -30%. Trailing stop 35% under peak after 2x. 12h time stop if below 1.3x. Rug (liq under $3K) = full loss of the remainder.</div><b>Open ('+op.length+')</b>'+(op.map(row).join('')||'<p class="m">No open positions.</p>')+'<b>Closed ('+cl.length+')</b>'+cl.slice(0,50).map(row).join('')
+}
+function renderBank(){
+ const s=summarize(ST),dw=dayWise(ST),days=Object.keys(dw).sort().reverse();$('bBank').textContent=usd(s.bank);
+ const today=dayKey(Date.now());const td=dw[today]||{pnl:0,n:0,w:0};
+ let mo={};days.forEach(d=>{const k=d.slice(0,7);mo[k]=(mo[k]||0)+dw[d].pnl});
+ $('bank').innerHTML='<div class="eq"><div class="box"><small>Today</small><span class="'+cls(td.pnl)+'">'+usd(td.pnl)+'</span></div><div class="box"><small>Realised</small><span class="'+cls(s.realised)+'">'+usd(s.realised)+'</span></div><div class="box"><small>Cash</small><span>'+usd(s.cash,0)+'</span></div></div>'
+ +'<h4>Day-wise profit (IST)</h4><table><tr><th>Day</th><th>Trades</th><th>Wins</th><th>P&amp;L</th></tr>'+(days.map((d,i)=>'<tr><td>'+d+(d===today?' (today)':'')+'</td><td>'+dw[d].n+'</td><td>'+dw[d].w+'</td><td class="'+cls(dw[d].pnl)+'">'+usd(dw[d].pnl)+'</td></tr>').join('')||'<tr><td colspan=4 class="m">No closed trades yet</td></tr>')+'</table>'
+ +'<h4>Month-wise</h4><table>'+(Object.keys(mo).map(k=>'<tr><td>'+k+'</td><td class="'+cls(mo[k])+'">'+usd(mo[k])+'</td></tr>').join('')||'<tr><td class="m">-</td></tr>')+'</table>'
+ +'<h4>Hit rate by tier</h4>'+tierStats()
+}
+function tierStats(){const t={};ST.pos.filter(p=>!p.open).forEach(p=>{const k=p.tier;t[k]=t[k]||{n:0,w:0,x2:0,x3:0,x5:0};t[k].n++;if(p.banked>p.cost)t[k].w++;if(p.tp2)t[k].x2++;if(p.tp3)t[k].x3++;if(p.tp5)t[k].x5++});
+ const ks=Object.keys(t);return '<table><tr><th>Tier</th><th>N</th><th>Win</th><th>2x</th><th>3x</th><th>5x</th></tr>'+(ks.map(k=>'<tr><td>'+k+'</td><td>'+t[k].n+'</td><td>'+t[k].w+'</td><td>'+t[k].x2+'</td><td>'+t[k].x3+'</td><td>'+t[k].x5+'</td></tr>').join('')||'<tr><td colspan=6 class="m">Need closed trades</td></tr>')+'</table>'}
+function renderSys(){
+ $('sys').innerHTML='<div class="note"><b>Mode: '+(MODE==='server'?'24/7 SERVER (a Cloudflare cron scans every 2 minutes even when this page is closed; this page just displays the server book)':'PHONE (this page scans while open; book saved in this browser)')+'</b><br>Phone mode: this page scans Dexscreener every '+ST.cfg.scanSec+'s while it is open (data: token profiles, boosts, pump/raydium search). Your paper book is saved in this phone browser. When the page is closed, prices are NOT tracked. Always-on server mode is a separate step.</div>'
+ +'<div class="note">Last scan: '+(lastScan?new Date(lastScan).toLocaleTimeString('en-IN',{timeZone:'Asia/Kolkata'}):'never')+'<br>Coins seen: '+RADAR.length+' | Errors in a row: '+errs+(lastErr?'<br>Last error: '+esc(lastErr):'')+'<br>Auto-buy: <b>'+(ST.cfg.auto?'ON':'OFF')+'</b> | min score '+ST.cfg.minScore+' | bet '+usd(ST.cfg.bet,0)+' | max open '+ST.cfg.maxOpen+'</div>'
+ +'<div class="note">Gates for auto-buy: liq &ge; $'+ST.cfg.minLiq+', MC &le; $'+(ST.cfg.maxMc/1e6)+'M, age 8m-36h, 5m buyers &ge; 55%, 1h change &lt; +400%, liq/MC &ge; 4%. Score blends 5m/1h momentum, buy pressure, volume/liquidity turnover, headroom to $5M MC and liquidity depth. Potential tier: 5x needs &ge;5x headroom, 3x &ge;3x, 2x &ge;2x. Scores are heuristics, not predictions.</div>'
+ +'<div class="note">Paper only. No wallet connected, no real orders. 3% simulated slippage/fee on every buy and sell.</div><button class="btn" onclick="scan()">Scan now</button>'
+}
+function summaryHdr(){const s=summarize(ST);$('hEq').textContent=usd(s.equity);$('hBank').textContent=usd(s.bank);const pe=$('hPnl');pe.textContent=usd(s.pnl);pe.className=cls(s.pnl);
+ $('hSt').textContent=(scanning?'scanning... ':'')+'Last scan '+(lastScan?Math.round((Date.now()-lastScan)/1000)+'s ago':'never')+' | '+(MODE==='server'?'SERVER 24/7':'PHONE')+' | open '+ST.pos.filter(p=>p.open).length+' | '+(errs?'<errors>':'live')}
+function render(){summaryHdr();renderRadar();renderPos();renderBank();renderSys()}
+function tab(i){document.querySelectorAll('.tabs button').forEach((b,j)=>b.classList.toggle('on',j==i));document.querySelectorAll('.pg').forEach((p,j)=>p.classList.toggle('on',j==i));scrollTo(0,0)}
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>tab(+b.dataset.t));
+document.querySelectorAll('.flt button').forEach(b=>b.onclick=()=>{FIL=b.dataset.f;document.querySelectorAll('.flt button').forEach(x=>x.classList.toggle('on',x===b));renderRadar()});
+function side(o){$('side').classList.toggle('on',!!o);if(o){$('cStart').value=ST.cfg.start;$('cBet').value=ST.cfg.bet;$('cMax').value=ST.cfg.maxOpen;$('cMin').value=ST.cfg.minScore;$('cAuto').textContent='Auto-buy: '+(ST.cfg.auto?'ON':'OFF');$('cMode').textContent='Mode: '+(MODE==='server'?'24/7 SERVER':'PHONE (page open)')+' - tap to switch'}}
+function toggleMode(){setMode(MODE==='server'?'phone':'server')}
+function toggleAuto(){if(MODE==='server')return;ST.cfg.auto=!ST.cfg.auto;$('cAuto').textContent='Auto-buy: '+(ST.cfg.auto?'ON':'OFF');save()}
+function saveCfg(){if(MODE==='server'){alert('Settings apply to Phone mode. The 24/7 server uses its defaults.');return}const n=(i,d)=>{const v=parseFloat($(i).value);return v>0?v:d};ST.cfg.start=n('cStart',500);ST.cfg.bet=n('cBet',20);ST.cfg.maxOpen=n('cMax',10);ST.cfg.minScore=n('cMin',62);save();side(0);render()}
+function exportJ(){const b=new Blob([JSON.stringify(ST,null,1)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='paper-lab-book.json';a.click()}
+function resetAll(){if(MODE==='server'){alert('Server book is managed by the server.');return}if(confirm('Reset the whole paper book?')){ST={cfg:ST.cfg,pos:[],seen:{},created:Date.now(),log:[]};save();side(0);render()}}
+render();scan();setInterval(()=>{if(!document.hidden)scan()},MODE==='server'?20000:ST.cfg.scanSec*1000);setInterval(summaryHdr,5000);document.addEventListener('visibilitychange',()=>{if(!document.hidden&&Date.now()-lastScan>20000)scan()});
+</script></body></html>
