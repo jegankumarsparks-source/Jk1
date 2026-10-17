@@ -1,6 +1,6 @@
 {
- "generatedAt": 1792200339918,
- "generatedAtIso": "2026-10-17T01:25:39.918Z",
+ "generatedAt": 1792200638457,
+ "generatedAtIso": "2026-10-17T01:30:38.457Z",
  "scanner": "solana-radar-server",
  "runner": "cloudflare-worker-cron",
  "engineSource": "index.html embedded engine, extracted verbatim at run time",
@@ -9,9 +9,9 @@
  "scoreVersion": "score-v1.0",
  "riskPolicyVersion": "risk-v1.0",
  "thresholdsVersion": "thresh-v1.0",
- "cycle": 93,
- "cycleStartedAt": 1792200335902,
- "cycleDurationMs": 4016,
+ "cycle": 94,
+ "cycleStartedAt": 1792200636085,
+ "cycleDurationMs": 2372,
  "schedule": "every 5 min via Cloudflare Workers cron (free tier, keyless data) — runs whether or not any tab is open. Backstop: GitHub Actions cron (requested every 5 min; GitHub delays it in practice — observed every 2-3 h). When it runs it skips while this worker is healthy with dexscreener LIVE, and covers discovery from separate egress IPs during dexscreener 429 cooldowns or worker outages.",
  "engineDrift": null,
  "stateRestored": true,
@@ -19,11 +19,11 @@
   {
    "id": "dexscreener",
    "label": "Dexscreener (public, keyless)",
-   "status": "DEGRADED",
-   "lastSuccess": null,
-   "lastError": "HTTP 429",
-   "requestCount": 2,
-   "rateLimitCount": 1
+   "status": "LIVE",
+   "lastSuccess": 1792200638457,
+   "lastError": null,
+   "requestCount": 25,
+   "rateLimitCount": 0
   },
   {
    "id": "rugcheck",
@@ -33,7 +33,7 @@
    "lastError": null,
    "requestCount": 0,
    "rateLimitCount": 0,
-   "note": "not exercised this cycle (no refreshed candidates needed them)"
+   "note": "not exercised - discovery skipped during dexscreener 429 cooldown"
   },
   {
    "id": "solanarpc",
@@ -43,7 +43,7 @@
    "lastError": null,
    "requestCount": 0,
    "rateLimitCount": 0,
-   "note": "not exercised this cycle (no refreshed candidates needed them)"
+   "note": "not exercised - discovery skipped during dexscreener 429 cooldown"
   }
  ],
  "counters": {
@@ -61,7 +61,7 @@
   "watchlist": 0
  },
  "analyzedThisCycle": 0,
- "signalMarksTracked": 0,
+ "signalMarksTracked": 25,
  "newSignalsThisCycle": [],
  "recentSignals": [
   {
@@ -78,10 +78,16 @@
    "qualifiedWallets": 0,
    "pairAddress": "9tKRToNToLCXsNfkLWT4DUqoDiPoFhJ1Yj3Zs9iu91nD",
    "dexId": "pumpfun",
-   "lastPrice": null,
-   "lastPriceAt": null,
-   "multiple": null,
-   "milestonesHit": [],
+   "lastPrice": 0.0000372,
+   "lastPriceAt": 1792200636136,
+   "multiple": 1.63,
+   "milestonesHit": [
+    {
+     "x": 1.5,
+     "at": 1792200638457,
+     "price": 0.0000372
+    }
+   ],
    "dumpHit": null,
    "links": {
     "dexscreener": "https://dexscreener.com/solana/9tKRToNToLCXsNfkLWT4DUqoDiPoFhJ1Yj3Zs9iu91nD",
@@ -104,9 +110,9 @@
    "qualifiedWallets": 0,
    "pairAddress": "9fodg55yvXTEHsVxu3iM6RCsYdYo4nyzAjF2BTTaUiLw",
    "dexId": "pumpswap",
-   "lastPrice": null,
-   "lastPriceAt": null,
-   "multiple": null,
+   "lastPrice": 0.000003575,
+   "lastPriceAt": 1792200636286,
+   "multiple": 0.95,
    "milestonesHit": [],
    "dumpHit": null,
    "links": {
@@ -130,11 +136,15 @@
    "qualifiedWallets": 0,
    "pairAddress": "591GQ119jBPLqdJxGaxGvmNSgFUdYgexX6JmRH44M4Z7",
    "dexId": "pumpswap",
-   "lastPrice": null,
-   "lastPriceAt": null,
-   "multiple": null,
+   "lastPrice": 0.00006502,
+   "lastPriceAt": 1792200636331,
+   "multiple": 0.17,
    "milestonesHit": [],
-   "dumpHit": null,
+   "dumpHit": {
+    "at": 1792200638457,
+    "price": 0.00006502,
+    "multiple": 0.17
+   },
    "links": {
     "dexscreener": "https://dexscreener.com/solana/591GQ119jBPLqdJxGaxGvmNSgFUdYgexX6JmRH44M4Z7",
     "gmgn": "https://gmgn.ai/sol/token/DPLpK6biJy492G81SeskfW6VeYEH5V5YZY8uWsgEpump",
@@ -156,9 +166,9 @@
    "qualifiedWallets": 0,
    "pairAddress": "EtTBTfvcWet9f3cjovLLRokRg4kkx2w3JtqQgeY1q9ei",
    "dexId": "pumpswap",
-   "lastPrice": null,
-   "lastPriceAt": null,
-   "multiple": null,
+   "lastPrice": 0.00000645,
+   "lastPriceAt": 1792200636368,
+   "multiple": 1.49,
    "milestonesHit": [],
    "dumpHit": null,
    "links": {
@@ -182,9 +192,9 @@
    "qualifiedWallets": 1,
    "pairAddress": "GWf6wXLM4PMz6gFtt9es1ybiFKs97TTLBK1VuFGospty",
    "dexId": "pumpswap",
-   "lastPrice": null,
-   "lastPriceAt": null,
-   "multiple": null,
+   "lastPrice": 0.0003084,
+   "lastPriceAt": 1792200636373,
+   "multiple": 1.38,
    "milestonesHit": [],
    "dumpHit": null,
    "links": {
@@ -208,9 +218,9 @@
    "qualifiedWallets": 2,
    "pairAddress": "GbMWWak4TQApkwgPr5d3a9v4iX4baYzZX6RCGCjEoQNY",
    "dexId": "pumpfun",
-   "lastPrice": null,
-   "lastPriceAt": null,
-   "multiple": null,
+   "lastPrice": 0.00001013,
+   "lastPriceAt": 1792200636414,
+   "multiple": 0.73,
    "milestonesHit": [],
    "dumpHit": null,
    "links": {
@@ -234,9 +244,9 @@
    "qualifiedWallets": 2,
    "pairAddress": "WHhJQNA9t97q67f5qAyk8bdJFAQVNEzGpSrKA52FSi7",
    "dexId": "pumpswap",
-   "lastPrice": 0.000002484,
-   "lastPriceAt": 1792199135747,
-   "multiple": 0.86,
+   "lastPrice": 0.000002396,
+   "lastPriceAt": 1792200636568,
+   "multiple": 0.83,
    "milestonesHit": [],
    "dumpHit": null,
    "links": {
@@ -260,9 +270,9 @@
    "qualifiedWallets": 4,
    "pairAddress": "BJPVaAc8X1XRrqyPcTQRPKjKd7vamjMUqJavvtzhGLcU",
    "dexId": "pumpfun",
-   "lastPrice": 0.000003279,
-   "lastPriceAt": 1792199135886,
-   "multiple": 0.41,
+   "lastPrice": 0.000003156,
+   "lastPriceAt": 1792200636723,
+   "multiple": 0.4,
    "milestonesHit": [],
    "dumpHit": {
     "at": 1792195236505,
@@ -290,9 +300,9 @@
    "qualifiedWallets": 2,
    "pairAddress": "9geyK4xfeX6EeMpbXnt994eZyFLxhX15BdQsxXbPS6Ze",
    "dexId": "pumpfun",
-   "lastPrice": 0.000003256,
-   "lastPriceAt": 1792199135922,
-   "multiple": 0.4,
+   "lastPrice": 0.000003196,
+   "lastPriceAt": 1792200636874,
+   "multiple": 0.39,
    "milestonesHit": [],
    "dumpHit": {
     "at": 1792195236505,
@@ -320,8 +330,8 @@
    "qualifiedWallets": 1,
    "pairAddress": "GREv4wiRJbZzyJx9DywBvudWgMXWo83H7ZMuyp3S71jG",
    "dexId": "pumpfun",
-   "lastPrice": 0.000002926,
-   "lastPriceAt": 1792199136091,
+   "lastPrice": 0.000002917,
+   "lastPriceAt": 1792200637038,
    "multiple": 0.57,
    "milestonesHit": [],
    "dumpHit": null,
@@ -346,9 +356,9 @@
    "qualifiedWallets": 1,
    "pairAddress": "HZX4TM4avsVfFGvHBdu6oX5ZJKL1WH9aVhuuARjXY2EP",
    "dexId": "pumpfun",
-   "lastPrice": 0.000008908,
-   "lastPriceAt": 1792199136127,
-   "multiple": 1.3,
+   "lastPrice": 0.000009241,
+   "lastPriceAt": 1792200637042,
+   "multiple": 1.35,
    "milestonesHit": [
     {
      "x": 1.5,
@@ -378,8 +388,8 @@
    "qualifiedWallets": 2,
    "pairAddress": "GjrDYzYgSgHqxZK5UTYnCy61GoEd9UovMw6spczV62Hq",
    "dexId": "pumpswap",
-   "lastPrice": 0.00000246,
-   "lastPriceAt": 1792199136167,
+   "lastPrice": 0.00000235,
+   "lastPriceAt": 1792200637067,
    "multiple": 0.09,
    "milestonesHit": [],
    "dumpHit": {
@@ -408,9 +418,9 @@
    "qualifiedWallets": 0,
    "pairAddress": "DBqbqUehE6kr9c4oGvoESs9JJWJJRoVLgCcSPEePD5qT",
    "dexId": "pumpswap",
-   "lastPrice": 0.00003346,
-   "lastPriceAt": 1792199136175,
-   "multiple": 0.83,
+   "lastPrice": 0.00003263,
+   "lastPriceAt": 1792200637112,
+   "multiple": 0.81,
    "milestonesHit": [],
    "dumpHit": null,
    "links": {
@@ -434,8 +444,8 @@
    "qualifiedWallets": 0,
    "pairAddress": "EUyunpwVybXKn6oXPqmf67HdoGrX8VSXQZRXkkBuRfBj",
    "dexId": "pumpswap",
-   "lastPrice": 0.000004371,
-   "lastPriceAt": 1792199136182,
+   "lastPrice": 0.000004364,
+   "lastPriceAt": 1792200637151,
    "multiple": 0.24,
    "milestonesHit": [],
    "dumpHit": {
@@ -464,9 +474,9 @@
    "qualifiedWallets": 0,
    "pairAddress": "CxPdeNZn9XTfRZ3Ab6dBmsRygLNCjo41ztH7UuV1eNh3",
    "dexId": "raydium",
-   "lastPrice": 0.0002612,
-   "lastPriceAt": 1792199136188,
-   "multiple": 1,
+   "lastPrice": 0.0002717,
+   "lastPriceAt": 1792200637192,
+   "multiple": 1.04,
    "milestonesHit": [],
    "dumpHit": null,
    "links": {
@@ -604,9 +614,9 @@
    "state": "PAPER_SIGNAL",
    "score": 65,
    "riskVerdict": "PASS",
-   "liquidityUsd": 145068.38,
-   "mcap": 2498239,
-   "observedAt": 1792199136584,
+   "liquidityUsd": 151886.96,
+   "mcap": 2725468,
+   "observedAt": 1792200638234,
    "links": {
     "dexscreener": "https://dexscreener.com/solana/265GQ6QKcEGwNCWsL8CsJzD3iDDRuzwj7K9Pa7vst73M",
     "gmgn": "https://gmgn.ai/sol/token/2e3zQiA8JWeDjjVeuqzv9X1Q3aqRRaPqL8UYEbxVpump",
@@ -630,10 +640,7 @@
   }
  ],
  "errors": [
-  "discovery: profiles: HTTP 429",
-  "discovery: boosts: source in rate-limit backoff",
-  "dexscreener cooldown armed for 10 min (strike 1 after 2 consecutive 429 cycles, driver-level; discovery resumes automatically, heartbeats continue)",
-  "GitHub Actions backstop (separate egress IPs) covers discovery when its scheduled run lands — GitHub delays the 5-min cron in practice, so coverage is best-effort"
+  "discovery skipped: dexscreener 429 cooldown active until 2026-10-17T01:35:39.918Z (driver-level backoff, engine rules unchanged; heartbeat feed still written)"
  ],
  "notes": [
   "PAPER ONLY — research signals, not financial advice, never executable trades.",
@@ -644,14 +651,13 @@
  ],
  "driver": "worker-budget-v2 2026-10-17",
  "phaseMs": {
-  "t0": 1792200334818,
-  "readMs": 1084,
-  "discoveryMs": 4016
+  "t0": 1792200634820,
+  "readMs": 1265
  },
  "dexBackoffUntil": 1792200939918,
  "dexBackoffStrikes": 1,
- "dex429Streak": 2,
+ "dex429Streak": 0,
  "stateReadError": null,
- "subrequests": 4,
+ "subrequests": 27,
  "stateWritten": true
 }
