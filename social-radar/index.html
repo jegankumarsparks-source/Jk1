@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>JK SOCIAL RADAR</title>
+<style>
+:root{--bg:#0a0618;--card:#150e2e;--card2:#1d1440;--violet:#8b5cf6;--cyan:#22d3ee;--pink:#f472b6;--green:#34d399;--amber:#fbbf24;--red:#f87171;--txt:#f1ecff;--dim:#9b8fc7}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--txt);font-family:-apple-system,'Segoe UI',Roboto,sans-serif;padding-bottom:76px;min-height:100vh;background-image:radial-gradient(circle at 15% 0%,rgba(139,92,246,.18),transparent 45%),radial-gradient(circle at 90% 10%,rgba(34,211,238,.12),transparent 40%)}
+header{position:sticky;top:0;z-index:50;background:rgba(10,6,24,.92);backdrop-filter:blur(10px);padding:12px 14px 8px;border-bottom:1px solid rgba(139,92,246,.25)}
+.hrow{display:flex;align-items:center;justify-content:space-between}
+.logo{font-size:19px;font-weight:900;letter-spacing:.5px;background:linear-gradient(90deg,var(--cyan),var(--violet),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent}
+.live{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;background:rgba(52,211,153,.12);color:var(--green);border:1px solid rgba(52,211,153,.35)}
+.live.off{background:rgba(248,113,113,.12);color:var(--red);border-color:rgba(248,113,113,.35)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 1.4s infinite}
+.live.off .dot{background:var(--red);animation:none}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+.upd{font-size:10px;color:var(--dim);margin-top:3px;text-align:right}
+.ticker{overflow:hidden;white-space:nowrap;margin-top:8px;background:linear-gradient(90deg,rgba(139,92,246,.15),rgba(34,211,238,.1));border-radius:8px;padding:6px 0;border:1px solid rgba(139,92,246,.2)}
+.ticker-in{display:inline-block;animation:tick 40s linear infinite;padding-left:100%}
+@keyframes tick{to{transform:translateX(-100%)}}
+.tk{display:inline-block;margin:0 18px;font-size:12px;font-weight:600}
+.tk.up{color:var(--green)}.tk.hot{color:var(--amber)}.tk.new{color:var(--cyan)}
+main{padding:12px 12px 20px;max-width:640px;margin:0 auto}
+.sec{font-size:12px;font-weight:800;letter-spacing:1.5px;color:var(--dim);margin:16px 4px 8px;text-transform:uppercase}
+.card{background:linear-gradient(145deg,var(--card),var(--card2));border:1px solid rgba(139,92,246,.22);border-radius:16px;padding:12px;margin-bottom:10px;animation:slidein .35s ease;position:relative;overflow:hidden}
+@keyframes slidein{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.card.hotcard{border:1px solid transparent;background:linear-gradient(var(--card),var(--card)) padding-box,linear-gradient(120deg,var(--amber),var(--pink),var(--violet)) border-box}
+.crow{display:flex;gap:10px;align-items:center}
+.icon{width:44px;height:44px;border-radius:12px;object-fit:cover;background:#2a1f55;flex-shrink:0}
+.iconph{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--violet),var(--cyan));display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;flex-shrink:0}
+.cmain{flex:1;min-width:0}
+.sym{font-weight:800;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sub{font-size:11px;color:var(--dim);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.badges{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}
+.badge{font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;letter-spacing:.3px}
+.b-tg{background:rgba(34,211,238,.15);color:var(--cyan);border:1px solid rgba(34,211,238,.3)}
+.b-boost{background:rgba(251,191,36,.15);color:var(--amber);border:1px solid rgba(251,191,36,.3)}
+.b-x{background:rgba(241,236,255,.1);color:#d8d0f5;border:1px solid rgba(241,236,255,.2)}
+.b-launch{background:rgba(244,114,182,.15);color:var(--pink);border:1px solid rgba(244,114,182,.3)}
+.b-hot{background:linear-gradient(90deg,var(--amber),var(--pink));color:#1a0b2e}
+.mult{font-size:13px;font-weight:900;padding:4px 9px;border-radius:10px;background:linear-gradient(90deg,rgba(52,211,153,.25),rgba(34,211,238,.2));color:var(--green);white-space:nowrap}
+.mult.big{background:linear-gradient(90deg,var(--amber),var(--pink));color:#1a0b2e}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 4px}
+.chip{font-size:12px;font-weight:700;padding:7px 14px;border-radius:20px;background:var(--card);border:1px solid rgba(139,92,246,.3);color:var(--dim)}
+.chip.on{background:linear-gradient(90deg,var(--violet),var(--cyan));color:#0a0618;border-color:transparent}
+.alertcard{border-left:4px solid var(--green)}
+.alertcard.gold{border-left:4px solid var(--amber);background:linear-gradient(145deg,#231638,#1d1440)}
+.atitle{font-weight:900;font-size:16px}
+.anote{font-size:12px;color:var(--dim);margin-top:4px;line-height:1.5}
+.notecard{background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.25);border-radius:12px;padding:10px 12px;font-size:12px;color:#e8ddc0;line-height:1.55;margin-bottom:10px}
+.src{display:flex;gap:10px;align-items:flex-start;padding:11px 12px;background:var(--card);border-radius:12px;margin-bottom:8px;border:1px solid rgba(139,92,246,.18)}
+.sdot{width:10px;height:10px;border-radius:50%;margin-top:4px;flex-shrink:0}
+.s-live{background:var(--green);box-shadow:0 0 8px var(--green)}
+.s-stale{background:var(--amber)}
+.s-offline{background:var(--red)}
+.sname{font-weight:700;font-size:13px}
+.sdet{font-size:11px;color:var(--dim);margin-top:2px;line-height:1.45}
+nav{position:fixed;bottom:0;left:0;right:0;z-index:60;background:rgba(15,9,34,.97);backdrop-filter:blur(12px);border-top:1px solid rgba(139,92,246,.3);display:flex;padding:6px 4px calc(8px + env(safe-area-inset-bottom))}
+.tab{flex:1;text-align:center;padding:7px 0 4px;border-radius:12px;color:var(--dim);font-size:10px;font-weight:700;cursor:pointer;position:relative}
+.tab .ti{font-size:20px;display:block;margin-bottom:2px}
+.tab.on{color:var(--cyan);background:rgba(34,211,238,.1)}
+.tab .cnt{position:absolute;top:2px;right:14px;background:var(--pink);color:#fff;font-size:9px;font-weight:800;min-width:16px;height:16px;line-height:16px;border-radius:8px;padding:0 3px}
+.sheet{position:fixed;inset:0;z-index:100;display:none}
+.sheet.open{display:block}
+.sheet-bg{position:absolute;inset:0;background:rgba(5,2,15,.75);backdrop-filter:blur(3px)}
+.sheet-in{position:absolute;bottom:0;left:0;right:0;max-width:640px;margin:0 auto;background:#18103a;border-radius:22px 22px 0 0;padding:18px 16px calc(20px + env(safe-area-inset-bottom));max-height:86vh;overflow-y:auto;animation:sheetup .3s ease;border-top:2px solid var(--violet)}
+@keyframes sheetup{from{transform:translateY(60px);opacity:.5}to{transform:none;opacity:1}}
+.grip{width:42px;height:4px;border-radius:3px;background:rgba(139,92,246,.5);margin:0 auto 14px}
+.dhead{display:flex;gap:12px;align-items:center;margin-bottom:12px}
+.dname{font-size:19px;font-weight:900}
+.dsub{font-size:12px;color:var(--dim);margin-top:2px;word-break:break-all}
+.statgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+.stat{background:rgba(139,92,246,.1);border-radius:10px;padding:9px 11px}
+.stat b{display:block;font-size:14px;margin-top:2px}
+.stat span{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.6px}
+.linkrow{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}
+.lbtn{flex:1;min-width:100px;text-align:center;padding:11px 8px;border-radius:12px;font-size:12px;font-weight:800;text-decoration:none;color:#0a0618;background:linear-gradient(90deg,var(--cyan),#67e8f9)}
+.lbtn.gmgn{background:linear-gradient(90deg,var(--violet),#a78bfa)}
+.lbtn.sols{background:linear-gradient(90deg,var(--green),#6ee7b7)}
+.lbtn.tw{background:rgba(241,236,255,.12);color:var(--txt);border:1px solid rgba(241,236,255,.25)}
+.lbtn.tg2{background:rgba(34,211,238,.14);color:var(--cyan);border:1px solid rgba(34,211,238,.3)}
+.post{background:rgba(139,92,246,.08);border-radius:10px;padding:10px 11px;margin-bottom:8px}
+.post a{color:var(--cyan);font-size:11px;font-weight:700;text-decoration:none}
+.ptxt{font-size:12px;color:#cfc5f2;margin-top:5px;line-height:1.5;word-break:break-word}
+.ptime{font-size:10px;color:var(--dim)}
+.copybtn{background:rgba(139,92,246,.2);border:1px solid rgba(139,92,246,.4);color:var(--txt);font-size:11px;font-weight:700;padding:6px 12px;border-radius:9px;cursor:pointer}
+.empty{text-align:center;padding:40px 20px;color:var(--dim);font-size:13px;line-height:1.7}
+.rocket{font-size:34px;display:block;margin-bottom:8px;animation:float 2.4s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+</style>
+</head>
+<body>
+<header>
+  <div class="hrow">
+    <div class="logo">🛰 JK SOCIAL RADAR</div>
+    <div class="live off" id="liveBadge"><span class="dot"></span><span id="liveTxt">LOADING</span></div>
+  </div>
+  <div class="upd" id="updTxt">connecting…</div>
+  <div class="ticker"><div class="ticker-in" id="ticker">scanning social sources…</div></div>
+</header>
+<main>
+  <div id="view-alerts"></div>
+  <div id="view-feed" style="display:none"></div>
+  <div id="view-launch" style="display:none"></div>
+  <div id="view-sources" style="display:none"></div>
+</main>
+<nav>
+  <div class="tab on" data-t="alerts"><span class="ti">🚨</span>ALERTS<span class="cnt" id="cnt-alerts" style="display:none"></span></div>
+  <div class="tab" data-t="feed"><span class="ti">🔥</span>FEED</div>
+  <div class="tab" data-t="launch"><span class="ti">🚀</span>LAUNCH</div>
+  <div class="tab" data-t="sources"><span class="ti">📡</span>SOURCES</div>
+</nav>
+<div class="sheet" id="sheet"><div class="sheet-bg" onclick="closeSheet()"></div><div class="sheet-in" id="sheetIn"></div></div>
+<script>
+const D={feed:null,alerts:null,launches:null,sources:null};
+const F=(u)=>fetch(u+'?t='+Date.now()).then(r=>r.json());
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ago=t=>{if(!t)return'?';const s=(Date.now()-t)/1e3;if(s<60)return Math.round(s)+'s';if(s<3600)return Math.round(s/60)+'m';if(s<86400)return Math.round(s/3600)+'h';return Math.round(s/86400)+'d'};
+const fm=n=>{if(n==null)return'—';if(n>=1e9)return'$'+(n/1e9).toFixed(2)+'B';if(n>=1e6)return'$'+(n/1e6).toFixed(2)+'M';if(n>=1e3)return'$'+(n/1e3).toFixed(1)+'K';return'$'+(+n).toFixed(4)};
+const gmgn=ca=>'https://gmgn.ai/sol/token/'+ca;
+const sols=ca=>'https://solscan.io/token/'+ca;
+let curTab='alerts',feedFilter='all';
+
+function icon(c){return c.icon?`<img class="icon" src="${esc(c.icon)}" loading="lazy" onerror="this.outerHTML=iconph('${esc(c.symbol)}')">`:iconph(c.symbol)}
+function iconph(s){return `<div class="iconph">${esc((s||'?').slice(0,2))}</div>`}
+function badges(c){
+  let b='';
+  const tgs=c.sources.filter(s=>s.type==='telegram');
+  if(tgs.length)b+=`<span class="badge b-tg">✈ TG ×${tgs.length}</span>`;
+  if(c.boost)b+=`<span class="badge b-boost">⚡ BOOST</span>`;
+  if(c.twitter)b+=`<span class="badge b-x">𝕏 PAGE</span>`;
+  if(c.sources.some(s=>s.type==='launch'))b+=`<span class="badge b-launch">🚀 NEW</span>`;
+  if(c.sourceCount>=3)b+=`<span class="badge b-hot">🔥 ${c.sourceCount} SOURCES</span>`;
+  return b;
+}
+function coinCard(c,i){
+  const hot=(c.sourceCount||0)>=3;
+  const mult=c.mult&&c.mult>=1.3?`<span class="mult ${c.mult>=2?'big':''}">${c.mult>=10?c.mult.toFixed(1):c.mult.toFixed(2)}x</span>`:'';
+  return `<div class="card ${hot?'hotcard':''}" style="animation-delay:${Math.min(i*40,400)}ms" onclick="openCoin('${esc(c.ca)}')">
+    <div class="crow">${icon(c)}
+      <div class="cmain"><div class="sym">$${esc(c.symbol||'UNKNOWN')}</div>
+      <div class="sub">${esc(c.name||'')} · mcap ${fm(c.mcap)}</div>
+      <div class="badges">${badges(c)}</div></div>
+      <div style="text-align:right">${mult}<div class="sub" style="margin-top:4px">${ago(Math.max(...c.sources.map(s=>s.time||0)))}</div></div>
+    </div></div>`;
+}
+function renderAlerts(){
+  const A=(D.alerts?.alerts||[]);
+  const el=document.getElementById('view-alerts');
+  let h='';
+  if(A.length){
+    h+=`<div class="sec">🚨 Pump alerts — newest first</div>`;
+    h+=A.map((a,i)=>`<div class="card alertcard ${a.mult>=3?'gold':''}" style="animation-delay:${Math.min(i*40,400)}ms" onclick="openCoin('${esc(a.ca)}')">
+      <div class="crow">${a.icon?`<img class="icon" src="${esc(a.icon)}" onerror="this.outerHTML=iconph('${esc(a.symbol)}')">`:iconph(a.symbol)}
+      <div class="cmain"><div class="atitle">$${esc(a.symbol)} <span style="color:var(--green)">${a.mult}x</span> 🚀</div>
+      <div class="anote">hit ${a.mult}x since radar first saw it · price ${a.price?'$'+a.price:'—'} · mcap ${fm(a.mcap)} · ${ago(a.time)} ago</div></div>
+      <span style="font-size:22px">${a.mult>=5?'🔥':'🎯'}</span></div></div>`).join('');
+  }else{
+    h+=`<div class="empty"><span class="rocket">📡</span>No pump alerts yet.<br>The radar is watching 24/7 — the moment a listed coin hits 1.5x / 2x / 3x / 5x / 10x from where it was first spotted, it lands here at the top.</div>`;
+  }
+  const hot=(D.feed?.coins||[]).filter(c=>(c.sourceCount||0)>=3).slice(0,10);
+  if(hot.length){h+=`<div class="sec">🔥 On 3+ sources right now</div>`+hot.map(coinCard).join('')}
+  el.innerHTML=h;
+  const cnt=document.getElementById('cnt-alerts');
+  if(A.length){cnt.style.display='';cnt.textContent=A.length>9?'9+':A.length}else cnt.style.display='none';
+}
+function renderFeed(){
+  const el=document.getElementById('view-feed');
+  let coins=D.feed?.coins||[];
+  const f=feedFilter;
+  let list=coins.filter(c=>{
+    if(f==='tg')return c.sources.some(s=>s.type==='telegram');
+    if(f==='boost')return !!c.boost;
+    if(f==='x')return !!c.twitter;
+    if(f==='hot')return (c.sourceCount||0)>=3;
+    return true;
+  });
+  let h=`<div class="chips">
+    <span class="chip ${f==='all'?'on':''}" onclick="setF('all')">ALL (${coins.length})</span>
+    <span class="chip ${f==='hot'?'on':''}" onclick="setF('hot')">🔥 HOT</span>
+    <span class="chip ${f==='tg'?'on':''}" onclick="setF('tg')">✈ TELEGRAM</span>
+    <span class="chip ${f==='boost'?'on':''}" onclick="setF('boost')">⚡ BOOSTED</span>
+    <span class="chip ${f==='x'?'on':''}" onclick="setF('x')">𝕏 HAS X PAGE</span></div>`;
+  h+=`<div class="notecard">Coins spotted on Solana Telegram call channels, Dexscreener promoted (paid boost) coins and fresh launches. Tap any coin for full detail + Dexscreener / GMGN links. Telegram calls are UNVERIFIED — anyone can run a call channel.</div>`;
+  h+=list.length?list.slice(0,80).map(coinCard).join(''):`<div class="empty"><span class="rocket">🛰</span>No coins in this filter right now.</div>`;
+  el.innerHTML=h;
+}
+function setF(f){feedFilter=f;renderFeed()}
+function renderLaunch(){
+  const el=document.getElementById('view-launch');
+  const L=D.launches||{launches:[],upcoming:[]};
+  let h=`<div class="sec">🚀 Just launched (newest pools)</div>`;
+  h+=(L.launches||[]).slice(0,40).map((c,i)=>`<div class="card" style="animation-delay:${Math.min(i*30,300)}ms" onclick="openCoin('${esc(c.ca)}')">
+    <div class="crow">${icon(c)}<div class="cmain"><div class="sym">$${esc(c.symbol||'UNKNOWN')}</div>
+    <div class="sub">launched ${ago(c.launchAt)} ago · liq ${fm(c.liq)} · mcap ${fm(c.mcap)}</div>
+    <div class="badges">${badges(c)}</div></div></div></div>`).join('')||`<div class="empty">No launches found this cycle.</div>`;
+  if((L.upcoming||[]).length){
+    h+=`<div class="sec">⏳ Possibly upcoming (token page exists, no live pair yet)</div>`;
+    h+=`<div class="notecard">These tokens have a Dexscreener profile but no live trading pair yet — usually created before launch. No launch date is published by the source, so "when" is unknown.</div>`;
+    h+=L.upcoming.slice(0,25).map(coinCard).join('');
+  }
+  el.innerHTML=h;
+}
+function renderSources(){
+  const el=document.getElementById('view-sources');
+  const S=D.sources?.sources||[];
+  let h=`<div class="sec">📡 Source-by-source truth</div>`;
+  h+=`<div class="notecard">Every source below shows its real status from the last 5-minute server scan. OFFLINE means no free data exists for it — nothing is faked or replayed.</div>`;
+  h+=S.map(s=>`<div class="src"><span class="sdot s-${s.status}"></span><div style="flex:1">
+    <div class="sname">${esc(s.name)} ${s.status==='live'?'<span style="color:var(--green);font-size:10px">● LIVE</span>':s.status==='stale'?'<span style="color:var(--amber);font-size:10px">● STALE</span>':'<span style="color:var(--red);font-size:10px">● OFFLINE</span>'}</div>
+    <div class="sdet">${esc(s.detail||'')}</div></div>
+    ${s.url?`<a href="${esc(s.url)}" target="_blank" style="color:var(--cyan);font-size:16px;text-decoration:none">↗</a>`:''}</div>`).join('');
+  el.innerHTML=h;
+}
+function openCoin(ca){
+  const c=(D.feed?.coins||[]).find(x=>x.ca===ca)||(D.launches?.launches||[]).find(x=>x.ca===ca)||(D.launches?.upcoming||[]).find(x=>x.ca===ca);
+  if(!c)return;
+  const posts=c.sources.filter(s=>s.type==='telegram'&&s.text);
+  const others=c.sources.filter(s=>!s.text);
+  document.getElementById('sheetIn').innerHTML=`<div class="grip"></div>
+    <div class="dhead">${icon(c)}<div style="flex:1;min-width:0">
+      <div class="dname">$${esc(c.symbol||'UNKNOWN')}</div>
+      <div class="dsub">${esc(c.name||'')}</div>
+      <div class="dsub" style="font-size:10px;margin-top:4px">${esc(c.ca)}</div></div>
+      <button class="copybtn" onclick="navigator.clipboard.writeText('${esc(c.ca)}');this.textContent='COPIED ✓'">COPY CA</button></div>
+    <div class="badges" style="margin-bottom:4px">${badges(c)}</div>
+    <div class="statgrid">
+      <div class="stat"><span>Price</span><b>${c.price?'$'+(+c.price<0.001?c.price.toExponential(2):c.price):'—'}</b></div>
+      <div class="stat"><span>Since first seen</span><b style="color:${c.mult>=1?'var(--green)':'var(--red)'}">${c.mult?c.mult.toFixed(2)+'x':'—'}</b></div>
+      <div class="stat"><span>Market cap</span><b>${fm(c.mcap)}</b></div>
+      <div class="stat"><span>Liquidity</span><b>${fm(c.liq)}</b></div>
+      <div class="stat"><span>24h change</span><b style="color:${c.chg24>=0?'var(--green)':'var(--red)'}">${c.chg24!=null?c.chg24.toFixed(1)+'%':'—'}</b></div>
+      <div class="stat"><span>First seen</span><b>${ago(c.firstSeen)} ago</b></div>
+    </div>
+    <div class="linkrow">
+      <a class="lbtn" href="${esc(c.dexUrl||'https://dexscreener.com/solana/'+c.ca)}" target="_blank">DEXSCREENER</a>
+      <a class="lbtn gmgn" href="${gmgn(c.ca)}" target="_blank">GMGN</a>
+      <a class="lbtn sols" href="${sols(c.ca)}" target="_blank">SOLSCAN</a>
+      ${c.twitter?`<a class="lbtn tw" href="${esc(c.twitter)}" target="_blank">𝕏 X PAGE</a>`:''}
+      ${c.telegram?`<a class="lbtn tg2" href="${esc(c.telegram)}" target="_blank">✈ COIN TG</a>`:''}
+    </div>
+    ${posts.length?`<div class="sec">✈ Source posts (tap to open)</div>`+posts.map(p=>`<div class="post"><a href="${esc(p.url)}" target="_blank">${esc(p.label)} · ${ago(p.time)} ago ↗</a><div class="ptxt">${esc(p.text)}</div></div>`).join(''):''}
+    ${others.length?`<div class="sec">Also seen on</div>`+others.map(o=>`<div class="post"><a href="${esc(o.url)}" target="_blank">${esc(o.label)} ↗</a><div class="ptime">${ago(o.time)} ago</div></div>`).join(''):''}`;
+  document.getElementById('sheet').classList.add('open');
+}
+function closeSheet(){document.getElementById('sheet').classList.remove('open')}
+function renderTicker(){
+  const items=[];
+  (D.alerts?.alerts||[]).slice(0,5).forEach(a=>items.push(`<span class="tk up">🚀 $${esc(a.symbol)} ${a.mult}x</span>`));
+  (D.feed?.coins||[]).filter(c=>(c.sourceCount||0)>=3).slice(0,6).forEach(c=>items.push(`<span class="tk hot">🔥 $${esc(c.symbol)} on ${c.sourceCount} sources</span>`));
+  (D.feed?.coins||[]).slice(0,8).forEach(c=>items.push(`<span class="tk new">✈ $${esc(c.symbol)} spotted</span>`));
+  const t=items.join('')||'<span class="tk">radar warming up…</span>';
+  document.getElementById('ticker').innerHTML=t+t;
+}
+async function refresh(){
+  try{
+    const [feed,alerts,launches,sources]=await Promise.all([F('data/feed.json'),F('data/alerts.json'),F('data/launches.json'),F('data/sources.json')]);
+    D.feed=feed;D.alerts=alerts;D.launches=launches;D.sources=sources;
+    const age=(Date.now()-feed.updatedAt)/60000;
+    const lb=document.getElementById('liveBadge');
+    if(age<15){lb.classList.remove('off');document.getElementById('liveTxt').textContent='LIVE 24/7'}
+    else{lb.classList.add('off');document.getElementById('liveTxt').textContent='STALE'}
+    document.getElementById('updTxt').textContent='server scan '+ago(feed.updatedAt)+' ago · next ~5 min · '+feed.coinCount+' coins tracked';
+    renderTicker();renderAlerts();renderFeed();renderLaunch();renderSources();
+  }catch(e){document.getElementById('updTxt').textContent='connection issue - retrying…'}
+}
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
+  curTab=t.dataset.t;
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===t));
+  ['alerts','feed','launch','sources'].forEach(v=>document.getElementById('view-'+v).style.display=v===curTab?'':'none');
+});
+refresh();setInterval(refresh,60000);
+</script>
+</body>
+</html>
