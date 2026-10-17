@@ -17,8 +17,8 @@ const REPO='jegankumarsparks-source/Jk1';
 let subCount=0;
 { const _f=globalThis.fetch;
   globalThis.fetch=(...a)=>{ subCount++; return _f(...a); }; }
-const SUB_CUTOFF_ANALYZE=34; // stop starting new candidate analysis past this
-const SUB_CUTOFF_MARKS=40;   // skip price-mark refresh past this
+const SUB_CUTOFF_ANALYZE=22; // stop starting new candidate analysis past this
+const SUB_CUTOFF_MARKS=36;   // skip price-mark refresh past this
 let lastWriteError=null; // warm isolates only: surfaced once in the next feed, then cleared
 const STATE_PATH='solana-radar/server/state.json';
 const FEED_PATH='solana-radar/server-scan.json';
@@ -156,7 +156,7 @@ async function runCycle(env){
     if(c.rugcheck){
       WALLETS.harvestFromToken(c);
       const recs=(c.rugcheck.topHolders||[]).filter(h=>h.address&&!h.insider).slice(0,S.settings.walletResearchPerCandidate||5);
-      for(const h of recs){ if(Date.now()>deadline)break; try{ await WALLETS.researchWallet(h.address); }catch(e){} }
+      for(const h of recs){ if(Date.now()>deadline||subCount>40)break; try{ await WALLETS.researchWallet(h.address); }catch(e){} }
       c.walletEvidence=(c.rugcheck.topHolders||[]).filter(h=>h.address).map(h=>{
         const w=S.wallets.get(h.address);
         return {address:h.address,pct:h.pct,insider:h.insider,state:w?w.state:'UNVERIFIED',
