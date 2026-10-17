@@ -40,7 +40,7 @@ function newPos(coin,price,C,now,tier,score){
 // manage one position given fresh price/liq; returns array of events, mutates pos
 function managePos(pos,price,liq,now,C){
  const ev=[];if(!pos.open||!(price>0))return ev;
- pos.last=price;pos.mult=price/pos.entry;if(pos.mult>pos.peak)pos.peak=pos.mult;if(pos.trough==null||pos.mult<pos.trough)pos.trough=pos.mult;
+ pos.last=price;if(liq!=null)pos.lastLiq=liq;pos.mult=price/pos.entry;if(pos.mult>pos.peak)pos.peak=pos.mult;if(pos.trough==null||pos.mult<pos.trough)pos.trough=pos.mult;
  const sell=(frac,why)=>{const u=pos.rem*frac;const v=u*price*(1-C.friction);pos.rem-=u;pos.banked+=v;ev.push({t:now,e:why,m:pos.mult,u:v});};
  const closeAll=(why,val)=>{const v=val===undefined?pos.rem*price*(1-C.friction):val;pos.banked+=v;pos.rem=0;pos.open=false;pos.exitTime=now;pos.reason=why;pos.exitMult=pos.mult;ev.push({t:now,e:why,m:pos.mult,u:v});};
  if(liq!==null&&liq<C.rugLiq){closeAll('RUG',0);}
