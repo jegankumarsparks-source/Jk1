@@ -17,8 +17,10 @@ const REPO='jegankumarsparks-source/Jk1';
 let subCount=0;
 { const _f=globalThis.fetch;
   globalThis.fetch=(...a)=>{ subCount++; return _f(...a); }; }
-const SUB_CUTOFF_ANALYZE=22; // stop starting new candidate analysis past this
-const SUB_CUTOFF_MARKS=36;   // skip price-mark refresh past this
+const SUB_CUTOFF_ANALYZE=14; // stop starting new candidate analysis past this (counter under-reads vs runtime; padded)
+const SUB_CUTOFF_MARKS=30;   // skip price-mark refresh past this
+const SUB_CUTOFF_HARD=38;    // no discretionary fetch of any kind past this
+const HEAVY_PHASE_DEADLINE_MS=12000; // wall-clock backstop: discretionary phases stop, writes always happen
 let lastWriteError=null; // warm isolates only: surfaced once in the next feed, then cleared
 const STATE_PATH='solana-radar/server/state.json';
 const FEED_PATH='solana-radar/server-scan.json';
@@ -116,6 +118,9 @@ async function runCycle(env){
   const errors=[];
   if(drift)errors.push('ENGINE DRIFT: '+drift);
   const DISCOVERY_BUDGET_MS=20000;
+  const heavyDeadline=Date.now()+HEAVY_PHASE_DEADLINE_MS;
+  if(S&&S.settings){ S.settings.maxRugcheckPerCycle=Math.min(S.settings.maxRugcheckPerCycle||3,3); S.settings.walletResearchPerCandidate=Math.min(S.settings.walletResearchPerCandidate||3,3); }
+  const subPhases={};
   let dexBackoffUntil=0, dexStrikes=(st&&st.dexBackoffStrikes)||0, dex429Streak=0;
   if(st&&st.dexBackoffUntil&&st.dexBackoffUntil>Date.now()){
     dexBackoffUntil=st.dexBackoffUntil;
@@ -127,6 +132,7 @@ async function runCycle(env){
       if(r&&r.errors&&r.errors.length)errors.push(...r.errors.map(e=>'discovery: '+e));
     }catch(e){ errors.push('discovery cycle: '+(e.message||e)); }
     phaseT.discoveryMs=Date.now()-dT;
+    subPhases.afterDiscovery=subCount;
     const dex=REG.all().find(s=>s.id==='dexscreener');
     const dex429=dex&&dex.status==='DEGRADED'&&String(dex.lastError||'').includes('429');
     const discoveryStalled=(phaseT.discoveryMs||0)>=DISCOVERY_BUDGET_MS;
@@ -156,7 +162,7 @@ async function runCycle(env){
     if(c.rugcheck){
       WALLETS.harvestFromToken(c);
       const recs=(c.rugcheck.topHolders||[]).filter(h=>h.address&&!h.insider).slice(0,S.settings.walletResearchPerCandidate||5);
-      for(const h of recs){ if(Date.now()>deadline||subCount>40)break; try{ await WALLETS.researchWallet(h.address); }catch(e){} }
+      for(const h of recs){ if(Date.now()>deadline||Date.now()>heavyDeadline||subCount>SUB_CUTOFF_HARD)break; try{ await WALLETS.researchWallet(h.address); }catch(e){} }
       c.walletEvidence=(c.rugcheck.topHolders||[]).filter(h=>h.address).map(h=>{
         const w=S.wallets.get(h.address);
         return {address:h.address,pct:h.pct,insider:h.insider,state:w?w.state:'UNVERIFIED',
@@ -170,8 +176,8 @@ async function runCycle(env){
 
   let analyzed=0;
   for(const c of S.candidates.values()){
-    if(analyzed>=S.settings.maxRugcheckPerCycle)break;
-    if(Date.now()>deadline){ errors.push('deadline reached — remaining candidates deferred to next cycle'); break; }
+    if(analyzed>=Math.min(S.settings.maxRugcheckPerCycle||3,3))break;
+    if(Date.now()>deadline||Date.now()>heavyDeadline){ errors.push('deadline reached — remaining candidates deferred to next cycle'); break; }
     if(subCount>SUB_CUTOFF_ANALYZE){ errors.push('subrequest budget reached ('+subCount+') — remaining analysis deferred (driver-level, protects heartbeat writes)'); break; }
     if((c.updatedAt||0)<cycleStart)continue;
     if(c.state==='DISCOVERED'||(c.state==='DATA_INCOMPLETE'&&c.market)){
@@ -179,9 +185,10 @@ async function runCycle(env){
     }
   }
 
+  subPhases.afterAnalysis=subCount;
   /* --- signal milestone marks (observed, never executable) --- */
   let marksTracked=0;
-  if(subCount>SUB_CUTOFF_MARKS){ errors.push('marks refresh skipped: subrequest budget ('+subCount+') reserved for heartbeat writes'); }
+  if(subCount>SUB_CUTOFF_MARKS||Date.now()>heavyDeadline){ errors.push('marks refresh skipped: subrequest budget ('+subCount+') reserved for heartbeat writes'); }
   else { const cut=U.now()-48*3600*1000;
     const recent=[...S.signals.values()].filter(g=>g.createdAt>cut).sort((a,b)=>b.createdAt-a.createdAt).slice(0,25);
     if(recent.length){
@@ -203,6 +210,7 @@ async function runCycle(env){
       }
     } }
 
+  subPhases.afterMarks=subCount;
   /* --- eviction (state hygiene, same as scanner.mjs) --- */
   { const cut=U.now()-72*3600*1000;
     for(const [m,c] of [...S.candidates]){
@@ -296,6 +304,7 @@ async function runCycle(env){
   feed.dex429Streak=dex429Streak||0;
   feed.stateReadError=stateFetchError;
   feed.subrequests=subCount;
+  feed.subPhases=subPhases;
   feed.notes.push('Driver enforces hard per-phase time budgets and always writes this heartbeat feed, even when a data source stalls; a stalled source is labelled in errors, never silent.');
 
   /* when our dex is in 429 cooldown and the GitHub backstop just wrote a fresh cycle
