@@ -32,13 +32,37 @@ async function ghGet(env, path) {
   const j = await r.json();
   return { sha: j.sha, text: unb64(j.content.replace(/\n/g, '')) };
 }
-async function ghPut(env, path, text, message) {
-  const cur = await ghGet(env, path).catch(() => null);
-  const body = { message, content: b64(text), committer: { name: 'EARLY-ENTRY RADAR (worker)', email: 'jegankumarsparks@gmail.com' } };
-  if (cur) body.sha = cur.sha;
-  const r = await fetch(`https://api.github.com/repos/${REPO}/contents/${path}`, { method: 'PUT', headers: { ...ghHeaders(env), 'content-type': 'application/json' }, body: JSON.stringify(body) });
-  if (!r.ok) throw new Error(`gh put ${path}: HTTP ${r.status} ${await r.text().then(t => t.slice(0, 200))}`);
-  return true;
+async function ghPut(env, path, text, message, retries = 2) {
+  for (let i = 0; i <= retries; i++) {
+    const cur = await ghGet(env, path).catch(() => null);
+    const body = { message, content: b64(text), committer: { name: 'EARLY-ENTRY RADAR (worker)', email: 'jegankumarsparks@gmail.com' } };
+    if (cur) body.sha = cur.sha;
+    const r = await fetch(`https://api.github.com/repos/${REPO}/contents/${path}`, { method: 'PUT', headers: { ...ghHeaders(env), 'content-type': 'application/json' }, body: JSON.stringify(body) });
+    if (r.ok) return true;
+    if (r.status === 409 && i < retries) continue; // concurrent writer (cron overlap): refetch sha, retry
+    throw new Error(`gh put ${path}: HTTP ${r.status} ${await r.text().then(t => t.slice(0, 200))}`);
+  }
+  return false;
+}
+
+// Union-merge two store states (append-only lists + entity upserts). Idempotent; safe for cron overlap.
+export function mergeStates(a, b) {
+  const out = a;
+  out.seq = Math.max(a.seq || 0, b.seq || 0);
+  const seen = new Set(a.raw_events.map(e => e.source + '|' + e.source_id));
+  for (const e of b.raw_events) if (!seen.has(e.source + '|' + e.source_id)) { out.raw_events.push(e); seen.add(e.source + '|' + e.source_id); }
+  for (const k of ['entity_evidence', 'mentions', 'security_results', 'gate_results', 'launch_status_log', 'signal_state_log', 'source_health', 'notifications', 'pending_notifications']) {
+    const key = (x) => JSON.stringify(x);
+    const have = new Set((out[k] || []).map(key));
+    for (const x of (b[k] || [])) if (!have.has(key(x))) { out[k] = out[k] || []; out[k].push(x); have.add(key(x)); }
+  }
+  for (const [id, e] of Object.entries(b.entities || {})) {
+    if (!out.entities[id]) out.entities[id] = e;
+    else { const o = out.entities[id]; if (!o.name && e.name) o.name = e.name; if (!o.ticker && e.ticker) o.ticker = e.ticker;
+      if (e.first_evidence_at < o.first_evidence_at) o.first_evidence_at = e.first_evidence_at; o.launch_status = e.launch_status; }
+  }
+  Object.assign(out.sources, b.sources);
+  return out;
 }
 
 async function tgSend(env, text, state) {
@@ -61,6 +85,7 @@ async function runCycle(env) {
   const saved = await ghGet(env, `${BASE}/data/state.json`).catch(() => null);
   const state = saved ? JSON.parse(saved.text) : emptyState();
   if (!state.notifications) state.notifications = [];
+  if (!state.pending_notifications) state.pending_notifications = [];
   const store = openJsonStore(state);
 
   // 1. collect
@@ -112,18 +137,25 @@ async function runCycle(env) {
     }
   }
 
-  // 4. notify on transitions (dedupe: one message per entity+state)
-  let notified = 0, tgStatus = 'disabled';
+  // 4. notifications: queue first, then drain max 3/cycle (Telegram rate-limit + 50-subrequest budget).
+  const NOTIFY_STATES = ['QUALIFIED CANDIDATE', 'SECURITY REJECTED', 'SIGNAL INVALIDATED', 'DATA INCOMPLETE'];
   for (const tr of transitions) {
     const key = `${tr.entityId}:${tr.to}`;
-    if (['QUALIFIED CANDIDATE', 'SECURITY REJECTED', 'SIGNAL INVALIDATED', 'DATA INCOMPLETE'].includes(tr.to)
-        && !state.notifications.some(n => n.key === key)) {
-      const ent = state.entities[tr.entityId];
-      tgStatus = await tgSend(env,
-        `EARLY-ENTRY RADAR\n${tr.to}\n${ent.name || '?'} (${ent.ticker || '?'})\nmint: ${ent.mint || 'unverified'}\nstate change: ${tr.from || 'new'} -> ${tr.to}\nhttps://jegankumarsparks-source.github.io/Jk1/${BASE}/`, state);
-      if (tgStatus === 'sent') { state.notifications.push({ key, at: new Date().toISOString(), result: tgStatus }); notified++; }
-      // not_configured/errors do NOT burn the dedupe key: the alert fires once Telegram is connected
+    if (NOTIFY_STATES.includes(tr.to)
+        && !state.notifications.some(n => n.key === key)
+        && !state.pending_notifications.some(n => n.key === key)) {
+      state.pending_notifications.push({ key, entityId: tr.entityId, to: tr.to, from: tr.from, queued_at: new Date().toISOString() });
     }
+  }
+  let notified = 0, tgStatus = 'disabled';
+  while (state.pending_notifications.length && notified < 3 && subrequests < SUBREQUEST_BUDGET - 6) {
+    const n = state.pending_notifications.shift();
+    const ent = state.entities[n.entityId];
+    tgStatus = await tgSend(env,
+      `EARLY-ENTRY RADAR\n${n.to}\n${ent && ent.name || '?'} (${ent && ent.ticker || '?'})\nmint: ${(ent && ent.mint) || 'unverified'}\nstate change: ${n.from || 'new'} -> ${n.to}\nhttps://jegankumarsparks-source.github.io/Jk1/${BASE}/`, state);
+    if (tgStatus === 'sent') { state.notifications.push({ key: n.key, at: new Date().toISOString(), result: tgStatus }); notified++; }
+    else if (tgStatus === 'not_configured') { state.pending_notifications.unshift(n); break; } // keep queue, try next cycle
+    else { state.notifications.push({ key: n.key, at: new Date().toISOString(), result: tgStatus }); } // real error: log + move on (no retry storm)
   }
 
   // 5. dashboard data
@@ -148,7 +180,16 @@ async function runCycle(env) {
     coins, sources: health, transitions: state.signal_state_log.slice(-50), notifications: state.notifications.slice(-20),
     gaps: ['X/Twitter: no free API', 'Reddit: blocked (needs free OAuth app)', 'Discord: needs per-server bot', 'Instagram: no free access', 'GMGN: no API (links from validated mint only)'] };
 
-  await ghPut(env, `${BASE}/data/state.json`, JSON.stringify(state), 'early-entry-radar: cycle state');
+  // Concurrent-writer safe: if state.json changed under us even after sha retry, merge with remote once.
+  try {
+    await ghPut(env, `${BASE}/data/state.json`, JSON.stringify(state), 'early-entry-radar: cycle state');
+  } catch (e) {
+    if (String(e).includes('409')) {
+      const remote = await ghGet(env, `${BASE}/data/state.json`);
+      const merged = mergeStates(JSON.parse(remote.text), state);
+      await ghPut(env, `${BASE}/data/state.json`, JSON.stringify(merged), 'early-entry-radar: cycle state (merged)');
+    } else throw e;
+  }
   await ghPut(env, `${BASE}/data/feed.json`, JSON.stringify(feed), `early-entry-radar: feed ${feed.headline}`);
   return { ok: true, cycle_ms: Date.now() - t0, entities: coins.length, secChecked, notified, tgStatus, headline: feed.headline };
 }
