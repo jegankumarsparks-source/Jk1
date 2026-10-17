@@ -3,6 +3,7 @@
 import { DatabaseSync } from 'node:sqlite';
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { openStore } from '../src/store.js';
+
 import { ingestEvents, runCollectors } from '../src/ingest.js';
 import { parsePreview } from '../src/adapters/telegram.js';
 import * as pumpfun from '../src/adapters/pumpfun.js';
@@ -49,7 +50,7 @@ if (!OFFLINE) {
   const before = store.get(`SELECT COUNT(*) c FROM raw_events`).c;
   const rows = store.all(`SELECT source,source_id,url,observed_at,ingested_at,payload,retrieval_status FROM raw_events`);
   const replay = rows.map(r => ({ ...r, payload: JSON.parse(r.payload) }));
-  const stats = ingestEvents(store, replay);
+  const stats = await ingestEvents(store, replay);
   const after = store.get(`SELECT COUNT(*) c FROM raw_events`).c;
   check('T2_idempotent_reingest', stats.inserted === 0 && stats.duplicates === replay.length && before === after,
     `replayed=${replay.length} inserted=${stats.inserted} duplicates=${stats.duplicates} rows ${before}->${after}`);
@@ -70,7 +71,7 @@ if (!OFFLINE) {
   // clear DB for isolated test
   db.exec(`DELETE FROM entity_evidence; DELETE FROM mentions; DELETE FROM entities; DELETE FROM raw_events;`);
   for (const src of ['pumpfun','dexscreener','geckoterminal']) store.registerSource({source:src,source_type:'api',auth_status:'none',reliability_notes:'test'});
-  const stats = ingestEvents(store, syn);
+  const stats = await ingestEvents(store, syn);
   const ents = store.all(`SELECT * FROM entities`);
   const ev = store.all(`SELECT e.entity_id, r.source FROM entity_evidence e JOIN raw_events r ON r.id=e.raw_event_id`);
   const one = ents.length === 1 && ents[0].entity_id === `mint:${mint}` && ents[0].kind === 'mint';
@@ -97,7 +98,7 @@ if (!OFFLINE) {
   ];
   store.registerSource({source:'pumpfun',source_type:'api',auth_status:'none',reliability_notes:'test'});
   store.registerSource({source:'telegram',source_type:'web_preview',auth_status:'none',reliability_notes:'test'});
-  ingestEvents(store, events);
+  await ingestEvents(store, events);
   const ents = store.all(`SELECT entity_id, kind, mint, name FROM entities ORDER BY entity_id`);
   const mintEnts = ents.filter(e => e.kind === 'mint');
   const provs = ents.filter(e => e.kind === 'provisional');
@@ -118,8 +119,8 @@ if (!OFFLINE) {
     const ts = new Date().toISOString();
     store.registerSource({source:'telegram',source_type:'web_preview',auth_status:'none',reliability_notes:'test'});
     const ev1 = parsePreview(html, 'pumpfundotfun', ts);
-    const s1 = ingestEvents(store, ev1);
-    const s2 = ingestEvents(store, parsePreview(html, 'pumpfundotfun', ts));
+    const s1 = await ingestEvents(store, ev1);
+    const s2 = await ingestEvents(store, parsePreview(html, 'pumpfundotfun', ts));
     const withTs = ev1.filter(e => e.observed_at).length;
     check('T5_telegram_parse_dedupe', ev1.length > 0 && s1.inserted === ev1.length && s2.inserted === 0 && withTs > 0,
       `parsed=${ev1.length} (with timestamps=${withTs}) first_insert=${s1.inserted} reparse_insert=${s2.inserted}`);
@@ -137,7 +138,7 @@ if (!OFFLINE) {
       payload: { mint: 'short', name: 'ScamCoin', symbol: 'SCAM' } },
   ];
   store.registerSource({source:'pumpfun',source_type:'api',auth_status:'none',reliability_notes:'test'});
-  ingestEvents(store, events);
+  await ingestEvents(store, events);
   const mintEnts = store.all(`SELECT * FROM entities WHERE kind='mint'`);
   const provs = store.all(`SELECT * FROM entities WHERE kind='provisional'`);
   // both invalid-mint events share normalized name+ticker+link('') -> one provisional entity, zero mint entities

@@ -22,31 +22,28 @@ export function categorizeMention(text) {
 }
 
 // Normalized text fingerprint for copy/repost detection.
-export function mentionFingerprint(text) {
-  return sha256((text || '').toLowerCase().replace(/https?:\/\/\S+/g, '').replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim()).slice(0, 24);
+export async function mentionFingerprint(text) {
+  const norm = (text || '').toLowerCase().replace(/https?:\/\/\S+/g, '').replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
+  return (await sha256(norm)).slice(0, 24);
 }
 
 // Ingest mentions from raw events (telegram adapter payloads). Marks duplicates by fingerprint.
-export function ingestMentions(store, events) {
+export async function ingestMentions(store, events) {
   const stats = { mentions: 0, duplicates: 0 };
   for (const e of events) {
     if (e.source !== 'telegram') continue;
     const text = (e.payload && e.payload.text) || '';
     if (!text.trim()) continue;
-    const fp = mentionFingerprint(text);
-    const existing = store.get(`SELECT id FROM mentions WHERE fingerprint=?`, fp);
+    const fp = await mentionFingerprint(text);
+    const existing = store.findMentionByFingerprint(fp);
     const isDupe = existing ? 1 : 0;
-    store.run(`INSERT INTO mentions(raw_event_id,entity_id,author,url,published_at,ingested_at,category,is_duplicate,confidence,text,fingerprint)
-               VALUES(?,?,?,?,?,?,?,?,?,?,?)`,
-      e.id, null, (e.payload && e.payload.channel) || null, e.url, e.observed_at, e.ingested_at,
-      categorizeMention(text), isDupe, 'low', text.slice(0, 4000), fp);
+    store.insertMention({ raw_event_id: e.id, entity_id: null, author: (e.payload && e.payload.channel) || null,
+      url: e.url, published_at: e.observed_at, ingested_at: e.ingested_at, category: categorizeMention(text),
+      is_duplicate: isDupe, confidence: 'low', text: text.slice(0, 4000), fingerprint: fp });
     stats.mentions++; if (isDupe) stats.duplicates++;
   }
   return stats;
 }
 
 // Independent sources = distinct source channels with non-duplicate mentions.
-export function independentSourceCount(store, entityId) {
-  const row = store.get(`SELECT COUNT(DISTINCT author) c FROM mentions WHERE entity_id=? AND is_duplicate=0`, entityId);
-  return row ? row.c : 0;
-}
+

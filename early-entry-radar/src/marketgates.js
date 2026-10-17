@@ -73,7 +73,6 @@ export async function runMarketGates(mint, config = {}, nowMs = Date.now()) {
 export function persistGates(store, entityId, { gates }) {
   const at = new Date().toISOString();
   for (const [name, g] of Object.entries(gates)) {
-    store.run(`INSERT INTO gate_results(entity_id,gate,result,detail,at) VALUES(?,?,?,?,?)`,
-      entityId, name, g.result, JSON.stringify(g.detail || null), at);
+    store.insertGateResult({ entity_id: entityId, gate: name, result: g.result, detail: JSON.stringify(g.detail || null), at });
   }
 }

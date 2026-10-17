@@ -63,9 +63,8 @@ export function computeLaunchStatus({ evidence = [], mentions = [], now = null }
 // Persist a transition into entities.launch_status (append-only log via launch_status_log).
 export function applyLaunchStatus(store, entityId, result) {
   const now = nowUTC();
-  const prev = store.get(`SELECT launch_status FROM entities WHERE entity_id=?`, entityId);
-  store.run(`UPDATE entities SET launch_status=? WHERE entity_id=?`, result.status, entityId);
-  store.run(`INSERT INTO launch_status_log(entity_id,from_status,to_status,reasons,at) VALUES(?,?,?,?,?)`,
-    entityId, prev ? prev.launch_status : null, result.status, JSON.stringify(result.reasons), now);
-  return { from: prev ? prev.launch_status : null, to: result.status };
+  const prev = store.getEntityLaunchStatus(entityId);
+  store.setEntityLaunchStatus(entityId, result.status);
+  store.logLaunchStatus(entityId, prev, result.status, JSON.stringify(result.reasons), now);
+  return { from: prev, to: result.status };
 }

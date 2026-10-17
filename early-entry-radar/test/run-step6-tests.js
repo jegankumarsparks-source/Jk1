@@ -2,6 +2,7 @@
 import { DatabaseSync } from 'node:sqlite';
 import { readFileSync } from 'node:fs';
 import { openStore } from '../src/store.js';
+
 import { decide, lifecycle, applySignalState, dailySignalReport, SIGNAL_STATES } from '../src/decision.js';
 
 const db = new DatabaseSync(':memory:');

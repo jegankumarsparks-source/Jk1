@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>JK Early-Entry Radar</title>
+<style>
+:root{--bg:#0b0e14;--card:#151a24;--line:#232a38;--txt:#e8ecf3;--dim:#8b94a7;--grn:#22c55e;--red:#ef4444;--ylw:#eab308;--blu:#3b82f6;--gry:#6b7280}
+*{box-sizing:border-box;margin:0}body{background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,sans-serif;font-size:14px;padding-bottom:60px}
+header{position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--line);padding:10px 12px;z-index:5}
+h1{font-size:16px}.sub{color:var(--dim);font-size:11px;margin-top:2px}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding:8px 12px;background:var(--bg);position:sticky;top:52px;z-index:5;border-bottom:1px solid var(--line)}
+.tab{padding:6px 12px;border-radius:16px;background:var(--card);color:var(--dim);white-space:nowrap;font-size:12px;border:1px solid var(--line)}
+.tab.on{color:var(--txt);border-color:var(--blu)}
+main{padding:10px 12px}.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;margin:2px 4px 2px 0}
+.b-grn{background:#052e16;color:var(--grn)}.b-red{background:#450a0a;color:var(--red)}.b-ylw{background:#422006;color:var(--ylw)}.b-gry{background:#1f2937;color:var(--gry)}.b-blu{background:#172554;color:var(--blu)}
+.name{font-weight:700;font-size:15px}.mint{font-family:monospace;font-size:10px;color:var(--dim);word-break:break-all}
+.row{display:flex;justify-content:space-between;color:var(--dim);font-size:12px;margin-top:4px}
+.links a{color:var(--blu);text-decoration:none;font-size:12px;margin-right:10px}
+.gap{color:var(--ylw);font-size:12px;padding:4px 0}
+.scorebar{height:6px;background:var(--line);border-radius:3px;margin-top:6px}.scorebar i{display:block;height:6px;border-radius:3px;background:var(--grn)}
+#toast{position:fixed;bottom:8px;left:12px;right:12px;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:8px 10px;color:var(--dim);font-size:11px}
+</style></head><body>
+<header><h1>🛰 JK EARLY-ENTRY RADAR <span id="livebadge" class="badge b-gry">…</span></h1>
+<div class="sub" id="sub">loading…</div></header>
+<div class="tabs" id="tabs"></div>
+<main id="main"></main>
+<div id="toast">paper system · no real money · free-tier data</div>
+<script>
+const FEED='data/feed.json';
+let feed=null,tab='overview';
+const TABS=[['overview','Overview'],['radar','Pre-Launch'],['coins','New Coins'],['live','Live'],['candidates','✅ Candidates'],['rejected','⛔ Rejected'],['sources','Sources'],['signals','Signals'],['audit','Audit']];
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const ago=t=>{if(!t)return'?';const s=(Date.now()-new Date(t).getTime())/1e3;return s<60?`${s|0}s`:s<3600?`${s/60|0}m`:`${s/3600|0}h`};
+const badge=(t,c)=>`<span class="badge b-${c}">${esc(t)}</span>`;
+const resBadge=r=>r==='PASS'?badge('PASS','grn'):r==='FAIL'?badge('FAIL','red'):badge(r||'UNKNOWN','ylw');
+const stateBadge=s=>{const m={'QUALIFIED CANDIDATE':'grn','SECURITY REJECTED':'red','SIGNAL INVALIDATED':'red','LIVE MARKET VERIFIED':'grn','LAUNCH DETECTED':'blu','DATA INCOMPLETE':'ylw','LIQUIDITY INSUFFICIENT':'ylw','PRE-LAUNCH WATCH':'blu','NEEDS VERIFICATION':'ylw'};return badge(s,m[s]||'gry')};
+function card(c){
+  const mintOk=c.kind==='mint'&&c.mint;
+  const links=mintOk?`<div class="links" style="margin-top:6px">
+    <a href="https://dexscreener.com/solana/${c.mint}">DEXSCREENER</a>
+    <a href="https://gmgn.ai/sol/token/${c.mint}">GMGN</a>
+    <a href="https://solscan.io/token/${c.mint}">SOLSCAN</a></div>`:'';
+  return `<div class="card">
+    <div class="name">${esc(c.name||'(unnamed)')} ${c.ticker?`<span class="sub">$${esc(c.ticker)}</span>`:''}</div>
+    ${c.mint?`<div class="mint">${esc(c.mint)}</div>`:'<div class="mint">provisional identity - mint unverified</div>'}
+    <div style="margin-top:6px">${stateBadge(c.launch_status)}${c.signal?stateBadge(c.signal.state):''}</div>
+    ${c.signal&&c.signal.score!=null?`<div class="row"><span>score</span><span>${c.signal.score}/100</span></div><div class="scorebar"><i style="width:${c.signal.score}%"></i></div>`:''}
+    ${(c.security||[]).map(s=>resBadge(s.result)+`<span class="sub" style="font-size:10px">${esc(s.check)}</span>`).join(' ')}
+    <div class="row"><span>first evidence</span><span>${ago(c.first_evidence_at)} ago</span></div>
+    ${links}</div>`;
+}
+function render(){
+  document.getElementById('tabs').innerHTML=TABS.map(([k,l])=>`<div class="tab ${k===tab?'on':''}" onclick="tab='${k}';render()">${l}</div>`).join('');
+  const m=document.getElementById('main');
+  if(!feed){m.innerHTML='<div class="card">loading…</div>';return}
+  const cs=feed.coins||[];
+  if(tab==='overview'){
+    m.innerHTML=`<div class="card"><div class="name">${esc(feed.headline)}</div>
+      <div class="row"><span>generated</span><span>${ago(feed.generated_at)} ago</span></div>
+      <div class="row"><span>entities tracked</span><span>${cs.length}</span></div>
+      <div class="row"><span>cycle time</span><span>${feed.cycle_ms}ms</span></div></div>
+      <div class="card"><div class="name">Source gaps (accepted, never bypassed)</div>${(feed.gaps||[]).map(g=>`<div class="gap">⚠ ${esc(g)}</div>`).join('')}</div>`;
+  }else if(tab==='radar'){
+    const f=cs.filter(c=>/PRE-LAUNCH/.test(c.launch_status));
+    m.innerHTML=f.length?f.map(card).join(''):'<div class="card">No pre-launch candidates under watch right now.</div>';
+  }else if(tab==='coins'){
+    m.innerHTML=cs.slice(0,50).map(card).join('')||'<div class="card">No coins yet.</div>';
+  }else if(tab==='live'){
+    const f=cs.filter(c=>c.launch_status==='LIVE MARKET VERIFIED'||c.launch_status==='LAUNCH DETECTED');
+    m.innerHTML=f.length?f.map(card).join(''):'<div class="card">No live launches detected yet.</div>';
+  }else if(tab==='candidates'){
+    const f=cs.filter(c=>c.signal&&c.signal.state==='QUALIFIED CANDIDATE');
+    m.innerHTML=f.length?f.map(card).join(''):'<div class="card"><b>NO QUALIFIED SIGNAL</b><br><span class="sub">No candidate passed every gate. That is a valid result, not an outage.</span></div>';
+  }else if(tab==='rejected'){
+    const f=cs.filter(c=>c.signal&&(c.signal.state==='SECURITY REJECTED'||c.signal.state==='SIGNAL INVALIDATED'||c.signal.state==='LIQUIDITY INSUFFICIENT'||c.signal.state==='DATA INCOMPLETE'));
+    m.innerHTML=f.length?f.map(card).join(''):'<div class="card">No rejected candidates yet.</div>';
+  }else if(tab==='sources'){
+    m.innerHTML=Object.entries(feed.sources||{}).map(([k,h])=>`<div class="card"><div class="name">${esc(k)}</div>
+      ${badge(h.status,h.status==='LIVE'?'grn':h.status==='DEGRADED'?'ylw':'red')}
+      <div class="row"><span>checked</span><span>${ago(h.checked_at)} ago</span></div>
+      <div class="row"><span>latency</span><span>${h.latency_ms??'?'}ms · http ${h.http_status??'?'}</span></div>
+      ${h.rate_limit?`<div class="row"><span>rate limit</span><span>${esc(h.rate_limit)}</span></div>`:''}
+      ${h.error?`<div class="row"><span>error</span><span>${esc(h.error)}</span></div>`:''}</div>`).join('');
+  }else if(tab==='signals'){
+    const trs=(feed.transitions||[]).slice().reverse();
+    m.innerHTML=trs.map(t=>`<div class="card">${stateBadge(t.to_state)}<span class="sub">${esc(t.entity_id.slice(0,20))}</span>
+      <div class="row"><span>${esc(t.from_state||'∅')} → ${esc(t.to_state)}</span><span>${ago(t.at)} ago</span></div>
+      ${t.score!=null?`<div class="row"><span>score</span><span>${t.score}/100</span></div>`:''}</div>`).join('')||'<div class="card">No signal transitions yet.</div>';
+  }else if(tab==='audit'){
+    m.innerHTML=(feed.notifications||[]).slice().reverse().map(n=>`<div class="card"><div class="mint">${esc(n.key)}</div>
+      <div class="row"><span>telegram</span><span>${esc(n.result)}</span></div>
+      <div class="row"><span>at</span><span>${ago(n.at)} ago</span></div></div>`).join('')||'<div class="card">No notifications logged. Telegram activates when the chat is connected.</div>';
+  }
+}
+async function tick(){
+  try{
+    const r=await fetch(FEED+'?t='+Date.now(),{cache:'no-store'});
+    feed=await r.json();
+    const age=(Date.now()-new Date(feed.generated_at).getTime())/1000;
+    const lb=document.getElementById('livebadge');
+    if(age<420){lb.textContent='LIVE';lb.className='badge b-grn'}
+    else if(age<1800){lb.textContent='DELAYED';lb.className='badge b-ylw'}
+    else{lb.textContent='OFFLINE';lb.className='badge b-red'}
+    document.getElementById('sub').textContent=`updated ${ago(feed.generated_at)} ago · ${feed.coins.length} entities · paper only`;
+  }catch(e){const lb=document.getElementById('livebadge');lb.textContent='OFFLINE';lb.className='badge b-red'}
+  render();
+}
+tick();setInterval(tick,60000);
+</script></body></html>

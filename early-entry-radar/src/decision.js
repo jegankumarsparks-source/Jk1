@@ -74,18 +74,17 @@ export function lifecycle(currentState, input, config = {}) {
 
 export function applySignalState(store, entityId, result) {
   const now = nowUTC();
-  const prev = store.get(`SELECT to_state FROM signal_state_log WHERE entity_id=? ORDER BY id DESC LIMIT 1`, entityId);
-  const from = prev ? prev.to_state : null;
+  const from = store.latestSignalState(entityId);
   if (from === result.state) return { from, to: result.state, changed: false };
-  store.run(`INSERT INTO signal_state_log(entity_id,from_state,to_state,reasons,score,score_breakdown,at) VALUES(?,?,?,?,?,?,?)`,
-    entityId, from, result.state, JSON.stringify(result.reasons), result.score, result.breakdown ? JSON.stringify(result.breakdown) : null, now);
+  store.logSignalState({ entity_id: entityId, from_state: from, to_state: result.state,
+    reasons: JSON.stringify(result.reasons), score: result.score,
+    score_breakdown: result.breakdown ? JSON.stringify(result.breakdown) : null, at: now });
   return { from, to: result.state, changed: true };
 }
 
 // The engine's honest output when nothing qualifies.
 export function dailySignalReport(store) {
-  const q = store.all(`SELECT entity_id, to_state, score, at FROM signal_state_log s1
-    WHERE id IN (SELECT MAX(id) FROM signal_state_log GROUP BY entity_id)`);
+  const q = store.latestSignalStates();
   const qualified = q.filter(r => r.to_state === 'QUALIFIED CANDIDATE' || r.to_state === 'OUTCOME PENDING');
   if (!qualified.length) return { headline: 'NO QUALIFIED SIGNAL', candidates: [], note: 'No candidate passed all gates. This is a valid result, not an outage.' };
   return { headline: `${qualified.length} QUALIFIED CANDIDATE(S)`, candidates: qualified };

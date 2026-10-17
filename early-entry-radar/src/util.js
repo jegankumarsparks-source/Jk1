@@ -1,9 +1,10 @@
-// Shared utilities. Worker-safe (global fetch, no node APIs except crypto).
-import { createHash } from 'node:crypto';
-
+// Shared utilities. Worker-safe (global fetch, Web Crypto; no node-only APIs).
 export const nowUTC = () => new Date().toISOString();
 
-export const sha256 = (s) => createHash('sha256').update(s).digest('hex');
+export async function sha256(text) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+}
 
 const B58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
 const B58_MAP = new Map([...B58].map((c, i) => [c, BigInt(i)]));

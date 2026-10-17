@@ -35,13 +35,16 @@ export async function fetchQuote(inputMint, outputMint, amount, slippageBps = 50
 // [36..43] supply, [44] decimals, [45] initialized, [46..49] freezeAuthority option, [50..81] authority.
 export function parseMintAccount(base64) {
   try {
-    const b = Buffer.from(base64, 'base64');
-    if (b.length < 82) return null;
+    const bin = atob(base64);
+    if (bin.length < 82) return null;
+    const b = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) b[i] = bin.charCodeAt(i);
+    const dv = new DataView(b.buffer);
     return {
-      mint_authority_set: b.readUInt32LE(0) !== 0,
-      decimals: b.readUInt8(44),
-      initialized: b.readUInt8(45) !== 0,
-      freeze_authority_set: b.readUInt32LE(46) !== 0,
+      mint_authority_set: dv.getUint32(0, true) !== 0,
+      decimals: dv.getUint8(44),
+      initialized: dv.getUint8(45) !== 0,
+      freeze_authority_set: dv.getUint32(46, true) !== 0,
     };
   } catch { return null; }
 }
@@ -129,8 +132,8 @@ export async function runSecurityChecks(mint, config = {}) {
 
 export function persistSecurity(store, entityId, { checks, verdict }) {
   for (const [name, c] of Object.entries(checks)) {
-    store.run(`INSERT INTO security_results(entity_id,check_name,result,evidence,provider,limitations,at) VALUES(?,?,?,?,?,?,?)`,
-      entityId, name, c.result, JSON.stringify(c.evidence || null), c.provider || null, c.limitations || null, c.at);
+    store.insertSecurityResult({ entity_id: entityId, check_name: name, result: c.result,
+      evidence: JSON.stringify(c.evidence || null), provider: c.provider || null, limitations: c.limitations || null, at: c.at });
   }
   return verdict;
 }

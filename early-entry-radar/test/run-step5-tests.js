@@ -2,12 +2,15 @@
 import { DatabaseSync } from 'node:sqlite';
 import { readFileSync } from 'node:fs';
 import { openStore } from '../src/store.js';
+import { openJsonStore, emptyState } from '../src/jsonstore.js';
 import { runSecurityChecks, parseMintAccount, fetchMintAccountPost, CRITICAL, MANDATORY } from '../src/security.js';
 import { runMarketGates } from '../src/marketgates.js';
 
+const BACKEND = process.env.BACKEND || 'sqlite';
 const db = new DatabaseSync(':memory:');
 db.exec(readFileSync(new URL('../schema.sql', import.meta.url), 'utf8'));
-const store = openStore(db);
+const store = BACKEND === 'json' ? openJsonStore(emptyState()) : openStore(db);
+console.log(`[backend=${BACKEND}]`);
 const config = JSON.parse(readFileSync(new URL('../config.json', import.meta.url), 'utf8'));
 const results = [];
 const check = (n, ok, ev) => { results.push(ok); console.log(`${ok?'PASS':'FAIL'}  ${n}  | ${ev}`); };

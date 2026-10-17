@@ -2,6 +2,7 @@
 import { DatabaseSync } from 'node:sqlite';
 import { readFileSync } from 'node:fs';
 import { openStore } from '../src/store.js';
+
 import { computeLaunchStatus, applyLaunchStatus, classifyAnnouncement } from '../src/prelaunch.js';
 import { categorizeMention, mentionFingerprint, ingestMentions } from '../src/social.js';
 
@@ -66,7 +67,7 @@ const ts = new Date().toISOString();
   // need raw_events parents for FK
   const evs = [mkEv(1, 'chanA', 'GEM ALERT $ZKRA 100x buy now'), mkEv(2, 'chanB', 'GEM ALERT $ZKRA 100x buy now'), mkEv(3, 'chanC', 'Different take: $ZKRA scam warning')];
   for (const e of evs) store.insertRawEvent(e);
-  const st = ingestMentions(store, evs);
+  const st = await ingestMentions(store, evs);
   check('T11_social_categories_dupes', catOk && st.mentions === 3 && st.duplicates === 1,
     `categories 5/5 correct=${catOk}; mentions=${st.mentions} duplicates_flagged=${st.duplicates} (same text, 2 channels)`);
 }
