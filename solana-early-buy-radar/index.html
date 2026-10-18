@@ -59,8 +59,8 @@ nav{position:fixed;bottom:0;left:0;right:0;z-index:30;background:var(--card);bor
 nav button{flex:1;background:none;color:var(--mut);border-radius:0;font-size:10px;padding:6px 2px;display:flex;flex-direction:column;align-items:center;gap:1px;min-height:56px}
 nav button .ic{font-size:19px}
 nav button.on{color:var(--c);background:linear-gradient(180deg,rgba(53,208,255,.14),transparent)}
-#popup{position:fixed;left:50%;top:70px;transform:translate(-50%,-160%);width:min(94vw,440px);z-index:50;background:linear-gradient(135deg,#0d7a55,#12b981);color:#fff;border-radius:16px;padding:14px;box-shadow:0 10px 40px rgba(0,0,0,.5);transition:transform .45s cubic-bezier(.2,1.3,.4,1)}
-#popup.show{transform:translate(-50%,0);animation:pulse 1.2s 2}
+#popup{position:fixed;left:50%;top:70px;transform:translate(-50%,-160%);visibility:hidden;opacity:0;pointer-events:none;width:min(94vw,440px);z-index:50;background:linear-gradient(135deg,#0d7a55,#12b981);color:#fff;border-radius:16px;padding:14px;box-shadow:0 10px 40px rgba(0,0,0,.5);transition:transform .45s cubic-bezier(.2,1.3,.4,1),opacity .3s,visibility 0s .45s}
+#popup.show{visibility:visible;opacity:1;pointer-events:auto;transition:transform .45s cubic-bezier(.2,1.3,.4,1),opacity .3s,visibility 0s;transform:translate(-50%,0);animation:pulse 1.2s 2}
 @keyframes pulse{50%{box-shadow:0 0 0 10px rgba(46,229,157,.25)}}
 #popup a{color:#fff;text-decoration:underline;background:none;border:0}
 .dot{width:9px;height:9px;border-radius:50%;display:inline-block;background:var(--mut)}
