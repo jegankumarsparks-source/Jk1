@@ -1,8 +1,10 @@
 {
-  "_comment": "All thresholds are CONFIGURABLE starting points, not proven-profitable values. Changing them never bypasses security gates.",
-  "min_liquidity_usd": 5000,
+  "_comment": "All thresholds are CONFIGURABLE starting points, not proven-profitable values. 2026-10-18: loosened on owner instruction (liquidity 5000->1000, qualify 60->40, watchlist 20). Critical security rejects unchanged.",
+  "min_liquidity_usd": 1000,
   "max_price_impact_pct": 15,
-  "max_top_holder_pct": 0.30,
+  "max_top_holder_pct": 0.3,
   "freshness_max_age_sec": 900,
-  "quote_probe_sol_lamports": 100000000
+  "quote_probe_sol_lamports": 100000000,
+  "min_signal_score": 40,
+  "watchlist_min_score": 20
 }

@@ -31,7 +31,7 @@ export function extractIdentity(event) {
     // base token address arrives via relationships in full responses; new_pools embeds it in name only.
     mint = (p.relationships && p.relationships.base_token && p.relationships.base_token.data)
       ? p.relationships.base_token.data.id.replace(/^solana_/, '') : null;
-  } else if (event.source === 'telegram') {
+  } else if (event.source === 'telegram' || event.source === 'reddit') {
     name = null; ticker = null;
     mint = extractMints(p.text)[0] || null;
     links = (p.text.match(/https?:\/\/[^\s)]+/g) || []);

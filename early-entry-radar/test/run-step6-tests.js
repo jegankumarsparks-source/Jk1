@@ -40,8 +40,8 @@ const goodFacts = { age_hours: 2, mean_source_reliability: 0.8, independent_sour
 // T20: NO QUALIFIED SIGNAL is a valid engine output
 {
   const rep = dailySignalReport(store);
-  const r2 = decide({ identity: 'mint', launchStatus: 'LIVE MARKET VERIFIED', securityVerdict: 'PASS_WITH_FINDINGS', marketVerdict: 'MARKET OK', facts: { ...goodFacts, liquidity_usd: 5000, unique_mentions: 0, independent_sources: 0, txn_count: 0, independent_influencer_mentions: 0, mean_source_reliability: 0.3, data_completeness: 0.4 } }, config);
-  check('T20_no_qualified_signal', rep.headline === 'NO QUALIFIED SIGNAL' && r2.state === 'DISCOVERED' && r2.score < 60,
+  const r2 = decide({ identity: 'mint', launchStatus: 'LIVE MARKET VERIFIED', securityVerdict: 'PASS_WITH_FINDINGS', marketVerdict: 'MARKET OK', facts: { ...goodFacts, liquidity_usd: 5000, unique_mentions: 0, independent_sources: 0, txn_count: 0, independent_influencer_mentions: 0, mean_source_reliability: 0.3, data_completeness: 0.4 } }, { ...config, min_signal_score: 60, watchlist_min_score: 55 }); // explicit thresholds: mechanism test (owner loosened defaults 2026-10-18)
+  check('T20_no_qualified_signal', rep.headline === 'NO QUALIFIED SIGNAL' && r2.state === 'DISCOVERED' && r2.score < 55,
     `empty engine => "${rep.headline}"; weak candidate => state=${r2.state} score=${r2.score} (tracked, not signalled)`);
 }
 // T21: lifecycle - qualify, then invalidate on liquidity collapse; expiry path; state log audit

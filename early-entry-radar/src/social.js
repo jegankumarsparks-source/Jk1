@@ -31,15 +31,15 @@ export async function mentionFingerprint(text) {
 export async function ingestMentions(store, events) {
   const stats = { mentions: 0, duplicates: 0 };
   for (const e of events) {
-    if (e.source !== 'telegram') continue;
+    if (e.source !== 'telegram' && e.source !== 'reddit') continue;
     const text = (e.payload && e.payload.text) || '';
     if (!text.trim()) continue;
     const fp = await mentionFingerprint(text);
     const existing = store.findMentionByFingerprint(fp);
     const isDupe = existing ? 1 : 0;
     store.insertMention({ raw_event_id: e.id, entity_id: null, author: (e.payload && e.payload.channel) || null,
-      url: e.url, published_at: e.observed_at, ingested_at: e.ingested_at, category: categorizeMention(text),
-      is_duplicate: isDupe, confidence: 'low', text: text.slice(0, 4000), fingerprint: fp });
+      url: e.url, published_at: e.observed_at, ingested_at: e.ingested_at, category: e.source === 'reddit' ? 'community' : categorizeMention(text),
+      is_duplicate: isDupe, confidence: 'low', source: e.source, text: text.slice(0, 4000), fingerprint: fp });
     stats.mentions++; if (isDupe) stats.duplicates++;
   }
   return stats;

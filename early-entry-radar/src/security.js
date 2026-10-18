@@ -59,6 +59,31 @@ export async function fetchMintAccountPost(mint, rpc = 'https://api.mainnet-beta
   } catch { return null; }
 }
 
+// Helius RPC (owner's free-tier key, vault 'SEWL Helius API key', approved 2026-10-18):
+// unlocks getTokenLargestAccounts (blocked on free public RPCs) and reliable mint-account reads.
+const heliusUrl = () => globalThis.EER_HELIUS_KEY ? `https://mainnet.helius-rpc.com/?api-key=${globalThis.EER_HELIUS_KEY}` : null;
+
+async function rpcPost(url, method, params) {
+  try {
+    const res = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }), signal: AbortSignal.timeout(20000) });
+    const j = await res.json();
+    return j && j.result !== undefined ? j.result : null;
+  } catch { return null; }
+}
+
+// top-1 holder share from on-chain largest accounts. null on any failure.
+export async function fetchHolderConcentrationChain(mint) {
+  const url = heliusUrl(); if (!url) return null;
+  const [largest, supply] = await Promise.all([
+    rpcPost(url, 'getTokenLargestAccounts', [mint]),
+    rpcPost(url, 'getTokenSupply', [mint])]);
+  const arr = largest && largest.value; const ui = supply && supply.value && supply.value.uiAmount;
+  if (!Array.isArray(arr) || !arr.length || !ui) return null;
+  const top = arr[0];
+  return { top_holder_pct: (top.uiAmount || 0) / ui, top_address: top.address, holder_sample: arr.length, supply: ui };
+}
+
 export async function runSecurityChecks(mint, config = {}) {
   const checks = {};
   if (!isValidMint(mint)) {
@@ -68,7 +93,7 @@ export async function runSecurityChecks(mint, config = {}) {
   // Sequential with light spacing: jupiter lite-api 429s under burst (observed 2026-10-17).
   const gp = await fetchGoPlus(mint);
   const rc = await fetchRugcheck(mint);
-  const acct = await fetchMintAccountPost(mint);
+  const acct = await fetchMintAccountPost(mint, heliusUrl() || 'https://api.mainnet-beta.solana.com');
   const sellQ = await fetchQuote(mint, 'So11111111111111111111111111111111111111112', config.quote_probe_token_amount || 1000000000);
   await new Promise(r => setTimeout(r, 1200));
   const buyQ = await fetchQuote('So11111111111111111111111111111111111111112', mint, config.quote_probe_sol_lamports || 100000000);
@@ -103,9 +128,17 @@ export async function runSecurityChecks(mint, config = {}) {
   else if (sellQ.kind === 'error') checks.sell_feasibility = unknown(`jupiter error: ${sellQ.reason}`, 'jupiter', 'transient errors are never treated as infeasibility');
   else checks.sell_feasibility = ok({ outAmount: sellQ.quote.outAmount, priceImpactPct: sellQ.quote.priceImpactPct, buy_also_quoted: buyQ.kind === 'quoted' }, 'jupiter', 'quote-based feasibility, not an executed swap');
 
-  // holder concentration (GoPlus top holder list; RPC getTokenLargestAccounts is blocked on free public RPCs - recorded limitation)
-  if (!gp || !Array.isArray(gp.holders) || gp.holders.length === 0) {
-    checks.holder_concentration = unknown('goplus holders unavailable', 'goplus', 'getTokenLargestAccounts blocked on free public RPC tiers (verified 2026-10-17); GoPlus is the only free holder source');
+  // holder concentration: on-chain via Helius when key present (2026-10-18+), GoPlus fallback.
+  const chain = await fetchHolderConcentrationChain(mint);
+  if (chain) {
+    const maxTop = config.max_top_holder_pct ?? 0.30;
+    const ev = { ...chain, provider_note: 'on-chain getTokenLargestAccounts via Helius free tier' };
+    checks.holder_concentration = chain.top_holder_pct > maxTop
+      ? fail(ev, 'helius', `threshold ${maxTop} is configurable, not a proven boundary`)
+      : ok(ev, 'helius');
+  } else if (!gp || !Array.isArray(gp.holders) || gp.holders.length === 0) {
+    checks.holder_concentration = unknown('goplus holders unavailable', 'goplus',
+      globalThis.EER_HELIUS_KEY ? 'helius call failed this cycle; goplus empty' : 'getTokenLargestAccounts blocked on free public RPC tiers (verified 2026-10-17); GoPlus is the only free holder source');
   } else {
     const top = parseFloat(gp.holders[0].percent || '0');
     const maxTop = config.max_top_holder_pct ?? 0.30;

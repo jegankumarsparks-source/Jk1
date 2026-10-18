@@ -8,7 +8,7 @@ import { nowUTC } from './util.js';
 import { scoreCandidate } from './scoring.js';
 
 export const SIGNAL_STATES = ['DISCOVERED', 'PRE-LAUNCH WATCH', 'NEEDS VERIFICATION', 'LAUNCH DETECTED',
-  'SECURITY REJECTED', 'DATA INCOMPLETE', 'LIQUIDITY INSUFFICIENT', 'QUALIFIED CANDIDATE',
+  'SECURITY REJECTED', 'DATA INCOMPLETE', 'LIQUIDITY INSUFFICIENT', 'QUALIFIED CANDIDATE', 'WATCHLIST',
   'SIGNAL EXPIRED', 'SIGNAL INVALIDATED', 'OUTCOME PENDING', 'OUTCOME RECORDED'];
 
 // inputs: identity kind, launch status, security verdict, market verdict, score facts, config, timestamps
@@ -34,6 +34,13 @@ export function decide(input, config = {}) {
     return { state: 'DATA INCOMPLETE', reasons, score: null, breakdown: null };
   }
   if (input.marketVerdict === 'LIQUIDITY INSUFFICIENT') {
+    // owner directive 2026-10-18: surface, don't hide. Enough signal => WATCHLIST with the
+    // failing gates kept visible in reasons; otherwise the honest LIQUIDITY INSUFFICIENT label stays.
+    if (input.launchStatus === 'LIVE MARKET VERIFIED' && input.securityVerdict === 'PASS_WITH_FINDINGS') {
+      const { score, breakdown } = scoreCandidate(input.facts || {}, (config.score && config.score.weights) || undefined);
+      const wlMin = config.watchlist_min_score ?? 20;
+      if (score >= wlMin) return { state: 'WATCHLIST', reasons: ['liquidity gate(s) failing - surfaced per owner config, NOT trade-ready', `score ${score}/100 (watchlist min ${wlMin})`], score, breakdown };
+    }
     return { state: 'LIQUIDITY INSUFFICIENT', reasons: ['one or more market gates failed'], score: null, breakdown: null };
   }
   // Pre-launch states
@@ -52,7 +59,9 @@ export function decide(input, config = {}) {
     reasons.push(`score ${score}/100 (min ${minScore}, configurable)`);
     if ((input.facts && input.facts.disclosed_paid_mentions) > 0) reasons.push(`note: ${input.facts.disclosed_paid_mentions} disclosed-paid mention(s) present - counted as risk context, not endorsement`);
     if (score >= minScore) return { state: 'QUALIFIED CANDIDATE', reasons, score, breakdown };
-    return { state: 'DISCOVERED', reasons: [...reasons, 'below min score - tracked, not signalled'], score, breakdown };
+    const wlMin = config.watchlist_min_score ?? 20;
+    if (score >= wlMin) return { state: 'WATCHLIST', reasons: [...reasons, 'below qualify score - watchlist tier (owner config 2026-10-18)'], score, breakdown };
+    return { state: 'DISCOVERED', reasons: [...reasons, 'below watchlist score - tracked, not signalled'], score, breakdown };
   }
   if (input.launchStatus === 'STATUS UNKNOWN') {
     return { state: 'DISCOVERED', reasons: ['launch status unknown - tracked only'], score: null, breakdown: null };

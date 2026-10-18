@@ -13,10 +13,11 @@ import * as pumpfun from './src/adapters/pumpfun.js';
 import * as dexscreener from './src/adapters/dexscreener.js';
 import * as geckoterminal from './src/adapters/geckoterminal.js';
 import * as telegram from './src/adapters/telegram.js';
+import * as reddit from './src/adapters/reddit.js';
 
 const REPO = 'jegankumarsparks-source/Jk1';
 const BASE = 'early-entry-radar';
-const TG_CHANNELS = ['pumpfundotfun']; // config: public-preview channels only (GAP: most CT channels have no preview)
+const TG_CHANNELS = ['pumpfundotfun', 'DRBTSolanaPF']; // public-preview channels; DRBTSolanaPF verified active 2026-10-18
 // Free Workers cap at 50 subrequests/invocation (hit in testing 2026-10-17). Hard budget below.
 const SECURITY_BUDGET_PER_CYCLE = 3;   // each entity costs ~8 subrequests (sec 5 + gates 3)
 const SUBREQUEST_BUDGET = 44;
@@ -120,6 +121,7 @@ async function tgSend(env, text, state) {
 async function runCycle(env) {
   const t0 = Date.now();
   globalThis.EER_FETCH_RETRIES = 0; // 50-subrequest cap: no silent retry multiplication inside Workers
+  globalThis.EER_HELIUS_KEY = env.HELIUS_KEY || null; // owner-approved free-tier key (vault 2026-10-18)
   let subrequests = 0;
   const realFetch = globalThis.fetch.bind(globalThis);
   globalThis.fetch = (...a) => { subrequests++; return realFetch(...a); };
@@ -130,10 +132,10 @@ async function runCycle(env) {
   const store = openJsonStore(state);
 
   // 1. collect
-  const collected = await runCollectors(store, [pumpfun, dexscreener, geckoterminal, telegram], { telegram: { channels: TG_CHANNELS } });
+  const collected = await runCollectors(store, [pumpfun, dexscreener, geckoterminal, telegram, reddit], { telegram: { channels: TG_CHANNELS }, reddit: { subreddits: ['solana'] } });
 
   // 2. mentions from new telegram events
-  const tgEvents = state.raw_events.filter(e => e.source === 'telegram').slice(-50);
+  const tgEvents = state.raw_events.filter(e => e.source === 'telegram' || e.source === 'reddit').slice(-80);
   await ingestMentions(store, tgEvents.map(e => ({ ...e, id: e.id })));
 
   // 3. per-entity pipeline for entities with fresh evidence this cycle
@@ -182,7 +184,7 @@ async function runCycle(env) {
   }
 
   // 4. notifications: queue first, then drain max 3/cycle (Telegram rate-limit + 50-subrequest budget).
-  const NOTIFY_STATES = ['QUALIFIED CANDIDATE', 'SECURITY REJECTED', 'SIGNAL INVALIDATED', 'DATA INCOMPLETE'];
+  const NOTIFY_STATES = ['QUALIFIED CANDIDATE', 'WATCHLIST', 'SECURITY REJECTED', 'SIGNAL INVALIDATED', 'DATA INCOMPLETE'];
   for (const tr of transitions) {
     const key = `${tr.entityId}:${tr.to}`;
     const isRegression = ['QUALIFYING', 'QUALIFIED CANDIDATE', 'OUTCOME PENDING'].includes(tr.from);
@@ -194,7 +196,7 @@ async function runCycle(env) {
     }
   }
   // coalesce: if rejections pile up (e.g. after a stall), keep at most 2 and fold the rest into one summary
-  for (const st of ['SECURITY REJECTED', 'DATA INCOMPLETE']) {
+  for (const st of ['SECURITY REJECTED', 'DATA INCOMPLETE', 'WATCHLIST']) {
     const rej = state.pending_notifications.filter(n => n.to === st);
     if (rej.length > 2) {
       state.pending_notifications = state.pending_notifications.filter(n => n.to !== st || rej.indexOf(n) < 2);
@@ -204,7 +206,7 @@ async function runCycle(env) {
     }
   }
   // QUALIFIED CANDIDATE alerts drain first
-  state.pending_notifications.sort((a, b) => (b.to === 'QUALIFIED CANDIDATE') - (a.to === 'QUALIFIED CANDIDATE'));
+  state.pending_notifications.sort((a, b) => ((b.to === 'QUALIFIED CANDIDATE') - (a.to === 'QUALIFIED CANDIDATE')) || ((b.to === 'WATCHLIST') - (a.to === 'WATCHLIST')));
   let notified = 0, tgStatus = 'disabled';
   while (state.pending_notifications.length && notified < 3 && subrequests < SUBREQUEST_BUDGET - 6) {
     const n = state.pending_notifications.shift();
@@ -244,7 +246,13 @@ async function runCycle(env) {
       ? `${coins.filter(c => c.signal && c.signal.state === 'QUALIFIED CANDIDATE').length} QUALIFIED CANDIDATE(S)` : 'NO QUALIFIED SIGNAL',
     coins, sources: health, transitions: state.signal_state_log.slice(-50), notifications: state.notifications.slice(-20),
     evaluation: summarizeEvaluation(state),
-    gaps: ['X/Twitter: no free API', 'Reddit: blocked (needs free OAuth app)', 'Discord: needs per-server bot', 'Instagram: no free access', 'GMGN: no API (links from validated mint only)'] };
+    gaps: [
+      'X/Twitter: IMPOSSIBLE free - X removed the free tier Feb 2026 (pay-per-use only, needs card); nitter dead, syndication empty (probed 2026-10-18)',
+      'Reddit: PARTIAL - public RSS live but intermittent from datacenter IPs (429/403); reliable path = your own free Reddit app (needs your Reddit login once)',
+      'Discord: IMPOSSIBLE free - reading a server needs an account inside it; no public message feed exists',
+      'Instagram: IMPOSSIBLE free - no public discovery API',
+      'GMGN: no API, site Cloudflare-blocks datacenter access (probed 403); links open fine from your phone',
+      'Helius RPC key available (vault) - pending your one-tap approval link to enable holder-concentration on-chain checks'] };
 
   // Concurrent-writer safe: if state.json changed under us even after sha retry, merge with remote once.
   try {

@@ -27,12 +27,12 @@ main{padding:10px 12px}.card{background:var(--card);border:1px solid var(--line)
 <script>
 const FEED='data/feed.json';
 let feed=null,tab=(location.hash||'#overview').slice(1);
-const TABS=[['overview','Overview'],['radar','Pre-Launch'],['coins','New Coins'],['live','Live'],['candidates','✅ Candidates'],['rejected','⛔ Rejected'],['evaluation','📊 Paper Eval'],['sources','Sources'],['signals','Signals'],['audit','Audit']];
+const TABS=[['overview','Overview'],['radar','Pre-Launch'],['coins','New Coins'],['live','Live'],['candidates','✅ Candidates'],['watchlist','👀 Watchlist'],['rejected','⛔ Rejected'],['evaluation','📊 Paper Eval'],['sources','Sources'],['signals','Signals'],['audit','Audit']];
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const ago=t=>{if(!t)return'?';const s=(Date.now()-new Date(t).getTime())/1e3;return s<60?`${s|0}s`:s<3600?`${s/60|0}m`:`${s/3600|0}h`};
 const badge=(t,c)=>`<span class="badge b-${c}">${esc(t)}</span>`;
 const resBadge=r=>r==='PASS'?badge('PASS','grn'):r==='FAIL'?badge('FAIL','red'):badge(r||'UNKNOWN','ylw');
-const stateBadge=s=>{const m={'QUALIFIED CANDIDATE':'grn','SECURITY REJECTED':'red','SIGNAL INVALIDATED':'red','LIVE MARKET VERIFIED':'grn','LAUNCH DETECTED':'blu','DATA INCOMPLETE':'ylw','LIQUIDITY INSUFFICIENT':'ylw','PRE-LAUNCH WATCH':'blu','NEEDS VERIFICATION':'ylw'};return badge(s,m[s]||'gry')};
+const stateBadge=s=>{const m={'QUALIFIED CANDIDATE':'grn','SECURITY REJECTED':'red','SIGNAL INVALIDATED':'red','LIVE MARKET VERIFIED':'grn','LAUNCH DETECTED':'blu','DATA INCOMPLETE':'ylw','LIQUIDITY INSUFFICIENT':'ylw','PRE-LAUNCH WATCH':'blu','NEEDS VERIFICATION':'ylw','WATCHLIST':'blu'};return badge(s,m[s]||'gry')};
 function card(c){
   const mintOk=c.kind==='mint'&&c.mint;
   const links=mintOk?`<div class="links" style="margin-top:6px">
@@ -70,6 +70,10 @@ function render(){
   }else if(tab==='candidates'){
     const f=cs.filter(c=>c.signal&&c.signal.state==='QUALIFIED CANDIDATE');
     m.innerHTML=f.length?f.map(card).join(''):'<div class="card"><b>NO QUALIFIED SIGNAL</b><br><span class="sub">No candidate passed every gate. That is a valid result, not an outage.</span></div>';
+  }else if(tab==='watchlist'){
+    const f=cs.filter(c=>c.signal&&c.signal.state==='WATCHLIST');
+    m.innerHTML=`<div class="card"><b>WATCHLIST</b><br><span class="sub">Coins surfaced with some gates failing or below qualify score. Failure badges are shown on each card - these are NOT trade-ready.</span></div>`
+      +(f.length?f.map(card).join(''):'<div class="card">Nothing on the watchlist yet.</div>');
   }else if(tab==='rejected'){
     const f=cs.filter(c=>c.signal&&(c.signal.state==='SECURITY REJECTED'||c.signal.state==='SIGNAL INVALIDATED'||c.signal.state==='LIQUIDITY INSUFFICIENT'||c.signal.state==='DATA INCOMPLETE'));
     m.innerHTML=f.length?f.map(card).join(''):'<div class="card">No rejected candidates yet.</div>';
@@ -98,7 +102,7 @@ function render(){
     }
   }else if(tab==='sources'){
     m.innerHTML=Object.entries(feed.sources||{}).map(([k,h])=>`<div class="card"><div class="name">${esc(k)}</div>
-      ${badge(h.status,h.status==='LIVE'?'grn':h.status==='DEGRADED'?'ylw':'red')}
+      ${badge(h.status,h.status==='LIVE'?'grn':(h.status==='DEGRADED'||h.status==='INTERMITTENT')?'ylw':'red')}
       <div class="row"><span>checked</span><span>${ago(h.checked_at)} ago</span></div>
       <div class="row"><span>latency</span><span>${h.latency_ms??'?'}ms · http ${h.http_status??'?'}</span></div>
       ${h.rate_limit?`<div class="row"><span>rate limit</span><span>${esc(h.rate_limit)}</span></div>`:''}
