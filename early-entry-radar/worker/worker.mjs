@@ -251,8 +251,7 @@ async function runCycle(env) {
       'Reddit: PARTIAL - public RSS live but intermittent from datacenter IPs (429/403); reliable path = your own free Reddit app (needs your Reddit login once)',
       'Discord: IMPOSSIBLE free - reading a server needs an account inside it; no public message feed exists',
       'Instagram: IMPOSSIBLE free - no public discovery API',
-      'GMGN: no API, site Cloudflare-blocks datacenter access (probed 403); links open fine from your phone',
-      'Helius RPC key available (vault) - pending your one-tap approval link to enable holder-concentration on-chain checks'] };
+      'GMGN: no API, site Cloudflare-blocks datacenter access (probed 403); links open fine from your phone'] };
 
   // Concurrent-writer safe: if state.json changed under us even after sha retry, merge with remote once.
   try {
