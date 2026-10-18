@@ -1,6 +1,6 @@
 {
- "generatedAt": 1792326941056,
- "generatedAtIso": "2026-10-18T12:35:41.056Z",
+ "generatedAt": 1792327240297,
+ "generatedAtIso": "2026-10-18T12:40:40.297Z",
  "scanner": "solana-radar-server",
  "runner": "cloudflare-worker-cron",
  "engineSource": "index.html embedded engine, extracted verbatim at run time",
@@ -9,9 +9,9 @@
  "scoreVersion": "score-v1.0",
  "riskPolicyVersion": "risk-v1.0",
  "thresholdsVersion": "thresh-v1.0",
- "cycle": 512,
- "cycleStartedAt": 1792326936525,
- "cycleDurationMs": 4531,
+ "cycle": 513,
+ "cycleStartedAt": 1792327236238,
+ "cycleDurationMs": 4059,
  "schedule": "every 5 min via Cloudflare Workers cron (free tier, keyless data) — runs whether or not any tab is open. Backstop: GitHub Actions cron (requested every 5 min; GitHub delays it in practice — observed every 2-3 h). When it runs it skips while this worker is healthy with dexscreener LIVE, and covers discovery from separate egress IPs during dexscreener 429 cooldowns or worker outages.",
  "engineDrift": null,
  "stateRestored": true,
@@ -20,9 +20,9 @@
    "id": "dexscreener",
    "label": "Dexscreener (public, keyless)",
    "status": "DEGRADED",
-   "lastSuccess": 1792326937043,
+   "lastSuccess": null,
    "lastError": "HTTP 429",
-   "requestCount": 3,
+   "requestCount": 2,
    "rateLimitCount": 1
   },
   {
@@ -38,11 +38,12 @@
   {
    "id": "solanarpc",
    "label": "Solana JSON-RPC (PublicNode)",
-   "status": "LIVE",
-   "lastSuccess": 1792326936732,
+   "status": "NOT_OBSERVED",
+   "lastSuccess": null,
    "lastError": null,
-   "requestCount": 9,
-   "rateLimitCount": 0
+   "requestCount": 0,
+   "rateLimitCount": 0,
+   "note": "not exercised this cycle (no refreshed candidates needed them)"
   }
  ],
  "counters": {
@@ -59,8 +60,8 @@
   "dataIncomplete": 5,
   "watchlist": 0
  },
- "analyzedThisCycle": 3,
- "signalMarksTracked": 1,
+ "analyzedThisCycle": 0,
+ "signalMarksTracked": 0,
  "newSignalsThisCycle": [],
  "recentSignals": [
   {
@@ -627,7 +628,9 @@
   }
  ],
  "errors": [
-  "discovery paused this cycle (driver-level phase alternation: odd cycles discover, even cycles analyze, so both fit the free-tier subrequest budget; each runs every 10 min)"
+  "discovery: profiles: HTTP 429",
+  "discovery: boosts: source in rate-limit backoff",
+  "dexscreener 429 this cycle — retrying next cycle (cooldown arms after 2 consecutive 429 cycles)"
  ],
  "notes": [
   "PAPER ONLY — research signals, not financial advice, never executable trades.",
@@ -638,18 +641,19 @@
  ],
  "driver": "worker-budget-v2 2026-10-17",
  "phaseMs": {
-  "t0": 1792326934769,
-  "readMs": 1756
+  "t0": 1792327235099,
+  "readMs": 1139,
+  "discoveryMs": 4059
  },
  "dexBackoffUntil": null,
  "dexBackoffStrikes": 0,
- "dex429Streak": 0,
+ "dex429Streak": 1,
  "stateReadError": null,
- "subrequests": 14,
+ "subrequests": 4,
  "subPhases": {
-  "afterDiscovery": 2,
-  "afterAnalysis": 11,
-  "afterMarks": 14
+  "afterDiscovery": 4,
+  "afterAnalysis": 4,
+  "afterMarks": 4
  },
  "stateWritten": true
 }
