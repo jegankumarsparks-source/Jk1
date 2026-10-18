@@ -1,6 +1,6 @@
 {
- "generatedAt": 1792310748686,
- "generatedAtIso": "2026-10-18T08:05:48.686Z",
+ "generatedAt": 1792311039278,
+ "generatedAtIso": "2026-10-18T08:10:39.278Z",
  "scanner": "solana-radar-server",
  "runner": "cloudflare-worker-cron",
  "engineSource": "index.html embedded engine, extracted verbatim at run time",
@@ -9,9 +9,9 @@
  "scoreVersion": "score-v1.0",
  "riskPolicyVersion": "risk-v1.0",
  "thresholdsVersion": "thresh-v1.0",
- "cycle": 458,
- "cycleStartedAt": 1792310735392,
- "cycleDurationMs": 13294,
+ "cycle": 459,
+ "cycleStartedAt": 1792311035263,
+ "cycleDurationMs": 4015,
  "schedule": "every 5 min via Cloudflare Workers cron (free tier, keyless data) — runs whether or not any tab is open. Backstop: GitHub Actions cron (requested every 5 min; GitHub delays it in practice — observed every 2-3 h). When it runs it skips while this worker is healthy with dexscreener LIVE, and covers discovery from separate egress IPs during dexscreener 429 cooldowns or worker outages.",
  "engineDrift": null,
  "stateRestored": true,
@@ -19,29 +19,31 @@
   {
    "id": "dexscreener",
    "label": "Dexscreener (public, keyless)",
-   "status": "NOT_OBSERVED",
+   "status": "DEGRADED",
    "lastSuccess": null,
-   "lastError": null,
-   "requestCount": 0,
-   "rateLimitCount": 0
+   "lastError": "HTTP 429",
+   "requestCount": 2,
+   "rateLimitCount": 1
   },
   {
    "id": "rugcheck",
    "label": "RugCheck (public, keyless)",
-   "status": "LIVE",
-   "lastSuccess": 1792310744384,
+   "status": "NOT_OBSERVED",
+   "lastSuccess": null,
    "lastError": null,
-   "requestCount": 2,
-   "rateLimitCount": 0
+   "requestCount": 0,
+   "rateLimitCount": 0,
+   "note": "not exercised this cycle (no refreshed candidates needed them)"
   },
   {
    "id": "solanarpc",
    "label": "Solana JSON-RPC (PublicNode)",
-   "status": "LIVE",
-   "lastSuccess": 1792310748686,
+   "status": "NOT_OBSERVED",
+   "lastSuccess": null,
    "lastError": null,
-   "requestCount": 12,
-   "rateLimitCount": 0
+   "requestCount": 0,
+   "rateLimitCount": 0,
+   "note": "not exercised this cycle (no refreshed candidates needed them)"
   }
  ],
  "counters": {
@@ -58,7 +60,7 @@
   "dataIncomplete": 5,
   "watchlist": 0
  },
- "analyzedThisCycle": 3,
+ "analyzedThisCycle": 0,
  "signalMarksTracked": 0,
  "newSignalsThisCycle": [],
  "recentSignals": [
@@ -664,8 +666,9 @@
   }
  ],
  "errors": [
-  "discovery paused this cycle (driver-level phase alternation: odd cycles discover, even cycles analyze, so both fit the free-tier subrequest budget; each runs every 10 min)",
-  "marks refresh skipped: subrequest budget (16) reserved for heartbeat writes"
+  "discovery: profiles: HTTP 429",
+  "discovery: boosts: source in rate-limit backoff",
+  "dexscreener 429 this cycle — retrying next cycle (cooldown arms after 2 consecutive 429 cycles)"
  ],
  "notes": [
   "PAPER ONLY — research signals, not financial advice, never executable trades.",
@@ -676,18 +679,19 @@
  ],
  "driver": "worker-budget-v2 2026-10-17",
  "phaseMs": {
-  "t0": 1792310734533,
-  "readMs": 859
+  "t0": 1792311034660,
+  "readMs": 603,
+  "discoveryMs": 4015
  },
  "dexBackoffUntil": null,
  "dexBackoffStrikes": 0,
- "dex429Streak": 0,
+ "dex429Streak": 1,
  "stateReadError": null,
- "subrequests": 16,
+ "subrequests": 4,
  "subPhases": {
-  "afterDiscovery": 2,
-  "afterAnalysis": 16,
-  "afterMarks": 16
+  "afterDiscovery": 4,
+  "afterAnalysis": 4,
+  "afterMarks": 4
  },
  "stateWritten": true
 }
