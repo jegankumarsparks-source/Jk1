@@ -1,6 +1,6 @@
 {
- "generatedAt": 1792306844195,
- "generatedAtIso": "2026-10-18T07:00:44.195Z",
+ "generatedAt": 1792307141091,
+ "generatedAtIso": "2026-10-18T07:05:41.091Z",
  "scanner": "solana-radar-server",
  "runner": "cloudflare-worker-cron",
  "engineSource": "index.html embedded engine, extracted verbatim at run time",
@@ -9,9 +9,9 @@
  "scoreVersion": "score-v1.0",
  "riskPolicyVersion": "risk-v1.0",
  "thresholdsVersion": "thresh-v1.0",
- "cycle": 445,
- "cycleStartedAt": 1792306835339,
- "cycleDurationMs": 8856,
+ "cycle": 446,
+ "cycleStartedAt": 1792307135185,
+ "cycleDurationMs": 5906,
  "schedule": "every 5 min via Cloudflare Workers cron (free tier, keyless data) — runs whether or not any tab is open. Backstop: GitHub Actions cron (requested every 5 min; GitHub delays it in practice — observed every 2-3 h). When it runs it skips while this worker is healthy with dexscreener LIVE, and covers discovery from separate egress IPs during dexscreener 429 cooldowns or worker outages.",
  "engineDrift": null,
  "stateRestored": true,
@@ -19,28 +19,28 @@
   {
    "id": "dexscreener",
    "label": "Dexscreener (public, keyless)",
-   "status": "DEGRADED",
-   "lastSuccess": 1792306835403,
-   "lastError": "HTTP 429",
+   "status": "LIVE",
+   "lastSuccess": 1792307141091,
+   "lastError": null,
    "requestCount": 8,
-   "rateLimitCount": 2
+   "rateLimitCount": 0
   },
   {
    "id": "rugcheck",
    "label": "RugCheck (public, keyless)",
    "status": "LIVE",
-   "lastSuccess": 1792306839626,
+   "lastSuccess": 1792307140300,
    "lastError": null,
-   "requestCount": 1,
+   "requestCount": 3,
    "rateLimitCount": 0
   },
   {
    "id": "solanarpc",
    "label": "Solana JSON-RPC (PublicNode)",
    "status": "DEGRADED",
-   "lastSuccess": 1792306839810,
+   "lastSuccess": null,
    "lastError": "HTTP 429",
-   "requestCount": 4,
+   "requestCount": 2,
    "rateLimitCount": 1
   }
  ],
@@ -48,46 +48,19 @@
   "discovered": 667,
   "validated": 0,
   "rejected": 0,
-  "incomplete": 477,
+  "incomplete": 480,
   "signals": 134
  },
  "counts": {
   "total": 643,
   "validated": 134,
   "paperSignals": 134,
-  "dataIncomplete": 4,
+  "dataIncomplete": 6,
   "watchlist": 0
  },
- "analyzedThisCycle": 1,
- "signalMarksTracked": 0,
- "newSignalsThisCycle": [
-  {
-   "id": "sig_mvdh7vvnwspmj0",
-   "mint": "38Afjux8G5M5LXFHKyh6iSu3nL1Bvr5N9iygwetfpump",
-   "symbol": "NIP",
-   "name": "Niggas in Paris",
-   "createdAt": 1792306844195,
-   "signalPriceUsd": 0.0000154,
-   "score": 23.5,
-   "riskVerdict": "FAIL",
-   "liquidityUsd": null,
-   "volume24": 52158.61,
-   "qualifiedWallets": 2,
-   "pairAddress": "E5rox4A7ayZoBCbm4zx6AUsDXJdWpMYHsEHwm1hdLWeD",
-   "dexId": "pumpfun",
-   "lastPrice": null,
-   "lastPriceAt": null,
-   "multiple": null,
-   "milestonesHit": [],
-   "dumpHit": null,
-   "links": {
-    "dexscreener": "https://dexscreener.com/solana/E5rox4A7ayZoBCbm4zx6AUsDXJdWpMYHsEHwm1hdLWeD",
-    "gmgn": "https://gmgn.ai/sol/token/38Afjux8G5M5LXFHKyh6iSu3nL1Bvr5N9iygwetfpump",
-    "solscan": "https://solscan.io/token/38Afjux8G5M5LXFHKyh6iSu3nL1Bvr5N9iygwetfpump"
-   },
-   "paperOnly": true
-  }
- ],
+ "analyzedThisCycle": 3,
+ "signalMarksTracked": 8,
+ "newSignalsThisCycle": [],
  "recentSignals": [
   {
    "id": "sig_mvdh7vvnwspmj0",
@@ -687,18 +660,7 @@
   }
  ],
  "errors": [
-  "discovery: pairs bcmp…pump: HTTP 429",
-  "discovery: pairs 4RFb…pump: HTTP 429",
-  "discovery: pairs 5D3N…pump: source in rate-limit backoff",
-  "discovery: pairs BdXf…2S5t: source in rate-limit backoff",
-  "discovery: pairs 91ye…pump: source in rate-limit backoff",
-  "discovery: pairs AEf7…pump: source in rate-limit backoff",
-  "discovery: pairs JAkd…pump: source in rate-limit backoff",
-  "discovery: pairs 7cGw…pump: source in rate-limit backoff",
-  "discovery: pairs Ponz…Axz7: source in rate-limit backoff",
-  "discovery: pairs 3Y7k…pump: source in rate-limit backoff",
-  "dexscreener 429 this cycle — retrying next cycle (cooldown arms after 2 consecutive 429 cycles)",
-  "subrequest budget reached (15) — remaining analysis deferred (driver-level, protects heartbeat writes)"
+  "discovery paused this cycle (driver-level phase alternation: odd cycles discover, even cycles analyze, so both fit the free-tier subrequest budget; each runs every 10 min)"
  ],
  "notes": [
   "PAPER ONLY — research signals, not financial advice, never executable trades.",
@@ -709,18 +671,17 @@
  ],
  "driver": "worker-budget-v2 2026-10-17",
  "phaseMs": {
-  "t0": 1792306834494,
-  "readMs": 845,
-  "discoveryMs": 4071
+  "t0": 1792307134561,
+  "readMs": 624
  },
  "dexBackoffUntil": null,
  "dexBackoffStrikes": 0,
- "dex429Streak": 1,
+ "dex429Streak": 0,
  "stateReadError": null,
  "subrequests": 15,
  "subPhases": {
-  "afterDiscovery": 10,
-  "afterAnalysis": 15,
+  "afterDiscovery": 2,
+  "afterAnalysis": 7,
   "afterMarks": 15
  },
  "stateWritten": true
