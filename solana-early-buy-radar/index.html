@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1020">
+<title>Solana Early Buy Radar</title>
+<style>
+:root{--bg:#0b1020;--bg2:#121a33;--card:#161f3d;--line:#26325e;--tx:#eaf0ff;--mut:#93a0c8;--g:#2ee59d;--a:#ffb938;--r:#ff5a74;--p:#9b6bff;--c:#35d0ff;--sh:0 6px 24px rgba(0,0,0,.35)}
+body.light{--bg:#f2f5ff;--bg2:#e6ebff;--card:#fff;--line:#cfd8ff;--tx:#14193a;--mut:#5a6590;--sh:0 4px 16px rgba(60,70,130,.15)}
+body.neon{--bg:#12001f;--bg2:#1d0233;--card:#27064a;--line:#5a1c9a;--tx:#fdeaff;--mut:#c79be8;--g:#3dffb0;--a:#ffd23d;--r:#ff3d86;--p:#d36bff;--c:#3de8ff}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+body{padding-bottom:calc(72px + env(safe-area-inset-bottom));background:radial-gradient(900px 400px at 10% -10%,rgba(155,107,255,.25),transparent),radial-gradient(800px 400px at 100% 0,rgba(53,208,255,.18),transparent),var(--bg);min-height:100vh}
+header{position:sticky;top:0;z-index:20;background:linear-gradient(90deg,#4b2bd6,#9b6bff 55%,#35d0ff);color:#fff;padding:10px 14px;display:flex;align-items:center;gap:10px;box-shadow:var(--sh)}
+header h1{font-size:16px;margin:0;flex:1;letter-spacing:.3px}
+.pill{display:inline-block;padding:2px 9px;border-radius:99px;font-size:11px;font-weight:700;letter-spacing:.3px;border:1px solid transparent}
+.p-g{background:rgba(46,229,157,.16);color:var(--g);border-color:rgba(46,229,157,.5)}
+.p-a{background:rgba(255,185,56,.16);color:var(--a);border-color:rgba(255,185,56,.5)}
+.p-r{background:rgba(255,90,116,.16);color:var(--r);border-color:rgba(255,90,116,.5)}
+.p-m{background:rgba(147,160,200,.15);color:var(--mut);border-color:rgba(147,160,200,.35)}
+.p-p{background:rgba(155,107,255,.18);color:var(--p);border-color:rgba(155,107,255,.5)}
+header .pill{background:rgba(0,0,0,.28);color:#fff;border-color:rgba(255,255,255,.4)}
+main{max-width:980px;margin:0 auto;padding:12px}
+section.tab{display:none}section.tab.on{display:block}
+h2{font-size:15px;margin:6px 0 10px;display:flex;align-items:center;gap:8px}
+.grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;box-shadow:var(--sh);margin-bottom:10px}
+.grid .card{margin-bottom:0}
+.stat b{display:block;font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+.stat span{font-size:15px;font-weight:700;word-break:break-word}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.sp{flex:1}
+button,select,input{font:inherit;color:var(--tx)}
+button{background:linear-gradient(135deg,#6a3df0,#35a5ff);border:0;color:#fff;border-radius:10px;padding:8px 13px;font-weight:700;cursor:pointer;min-height:38px}
+button.sec{background:var(--bg2);border:1px solid var(--line);color:var(--tx)}
+button.dng{background:linear-gradient(135deg,#ff3d6e,#ff8a3d)}
+button:disabled{opacity:.45;cursor:not-allowed}
+input,select{background:var(--bg2);border:1px solid var(--line);border-radius:9px;padding:8px;min-height:38px;width:100%}
+label.f{display:block;margin-bottom:10px;font-size:12px;color:var(--mut)}
+label.f small{display:block;margin-top:2px}
+.tk{display:flex;gap:10px;align-items:flex-start}
+.tk img{width:42px;height:42px;border-radius:10px;background:var(--bg2);object-fit:cover;flex:none}
+.tk .nm{font-weight:800;font-size:15px}
+.mint{font:11px ui-monospace,Menlo,monospace;color:var(--mut);word-break:break-all}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:6px 10px;margin:8px 0}
+.kv div b{display:block;font-size:10px;color:var(--mut);text-transform:uppercase}
+.kv div span{font-weight:700}
+.reasons{margin:6px 0 0;padding-left:18px;color:var(--mut);font-size:12.5px}
+.reasons li.bad{color:var(--r)}.reasons li.ok{color:var(--g)}.reasons li.warn{color:var(--a)}
+.bar{height:7px;border-radius:9px;background:var(--bg2);overflow:hidden;margin:6px 0}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--r),var(--a),var(--g))}
+a{color:var(--c);text-decoration:none;font-weight:700}
+.links{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.links a{background:var(--bg2);border:1px solid var(--line);border-radius:8px;padding:4px 9px;font-size:12px}
+.empty{text-align:center;color:var(--mut);padding:26px 10px}
+.note{font-size:12px;color:var(--mut);background:var(--bg2);border-left:3px solid var(--p);padding:8px 10px;border-radius:6px;margin:8px 0}
+nav{position:fixed;bottom:0;left:0;right:0;z-index:30;background:var(--card);border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom)}
+nav button{flex:1;background:none;color:var(--mut);border-radius:0;font-size:10px;padding:6px 2px;display:flex;flex-direction:column;align-items:center;gap:1px;min-height:56px}
+nav button .ic{font-size:19px}
+nav button.on{color:var(--c);background:linear-gradient(180deg,rgba(53,208,255,.14),transparent)}
+#popup{position:fixed;left:50%;top:70px;transform:translate(-50%,-160%);width:min(94vw,440px);z-index:50;background:linear-gradient(135deg,#0d7a55,#12b981);color:#fff;border-radius:16px;padding:14px;box-shadow:0 10px 40px rgba(0,0,0,.5);transition:transform .45s cubic-bezier(.2,1.3,.4,1)}
+#popup.show{transform:translate(-50%,0);animation:pulse 1.2s 2}
+@keyframes pulse{50%{box-shadow:0 0 0 10px rgba(46,229,157,.25)}}
+#popup a{color:#fff;text-decoration:underline;background:none;border:0}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block;background:var(--mut)}
+.dot.g{background:var(--g)}.dot.a{background:var(--a)}.dot.r{background:var(--r)}
+.spin{width:14px;height:14px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:sp 1s linear infinite;display:none}
+.busy .spin{display:inline-block}@keyframes sp{to{transform:rotate(360deg)}}
+table{width:100%;border-collapse:collapse;font-size:12px}td,th{padding:5px 6px;border-bottom:1px solid var(--line);text-align:left}
+th{color:var(--mut);font-size:10px;text-transform:uppercase}
+.scroll{overflow-x:auto}
+.tgl{display:flex;align-items:center;gap:8px;margin-bottom:10px}.tgl input{width:20px;height:20px;min-height:0}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header id="hd"><span style="font-size:20px">📡</span><h1>Solana Early Buy Radar</h1><span class="spin"></span><span id="hdStat" class="pill p-m">STARTING</span></header>
+<div id="popup" role="alert" aria-live="assertive"></div>
+<main>
+<section class="tab on" id="t-status">
+ <h2>A · Live Status</h2>
+ <div class="grid" id="statGrid"></div>
+ <div class="card" style="margin-top:10px"><div class="row">
+  <button id="btnScan">Scan now</button><button class="sec" id="btnPause">Pause</button><button class="sec" id="btnSound">🔔 Enable sound</button><button class="sec" id="btnNotif">Enable notifications</button>
+ </div><div class="note" id="statNote"></div></div>
+ <div class="note"><b>Evidence rules.</b> A price or volume move is <b>never</b> treated as proof of a wallet buy. A buy counts as <b>CONFIRMED</b> only when a parsed Solana transaction shows the signer's token balance going up while it paid SOL/wSOL. Everything else is labelled <b>MARKET-DERIVED</b>, <b>UNVERIFIED</b>, <b>INSUFFICIENT SAMPLE</b> or <b>NOT OBSERVED</b>. Research tool only: no wallet, no keys, no trading.</div>
+</section>
+<section class="tab" id="t-radar"><h2>B · Early Buy Radar</h2>
+ <div class="row" style="margin-bottom:10px"><select id="radFilter" style="max-width:220px"><option value="ALL">All statuses</option><option value="QUALIFIED">Qualified</option><option value="WATCH">Watch</option><option value="REJECTED">Rejected</option><option value="DATA INCOMPLETE">Data incomplete</option><option value="NOT OBSERVED">Not observed</option></select><span class="sp"></span><span id="radCount" class="pill p-m"></span></div>
+ <div id="radList"></div></section>
+<section class="tab" id="t-alerts"><h2>C · Signal Alert Center</h2>
+ <div class="card"><div class="row"><button class="sec" id="btnTestSound">Test sound</button><button class="sec" id="btnMute">Mute</button><span class="sp"></span><span class="pill p-m" id="alertCnt"></span></div>
+ <div class="note">Duplicate suppression: the same token is alerted at most once per cooldown (Settings). Alerts only fire while this page is open; browsers may pause background tabs.</div></div>
+ <div id="alertList"></div></section>
+<section class="tab" id="t-out"><h2>D · Outcome Monitor</h2>
+ <div class="grid" id="outStats" style="margin-bottom:10px"></div><div id="outList"></div></section>
+<section class="tab" id="t-set"><h2>E · Settings</h2><div id="setBox"></div></section>
+<section class="tab" id="t-health"><h2>F · System Health</h2><div id="healthBox"></div></section>
+</main>
+<nav id="nav"></nav>
+<script>
+"use strict";
+/* ===== util ===== */
+const $=s=>document.querySelector(s);
+const SOL='So11111111111111111111111111111111111111112';
+function h(tag,attrs,...kids){const e=document.createElement(tag);for(const k in(attrs||{})){const v=attrs[k];if(k==='class')e.className=v;else if(k.startsWith('on'))e.addEventListener(k.slice(2),v);else if(v!==false&&v!=null)e.setAttribute(k,v)}for(const c of kids.flat()){if(c==null||c===false)continue;e.append(c.nodeType?c:document.createTextNode(String(c)))}return e}
+const sleep=(ms,sig)=>new Promise((res,rej)=>{const t=setTimeout(res,ms);sig&&sig.addEventListener('abort',()=>{clearTimeout(t);rej(new DOMException('aborted','AbortError'))})});
+const fmtUsd=n=>n==null||isNaN(n)?'n/a':n>=1e6?'$'+(n/1e6).toFixed(2)+'M':n>=1e3?'$'+(n/1e3).toFixed(1)+'K':'$'+Number(n).toFixed(2);
+const fmtPx=n=>{if(n==null||isNaN(n))return'n/a';n=+n;if(n===0)return'$0';if(n>=1)return'$'+n.toFixed(4);const d=Math.min(12,Math.max(4,2-Math.floor(Math.log10(n))+2));return'$'+n.toFixed(d)};
+const fmtT=ts=>ts?new Date(ts).toLocaleTimeString():'never';
+const ago=ts=>{if(!ts)return'never';const s=Math.round((Date.now()-ts)/1000);return s<60?s+'s ago':s<3600?Math.round(s/60)+'m ago':Math.round(s/3600)+'h ago'};
+const pct=n=>n==null||isNaN(n)?'n/a':(n>0?'+':'')+Number(n).toFixed(1)+'%';
+const okMint=s=>typeof s==='string'&&/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(s);
+const okUrl=u=>{try{return new URL(u).protocol==='https:'}catch{return false}};
+/* ===== storage ===== */
+const Store={ok:false,mem:{},init(){try{localStorage.setItem('_t','1');localStorage.removeItem('_t');this.ok=true}catch{this.ok=false}},
+ get(k,d){try{const v=this.ok?localStorage.getItem(k):this.mem[k];return v==null?d:JSON.parse(v)}catch{return d}},
+ set(k,v){const s=JSON.stringify(v);try{if(this.ok)localStorage.setItem(k,s);else this.mem[k]=s;return true}catch{this.mem[k]=s;return false}}};
+Store.init();
+/* ===== settings ===== */
+const DEF={scanSec:60,minBuySol:2,clusterMin:5,minLiq:5000,maxH1:300,maxSlip:10,minWallets:1,scoreQ:60,rejectMintAuth:true,rejectFreeze:true,sound:true,theme:'dark',cooldownMin:30,maxVerify:4,rpcFirst:'publicnode',notify:true,maxHist:300,minAgeMin:2};
+let S=Object.assign({},DEF,Store.get('seb.settings',{}));
+const saveS=()=>Store.set('seb.settings',S);
+/* ===== state ===== */
+let signals=Store.get('seb.signals',[]);
+let alerts=Store.get('seb.alerts',[]);
+let radar=[];
+let lastAlertAt=Store.get('seb.lastAlert',{});
+const SRC={dex:{n:'DexScreener',ok:null,err:null,last:null,rl:0,calls:0,fail:0},rpc:{n:'Solana RPC',ok:null,err:null,last:null,rl:0,calls:0,fail:0,ep:null},jup:{n:'Jupiter price',ok:null,err:null,last:null,rl:0,calls:0,fail:0}};
+let sys={status:'STARTING',paused:false,scanning:false,lastScan:null,lastOkScan:null,lastTx:null,nextAt:null,scans:0,solUsd:null,solUsdAt:null,solUsdSrc:null,lastErr:null,scanMs:null,lastCounts:{}};
+let scanCtl=null,scanGen=0,timer=null;
+/* ===== network ===== */
+async function fetchJSON(url,opt={}){const {timeout=9000,retries=2,src,signal,body}=opt;let last;
+ for(let i=0;i<=retries;i++){
+  if(signal&&signal.aborted)throw new DOMException('aborted','AbortError');
+  const ac=new AbortController();const to=setTimeout(()=>ac.abort(),timeout);
+  const onAb=()=>ac.abort();signal&&signal.addEventListener('abort',onAb);
+  if(src)src.calls++;
+  try{
+   const r=await fetch(url,{signal:ac.signal,method:body?'POST':'GET',headers:body?{'content-type':'application/json'}:{},body:body?JSON.stringify(body):undefined,cache:'no-store'});
+   if(r.status===429){src&&(src.rl++);throw Object.assign(new Error('Rate limited (HTTP 429)'),{rl:true})}
+   if(!r.ok)throw new Error('HTTP '+r.status);
+   const j=await r.json();if(src){src.ok=true;src.err=null;src.last=Date.now()}return j}
+  catch(e){last=e;if(signal&&signal.aborted)throw new DOMException('aborted','AbortError');
+   if(src){src.fail++;src.err=(e&&e.name==='AbortError'?'Timeout':e.message)||'Network error';src.ok=false}
+   if(i<retries)await sleep((e.rl?2500:700)*Math.pow(2,i)+Math.random()*300,signal)}
+  finally{clearTimeout(to);signal&&signal.removeEventListener('abort',onAb)}}
+ throw last}
+const RPCS={publicnode:['https://solana-rpc.publicnode.com','https://api.mainnet-beta.solana.com'],mainnet:['https://api.mainnet-beta.solana.com','https://solana-rpc.publicnode.com']};
+async function rpc(method,params,signal){const eps=RPCS[S.rpcFirst]||RPCS.publicnode;let last;
+ for(const ep of eps){try{const j=await fetchJSON(ep,{src:SRC.rpc,signal,retries:1,timeout:12000,body:{jsonrpc:'2.0',id:1,method,params}});
+   if(j.error)throw new Error('RPC '+(j.error.code||'')+' '+(j.error.message||'error'));SRC.rpc.ep=ep;return j.result}
+  catch(e){last=e;if(e.name==='AbortError')throw e}}
+ throw last}
+async function dexTokens(addrs,signal){const out=[];for(let i=0;i<addrs.length;i+=30){const j=await fetchJSON('https://api.dexscreener.com/tokens/v1/solana/'+addrs.slice(i,i+30).join(','),{src:SRC.dex,signal});if(Array.isArray(j))out.push(...j)}return out}
+async function getSolUsd(signal){if(sys.solUsd&&Date.now()-sys.solUsdAt<120000)return sys.solUsd;
+ try{const j=await fetchJSON('https://lite-api.jup.ag/price/v3?ids='+SOL,{src:SRC.jup,signal,retries:1});const p=j[SOL]&&j[SOL].usdPrice;if(p>0){sys.solUsd=p;sys.solUsdAt=Date.now();sys.solUsdSrc='Jupiter';return p}}catch(e){if(e.name==='AbortError')throw e}
+ try{const t=await dexTokens([SOL],signal);const best=t.filter(x=>x.baseToken&&x.baseToken.address===SOL&&x.quoteToken&&/^USD/.test(x.quoteToken.symbol)).sort((a,b)=>((b.liquidity&&b.liquidity.usd)||0)-((a.liquidity&&a.liquidity.usd)||0))[0];const p=best&&+best.priceUsd;if(p>0){sys.solUsd=p;sys.solUsdAt=Date.now();sys.solUsdSrc='DexScreener';return p}}catch(e){if(e.name==='AbortError')throw e}
+ return sys.solUsd}
+/* ===== on-chain evidence ===== */
+const mintCache={};
+async function mintInfo(mint,signal){if(mintCache[mint]&&!mintCache[mint].err&&Date.now()-mintCache[mint].t<600000)return mintCache[mint];
+ const r=await rpc('getAccountInfo',[mint,{encoding:'jsonParsed'}],signal);const i=r&&r.value&&r.value.data&&r.value.data.parsed&&r.value.data.parsed.info;
+ const o=i?{mintAuth:i.mintAuthority||null,freezeAuth:i.freezeAuthority||null,supply:i.supply,dec:i.decimals,t:Date.now()}:{err:'mint account not parsed',t:Date.now()};mintCache[mint]=o;return o}
+function parseBuy(tx,mint){
+ if(!tx||!tx.meta)return null;
+ if(tx.meta.err)return{kind:'FAILED'};
+ const keys=tx.transaction.message.accountKeys.map(k=>typeof k==='string'?{pubkey:k,signer:false}:k);
+ const signer=(keys.find(k=>k.signer)||keys[0]).pubkey;const m=tx.meta;
+ const bal=(arr,mt)=>{let s=0;for(const b of arr||[])if(b.owner===signer&&b.mint===mt)s+=+((b.uiTokenAmount&&b.uiTokenAmount.uiAmount)||0);return s};
+ const dTok=bal(m.postTokenBalances,mint)-bal(m.preTokenBalances,mint);
+ const idx=keys.findIndex(k=>k.pubkey===signer);
+ const dLam=(m.postBalances[idx]-m.preBalances[idx]+(m.fee||0))/1e9;
+ const dW=bal(m.postTokenBalances,SOL)-bal(m.preTokenBalances,SOL);
+ const solDelta=dLam+dW;
+ if(dTok===0)return{kind:'OTHER'};
+ if(dTok>0&&solDelta<-0.001)return{kind:'BUY',sol:-solDelta,tokens:dTok,wallet:signer};
+ if(dTok<0&&solDelta>0.001)return{kind:'SELL',sol:solDelta,tokens:-dTok,wallet:signer};
+ return{kind:'AMBIGUOUS',wallet:signer}}
+async function verifyBuys(pair,signal){
+ const addr=pair.pairAddress;const mint=pair.baseToken.address;
+ const sigs=await rpc('getSignaturesForAddress',[addr,{limit:30}],signal);
+ const win=S.clusterMin*60;const now=Math.floor(Date.now()/1000);
+ const inWin=sigs.filter(s=>s.blockTime&&now-s.blockTime<=win);
+ const recent=inWin.filter(s=>!s.err).slice(0,10);
+ const res={window:inWin.length,checked:0,buys:[],sells:0,failed:inWin.filter(s=>s.err).length,ambiguous:0,errors:0,lastBlock:(sigs[0]&&sigs[0].blockTime)||null};
+ for(const s of recent){
+  try{const tx=await rpc('getTransaction',[s.signature,{encoding:'jsonParsed',maxSupportedTransactionVersion:0,commitment:'confirmed'}],signal);
+   res.checked++;const p=parseBuy(tx,mint);if(!p)continue;
+   if(p.kind==='BUY')res.buys.push(Object.assign(p,{sig:s.signature,t:s.blockTime}));else if(p.kind==='SELL')res.sells++;else if(p.kind==='AMBIGUOUS')res.ambiguous++}
+  catch(e){if(e.name==='AbortError')throw e;res.errors++;if(e.message&&/429|rate/i.test(e.message))break}}
+ if(res.lastBlock)sys.lastTx=Math.max(sys.lastTx||0,res.lastBlock*1000);
+ return res}
+/* ===== scoring & risk ===== */
+function slipEst(liqUsd,tradeUsd){if(!liqUsd)return null;const r=liqUsd/2;return tradeUsd/(r+tradeUsd)*100}
+function assess(pair,ev,mi,solUsd){
+ const why=[],bad=[];let score=0;const liq=pair.liquidity&&pair.liquidity.usd;
+ const m5=(pair.txns&&pair.txns.m5)||{buys:0,sells:0},h1=(pair.txns&&pair.txns.h1)||{buys:0,sells:0};
+ const age=pair.pairCreatedAt?(Date.now()-pair.pairCreatedAt)/60000:null;
+ const price=+pair.priceUsd;
+ const R=t=>bad.push(t),Wy=(c,t,pts)=>{why.push({c,t});if(pts)score+=pts};
+ if(!(price>0))R('No reliable price');
+ if(liq==null)R('Liquidity not reported by source');else if(liq<S.minLiq)R('Liquidity '+fmtUsd(liq)+' below minimum '+fmtUsd(S.minLiq));
+ const sl=slipEst(liq,100);if(sl!=null&&sl>S.maxSlip)R('Estimated slippage for a $100 exit ~'+sl.toFixed(1)+'% exceeds '+S.maxSlip+'%');
+ const h1c=pair.priceChange&&pair.priceChange.h1;if(h1c!=null&&h1c>S.maxH1)R('Already up '+pct(h1c)+' in 1h (max '+S.maxH1+'%)');
+ if(age!=null&&age<S.minAgeMin)R('Pair only '+age.toFixed(1)+' min old');
+ if(mi&&!mi.err){if(S.rejectFreeze&&mi.freezeAuth)R('Freeze authority is active');if(S.rejectMintAuth&&mi.mintAuth)R('Mint authority is active')}
+ if(m5.sells>m5.buys*3&&m5.sells>=8)R('Heavy sell pressure in last 5m ('+m5.sells+' sells vs '+m5.buys+' buys)');
+ const buys=ev?ev.buys:[];const wallets=new Set(buys.map(b=>b.wallet));const thr=S.minBuySol;
+ const big=buys.filter(b=>b.sol>=thr);const tot=buys.reduce((a,b)=>a+b.sol,0);const maxB=buys.reduce((a,b)=>Math.max(a,b.sol),0);
+ if(big.length)Wy('ok','CONFIRMED on-chain buy(s) >= '+thr+' SOL: largest '+maxB.toFixed(2)+' SOL ('+fmtUsd(maxB*solUsd)+')',35);
+ else if(ev&&ev.checked)Wy('warn','No confirmed buy >= '+thr+' SOL in last '+S.clusterMin+' min ('+ev.checked+' tx checked)',0);
+ if(wallets.size>=2)Wy('ok',wallets.size+' distinct signer wallets bought in window (independence UNVERIFIED: funding source not checked)',Math.min(20,8*wallets.size));
+ else if(wallets.size===1)Wy('warn','1 buying wallet only',0);
+ if(tot>=thr*2&&buys.length>=2)Wy('ok','Cluster volume '+tot.toFixed(2)+' SOL across '+buys.length+' buys',10);
+ const m5r=m5.buys/Math.max(1,m5.sells);
+ if(m5.buys>=5&&m5r>=1.3)Wy('ok','MARKET-DERIVED: 5m buys/sells '+m5.buys+'/'+m5.sells+' (counts, not wallet proof)',8);
+ const v=pair.volume||{};if(v.h1>0&&v.m5>0&&v.m5*12>v.h1*1.5)Wy('ok','MARKET-DERIVED: 5m volume pace '+(v.m5*12/v.h1).toFixed(1)+'x the 1h average',7);
+ if(h1c!=null&&h1c<S.maxH1*0.5&&h1c>=-10)Wy('ok','Price not yet extended (1h '+pct(h1c)+')',7);
+ if(liq!=null&&liq>=S.minLiq*3)Wy('ok','Liquidity comfortably above minimum ('+fmtUsd(liq)+')',8);
+ else if(liq!=null&&liq>=S.minLiq)Wy('ok','Liquidity above minimum ('+fmtUsd(liq)+')',4);
+ Wy('warn','Wallet track record: INSUFFICIENT SAMPLE (keyless public data has no verified wallet history)',0);
+ score=Math.min(100,Math.round(score));
+ let status;
+ if(bad.length)status='REJECTED';
+ else if(!ev||(ev.checked===0&&ev.errors>0)||(mi&&mi.err))status='DATA INCOMPLETE';
+ else if(!buys.length&&ev.window===0)status='NOT OBSERVED';
+ else if(big.length&&wallets.size>=S.minWallets&&score>=S.scoreQ)status='QUALIFIED';
+ else status='WATCH';
+ return{status,score,why,bad,liq,price,age,solBuy:maxB,tot,wallets:wallets.size,nBuys:buys.length,slip:sl}}
+/* ===== scan ===== */
+function setStat(t,c){sys.status=t;const e=$('#hdStat');e.textContent=t;e.className='pill '+c}
+async function discover(signal){const set=new Map();
+ const add=(arr,tag)=>{if(!Array.isArray(arr))return;for(const x of arr)if(x&&x.chainId==='solana'&&okMint(x.tokenAddress)&&!set.has(x.tokenAddress))set.set(x.tokenAddress,tag)};
+ const rs=await Promise.allSettled([fetchJSON('https://api.dexscreener.com/token-profiles/latest/v1',{src:SRC.dex,signal}),fetchJSON('https://api.dexscreener.com/token-boosts/latest/v1',{src:SRC.dex,signal}),fetchJSON('https://api.dexscreener.com/token-boosts/top/v1',{src:SRC.dex,signal})]);
+ if(signal.aborted)throw new DOMException('aborted','AbortError');
+ add(rs[0].value,'new profile');add(rs[1].value,'boosted');add(rs[2].value,'top boost');
+ for(const s of signals.filter(x=>!x.done))if(!set.has(s.mint))set.set(s.mint,'tracked');
+ if(!set.size&&rs.every(r=>r.status==='rejected'))throw rs[0].reason;
+ return[...set.keys()].slice(0,60).map(k=>({mint:k,tag:set.get(k)}))}
+async function scan(manual){
+ if(sys.paused&&!manual)return;
+ if(scanCtl)scanCtl.abort();
+ const gen=++scanGen;const ac=new AbortController();scanCtl=ac;const sig=ac.signal;
+ sys.scanning=true;document.body.classList.add('busy');const t0=Date.now();setStat('SCANNING','p-p');render();
+ try{
+  const solUsd=await getSolUsd(sig);
+  const disc=await discover(sig);
+  const pairsRaw=await dexTokens(disc.map(d=>d.mint),sig);
+  if(gen!==scanGen)return;
+  const byMint=new Map();
+  for(const p of pairsRaw){if(!p.baseToken||!okMint(p.baseToken.address)||p.chainId!=='solana'||!p.pairAddress)continue;const k=p.baseToken.address;const cur=byMint.get(k);const l=(p.liquidity&&p.liquidity.usd)||0;if(!cur||l>((cur.liquidity&&cur.liquidity.usd)||0))byMint.set(k,p)}
+  updateOutcomes(byMint);
+  const cands=[...byMint.values()].map(p=>{const m5=(p.txns&&p.txns.m5)||{buys:0,sells:0};const l=(p.liquidity&&p.liquidity.usd)||0;const pre=(m5.buys-m5.sells*0.7)+(l>=S.minLiq?10:0)+(((p.volume||{}).m5||0)/200);return{p,pre}}).sort((a,b)=>b.pre-a.pre);
+  const out=[];let verified=0;
+  for(const {p} of cands){
+   if(gen!==scanGen)return;
+   const liq=p.liquidity&&p.liquidity.usd;const m5=(p.txns&&p.txns.m5)||{buys:0,sells:0};
+   let ev=null,mi=null,evErr=null;
+   const worth=verified<S.maxVerify&&liq!=null&&liq>=S.minLiq&&(m5.buys+m5.sells)>0&&+((p.priceChange&&p.priceChange.h1)||0)<=S.maxH1;
+   if(worth){verified++;try{mi=await mintInfo(p.baseToken.address,sig);ev=await verifyBuys(p,sig)}catch(e){if(e.name==='AbortError')throw e;evErr=e.message}}
+   const a=assess(p,ev,mi,solUsd||0);
+   if(!worth&&a.status!=='REJECTED'){a.status='DATA INCOMPLETE';a.why.unshift({c:'warn',t:'Not verified on-chain this scan (RPC budget: top '+S.maxVerify+' per scan). Market data only.'})}
+   if(evErr){if(a.status!=='REJECTED')a.status='DATA INCOMPLETE';a.why.unshift({c:'bad',t:'On-chain check failed: '+evErr})}
+   const o={p,ev,mi,a,t:Date.now(),tag:(disc.find(d=>d.mint===p.baseToken.address)||{}).tag};out.push(o);
+   if(a.status==='QUALIFIED')registerSignal(o,solUsd);
+  }
+  if(gen!==scanGen)return;
+  const ord={QUALIFIED:0,WATCH:1,'NOT OBSERVED':2,'DATA INCOMPLETE':3,REJECTED:4};
+  out.sort((x,y)=>(ord[x.a.status]-ord[y.a.status])||y.a.score-x.a.score);
+  radar=out;sys.lastOkScan=Date.now();sys.lastErr=null;sys.scans++;sys.scanMs=Date.now()-t0;
+  sys.lastCounts={disc:disc.length,pairs:byMint.size,verified};
+  const q=out.filter(o=>o.a.status==='QUALIFIED').length;
+  setStat(q?'SIGNALS: '+q:'LIVE','p-g');
+ }catch(e){
+  if(e.name==='AbortError')return;
+  sys.lastErr=e.message||String(e);setStat('SOURCE ERROR','p-r');
+ }finally{
+  if(gen===scanGen){sys.scanning=false;sys.lastScan=Date.now();document.body.classList.remove('busy');scanCtl=null;scheduleNext();render()}}}
+function scheduleNext(){clearTimeout(timer);if(sys.paused){sys.nextAt=null;return}
+ let ms=Math.max(30,S.scanSec)*1000;if(SRC.dex.err&&/429/.test(SRC.dex.err))ms*=2;sys.nextAt=Date.now()+ms;timer=setTimeout(()=>scan(false),ms)}
+/* ===== signals & outcomes ===== */
+const CHK=[1,5,10,30,60];
+function registerSignal(o,solUsd){const mint=o.p.baseToken.address;
+ const dup=signals.find(s=>s.mint===mint&&Date.now()-s.t<S.cooldownMin*60000);
+ if(dup){o.a.why.unshift({c:'warn',t:'Duplicate suppressed: already signalled '+ago(dup.t)});return}
+ const best=o.ev.buys.slice().sort((a,b)=>b.sol-a.sol)[0];
+ const px=+o.p.priceUsd;
+ const s={id:'s'+Date.now().toString(36),t:Date.now(),mint,name:o.p.baseToken.name,sym:o.p.baseToken.symbol,pair:o.p.pairAddress,
+  ref:px,refLiq:o.a.liq,score:o.a.score,buySol:o.a.solBuy,buyUsd:o.a.solBuy*(solUsd||0),wallets:o.a.wallets,sig:best&&best.sig,
+  maxPx:px,minPx:px,hit:{1.5:null,2:null,3:null},hitIlliq:{1.5:false,2:false,3:false},last:px,lastLiq:o.a.liq,lastAt:Date.now(),chk:{},done:false,estExit:null};
+ signals.unshift(s);signals=signals.slice(0,S.maxHist);Store.set('seb.signals',signals);
+ fireAlert(s)}
+function updateOutcomes(byMint){let ch=false;const now=Date.now();
+ for(const s of signals){if(s.done)continue;const p=byMint.get(s.mint);if(!p)continue;const px=+p.priceUsd;if(!(px>0))continue;
+  const liq=p.liquidity&&p.liquidity.usd;s.last=px;s.lastLiq=liq;s.lastAt=now;s.maxPx=Math.max(s.maxPx,px);s.minPx=Math.min(s.minPx,px);
+  const x=px/s.ref;const realizable=liq!=null&&liq>=S.minLiq;
+  for(const t of[1.5,2,3]){if(x>=t){if(realizable){if(!s.hit[t])s.hit[t]=now}else s.hitIlliq[t]=true}}
+  const min=(now-s.t)/60000;for(const c of CHK){if(s.chk[c]==null&&min>=c)s.chk[c]={px,liq,at:now}}
+  const sl=slipEst(liq,100);s.estExit=sl==null?null:px*(1-sl/100)*(1-0.0025)/s.ref;
+  if(s.chk[60])s.done=true;
+  ch=true}
+ if(ch)Store.set('seb.signals',signals)}
+/* ===== alerts ===== */
+let audioCtx=null,muted=false,lastBeep=0;
+function ensureAudio(){try{if(!audioCtx){const A=window.AudioContext||window.webkitAudioContext;if(!A)return false;audioCtx=new A()}if(audioCtx.state==='suspended')audioCtx.resume();return true}catch{return false}}
+function beep(force){if(!force&&(muted||!S.sound))return false;if(!force&&Date.now()-lastBeep<4000)return false;if(!ensureAudio()||audioCtx.state!=='running')return false;lastBeep=Date.now();
+ const t=audioCtx.currentTime;[660,880,1175].forEach((f,i)=>{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(0.0001,t+i*.13);g.gain.exponentialRampToValueAtTime(.25,t+i*.13+.02);g.gain.exponentialRampToValueAtTime(.0001,t+i*.13+.18);o.connect(g);g.connect(audioCtx.destination);o.start(t+i*.13);o.stop(t+i*.13+.2)});return true}
+function fireAlert(s){
+ if(lastAlertAt[s.mint]&&Date.now()-lastAlertAt[s.mint]<S.cooldownMin*60000)return;
+ lastAlertAt[s.mint]=Date.now();Store.set('seb.lastAlert',lastAlertAt);
+ alerts.unshift({t:s.t,id:s.id,mint:s.mint,sym:s.sym,name:s.name,score:s.score,buySol:s.buySol,wallets:s.wallets,sig:s.sig});alerts=alerts.slice(0,100);Store.set('seb.alerts',alerts);
+ const pop=$('#popup');pop.replaceChildren(h('div',{class:'row'},h('b',{style:'font-size:16px'},'🚀 QUALIFIED SIGNAL'),h('span',{class:'sp'}),h('button',{class:'sec',onclick:()=>pop.classList.remove('show')},'✕')),
+  h('div',{style:'font-weight:800;font-size:18px;margin:4px 0'},(s.sym||'?')+' · '+(s.name||'')),
+  h('div',null,'Confirmed buy '+s.buySol.toFixed(2)+' SOL ('+fmtUsd(s.buyUsd)+') · '+s.wallets+' wallet(s) · score '+s.score),
+  h('div',{class:'links'},s.sig&&h('a',{href:'https://solscan.io/tx/'+s.sig,target:'_blank',rel:'noopener'},'Buy tx'),h('a',{href:'https://dexscreener.com/solana/'+s.pair,target:'_blank',rel:'noopener'},'Dexscreener'),h('a',{href:'https://gmgn.ai/sol/token/'+s.mint,target:'_blank',rel:'noopener'},'GMGN')));
+ pop.classList.add('show');setTimeout(()=>pop.classList.remove('show'),15000);
+ beep(false);
+ if(S.notify&&'Notification' in window&&Notification.permission==='granted'){try{new Notification('Qualified: '+s.sym,{body:'Confirmed buy '+s.buySol.toFixed(2)+' SOL, '+s.wallets+' wallet(s), score '+s.score,tag:s.mint})}catch{}}}
+/* ===== export ===== */
+function dl(name,mime,txt){const b=new Blob([txt],{type:mime});const u=URL.createObjectURL(b);const a=h('a',{href:u,download:name});document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),2000)}
+function exportJSON(){dl('early-buy-radar-history.json','application/json',JSON.stringify({exported:new Date().toISOString(),settings:S,signals,alerts},null,1))}
+function exportCSV(){const cols=['time','symbol','name','mint','ref_price_usd','score','confirmed_buy_sol','wallets','buy_tx','chk_1m','chk_5m','chk_10m','chk_30m','chk_60m','max_price_x','min_price_x','hit_1.5x','hit_2x','hit_3x','est_exit_adj_x','status'];
+ const q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
+ const hv=(s,t)=>s.hit[t]?'YES':s.hitIlliq[t]?'ILLIQUID':'NO';
+ const rows=signals.map(s=>[new Date(s.t).toISOString(),s.sym,s.name,s.mint,s.ref,s.score,s.buySol,s.wallets,s.sig||''].concat(CHK.map(c=>s.chk[c]?(s.chk[c].px/s.ref).toFixed(3):'PENDING'),[(s.maxPx/s.ref).toFixed(3),(s.minPx/s.ref).toFixed(3),hv(s,1.5),hv(s,2),hv(s,3),s.estExit==null?'':s.estExit.toFixed(3),s.done?'FINAL':'PENDING VALIDATION']));
+ dl('early-buy-radar-history.csv','text/csv',[cols].concat(rows).map(r=>r.map(q).join(',')).join('\n'))}
+/* ===== render ===== */
+const TABS=[['status','📊','Status'],['radar','🎯','Radar'],['alerts','🔔','Alerts'],['out','📈','Outcomes'],['set','⚙️','Settings'],['health','🩺','Health']];
+let tab=Store.get('seb.tab','status');if(location.hash&&TABS.some(t=>'#'+t[0]===location.hash))tab=location.hash.slice(1);if(!TABS.some(t=>t[0]===tab))tab='status';
+function buildNav(){const n=$('#nav');n.replaceChildren(...TABS.map(t=>h('button',{class:t[0]===tab?'on':'',onclick:()=>{tab=t[0];Store.set('seb.tab',tab);buildNav();if(tab==='set')renderSet();render();window.scrollTo(0,0)}},h('span',{class:'ic'},t[1]),t[2])))}
+const stPill=s=>({QUALIFIED:'p-g',WATCH:'p-a',REJECTED:'p-r'})[s]||'p-m';
+const lnk=(href,t)=>h('a',{href,target:'_blank',rel:'noopener noreferrer'},t);
+function coinLinks(mint,pair,sig){return h('div',{class:'links'},lnk('https://dexscreener.com/solana/'+pair,'Dexscreener'),lnk('https://gmgn.ai/sol/token/'+mint,'GMGN'),lnk('https://solscan.io/token/'+mint,'Solscan'),sig&&lnk('https://solscan.io/tx/'+sig,'Buy tx'))}
+function kv(a){return h('div',{class:'kv'},a.map(([k,v])=>h('div',null,h('b',null,k),h('span',null,v))))}
+function radCard(o){const{p,a,ev,mi}=o;const col=a.status==='QUALIFIED'?'g':a.status==='WATCH'?'a':a.status==='REJECTED'?'r':'';
+ const img=p.info&&okUrl(p.info.imageUrl)?h('img',{src:p.info.imageUrl,alt:'',loading:'lazy',referrerpolicy:'no-referrer'}):h('div',{style:'width:42px;height:42px;border-radius:10px;background:var(--bg2);flex:none'});
+ const rs=a.bad.map(t=>h('li',{class:'bad'},'REJECT: '+t)).concat(a.why.map(w=>h('li',{class:w.c},w.t)));
+ const fb=ev&&ev.buys.slice().sort((x,y)=>y.sol-x.sol)[0];
+ return h('div',{class:'card',style:col?'border-color:var(--'+col+')':''},
+  h('div',{class:'tk'},img,h('div',{style:'flex:1;min-width:0'},h('div',{class:'row'},h('span',{class:'nm'},p.baseToken.symbol||'?'),h('span',{style:'color:var(--mut)'},p.baseToken.name||''),h('span',{class:'sp'}),h('span',{class:'pill '+stPill(a.status)},a.status)),h('div',{class:'mint'},p.baseToken.address))),
+  h('div',{class:'bar'},h('i',{style:'width:'+a.score+'%'})),
+  kv([['Score',a.score+'/100'],['Ref price',fmtPx(a.price)],['Confirmed buy',ev?(a.nBuys?a.solBuy.toFixed(2)+' SOL ('+fmtUsd(a.solBuy*(sys.solUsd||0))+')':'NOT OBSERVED'):'not checked'],['Buying wallets',ev?(a.wallets?a.wallets+' (independence UNVERIFIED)':'0'):'n/a'],['Liquidity',a.liq==null?'n/a':fmtUsd(a.liq)],['Vol 5m / 1h',fmtUsd((p.volume||{}).m5)+' / '+fmtUsd((p.volume||{}).h1)],['Chg 5m / 1h',pct((p.priceChange||{}).m5)+' / '+pct((p.priceChange||{}).h1)],['Txns 5m (market)',(p.txns&&p.txns.m5)?p.txns.m5.buys+'B / '+p.txns.m5.sells+'S':'n/a'],['Wallet history','INSUFFICIENT SAMPLE'],['Authorities',mi&&!mi.err?(mi.mintAuth?'mint ON':'mint off')+' / '+(mi.freezeAuth?'freeze ON':'freeze off'):'unchecked'],['Found via',o.tag||'']]),
+  h('ul',{class:'reasons'},rs),coinLinks(p.baseToken.address,p.pairAddress,fb&&fb.sig))}
+function renderRadar(){const f=$('#radFilter').value;const list=radar.filter(o=>f==='ALL'||o.a.status===f);const c={};radar.forEach(o=>c[o.a.status]=(c[o.a.status]||0)+1);
+ $('#radCount').textContent=radar.length+' tokens · '+(c.QUALIFIED||0)+' qualified · '+(c.WATCH||0)+' watch';
+ const box=$('#radList');if(!list.length){box.replaceChildren(h('div',{class:'empty card'},sys.scans?'No tokens match this filter in the last scan.':sys.scanning?'First scan running... fetching live data.':sys.lastErr?'Scan failed: '+sys.lastErr+'. It will retry automatically.':'Waiting for first scan.'));return}
+ box.replaceChildren(...list.map(radCard))}
+function sigCard(s){const x=s.last/s.ref;const hitTxt=t=>s.hit[t]?'HIT '+fmtT(s.hit[t]):s.hitIlliq[t]?'touched, ILLIQUID (not counted)':s.done?'NOT HIT':'PENDING';
+ return h('div',{class:'card'},
+  h('div',{class:'row'},h('b',{style:'font-size:15px'},s.sym+' · '+s.name),h('span',{class:'sp'}),h('span',{class:'pill '+(s.done?'p-m':'p-a')},s.done?'FINAL':'PENDING VALIDATION')),
+  h('div',{class:'mint'},s.mint),
+  kv([['Signal time',new Date(s.t).toLocaleString()],['Ref price',fmtPx(s.ref)],['Latest',fmtPx(s.last)+' ('+x.toFixed(2)+'x)'],['Max up',(s.maxPx/s.ref).toFixed(2)+'x'],['Max adverse',((s.minPx/s.ref-1)*100).toFixed(1)+'%'],['Liquidity now',s.lastLiq==null?'n/a':fmtUsd(s.lastLiq)+' (was '+fmtUsd(s.refLiq)+')'],['Exit-adjusted',s.estExit==null?'n/a':s.estExit.toFixed(2)+'x (ESTIMATE)']]),
+  h('div',{class:'scroll'},h('table',null,h('tr',null,h('th',null,'Level'),h('th',null,'Status')),[1.5,2,3].map(t=>h('tr',null,h('td',null,t+'x'),h('td',null,hitTxt(t)))))),
+  h('div',{class:'scroll',style:'margin-top:8px'},h('table',null,h('tr',null,['1m','5m','10m','30m','60m'].map(t=>h('th',null,t))),h('tr',null,CHK.map(c=>h('td',null,s.chk[c]?(s.chk[c].px/s.ref).toFixed(2)+'x':'pending'))))),
+  h('div',{class:'note'},'Checkpoints use the first scan at or after each mark, so the real observation can be a little late. Prices are observed DexScreener values; exit-adjusted is an estimate.'),
+  coinLinks(s.mint,s.pair,s.sig))}
+function renderAlerts(){$('#alertCnt').textContent=alerts.length+' alerts';$('#btnMute').textContent=muted?'Unmute':'Mute';
+ const parts=[];parts.push(h('h2',null,'Latest qualified signals'));
+ parts.push(alerts.length?h('div',{class:'card scroll'},h('table',null,h('tr',null,['Time','Token','Buy','Wallets','Score','Tx'].map(t=>h('th',null,t))),alerts.slice(0,30).map(a=>h('tr',null,h('td',null,new Date(a.t).toLocaleTimeString()),h('td',null,a.sym),h('td',null,a.buySol.toFixed(2)+' SOL'),h('td',null,a.wallets),h('td',null,a.score),h('td',null,a.sig?lnk('https://solscan.io/tx/'+a.sig,'view'):''))))):h('div',{class:'empty card'},'No qualified signals yet. The radar never invents signals to hit a frequency target: it alerts only when a confirmed on-chain buy passes every risk check.'));
+ const rej=radar.filter(o=>o.a.status==='REJECTED').slice(0,12),qual=radar.filter(o=>o.a.status==='QUALIFIED');
+ parts.push(h('h2',null,'Why tokens were qualified or rejected (latest scan)'));
+ parts.push(h('div',{class:'card'},qual.length||rej.length?qual.map(o=>h('div',{style:'margin-bottom:8px'},h('span',{class:'pill p-g'},'QUALIFIED'),' ',h('b',null,o.p.baseToken.symbol),': ',o.a.why.filter(w=>w.c==='ok').map(w=>w.t).slice(0,3).join(' · '))).concat(rej.map(o=>h('div',{style:'margin-bottom:8px'},h('span',{class:'pill p-r'},'REJECTED'),' ',h('b',null,o.p.baseToken.symbol),': ',o.a.bad.join(' · ')))):h('div',{class:'empty'},'Nothing to explain yet.')));
+ $('#alertList').replaceChildren(...parts)}
+function renderOut(){const done=signals.filter(s=>s.done).length,pend=signals.length-done;const hit=t=>signals.filter(s=>s.hit[t]).length;
+ $('#outStats').replaceChildren(...[['Tracked signals',signals.length],['Pending validation',pend],['Hit 1.5x (liquid)',hit(1.5)+' / '+signals.length],['Hit 2x (liquid)',hit(2)+' / '+signals.length],['Hit 3x (liquid)',hit(3)+' / '+signals.length]].map(([k,v])=>h('div',{class:'card stat'},h('b',null,k),h('span',null,v))));
+ $('#outList').replaceChildren(...(signals.length?[h('div',{class:'note'},'Real observed results from this browser only. Small samples prove nothing; no hit rate is guaranteed or implied.')].concat(signals.map(sigCard)):[h('div',{class:'empty card'},'No qualified signals to monitor yet. When one fires, its reference price is stored and 1/5/10/30/60-minute checkpoints plus 1.5x / 2x / 3x targets are tracked here.')]))}
+function field(label,key,type,opts,hint){let el;
+ if(type==='select')el=h('select',{onchange:e=>{S[key]=e.target.value;saveS();if(key==='theme')applyTheme()}},opts.map(o=>h('option',{value:o[0],selected:String(S[key])===String(o[0])?'selected':false},o[1])));
+ else if(type==='check')return h('label',{class:'tgl'},h('input',{type:'checkbox',checked:S[key]?'checked':false,onchange:e=>{S[key]=e.target.checked;saveS();if(key==='notify'&&e.target.checked)askNotif()}}),h('span',null,label,hint?h('small',{style:'display:block;color:var(--mut)'},hint):''));
+ else el=h('input',{type:'number',value:S[key],min:opts.min,max:opts.max,step:opts.step||1,onchange:e=>{let v=parseFloat(e.target.value);if(!isFinite(v))v=DEF[key];v=Math.min(opts.max,Math.max(opts.min,v));e.target.value=v;S[key]=v;saveS();if(key==='scanSec')scheduleNext()}});
+ return h('label',{class:'f'},label,el,hint?h('small',null,hint):'')}
+function renderSet(){$('#setBox').replaceChildren(
+ h('div',{class:'card'},h('b',null,'Scanning'),h('br'),
+  field('Scan interval (seconds)','scanSec','n',{min:30,max:600},'Default 60. Public endpoints are rate limited; lower is not always better.'),
+  field('On-chain checks per scan','maxVerify','n',{min:1,max:8},'Each check reads transactions from the public RPC.'),
+  field('RPC preference','rpcFirst','select',[['publicnode','PublicNode first, Solana Foundation fallback'],['mainnet','Solana Foundation first, PublicNode fallback']])),
+ h('div',{class:'card'},h('b',null,'Purchase thresholds'),h('br'),
+  field('Minimum confirmed buy (SOL)','minBuySol','n',{min:0.1,max:1000,step:0.1},'Live SOL price: '+(sys.solUsd?'$'+sys.solUsd.toFixed(2):'n/a')),
+  h('div',{class:'row',style:'margin-bottom:10px'},[2,5,10,20].map(v=>h('button',{class:'sec',onclick:()=>{S.minBuySol=v;saveS();renderSet()}},v+' SOL')),sys.solUsd&&h('button',{class:'sec',onclick:()=>{S.minBuySol=Math.round(500/sys.solUsd*100)/100;saveS();renderSet()}},'about $500')),
+  field('Cluster window (minutes)','clusterMin','n',{min:1,max:5},'Only transactions this recent count.'),
+  field('Minimum distinct buying wallets','minWallets','n',{min:1,max:10}),
+  field('Minimum score to qualify','scoreQ','n',{min:10,max:100})),
+ h('div',{class:'card'},h('b',null,'Risk thresholds (a risk rejection always overrides score)'),h('br'),
+  field('Minimum liquidity (USD)','minLiq','n',{min:500,max:1e6,step:500}),
+  field('Max price gain in 1h (%)','maxH1','n',{min:20,max:5000,step:10}),
+  field('Max estimated slippage on a $100 exit (%)','maxSlip','n',{min:1,max:50}),
+  field('Minimum pair age (minutes)','minAgeMin','n',{min:0,max:60}),
+  field('Reject if mint authority is active','rejectMintAuth','check'),
+  field('Reject if freeze authority is active','rejectFreeze','check')),
+ h('div',{class:'card'},h('b',null,'Alerts and display'),h('br'),
+  field('Sound','sound','check'),field('Browser notifications','notify','check',null,'Needs permission; not supported on every browser.'),
+  field('Alert cooldown per token (minutes)','cooldownMin','n',{min:1,max:240}),
+  field('Theme','theme','select',[['dark','Dark'],['light','Light'],['neon','Neon']])),
+ h('div',{class:'card'},h('b',null,'History'),h('div',{class:'row',style:'margin:8px 0'},h('button',{onclick:exportJSON},'Export JSON'),h('button',{onclick:exportCSV},'Export CSV'),h('button',{class:'dng',onclick:clearHist},'Clear history'),h('button',{class:'sec',onclick:()=>{if(confirm('Reset all settings to defaults?')){S=Object.assign({},DEF);saveS();applyTheme();renderSet()}}},'Reset settings')),
+  h('div',{class:'note'},Store.ok?'Stored locally in this browser only ('+signals.length+' signals, '+alerts.length+' alerts).':'Local storage is blocked: history lives in memory and is lost on reload.')))}
+function clearHist(){if(!confirm('Delete all signal history and alerts from this browser? This cannot be undone.'))return;signals=[];alerts=[];lastAlertAt={};Store.set('seb.signals',signals);Store.set('seb.alerts',alerts);Store.set('seb.lastAlert',lastAlertAt);render();renderSet()}
+function renderHealth(){const notif='Notification' in window?Notification.permission:'unsupported';
+ const rows=Object.values(SRC).map(s=>h('tr',null,h('td',null,h('span',{class:'dot '+(s.ok==null?'':s.ok?'g':'r')}),' '+s.n),h('td',null,s.ok==null?'untested':s.ok?'OK':'ERROR'),h('td',null,s.last?ago(s.last):'never'),h('td',null,s.calls+' / '+s.fail+' / '+s.rl),h('td',null,s.err||'')));
+ $('#healthBox').replaceChildren(
+  h('div',{class:'card scroll'},h('table',null,h('tr',null,['Source','State','Last OK','Calls / fails / 429','Last error'].map(t=>h('th',null,t))),rows)),
+  h('div',{class:'card'},kv([['Last successful scan',sys.lastOkScan?fmtT(sys.lastOkScan)+' ('+ago(sys.lastOkScan)+')':'never'],['Scan duration',sys.scanMs?(sys.scanMs/1000).toFixed(1)+'s':'n/a'],['Local storage',Store.ok?'available':'BLOCKED (memory only)'],['Notifications',notif],['Audio',(window.AudioContext||window.webkitAudioContext)?(audioCtx?audioCtx.state:'not started (tap Enable sound)'):'unsupported'],['RPC in use',SRC.rpc.ep||'none yet'],['SOL/USD',sys.solUsd?'$'+sys.solUsd.toFixed(2)+' ('+sys.solUsdSrc+')':'n/a'],['Last scan error',sys.lastErr||'none']])),
+  h('div',{class:'card'},h('b',null,'Honest limitations'),h('ul',{class:'reasons'},
+   h('li',null,'This page only scans while it is open. Browsers pause background tabs; alerts do not arrive after you close it.'),
+   h('li',null,'No free keyless feed of every wallet transaction exists. The radar finds tokens via DexScreener, then reads recent on-chain transactions of the top candidates from the public Solana RPC. Most tokens are therefore "not verified this scan".'),
+   h('li',null,'Public RPC and DexScreener are rate limited and can return 429 or fail. The app backs off and shows it here.'),
+   h('li',null,'Wallet track record and wallet independence cannot be verified from keyless public data: they show INSUFFICIENT SAMPLE and UNVERIFIED.'),
+   h('li',null,'A buy is confirmed only for the transaction signer, with a token increase and a SOL/wSOL payment. Unusual routing may show as AMBIGUOUS and is not counted.'),
+   h('li',null,'Liquidity is missing for some venues (for example bonding-curve pairs); those tokens cannot qualify.'),
+   h('li',null,'Telegram alerts need a bot and a server, which this keyless page does not have, so none are sent. Nothing here can trade or touch a wallet.'),
+   h('li',null,'No hit rate is promised and signal frequency is not forced. Past price moves do not predict future ones.'))))}
+function renderStatus(){const age=sys.lastOkScan?(Date.now()-sys.lastOkScan)/1000:null;const fresh=age==null?'no data yet':age<S.scanSec*2?'fresh ('+Math.round(age)+'s old)':'STALE ('+Math.round(age)+'s old)';
+ const st=(k,v)=>h('div',{class:'card stat'},h('b',null,k),h('span',null,v));
+ const src=s=>s.ok==null?'untested':s.ok?'OK':'ERROR: '+s.err;
+ $('#statGrid').replaceChildren(st('App status',sys.paused?'PAUSED':sys.scanning?'Scanning...':sys.status),st('DexScreener',src(SRC.dex)),st('Solana RPC',src(SRC.rpc)),st('Last successful refresh',sys.lastOkScan?fmtT(sys.lastOkScan):'never'),st('Last confirmed tx seen',sys.lastTx?fmtT(sys.lastTx)+' ('+ago(sys.lastTx)+')':'none yet'),st('Scan interval',S.scanSec+'s'+(sys.nextAt&&!sys.scanning?' · next in '+Math.max(0,Math.round((sys.nextAt-Date.now())/1000))+'s':'')),st('Data freshness',fresh),st('Last scan',sys.lastCounts.disc!=null?sys.lastCounts.disc+' found · '+sys.lastCounts.pairs+' priced · '+sys.lastCounts.verified+' on-chain checked':'n/a'),st('SOL price',sys.solUsd?'$'+sys.solUsd.toFixed(2):'n/a'));
+ $('#btnPause').textContent=sys.paused?'Resume':'Pause';
+ $('#btnSound').textContent=audioCtx&&audioCtx.state==='running'?'🔔 Sound ready':'🔔 Enable sound';
+ const np='Notification' in window?Notification.permission:'unsupported';const bn=$('#btnNotif');bn.textContent=np==='granted'?'Notifications on':np==='unsupported'?'Notifications unsupported':np==='denied'?'Notifications blocked':'Enable notifications';bn.disabled=np==='unsupported'||np==='denied'||np==='granted';
+ $('#statNote').textContent=(location.protocol==='file:'?'Opened from a local file: some browsers block network calls from file pages. If the status shows errors, use the GitHub Pages link. ':'')+'Alerts, sound and notifications only work while this page is open and the screen is on.'}
+function render(){TABS.forEach(t=>$('#t-'+t[0]).classList.toggle('on',t[0]===tab));
+ try{({status:renderStatus,radar:renderRadar,alerts:renderAlerts,out:renderOut,set:()=>{if(!$('#setBox').children.length)renderSet()},health:renderHealth})[tab]()}catch(e){console.error(e)}}
+function askNotif(){if(!('Notification' in window))return;Notification.requestPermission().then(()=>render())}
+function applyTheme(){document.body.className=S.theme==='light'?'light':S.theme==='neon'?'neon':''}
+/* ===== init ===== */
+$('#btnScan').onclick=()=>scan(true);
+$('#btnPause').onclick=()=>{sys.paused=!sys.paused;if(sys.paused){if(scanCtl)scanCtl.abort();clearTimeout(timer);sys.nextAt=null;sys.scanning=false;setStat('PAUSED','p-m');document.body.classList.remove('busy')}else scan(true);render()};
+$('#btnSound').onclick=()=>{const ok=ensureAudio();setTimeout(()=>{if(ok&&audioCtx&&audioCtx.state==='running')beep(true);else alert('Audio is unavailable or blocked by this browser.');render()},80)};
+$('#btnNotif').onclick=askNotif;
+$('#btnTestSound').onclick=()=>{ensureAudio();setTimeout(()=>{if(!beep(true))alert('Could not play sound: audio unsupported or blocked by the browser.')},80)};
+$('#btnMute').onclick=()=>{muted=!muted;render()};
+$('#radFilter').onchange=render;
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!sys.paused&&!sys.scanning&&sys.lastOkScan&&Date.now()-sys.lastOkScan>S.scanSec*1500)scan(false)});
+applyTheme();buildNav();render();
+setInterval(()=>{if(tab==='status'||tab==='health')render()},1000);
+scan(false);
+window.__SEB={parseBuy,assess,S,sys:()=>sys,radar:()=>radar,signals:()=>signals,registerSignal,updateOutcomes};
+</script></body></html>
