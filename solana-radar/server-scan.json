@@ -1,6 +1,6 @@
 {
- "generatedAt": 1792355446288,
- "generatedAtIso": "2026-10-18T20:30:46.288Z",
+ "generatedAt": 1792355737076,
+ "generatedAtIso": "2026-10-18T20:35:37.076Z",
  "scanner": "solana-radar-server",
  "runner": "cloudflare-worker-cron",
  "engineSource": "index.html embedded engine, extracted verbatim at run time",
@@ -9,9 +9,9 @@
  "scoreVersion": "score-v1.0",
  "riskPolicyVersion": "risk-v1.0",
  "thresholdsVersion": "thresh-v1.0",
- "cycle": 608,
- "cycleStartedAt": 1792355436369,
- "cycleDurationMs": 9919,
+ "cycle": 609,
+ "cycleStartedAt": 1792355736103,
+ "cycleDurationMs": 973,
  "schedule": "every 5 min via Cloudflare Workers cron (free tier, keyless data) — runs whether or not any tab is open. Backstop: GitHub Actions cron (requested every 5 min; GitHub delays it in practice — observed every 2-3 h). When it runs it skips while this worker is healthy with dexscreener LIVE, and covers discovery from separate egress IPs during dexscreener 429 cooldowns or worker outages.",
  "engineDrift": null,
  "stateRestored": true,
@@ -20,32 +20,34 @@
    "id": "dexscreener",
    "label": "Dexscreener (public, keyless)",
    "status": "LIVE",
-   "lastSuccess": 1792355446288,
+   "lastSuccess": 1792355737076,
    "lastError": null,
-   "requestCount": 8,
+   "requestCount": 22,
    "rateLimitCount": 0
   },
   {
    "id": "rugcheck",
    "label": "RugCheck (public, keyless)",
-   "status": "LIVE",
-   "lastSuccess": 1792355445288,
+   "status": "NOT_OBSERVED",
+   "lastSuccess": null,
    "lastError": null,
-   "requestCount": 3,
-   "rateLimitCount": 0
+   "requestCount": 0,
+   "rateLimitCount": 0,
+   "note": "not exercised this cycle (no refreshed candidates needed them)"
   },
   {
    "id": "solanarpc",
    "label": "Solana JSON-RPC (PublicNode)",
-   "status": "DEGRADED",
-   "lastSuccess": 1792355440709,
-   "lastError": "HTTP 429",
-   "requestCount": 4,
-   "rateLimitCount": 1
+   "status": "NOT_OBSERVED",
+   "lastSuccess": null,
+   "lastError": null,
+   "requestCount": 0,
+   "rateLimitCount": 0,
+   "note": "not exercised this cycle (no refreshed candidates needed them)"
   }
  ],
  "counters": {
-  "discovered": 888,
+  "discovered": 893,
   "validated": 0,
   "rejected": 0,
   "incomplete": 705,
@@ -55,10 +57,10 @@
   "total": 697,
   "validated": 152,
   "paperSignals": 152,
-  "dataIncomplete": 3,
+  "dataIncomplete": 0,
   "watchlist": 0
  },
- "analyzedThisCycle": 3,
+ "analyzedThisCycle": 0,
  "signalMarksTracked": 8,
  "newSignalsThisCycle": [],
  "recentSignals": [
@@ -76,9 +78,9 @@
    "qualifiedWallets": 1,
    "pairAddress": "CqM9zPWg7MMSJEbJQ3hSm2zLcc7ec5dhXC4BumWsMVWH",
    "dexId": "pumpfun",
-   "lastPrice": 0.000003054,
-   "lastPriceAt": 1792353936279,
-   "multiple": 0.7,
+   "lastPrice": 0.000003015,
+   "lastPriceAt": 1792355736565,
+   "multiple": 0.69,
    "milestonesHit": [],
    "dumpHit": null,
    "links": {
@@ -103,7 +105,7 @@
    "pairAddress": "cEUdBrse7yyk4N91UHwMnrmA5G6kE7iFmEFgV527SsE",
    "dexId": "meteora",
    "lastPrice": 0.00002057,
-   "lastPriceAt": 1792353936291,
+   "lastPriceAt": 1792355736739,
    "multiple": 1,
    "milestonesHit": [],
    "dumpHit": null,
@@ -128,9 +130,9 @@
    "qualifiedWallets": 5,
    "pairAddress": "5HkrLrXtERvPKoAjGUCt1WrjtNCkADFjgyN8wtLCqd13",
    "dexId": "raydium",
-   "lastPrice": 0.00001345,
-   "lastPriceAt": 1792353936300,
-   "multiple": 0.41,
+   "lastPrice": 0.000007776,
+   "lastPriceAt": 1792355736769,
+   "multiple": 0.24,
    "milestonesHit": [],
    "dumpHit": {
     "at": 1792353936580,
@@ -159,7 +161,7 @@
    "pairAddress": "C1iKUPuaiuYY3wsquuQC8xdv1GvSZPuPCNMmzvBvLM3F",
    "dexId": "pumpfun",
    "lastPrice": 0.000002842,
-   "lastPriceAt": 1792353936317,
+   "lastPriceAt": 1792355736777,
    "multiple": 0.34,
    "milestonesHit": [],
    "dumpHit": {
@@ -188,9 +190,9 @@
    "qualifiedWallets": 2,
    "pairAddress": "DLT2YubJSWd7aUbq55mU5pNdbH1HktqzgjoBbBdpHFac",
    "dexId": "pumpfun",
-   "lastPrice": 0.000003473,
-   "lastPriceAt": 1792353936326,
-   "multiple": 1.05,
+   "lastPrice": 0.00000288,
+   "lastPriceAt": 1792355736825,
+   "multiple": 0.87,
    "milestonesHit": [],
    "dumpHit": null,
    "links": {
@@ -214,9 +216,9 @@
    "qualifiedWallets": 3,
    "pairAddress": "Fzyw7NiGfe7xsr5TSdhViBiQWraGhbQ8qCFxdq9nXg1p",
    "dexId": "pumpswap",
-   "lastPrice": 0.000004208,
-   "lastPriceAt": 1792353936367,
-   "multiple": 0.56,
+   "lastPrice": 0.000004765,
+   "lastPriceAt": 1792355736964,
+   "multiple": 0.63,
    "milestonesHit": [],
    "dumpHit": null,
    "links": {
@@ -241,7 +243,7 @@
    "pairAddress": "5PdaH1NZ9ZJoJZ8Jb9QVnHj6m4nv9qGmij88WgdXQtn7",
    "dexId": "pumpfun",
    "lastPrice": 0.000003446,
-   "lastPriceAt": 1792353936555,
+   "lastPriceAt": 1792355737018,
    "multiple": 0.49,
    "milestonesHit": [],
    "dumpHit": {
@@ -270,9 +272,9 @@
    "qualifiedWallets": 4,
    "pairAddress": "2aXmkjNC4MZJg7Y8FQfHLchAPnLGxgSaFX7xhbpuTgkc",
    "dexId": "pumpswap",
-   "lastPrice": 0.00001075,
-   "lastPriceAt": 1792353936580,
-   "multiple": 0.22,
+   "lastPrice": 0.000009869,
+   "lastPriceAt": 1792355737076,
+   "multiple": 0.2,
    "milestonesHit": [
     {
      "x": 1.5,
@@ -676,7 +678,7 @@
   }
  ],
  "errors": [
-  "discovery paused this cycle (driver-level phase alternation: odd cycles discover, even cycles analyze, so both fit the free-tier subrequest budget; each runs every 10 min)"
+  "subrequest budget reached (16) — remaining analysis deferred (driver-level, protects heartbeat writes)"
  ],
  "notes": [
   "PAPER ONLY — research signals, not financial advice, never executable trades.",
@@ -687,18 +689,19 @@
  ],
  "driver": "worker-budget-v2 2026-10-17",
  "phaseMs": {
-  "t0": 1792355434966,
-  "readMs": 1403
+  "t0": 1792355734930,
+  "readMs": 1173,
+  "discoveryMs": 412
  },
  "dexBackoffUntil": null,
  "dexBackoffStrikes": 0,
  "dex429Streak": 0,
  "stateReadError": null,
- "subrequests": 17,
+ "subrequests": 24,
  "subPhases": {
-  "afterDiscovery": 2,
-  "afterAnalysis": 9,
-  "afterMarks": 17
+  "afterDiscovery": 16,
+  "afterAnalysis": 16,
+  "afterMarks": 24
  },
  "stateWritten": true
 }
