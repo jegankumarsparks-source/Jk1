@@ -1,6 +1,6 @@
 {
- "generatedAt": 1792330844550,
- "generatedAtIso": "2026-10-18T13:40:44.550Z",
+ "generatedAt": 1792331142090,
+ "generatedAtIso": "2026-10-18T13:45:42.090Z",
  "scanner": "solana-radar-server",
  "runner": "cloudflare-worker-cron",
  "engineSource": "index.html embedded engine, extracted verbatim at run time",
@@ -9,9 +9,9 @@
  "scoreVersion": "score-v1.0",
  "riskPolicyVersion": "risk-v1.0",
  "thresholdsVersion": "thresh-v1.0",
- "cycle": 526,
- "cycleStartedAt": 1792330836490,
- "cycleDurationMs": 8060,
+ "cycle": 527,
+ "cycleStartedAt": 1792331137974,
+ "cycleDurationMs": 4116,
  "schedule": "every 5 min via Cloudflare Workers cron (free tier, keyless data) — runs whether or not any tab is open. Backstop: GitHub Actions cron (requested every 5 min; GitHub delays it in practice — observed every 2-3 h). When it runs it skips while this worker is healthy with dexscreener LIVE, and covers discovery from separate egress IPs during dexscreener 429 cooldowns or worker outages.",
  "engineDrift": null,
  "stateRestored": true,
@@ -19,47 +19,49 @@
   {
    "id": "dexscreener",
    "label": "Dexscreener (public, keyless)",
-   "status": "LIVE",
-   "lastSuccess": 1792330844550,
-   "lastError": null,
-   "requestCount": 8,
-   "rateLimitCount": 0
+   "status": "DEGRADED",
+   "lastSuccess": 1792331138085,
+   "lastError": "HTTP 429",
+   "requestCount": 16,
+   "rateLimitCount": 2
   },
   {
    "id": "rugcheck",
    "label": "RugCheck (public, keyless)",
-   "status": "LIVE",
-   "lastSuccess": 1792330843016,
+   "status": "NOT_OBSERVED",
+   "lastSuccess": null,
    "lastError": null,
-   "requestCount": 3,
-   "rateLimitCount": 0
+   "requestCount": 0,
+   "rateLimitCount": 0,
+   "note": "not exercised this cycle (no refreshed candidates needed them)"
   },
   {
    "id": "solanarpc",
    "label": "Solana JSON-RPC (PublicNode)",
-   "status": "LIVE",
-   "lastSuccess": 1792330843404,
+   "status": "NOT_OBSERVED",
+   "lastSuccess": null,
    "lastError": null,
-   "requestCount": 10,
-   "rateLimitCount": 0
+   "requestCount": 0,
+   "rateLimitCount": 0,
+   "note": "not exercised this cycle (no refreshed candidates needed them)"
   }
  ],
  "counters": {
-  "discovered": 739,
+  "discovered": 741,
   "validated": 0,
   "rejected": 0,
   "incomplete": 589,
   "signals": 146
  },
  "counts": {
-  "total": 672,
+  "total": 674,
   "validated": 146,
   "paperSignals": 146,
   "dataIncomplete": 5,
   "watchlist": 0
  },
- "analyzedThisCycle": 3,
- "signalMarksTracked": 8,
+ "analyzedThisCycle": 0,
+ "signalMarksTracked": 0,
  "newSignalsThisCycle": [],
  "recentSignals": [
   {
@@ -508,9 +510,9 @@
    "state": "PAPER_SIGNAL",
    "score": 77,
    "riskVerdict": "PASS",
-   "liquidityUsd": 34225.68,
-   "mcap": 158472,
-   "observedAt": 1792330538612,
+   "liquidityUsd": 28091.34,
+   "mcap": 109449,
+   "observedAt": 1792331138030,
    "links": {
     "dexscreener": "https://dexscreener.com/solana/3TkvGdzTQZ1u32yhnaMeyaABQeFuyyvNaZMEBD4AxpEx",
     "gmgn": "https://gmgn.ai/sol/token/C1Hpcif5LiLfmnLY1f67op1x2mSP7Rht6HXB9mfbpump",
@@ -624,7 +626,10 @@
   }
  ],
  "errors": [
-  "discovery paused this cycle (driver-level phase alternation: odd cycles discover, even cycles analyze, so both fit the free-tier subrequest budget; each runs every 10 min)"
+  "discovery: pairs 6vwk…pump: HTTP 429",
+  "discovery: pairs 8dAT…pump: HTTP 429",
+  "dexscreener 429 this cycle — retrying next cycle (cooldown arms after 2 consecutive 429 cycles)",
+  "subrequest budget reached (18) — remaining analysis deferred (driver-level, protects heartbeat writes)"
  ],
  "notes": [
   "PAPER ONLY — research signals, not financial advice, never executable trades.",
@@ -635,18 +640,19 @@
  ],
  "driver": "worker-budget-v2 2026-10-17",
  "phaseMs": {
-  "t0": 1792330835593,
-  "readMs": 897
+  "t0": 1792331134981,
+  "readMs": 2993,
+  "discoveryMs": 4116
  },
  "dexBackoffUntil": null,
  "dexBackoffStrikes": 0,
- "dex429Streak": 0,
+ "dex429Streak": 1,
  "stateReadError": null,
- "subrequests": 23,
+ "subrequests": 18,
  "subPhases": {
-  "afterDiscovery": 2,
-  "afterAnalysis": 15,
-  "afterMarks": 23
+  "afterDiscovery": 18,
+  "afterAnalysis": 18,
+  "afterMarks": 18
  },
  "stateWritten": true
 }
