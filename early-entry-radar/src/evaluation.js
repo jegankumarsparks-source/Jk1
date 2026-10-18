@@ -3,6 +3,7 @@
 // evaluation has no survivorship bias. Entry reference = first observed market price at
 // or after the first signal decision. Paper only: nothing here executes or implies trades.
 import { fetchDexscreenerPairs } from './marketgates.js';
+import { fetchJson } from './util.js';
 
 export const TRACK_WINDOW_HOURS = 24;
 export const RUG_DROP_PCT = 80;        // price down >=80% from entry => rug/collapse event
@@ -108,6 +109,23 @@ export function summarizeEvaluation(state, nowIso = new Date().toISOString()) {
   };
 }
 
+// GeckoTerminal fallback: dexscreener's token endpoint 429s from Cloudflare egress (verified 2026-10-18).
+export async function fetchGeckoPools(mint) {
+  const r = await fetchJson(`https://api.geckoterminal.com/api/v2/networks/solana/tokens/${mint}/pools`);
+  if (!r.ok || !r.json || !Array.isArray(r.json.data)) return null;
+  return r.json.data;
+}
+
+export function priceFromGecko(pools) {
+  if (!Array.isArray(pools) || !pools.length) return null;
+  const ok = pools.filter(p => p.attributes && p.attributes.base_token_price_usd);
+  if (!ok.length) return null;
+  const best = ok.reduce((m, p) => (parseFloat(p.attributes.reserve_in_usd || 0) > parseFloat(m.attributes.reserve_in_usd || 0) ? p : m), ok[0]);
+  return { price_usd: parseFloat(best.attributes.base_token_price_usd),
+           liquidity_usd: parseFloat(best.attributes.reserve_in_usd || 0),
+           source: 'geckoterminal', pair: best.attributes.address || null };
+}
+
 // One cycle of price refreshes, budget-limited. Prioritizes oldest-refreshed tracked entities.
 export async function runOutcomeRefresh(state, { budget = 4, subrequests = () => 0, subLimit = 40 } = {}) {
   const ids = trackedEntityIds(state);
@@ -116,18 +134,22 @@ export async function runOutcomeRefresh(state, { budget = 4, subrequests = () =>
     const lb = (state.outcomes[b] && state.outcomes[b].last_price_at) || '';
     return la.localeCompare(lb);
   });
-  let refreshed = 0, errors = 0;
+  let refreshed = 0, errors = 0, unavailable = 0;
   for (const id of byStale) {
     if (refreshed >= budget || subrequests() > subLimit) break;
     const ent = state.entities[id];
     try {
+      let pi = null;
       const pairs = await fetchDexscreenerPairs(ent.mint);
-      if (pairs === null) { errors++; continue; }
-      const pi = priceFromPairs(pairs);
-      if (!pi) continue;
+      if (pairs !== null) pi = priceFromPairs(pairs);
+      if (!pi) { // fallback: geckoterminal pools (dexscreener token endpoint blocked from CF egress)
+        const pools = await fetchGeckoPools(ent.mint);
+        if (pools !== null) pi = priceFromGecko(pools);
+      }
+      if (!pi) { unavailable++; continue; }
       updateOutcome(state, id, pi);
       refreshed++;
     } catch (e) { errors++; }
   }
-  return { refreshed, errors, tracked: ids.length };
+  return { refreshed, errors, unavailable, tracked: ids.length };
 }

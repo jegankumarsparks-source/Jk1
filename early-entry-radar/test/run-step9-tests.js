@@ -104,4 +104,16 @@ const mkState = () => ({ seq: 0, sources: {}, raw_events: [], entities: {}, enti
 }
 
 console.log(`\n${pass} passed, ${fail} failed`);
+
+
+// T37: geckoterminal fallback path (live dexscreener blocked from CF egress)
+import { priceFromGecko } from '../src/evaluation.js';
+{
+  const pi = priceFromGecko([
+    { attributes: { base_token_price_usd: '0.001', reserve_in_usd: '100' } },
+    { attributes: { base_token_price_usd: '0.002', reserve_in_usd: '9000', address: 'pool1' } }]);
+  t('T37 gecko price pick = highest-reserve pool', pi && pi.price_usd === 0.002 && pi.pair === 'pool1' && pi.source === 'geckoterminal');
+  t('T37b gecko null on empty', priceFromGecko([]) === null && priceFromGecko(null) === null);
+}
+console.log(`(with T37) total: ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

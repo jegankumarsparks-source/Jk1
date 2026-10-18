@@ -86,8 +86,8 @@ export function mergeStates(a, b) {
 // Keep repo state under the ~1MB contents-API cap: tighter caps in prod + drop stale
 // provisional (mintless) entities that never got a signal decision. Decided entities are kept.
 function pruneState(state) {
-  const caps = { raw_events: 2500, entity_evidence: 4000, mentions: 1500, security_results: 1500,
-    gate_results: 1500, launch_status_log: 300, signal_state_log: 600, source_health: 300,
+  const caps = { raw_events: 1500, entity_evidence: 3000, mentions: 1200, security_results: 1000,
+    gate_results: 1000, launch_status_log: 300, signal_state_log: 600, source_health: 300,
     notifications: 200, pending_notifications: 100 };
   for (const [k, cap] of Object.entries(caps)) if (state[k] && state[k].length > cap) state[k] = state[k].slice(-cap);
   const decided = new Set(state.signal_state_log.map(r => r.entity_id));
@@ -189,12 +189,14 @@ async function runCycle(env) {
     }
   }
   // coalesce: if rejections pile up (e.g. after a stall), keep at most 2 and fold the rest into one summary
-  const rej = state.pending_notifications.filter(n => n.to === 'SECURITY REJECTED');
-  if (rej.length > 2) {
-    state.pending_notifications = state.pending_notifications.filter(n => n.to !== 'SECURITY REJECTED' || rej.indexOf(n) < 2);
-    state.pending_notifications.push({ key: `summary:rejections:${new Date().toISOString().slice(0, 13)}`, entityId: null,
-      to: 'SECURITY REJECTED', from: null, summary_count: rej.length - 2, queued_at: new Date().toISOString() });
-    for (const n of rej.slice(2)) state.notifications.push({ key: n.key, at: new Date().toISOString(), result: 'coalesced' });
+  for (const st of ['SECURITY REJECTED', 'DATA INCOMPLETE']) {
+    const rej = state.pending_notifications.filter(n => n.to === st);
+    if (rej.length > 2) {
+      state.pending_notifications = state.pending_notifications.filter(n => n.to !== st || rej.indexOf(n) < 2);
+      state.pending_notifications.push({ key: `summary:${st}:${new Date().toISOString().slice(0, 13)}`, entityId: null,
+        to: st, from: null, summary_count: rej.length - 2, queued_at: new Date().toISOString() });
+      for (const n of rej.slice(2)) state.notifications.push({ key: n.key, at: new Date().toISOString(), result: 'coalesced' });
+    }
   }
   // QUALIFIED CANDIDATE alerts drain first
   state.pending_notifications.sort((a, b) => (b.to === 'QUALIFIED CANDIDATE') - (a.to === 'QUALIFIED CANDIDATE'));
@@ -203,7 +205,7 @@ async function runCycle(env) {
     const n = state.pending_notifications.shift();
     const ent = state.entities[n.entityId];
     tgStatus = await tgSend(env, n.summary_count
-      ? `EARLY-ENTRY RADAR\n${n.summary_count} further SECURITY REJECTIONS this period (routine, see Rejected tab)\nhttps://jegankumarsparks-source.github.io/Jk1/${BASE}/`
+      ? `EARLY-ENTRY RADAR\n${n.summary_count} further ${n.to} transitions this period (routine, see dashboard)\nhttps://jegankumarsparks-source.github.io/Jk1/${BASE}/`
       : `EARLY-ENTRY RADAR\n${n.to}\n${ent && ent.name || '?'} (${ent && ent.ticker || '?'})\nmint: ${(ent && ent.mint) || 'unverified'}\nstate change: ${n.from || 'new'} -> ${n.to}\nhttps://jegankumarsparks-source.github.io/Jk1/${BASE}/`, state);
     if (tgStatus === 'sent') { state.notifications.push({ key: n.key, at: new Date().toISOString(), result: tgStatus }); notified++; }
     else if (tgStatus === 'not_configured' || tgStatus === 'rate_limited' || tgStatus === 'muted') { state.pending_notifications.unshift(n); break; } // keep queue, try later
