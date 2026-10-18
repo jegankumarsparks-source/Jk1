@@ -1,6 +1,6 @@
 {
- "generatedAt": 1792306540596,
- "generatedAtIso": "2026-10-18T06:55:40.596Z",
+ "generatedAt": 1792306844195,
+ "generatedAtIso": "2026-10-18T07:00:44.195Z",
  "scanner": "solana-radar-server",
  "runner": "cloudflare-worker-cron",
  "engineSource": "index.html embedded engine, extracted verbatim at run time",
@@ -9,9 +9,9 @@
  "scoreVersion": "score-v1.0",
  "riskPolicyVersion": "risk-v1.0",
  "thresholdsVersion": "thresh-v1.0",
- "cycle": 444,
- "cycleStartedAt": 1792306535211,
- "cycleDurationMs": 5385,
+ "cycle": 445,
+ "cycleStartedAt": 1792306835339,
+ "cycleDurationMs": 8856,
  "schedule": "every 5 min via Cloudflare Workers cron (free tier, keyless data) — runs whether or not any tab is open. Backstop: GitHub Actions cron (requested every 5 min; GitHub delays it in practice — observed every 2-3 h). When it runs it skips while this worker is healthy with dexscreener LIVE, and covers discovery from separate egress IPs during dexscreener 429 cooldowns or worker outages.",
  "engineDrift": null,
  "stateRestored": true,
@@ -19,17 +19,17 @@
   {
    "id": "dexscreener",
    "label": "Dexscreener (public, keyless)",
-   "status": "LIVE",
-   "lastSuccess": 1792306540596,
-   "lastError": null,
+   "status": "DEGRADED",
+   "lastSuccess": 1792306835403,
+   "lastError": "HTTP 429",
    "requestCount": 8,
-   "rateLimitCount": 0
+   "rateLimitCount": 2
   },
   {
    "id": "rugcheck",
    "label": "RugCheck (public, keyless)",
    "status": "LIVE",
-   "lastSuccess": 1792306535387,
+   "lastSuccess": 1792306839626,
    "lastError": null,
    "requestCount": 1,
    "rateLimitCount": 0
@@ -37,31 +37,84 @@
   {
    "id": "solanarpc",
    "label": "Solana JSON-RPC (PublicNode)",
-   "status": "LIVE",
-   "lastSuccess": 1792306540398,
-   "lastError": null,
-   "requestCount": 10,
-   "rateLimitCount": 0
+   "status": "DEGRADED",
+   "lastSuccess": 1792306839810,
+   "lastError": "HTTP 429",
+   "requestCount": 4,
+   "rateLimitCount": 1
   }
  ],
  "counters": {
-  "discovered": 665,
+  "discovered": 667,
   "validated": 0,
   "rejected": 0,
   "incomplete": 477,
-  "signals": 133
+  "signals": 134
  },
  "counts": {
-  "total": 639,
-  "validated": 133,
-  "paperSignals": 133,
-  "dataIncomplete": 6,
+  "total": 643,
+  "validated": 134,
+  "paperSignals": 134,
+  "dataIncomplete": 4,
   "watchlist": 0
  },
- "analyzedThisCycle": 3,
- "signalMarksTracked": 8,
- "newSignalsThisCycle": [],
+ "analyzedThisCycle": 1,
+ "signalMarksTracked": 0,
+ "newSignalsThisCycle": [
+  {
+   "id": "sig_mvdh7vvnwspmj0",
+   "mint": "38Afjux8G5M5LXFHKyh6iSu3nL1Bvr5N9iygwetfpump",
+   "symbol": "NIP",
+   "name": "Niggas in Paris",
+   "createdAt": 1792306844195,
+   "signalPriceUsd": 0.0000154,
+   "score": 23.5,
+   "riskVerdict": "FAIL",
+   "liquidityUsd": null,
+   "volume24": 52158.61,
+   "qualifiedWallets": 2,
+   "pairAddress": "E5rox4A7ayZoBCbm4zx6AUsDXJdWpMYHsEHwm1hdLWeD",
+   "dexId": "pumpfun",
+   "lastPrice": null,
+   "lastPriceAt": null,
+   "multiple": null,
+   "milestonesHit": [],
+   "dumpHit": null,
+   "links": {
+    "dexscreener": "https://dexscreener.com/solana/E5rox4A7ayZoBCbm4zx6AUsDXJdWpMYHsEHwm1hdLWeD",
+    "gmgn": "https://gmgn.ai/sol/token/38Afjux8G5M5LXFHKyh6iSu3nL1Bvr5N9iygwetfpump",
+    "solscan": "https://solscan.io/token/38Afjux8G5M5LXFHKyh6iSu3nL1Bvr5N9iygwetfpump"
+   },
+   "paperOnly": true
+  }
+ ],
  "recentSignals": [
+  {
+   "id": "sig_mvdh7vvnwspmj0",
+   "mint": "38Afjux8G5M5LXFHKyh6iSu3nL1Bvr5N9iygwetfpump",
+   "symbol": "NIP",
+   "name": "Niggas in Paris",
+   "createdAt": 1792306844195,
+   "signalPriceUsd": 0.0000154,
+   "score": 23.5,
+   "riskVerdict": "FAIL",
+   "liquidityUsd": null,
+   "volume24": 52158.61,
+   "qualifiedWallets": 2,
+   "pairAddress": "E5rox4A7ayZoBCbm4zx6AUsDXJdWpMYHsEHwm1hdLWeD",
+   "dexId": "pumpfun",
+   "lastPrice": null,
+   "lastPriceAt": null,
+   "multiple": null,
+   "milestonesHit": [],
+   "dumpHit": null,
+   "links": {
+    "dexscreener": "https://dexscreener.com/solana/E5rox4A7ayZoBCbm4zx6AUsDXJdWpMYHsEHwm1hdLWeD",
+    "gmgn": "https://gmgn.ai/sol/token/38Afjux8G5M5LXFHKyh6iSu3nL1Bvr5N9iygwetfpump",
+    "solscan": "https://solscan.io/token/38Afjux8G5M5LXFHKyh6iSu3nL1Bvr5N9iygwetfpump"
+   },
+   "paperOnly": true
+  },
   {
    "id": "sig_mvddcina2txzva",
    "mint": "8a3a3CPKmQf8dsHXL1HFqNpobxUSVuwwg3Rq899ypump",
@@ -479,36 +532,6 @@
     "solscan": "https://solscan.io/token/rVWG97Yj6ZbuF9zeQo8TosQG6mUcUeL8BocfHu3pump"
    },
    "paperOnly": true
-  },
-  {
-   "id": "sig_mvbzqjwsaz1rvb",
-   "mint": "FRypgC2GjcUiEyhpEgdeakxcEBtQ3u2HdSpua3vPpump",
-   "symbol": "HAVEN",
-   "name": "HAVEN",
-   "createdAt": 1792217015884,
-   "signalPriceUsd": 0.000006716,
-   "score": 23.5,
-   "riskVerdict": "FAIL",
-   "liquidityUsd": null,
-   "volume24": 72945.56,
-   "qualifiedWallets": 2,
-   "pairAddress": "FjgDzioc1vRZpC5DUxBgMeiksW69nKtfHkzPH3oEgDtC",
-   "dexId": "pumpfun",
-   "lastPrice": 0.000003249,
-   "lastPriceAt": 1792305036197,
-   "multiple": 0.48,
-   "milestonesHit": [],
-   "dumpHit": {
-    "at": 1792253738450,
-    "price": 0.000003384,
-    "multiple": 0.5
-   },
-   "links": {
-    "dexscreener": "https://dexscreener.com/solana/FjgDzioc1vRZpC5DUxBgMeiksW69nKtfHkzPH3oEgDtC",
-    "gmgn": "https://gmgn.ai/sol/token/FRypgC2GjcUiEyhpEgdeakxcEBtQ3u2HdSpua3vPpump",
-    "solscan": "https://solscan.io/token/FRypgC2GjcUiEyhpEgdeakxcEBtQ3u2HdSpua3vPpump"
-   },
-   "paperOnly": true
   }
  ],
  "topCandidates": [
@@ -664,7 +687,18 @@
   }
  ],
  "errors": [
-  "discovery paused this cycle (driver-level phase alternation: odd cycles discover, even cycles analyze, so both fit the free-tier subrequest budget; each runs every 10 min)"
+  "discovery: pairs bcmp…pump: HTTP 429",
+  "discovery: pairs 4RFb…pump: HTTP 429",
+  "discovery: pairs 5D3N…pump: source in rate-limit backoff",
+  "discovery: pairs BdXf…2S5t: source in rate-limit backoff",
+  "discovery: pairs 91ye…pump: source in rate-limit backoff",
+  "discovery: pairs AEf7…pump: source in rate-limit backoff",
+  "discovery: pairs JAkd…pump: source in rate-limit backoff",
+  "discovery: pairs 7cGw…pump: source in rate-limit backoff",
+  "discovery: pairs Ponz…Axz7: source in rate-limit backoff",
+  "discovery: pairs 3Y7k…pump: source in rate-limit backoff",
+  "dexscreener 429 this cycle — retrying next cycle (cooldown arms after 2 consecutive 429 cycles)",
+  "subrequest budget reached (15) — remaining analysis deferred (driver-level, protects heartbeat writes)"
  ],
  "notes": [
   "PAPER ONLY — research signals, not financial advice, never executable trades.",
@@ -675,18 +709,19 @@
  ],
  "driver": "worker-budget-v2 2026-10-17",
  "phaseMs": {
-  "t0": 1792306534703,
-  "readMs": 508
+  "t0": 1792306834494,
+  "readMs": 845,
+  "discoveryMs": 4071
  },
  "dexBackoffUntil": null,
  "dexBackoffStrikes": 0,
- "dex429Streak": 0,
+ "dex429Streak": 1,
  "stateReadError": null,
- "subrequests": 21,
+ "subrequests": 15,
  "subPhases": {
-  "afterDiscovery": 2,
-  "afterAnalysis": 13,
-  "afterMarks": 21
+  "afterDiscovery": 10,
+  "afterAnalysis": 15,
+  "afterMarks": 15
  },
  "stateWritten": true
 }
