@@ -129,14 +129,16 @@ export function priceFromGecko(pools) {
 // One cycle of price refreshes, budget-limited. Prioritizes oldest-refreshed tracked entities.
 export async function runOutcomeRefresh(state, { budget = 4, subrequests = () => 0, subLimit = 40 } = {}) {
   const ids = trackedEntityIds(state);
-  const byStale = ids.sort((a, b) => {
-    const la = (state.outcomes[a] && state.outcomes[a].last_price_at) || '';
-    const lb = (state.outcomes[b] && state.outcomes[b].last_price_at) || '';
-    return la.localeCompare(lb);
-  });
+  // existing trackers first (oldest refresh) so series actually grow; new entries capped per cycle
+  const have = ids.filter(id => state.outcomes[id]).sort((a, b) =>
+    ((state.outcomes[a].last_price_at || '')).localeCompare(state.outcomes[b].last_price_at || ''));
+  const fresh = ids.filter(id => !state.outcomes[id]);
+  const byStale = [...have, ...fresh];
   let refreshed = 0, errors = 0, unavailable = 0;
+  let freshTried = 0;
   for (const id of byStale) {
     if (refreshed >= budget || subrequests() > subLimit) break;
+    if (!state.outcomes[id] && ++freshTried > 2) continue; // dead tokens burn budget; cap new-entry probes
     const ent = state.entities[id];
     try {
       let pi = null;

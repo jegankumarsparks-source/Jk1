@@ -6,7 +6,7 @@ import { runOutcomeRefresh, summarizeEvaluation } from './src/evaluation.js';
 import { runCollectors } from './src/ingest.js';
 import { ingestMentions } from './src/social.js';
 import { computeLaunchStatus, applyLaunchStatus } from './src/prelaunch.js';
-import { runSecurityChecks, persistSecurity } from './src/security.js';
+import { runSecurityChecks, persistSecurity, verdictFromRows } from './src/security.js';
 import { runMarketGates, persistGates } from './src/marketgates.js';
 import { decide, lifecycle, applySignalState } from './src/decision.js';
 import * as pumpfun from './src/adapters/pumpfun.js';
@@ -162,7 +162,10 @@ async function runCycle(env) {
         persistGates(store, entityId, gates);
         var secVerdict = sec.verdict, mktVerdict = gates.verdict;
       } else if (lastSec) {
-        var secVerdict = lastSec.result === 'FAIL' ? 'REJECTED' : 'PASS_WITH_FINDINGS';
+        // correct cache path: stored _verdict row wins; else recompute from all check rows (never last-row inference)
+        const rows = state.security_results.filter(r => r.entity_id === entityId).reverse();
+        const vrow = rows.find(r => r.check_name === '_verdict');
+        var secVerdict = vrow ? vrow.result : verdictFromRows(rows);
       }
       // decision
       const facts = buildFacts(state, entityId, ent, config);
@@ -182,6 +185,8 @@ async function runCycle(env) {
   const NOTIFY_STATES = ['QUALIFIED CANDIDATE', 'SECURITY REJECTED', 'SIGNAL INVALIDATED', 'DATA INCOMPLETE'];
   for (const tr of transitions) {
     const key = `${tr.entityId}:${tr.to}`;
+    const isRegression = ['QUALIFYING', 'QUALIFIED CANDIDATE', 'OUTCOME PENDING'].includes(tr.from);
+    if (tr.to === 'DATA INCOMPLETE' && !isRegression) continue; // first-time incompletes are routine, log-only
     if (NOTIFY_STATES.includes(tr.to)
         && !state.notifications.some(n => n.key === key)
         && !state.pending_notifications.some(n => n.key === key)) {

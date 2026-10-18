@@ -123,17 +123,31 @@ export async function runSecurityChecks(mint, config = {}) {
     checks.rugcheck_flags = { result: risks.length ? 'FAIL' : 'PASS', evidence: { score: rc.score, risks: risks.slice(0, 10) }, provider: 'rugcheck', limitations: 'advisory aggregate; individual checks above govern', at: nowUTC() };
   }
 
-  // verdict
+  return { checks, verdict: verdictFromChecks(checks) };
+}
+
+// Single source of truth for verdicts: only CRITICAL FAILs reject; MANDATORY UNKNOWNs => INCOMPLETE.
+// Advisory checks (rugcheck_flags etc.) never reject on their own.
+export function verdictFromChecks(checks) {
   let verdict = 'PASS_WITH_FINDINGS';
   for (const c of CRITICAL) if (checks[c] && checks[c].result === 'FAIL') verdict = 'REJECTED';
   if (verdict !== 'REJECTED') for (const m of MANDATORY) if (!checks[m] || checks[m].result === 'UNKNOWN') verdict = 'INCOMPLETE';
-  return { checks, verdict };
+  return verdict;
+}
+
+// Rebuild a verdict from stored check rows (worker cache path). Rows newest-first win per check.
+export function verdictFromRows(rows) {
+  const checks = {};
+  for (const r of rows) if (!(r.check_name in checks)) checks[r.check_name] = { result: r.result };
+  return verdictFromChecks(checks);
 }
 
 export function persistSecurity(store, entityId, { checks, verdict }) {
+  const at = new Date().toISOString();
   for (const [name, c] of Object.entries(checks)) {
     store.insertSecurityResult({ entity_id: entityId, check_name: name, result: c.result,
-      evidence: JSON.stringify(c.evidence || null), provider: c.provider || null, limitations: c.limitations || null, at: c.at });
+      evidence: JSON.stringify(c.evidence || null), provider: c.provider || null, limitations: c.limitations || null, at: c.at || at });
   }
+  store.insertSecurityResult({ entity_id: entityId, check_name: '_verdict', result: verdict, evidence: null, provider: 'engine', limitations: null, at });
   return verdict;
 }

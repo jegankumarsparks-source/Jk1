@@ -115,5 +115,24 @@ import { priceFromGecko } from '../src/evaluation.js';
   t('T37 gecko price pick = highest-reserve pool', pi && pi.price_usd === 0.002 && pi.pair === 'pool1' && pi.source === 'geckoterminal');
   t('T37b gecko null on empty', priceFromGecko([]) === null && priceFromGecko(null) === null);
 }
-console.log(`(with T37) total: ${pass} passed, ${fail} failed`);
+// T38: verdict regression - advisory rugcheck FAIL must NOT reject (bug found in prod 2026-10-18)
+import { verdictFromRows } from '../src/security.js';
+{
+  const advisoryOnly = [
+    { check_name: 'rugcheck_flags', result: 'FAIL' },
+    { check_name: 'mint_authority', result: 'PASS' },
+    { check_name: 'freeze_authority', result: 'PASS' },
+    { check_name: 'non_transferable', result: 'PASS' },
+    { check_name: 'sell_feasibility', result: 'PASS' },
+    { check_name: 'holder_concentration', result: 'PASS' }];
+  t('T38a advisory-only FAIL => PASS_WITH_FINDINGS', verdictFromRows(advisoryOnly) === 'PASS_WITH_FINDINGS', verdictFromRows(advisoryOnly));
+  const crit = [...advisoryOnly, { check_name: 'freeze_authority', result: 'FAIL' }];
+  // newest-first: freeze FAIL appears first
+  t('T38b critical FAIL => REJECTED', verdictFromRows([{ check_name: 'freeze_authority', result: 'FAIL' }, ...advisoryOnly]) === 'REJECTED');
+  const missing = [{ check_name: 'mint_authority', result: 'PASS' }];
+  t('T38c mandatory UNKNOWN => INCOMPLETE', verdictFromRows(missing) === 'INCOMPLETE');
+  const vrow = [{ check_name: '_verdict', result: 'REJECTED' }, ...advisoryOnly];
+  t('T38d newest row per check wins', verdictFromRows(vrow.filter(r=>r.check_name!=='_verdict')) === 'PASS_WITH_FINDINGS');
+}
+console.log(`(with T37+T38) total: ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
