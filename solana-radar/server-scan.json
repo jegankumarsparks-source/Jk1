@@ -1,6 +1,6 @@
 {
- "generatedAt": 1792332341114,
- "generatedAtIso": "2026-10-18T14:05:41.114Z",
+ "generatedAt": 1792332644044,
+ "generatedAtIso": "2026-10-18T14:10:44.044Z",
  "scanner": "solana-radar-server",
  "runner": "cloudflare-worker-cron",
  "engineSource": "index.html embedded engine, extracted verbatim at run time",
@@ -9,9 +9,9 @@
  "scoreVersion": "score-v1.0",
  "riskPolicyVersion": "risk-v1.0",
  "thresholdsVersion": "thresh-v1.0",
- "cycle": 531,
- "cycleStartedAt": 1792332336101,
- "cycleDurationMs": 5013,
+ "cycle": 532,
+ "cycleStartedAt": 1792332637006,
+ "cycleDurationMs": 7038,
  "schedule": "every 5 min via Cloudflare Workers cron (free tier, keyless data) — runs whether or not any tab is open. Backstop: GitHub Actions cron (requested every 5 min; GitHub delays it in practice — observed every 2-3 h). When it runs it skips while this worker is healthy with dexscreener LIVE, and covers discovery from separate egress IPs during dexscreener 429 cooldowns or worker outages.",
  "engineDrift": null,
  "stateRestored": true,
@@ -19,49 +19,47 @@
   {
    "id": "dexscreener",
    "label": "Dexscreener (public, keyless)",
-   "status": "DEGRADED",
-   "lastSuccess": 1792332337102,
-   "lastError": "HTTP 429",
-   "requestCount": 23,
-   "rateLimitCount": 1
+   "status": "LIVE",
+   "lastSuccess": 1792332644044,
+   "lastError": null,
+   "requestCount": 8,
+   "rateLimitCount": 0
   },
   {
    "id": "rugcheck",
    "label": "RugCheck (public, keyless)",
-   "status": "NOT_OBSERVED",
-   "lastSuccess": null,
+   "status": "LIVE",
+   "lastSuccess": 1792332643259,
    "lastError": null,
-   "requestCount": 0,
-   "rateLimitCount": 0,
-   "note": "not exercised this cycle (no refreshed candidates needed them)"
+   "requestCount": 2,
+   "rateLimitCount": 0
   },
   {
    "id": "solanarpc",
    "label": "Solana JSON-RPC (PublicNode)",
-   "status": "NOT_OBSERVED",
+   "status": "DEGRADED",
    "lastSuccess": null,
-   "lastError": null,
-   "requestCount": 0,
-   "rateLimitCount": 0,
-   "note": "not exercised this cycle (no refreshed candidates needed them)"
+   "lastError": "HTTP 429",
+   "requestCount": 2,
+   "rateLimitCount": 1
   }
  ],
  "counters": {
   "discovered": 748,
   "validated": 0,
   "rejected": 0,
-  "incomplete": 595,
+  "incomplete": 598,
   "signals": 146
  },
  "counts": {
   "total": 678,
   "validated": 146,
   "paperSignals": 146,
-  "dataIncomplete": 3,
+  "dataIncomplete": 5,
   "watchlist": 0
  },
- "analyzedThisCycle": 0,
- "signalMarksTracked": 7,
+ "analyzedThisCycle": 3,
+ "signalMarksTracked": 8,
  "newSignalsThisCycle": [],
  "recentSignals": [
   {
@@ -311,7 +309,7 @@
    "pairAddress": "DGzpJ9ZLPjhhgJ4Z4JqX4aJJW7YE34Hk8wFVfb1KQPVZ",
    "dexId": "pumpfun",
    "lastPrice": 0.000003663,
-   "lastPriceAt": 1792331737574,
+   "lastPriceAt": 1792332643269,
    "multiple": 0.81,
    "milestonesHit": [],
    "dumpHit": null,
@@ -336,9 +334,9 @@
    "qualifiedWallets": 1,
    "pairAddress": "CJJjTZtLuKwSUV3XX9YVoKs966uP7xGRc4yMNkLpGWHk",
    "dexId": "pumpswap",
-   "lastPrice": 0.000002648,
-   "lastPriceAt": 1792331737880,
-   "multiple": 0.8,
+   "lastPrice": 0.00000252,
+   "lastPriceAt": 1792332643275,
+   "multiple": 0.76,
    "milestonesHit": [],
    "dumpHit": null,
    "links": {
@@ -362,9 +360,9 @@
    "qualifiedWallets": 5,
    "pairAddress": "CkXNmecnvVbLBAeaRqvEX5QdwUw4SjwP8BjY7uAmC8TN",
    "dexId": "pumpswap",
-   "lastPrice": 0.00000327,
-   "lastPriceAt": 1792331738095,
-   "multiple": 0.52,
+   "lastPrice": 0.000003195,
+   "lastPriceAt": 1792332643499,
+   "multiple": 0.51,
    "milestonesHit": [],
    "dumpHit": null,
    "links": {
@@ -388,9 +386,9 @@
    "qualifiedWallets": 3,
    "pairAddress": "CDsRRjDTrLQQbzZbnLH1XdWUSkUyLnXi5i9kbBzgtpGC",
    "dexId": "pumpswap",
-   "lastPrice": 0.00001613,
-   "lastPriceAt": 1792331738165,
-   "multiple": 0.49,
+   "lastPrice": 0.0000221,
+   "lastPriceAt": 1792332643545,
+   "multiple": 0.67,
    "milestonesHit": [],
    "dumpHit": {
     "at": 1792328139438,
@@ -418,9 +416,9 @@
    "qualifiedWallets": 2,
    "pairAddress": "E5rox4A7ayZoBCbm4zx6AUsDXJdWpMYHsEHwm1hdLWeD",
    "dexId": "pumpfun",
-   "lastPrice": 0.000004699,
-   "lastPriceAt": 1792331738485,
-   "multiple": 0.31,
+   "lastPrice": 0.000008808,
+   "lastPriceAt": 1792332643781,
+   "multiple": 0.57,
    "milestonesHit": [],
    "dumpHit": {
     "at": 1792309235559,
@@ -449,7 +447,7 @@
    "pairAddress": "1qepxfgWVNtxzTSWNbunJsZiaUbdMtK3kABgKbGBa8o",
    "dexId": "meteora",
    "lastPrice": 0.00002,
-   "lastPriceAt": 1792331738578,
+   "lastPriceAt": 1792332643787,
    "multiple": 0.56,
    "milestonesHit": [],
    "dumpHit": null,
@@ -474,9 +472,9 @@
    "qualifiedWallets": 3,
    "pairAddress": "7ZnMAm4BnTXu8syTwKd2dNUDpP4vSnApgG6AhkpUC9iK",
    "dexId": "pumpfun",
-   "lastPrice": 0.00001498,
-   "lastPriceAt": 1792331738685,
-   "multiple": 0.84,
+   "lastPrice": 0.00001129,
+   "lastPriceAt": 1792332643794,
+   "multiple": 0.64,
    "milestonesHit": [],
    "dumpHit": {
     "at": 1792302939517,
@@ -644,7 +642,7 @@
   }
  ],
  "errors": [
-  "subrequest budget reached (16) — remaining analysis deferred (driver-level, protects heartbeat writes)"
+  "discovery paused this cycle (driver-level phase alternation: odd cycles discover, even cycles analyze, so both fit the free-tier subrequest budget; each runs every 10 min)"
  ],
  "notes": [
   "PAPER ONLY — research signals, not financial advice, never executable trades.",
@@ -655,19 +653,18 @@
  ],
  "driver": "worker-budget-v2 2026-10-17",
  "phaseMs": {
-  "t0": 1792332335016,
-  "readMs": 1085,
-  "discoveryMs": 157
+  "t0": 1792332634928,
+  "readMs": 2078
  },
  "dexBackoffUntil": null,
  "dexBackoffStrikes": 0,
  "dex429Streak": 0,
  "stateReadError": null,
- "subrequests": 25,
+ "subrequests": 14,
  "subPhases": {
-  "afterDiscovery": 16,
-  "afterAnalysis": 16,
-  "afterMarks": 25
+  "afterDiscovery": 2,
+  "afterAnalysis": 6,
+  "afterMarks": 14
  },
  "stateWritten": true
 }
