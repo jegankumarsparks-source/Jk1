@@ -1,46 +1,49 @@
 {
- "generatedAt": 1792330320046,
- "generatedAtIso": "2026-10-18T13:32:00.046Z",
+ "generatedAt": 1792330539147,
+ "generatedAtIso": "2026-10-18T13:35:39.147Z",
  "scanner": "solana-radar-server",
- "runner": "github-actions-backstop",
+ "runner": "cloudflare-worker-cron",
  "engineSource": "index.html embedded engine, extracted verbatim at run time",
  "buildMarker": "JK-SR-MAX-V1",
  "appVersion": "1.7.1",
  "scoreVersion": "score-v1.0",
  "riskPolicyVersion": "risk-v1.0",
  "thresholdsVersion": "thresh-v1.0",
- "cycle": 524,
- "cycleStartedAt": 1792330317315,
- "cycleDurationMs": 2731,
- "schedule": "BACKSTOP via GitHub Actions (keyless, free tier) — runs only when the Cloudflare worker heartbeat is stale (>12 min); primary 24/7 scanner is the Cloudflare worker",
+ "cycle": 525,
+ "cycleStartedAt": 1792330538149,
+ "cycleDurationMs": 998,
+ "schedule": "every 5 min via Cloudflare Workers cron (free tier, keyless data) — runs whether or not any tab is open. Backstop: GitHub Actions cron (requested every 5 min; GitHub delays it in practice — observed every 2-3 h). When it runs it skips while this worker is healthy with dexscreener LIVE, and covers discovery from separate egress IPs during dexscreener 429 cooldowns or worker outages.",
+ "engineDrift": null,
  "stateRestored": true,
  "sources": [
   {
    "id": "dexscreener",
    "label": "Dexscreener (public, keyless)",
    "status": "LIVE",
-   "lastSuccess": 1792330320043,
+   "lastSuccess": 1792330539147,
    "lastError": null,
-   "requestCount": 39,
+   "requestCount": 22,
    "rateLimitCount": 0
   },
   {
    "id": "rugcheck",
    "label": "RugCheck (public, keyless)",
-   "status": "LIVE",
-   "lastSuccess": 1792330319106,
+   "status": "NOT_OBSERVED",
+   "lastSuccess": null,
    "lastError": null,
-   "requestCount": 6,
-   "rateLimitCount": 0
+   "requestCount": 0,
+   "rateLimitCount": 0,
+   "note": "not exercised this cycle (no refreshed candidates needed them)"
   },
   {
    "id": "solanarpc",
    "label": "Solana JSON-RPC (PublicNode)",
-   "status": "LIVE",
-   "lastSuccess": 1792330319246,
+   "status": "NOT_OBSERVED",
+   "lastSuccess": null,
    "lastError": null,
-   "requestCount": 30,
-   "rateLimitCount": 0
+   "requestCount": 0,
+   "rateLimitCount": 0,
+   "note": "not exercised this cycle (no refreshed candidates needed them)"
   }
  ],
  "counters": {
@@ -57,166 +60,9 @@
   "dataIncomplete": 2,
   "watchlist": 0
  },
- "analyzedThisCycle": 6,
- "signalMarksTracked": 25,
- "newSignalsThisCycle": [
-  {
-   "id": "sig_mvdv70ezbzxdhq",
-   "mint": "TTcxAsRtHK2AQoT311u2HxMGTctE7Y7U6WegVoEpump",
-   "symbol": "Fini",
-   "name": "C’est Fini",
-   "createdAt": 1792330318043,
-   "signalPriceUsd": 0.00001837,
-   "score": 58.3,
-   "riskVerdict": "PASS",
-   "liquidityUsd": 9854.6,
-   "volume24": 256770.31,
-   "qualifiedWallets": 4,
-   "pairAddress": "5PQUGb8NSwBEZGLkQEDbKgGzWgFMBeUWRk1cERUtdTkH",
-   "dexId": "pumpswap",
-   "lastPrice": 0.00001837,
-   "lastPriceAt": 1792330319320,
-   "multiple": 1,
-   "milestonesHit": [],
-   "dumpHit": null,
-   "links": {
-    "dexscreener": "https://dexscreener.com/solana/5PQUGb8NSwBEZGLkQEDbKgGzWgFMBeUWRk1cERUtdTkH",
-    "gmgn": "https://gmgn.ai/sol/token/TTcxAsRtHK2AQoT311u2HxMGTctE7Y7U6WegVoEpump",
-    "solscan": "https://solscan.io/token/TTcxAsRtHK2AQoT311u2HxMGTctE7Y7U6WegVoEpump"
-   },
-   "paperOnly": true
-  },
-  {
-   "id": "sig_mvdv70kpli9v92",
-   "mint": "C1Hpcif5LiLfmnLY1f67op1x2mSP7Rht6HXB9mfbpump",
-   "symbol": "Tortue",
-   "name": "La Tortue Sagace",
-   "createdAt": 1792330318248,
-   "signalPriceUsd": 0.0002043,
-   "score": 77,
-   "riskVerdict": "PASS",
-   "liquidityUsd": 38159.14,
-   "volume24": 515147.18,
-   "qualifiedWallets": 5,
-   "pairAddress": "3TkvGdzTQZ1u32yhnaMeyaABQeFuyyvNaZMEBD4AxpEx",
-   "dexId": "pumpswap",
-   "lastPrice": 0.0002043,
-   "lastPriceAt": 1792330319309,
-   "multiple": 1,
-   "milestonesHit": [],
-   "dumpHit": null,
-   "links": {
-    "dexscreener": "https://dexscreener.com/solana/3TkvGdzTQZ1u32yhnaMeyaABQeFuyyvNaZMEBD4AxpEx",
-    "gmgn": "https://gmgn.ai/sol/token/C1Hpcif5LiLfmnLY1f67op1x2mSP7Rht6HXB9mfbpump",
-    "solscan": "https://solscan.io/token/C1Hpcif5LiLfmnLY1f67op1x2mSP7Rht6HXB9mfbpump"
-   },
-   "paperOnly": true
-  },
-  {
-   "id": "sig_mvdv70qfvnndfx",
-   "mint": "58eo3pKwDZ2GKT2XvRumuns6RustWyvqtgfyubA3kYAJ",
-   "symbol": "ZDOG",
-   "name": "Anonymous Dog",
-   "createdAt": 1792330318455,
-   "signalPriceUsd": 0.00009911,
-   "score": 55,
-   "riskVerdict": "PASS",
-   "liquidityUsd": 25366.29,
-   "volume24": 138079.01,
-   "qualifiedWallets": 2,
-   "pairAddress": "EsF94GU1x6DyXFL11ZSkuwzZpX8g5rzrYn8iTyc3xriR",
-   "dexId": "pumpswap",
-   "lastPrice": 0.00009911,
-   "lastPriceAt": 1792330319295,
-   "multiple": 1,
-   "milestonesHit": [],
-   "dumpHit": null,
-   "links": {
-    "dexscreener": "https://dexscreener.com/solana/EsF94GU1x6DyXFL11ZSkuwzZpX8g5rzrYn8iTyc3xriR",
-    "gmgn": "https://gmgn.ai/sol/token/58eo3pKwDZ2GKT2XvRumuns6RustWyvqtgfyubA3kYAJ",
-    "solscan": "https://solscan.io/token/58eo3pKwDZ2GKT2XvRumuns6RustWyvqtgfyubA3kYAJ"
-   },
-   "paperOnly": true
-  },
-  {
-   "id": "sig_mvdv710dtpsjpc",
-   "mint": "6vwkHvvoJujaPy6SWdjqE2fFc1V3AW6pj6KTh9jipump",
-   "symbol": "MEGA",
-   "name": "Make Europe Great Again",
-   "createdAt": 1792330318813,
-   "signalPriceUsd": 0.0001666,
-   "score": 72.5,
-   "riskVerdict": "PASS",
-   "liquidityUsd": 34315.96,
-   "volume24": 550406.17,
-   "qualifiedWallets": 5,
-   "pairAddress": "w6RsQbTcRXtXgdKc3TG19Q4abQv2y1zYbtKx98635HJ",
-   "dexId": "pumpswap",
-   "lastPrice": 0.0001666,
-   "lastPriceAt": 1792330319284,
-   "multiple": 1,
-   "milestonesHit": [],
-   "dumpHit": null,
-   "links": {
-    "dexscreener": "https://dexscreener.com/solana/w6RsQbTcRXtXgdKc3TG19Q4abQv2y1zYbtKx98635HJ",
-    "gmgn": "https://gmgn.ai/sol/token/6vwkHvvoJujaPy6SWdjqE2fFc1V3AW6pj6KTh9jipump",
-    "solscan": "https://solscan.io/token/6vwkHvvoJujaPy6SWdjqE2fFc1V3AW6pj6KTh9jipump"
-   },
-   "paperOnly": true
-  },
-  {
-   "id": "sig_mvdv7164gmpjc0",
-   "mint": "8dATxRTextAcaGxtWWUoTVApruNXtNS3Y74uD4Jzpump",
-   "symbol": "MEGA",
-   "name": "Make Europe Great Again",
-   "createdAt": 1792330319020,
-   "signalPriceUsd": 0.00004934,
-   "score": 65,
-   "riskVerdict": "PASS",
-   "liquidityUsd": 18220.93,
-   "volume24": 549200.17,
-   "qualifiedWallets": 4,
-   "pairAddress": "2aXmkjNC4MZJg7Y8FQfHLchAPnLGxgSaFX7xhbpuTgkc",
-   "dexId": "pumpswap",
-   "lastPrice": 0.00004934,
-   "lastPriceAt": 1792330319274,
-   "multiple": 1,
-   "milestonesHit": [],
-   "dumpHit": null,
-   "links": {
-    "dexscreener": "https://dexscreener.com/solana/2aXmkjNC4MZJg7Y8FQfHLchAPnLGxgSaFX7xhbpuTgkc",
-    "gmgn": "https://gmgn.ai/sol/token/8dATxRTextAcaGxtWWUoTVApruNXtNS3Y74uD4Jzpump",
-    "solscan": "https://solscan.io/token/8dATxRTextAcaGxtWWUoTVApruNXtNS3Y74uD4Jzpump"
-   },
-   "paperOnly": true
-  },
-  {
-   "id": "sig_mvdv71cenq0y2y",
-   "mint": "AQtGhiMUSvFfd7dgfMMk93WfmzJ8zELBj3BtuowJab99",
-   "symbol": "MEGA",
-   "name": "MAKE EUROPE GREAT AGAIN",
-   "createdAt": 1792330319246,
-   "signalPriceUsd": 0.000007086,
-   "score": 14.3,
-   "riskVerdict": "FAIL",
-   "liquidityUsd": null,
-   "volume24": 15241.2,
-   "qualifiedWallets": 1,
-   "pairAddress": "5PdaH1NZ9ZJoJZ8Jb9QVnHj6m4nv9qGmij88WgdXQtn7",
-   "dexId": "pumpfun",
-   "lastPrice": 0.000007086,
-   "lastPriceAt": 1792330319262,
-   "multiple": 1,
-   "milestonesHit": [],
-   "dumpHit": null,
-   "links": {
-    "dexscreener": "https://dexscreener.com/solana/5PdaH1NZ9ZJoJZ8Jb9QVnHj6m4nv9qGmij88WgdXQtn7",
-    "gmgn": "https://gmgn.ai/sol/token/AQtGhiMUSvFfd7dgfMMk93WfmzJ8zELBj3BtuowJab99",
-    "solscan": "https://solscan.io/token/AQtGhiMUSvFfd7dgfMMk93WfmzJ8zELBj3BtuowJab99"
-   },
-   "paperOnly": true
-  }
- ],
+ "analyzedThisCycle": 0,
+ "signalMarksTracked": 8,
+ "newSignalsThisCycle": [],
  "recentSignals": [
   {
    "id": "sig_mvdv71cenq0y2y",
@@ -232,9 +78,9 @@
    "qualifiedWallets": 1,
    "pairAddress": "5PdaH1NZ9ZJoJZ8Jb9QVnHj6m4nv9qGmij88WgdXQtn7",
    "dexId": "pumpfun",
-   "lastPrice": 0.000007086,
-   "lastPriceAt": 1792330319262,
-   "multiple": 1,
+   "lastPrice": 0.00000729,
+   "lastPriceAt": 1792330538577,
+   "multiple": 1.03,
    "milestonesHit": [],
    "dumpHit": null,
    "links": {
@@ -258,10 +104,16 @@
    "qualifiedWallets": 4,
    "pairAddress": "2aXmkjNC4MZJg7Y8FQfHLchAPnLGxgSaFX7xhbpuTgkc",
    "dexId": "pumpswap",
-   "lastPrice": 0.00004934,
-   "lastPriceAt": 1792330319274,
-   "multiple": 1,
-   "milestonesHit": [],
+   "lastPrice": 0.00009315,
+   "lastPriceAt": 1792330538592,
+   "multiple": 1.89,
+   "milestonesHit": [
+    {
+     "x": 1.5,
+     "at": 1792330539147,
+     "price": 0.00009315
+    }
+   ],
    "dumpHit": null,
    "links": {
     "dexscreener": "https://dexscreener.com/solana/2aXmkjNC4MZJg7Y8FQfHLchAPnLGxgSaFX7xhbpuTgkc",
@@ -284,9 +136,9 @@
    "qualifiedWallets": 5,
    "pairAddress": "w6RsQbTcRXtXgdKc3TG19Q4abQv2y1zYbtKx98635HJ",
    "dexId": "pumpswap",
-   "lastPrice": 0.0001666,
-   "lastPriceAt": 1792330319284,
-   "multiple": 1,
+   "lastPrice": 0.0001295,
+   "lastPriceAt": 1792330538599,
+   "multiple": 0.78,
    "milestonesHit": [],
    "dumpHit": null,
    "links": {
@@ -310,9 +162,9 @@
    "qualifiedWallets": 2,
    "pairAddress": "EsF94GU1x6DyXFL11ZSkuwzZpX8g5rzrYn8iTyc3xriR",
    "dexId": "pumpswap",
-   "lastPrice": 0.00009911,
-   "lastPriceAt": 1792330319295,
-   "multiple": 1,
+   "lastPrice": 0.00008884,
+   "lastPriceAt": 1792330538605,
+   "multiple": 0.9,
    "milestonesHit": [],
    "dumpHit": null,
    "links": {
@@ -336,9 +188,9 @@
    "qualifiedWallets": 5,
    "pairAddress": "3TkvGdzTQZ1u32yhnaMeyaABQeFuyyvNaZMEBD4AxpEx",
    "dexId": "pumpswap",
-   "lastPrice": 0.0002043,
-   "lastPriceAt": 1792330319309,
-   "multiple": 1,
+   "lastPrice": 0.0001646,
+   "lastPriceAt": 1792330538612,
+   "multiple": 0.81,
    "milestonesHit": [],
    "dumpHit": null,
    "links": {
@@ -362,9 +214,9 @@
    "qualifiedWallets": 4,
    "pairAddress": "5PQUGb8NSwBEZGLkQEDbKgGzWgFMBeUWRk1cERUtdTkH",
    "dexId": "pumpswap",
-   "lastPrice": 0.00001837,
-   "lastPriceAt": 1792330319320,
-   "multiple": 1,
+   "lastPrice": 0.00001567,
+   "lastPriceAt": 1792330538621,
+   "multiple": 0.85,
    "milestonesHit": [],
    "dumpHit": null,
    "links": {
@@ -389,7 +241,7 @@
    "pairAddress": "B3ea2zZuzmaczH2YC9bERdhm6nBDmMv8vgjAxa9XBTvP",
    "dexId": "pumpswap",
    "lastPrice": 0.000005505,
-   "lastPriceAt": 1792330319330,
+   "lastPriceAt": 1792330538887,
    "multiple": 0.71,
    "milestonesHit": [],
    "dumpHit": null,
@@ -415,7 +267,7 @@
    "pairAddress": "6Bt5ZK4NhLmXVG2NSLsgzK1W6F4ukHEZyWsBJ5TYu1nw",
    "dexId": "pumpfun",
    "lastPrice": 0.000003077,
-   "lastPriceAt": 1792330319405,
+   "lastPriceAt": 1792330539147,
    "multiple": 1,
    "milestonesHit": [],
    "dumpHit": null,
@@ -658,9 +510,9 @@
    "state": "PAPER_SIGNAL",
    "score": 77,
    "riskVerdict": "PASS",
-   "liquidityUsd": 38159.14,
-   "mcap": 196686,
-   "observedAt": 1792330319309,
+   "liquidityUsd": 34225.68,
+   "mcap": 158472,
+   "observedAt": 1792330538612,
    "links": {
     "dexscreener": "https://dexscreener.com/solana/3TkvGdzTQZ1u32yhnaMeyaABQeFuyyvNaZMEBD4AxpEx",
     "gmgn": "https://gmgn.ai/sol/token/C1Hpcif5LiLfmnLY1f67op1x2mSP7Rht6HXB9mfbpump",
@@ -748,9 +600,9 @@
    "state": "PAPER_SIGNAL",
    "score": 72.5,
    "riskVerdict": "PASS",
-   "liquidityUsd": 34315.96,
-   "mcap": 166624,
-   "observedAt": 1792330319284,
+   "liquidityUsd": 30228.4,
+   "mcap": 123670,
+   "observedAt": 1792330538599,
    "links": {
     "dexscreener": "https://dexscreener.com/solana/w6RsQbTcRXtXgdKc3TG19Q4abQv2y1zYbtKx98635HJ",
     "gmgn": "https://gmgn.ai/sol/token/6vwkHvvoJujaPy6SWdjqE2fFc1V3AW6pj6KTh9jipump",
@@ -773,11 +625,31 @@
    }
   }
  ],
- "errors": [],
+ "errors": [
+  "subrequest budget reached (16) — remaining analysis deferred (driver-level, protects heartbeat writes)"
+ ],
  "notes": [
   "PAPER ONLY — research signals, not financial advice, never executable trades.",
-  "Engine code is the in-tab scanner engine extracted verbatim from index.html at run time; rules unchanged.",
+  "Engine code is the in-tab scanner engine extracted verbatim from index.html into a static bundle (hash-checked every cycle against the live page; drift is labelled, never silent); rules unchanged.",
   "Signal price is frozen at signal time; lastPrice/multiple are observed Dexscreener marks, not executable fills.",
-  "Candidates idle >72h without an unconsumed signal are evicted (state hygiene); signals and wallets bounded."
- ]
+  "Candidates idle >72h without an unconsumed signal are evicted (state hygiene); signals and wallets bounded.",
+  "Driver enforces hard per-phase time budgets and always writes this heartbeat feed, even when a data source stalls; a stalled source is labelled in errors, never silent."
+ ],
+ "driver": "worker-budget-v2 2026-10-17",
+ "phaseMs": {
+  "t0": 1792330535282,
+  "readMs": 2867,
+  "discoveryMs": 421
+ },
+ "dexBackoffUntil": null,
+ "dexBackoffStrikes": 0,
+ "dex429Streak": 0,
+ "stateReadError": null,
+ "subrequests": 24,
+ "subPhases": {
+  "afterDiscovery": 16,
+  "afterAnalysis": 16,
+  "afterMarks": 24
+ },
+ "stateWritten": true
 }
