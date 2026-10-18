@@ -1,50 +1,53 @@
 {
- "generatedAt": 1792349966380,
- "generatedAtIso": "2026-10-18T18:59:26.380Z",
+ "generatedAt": 1792350037549,
+ "generatedAtIso": "2026-10-18T19:00:37.549Z",
  "scanner": "solana-radar-server",
- "runner": "github-actions-backstop",
+ "runner": "cloudflare-worker-cron",
  "engineSource": "index.html embedded engine, extracted verbatim at run time",
  "buildMarker": "JK-SR-MAX-V1",
  "appVersion": "1.7.1",
  "scoreVersion": "score-v1.0",
  "riskPolicyVersion": "risk-v1.0",
  "thresholdsVersion": "thresh-v1.0",
- "cycle": 590,
- "cycleStartedAt": 1792349963593,
- "cycleDurationMs": 2787,
- "schedule": "BACKSTOP via GitHub Actions (keyless, free tier) — runs only when the Cloudflare worker heartbeat is stale (>12 min); primary 24/7 scanner is the Cloudflare worker",
+ "cycle": 591,
+ "cycleStartedAt": 1792350037148,
+ "cycleDurationMs": 401,
+ "schedule": "every 5 min via Cloudflare Workers cron (free tier, keyless data) — runs whether or not any tab is open. Backstop: GitHub Actions cron (requested every 5 min; GitHub delays it in practice — observed every 2-3 h). When it runs it skips while this worker is healthy with dexscreener LIVE, and covers discovery from separate egress IPs during dexscreener 429 cooldowns or worker outages.",
+ "engineDrift": null,
  "stateRestored": true,
  "sources": [
   {
    "id": "dexscreener",
    "label": "Dexscreener (public, keyless)",
    "status": "LIVE",
-   "lastSuccess": 1792349966377,
+   "lastSuccess": 1792350037549,
    "lastError": null,
-   "requestCount": 39,
+   "requestCount": 22,
    "rateLimitCount": 0
   },
   {
    "id": "rugcheck",
    "label": "RugCheck (public, keyless)",
-   "status": "LIVE",
-   "lastSuccess": 1792349965347,
+   "status": "NOT_OBSERVED",
+   "lastSuccess": null,
    "lastError": null,
-   "requestCount": 6,
-   "rateLimitCount": 0
+   "requestCount": 0,
+   "rateLimitCount": 0,
+   "note": "not exercised this cycle (no refreshed candidates needed them)"
   },
   {
    "id": "solanarpc",
    "label": "Solana JSON-RPC (PublicNode)",
-   "status": "LIVE",
-   "lastSuccess": 1792349965444,
+   "status": "NOT_OBSERVED",
+   "lastSuccess": null,
    "lastError": null,
-   "requestCount": 30,
-   "rateLimitCount": 0
+   "requestCount": 0,
+   "rateLimitCount": 0,
+   "note": "not exercised this cycle (no refreshed candidates needed them)"
   }
  ],
  "counters": {
-  "discovered": 854,
+  "discovered": 855,
   "validated": 0,
   "rejected": 0,
   "incomplete": 680,
@@ -57,166 +60,9 @@
   "dataIncomplete": 0,
   "watchlist": 0
  },
- "analyzedThisCycle": 6,
- "signalMarksTracked": 25,
- "newSignalsThisCycle": [
-  {
-   "id": "sig_mve6w3pdohefey",
-   "mint": "3QMFFJfHBPscB3pCaP8tweu6TUfNEK3G1QEG2zFxpump",
-   "symbol": "CRASH",
-   "name": "HashCrash",
-   "createdAt": 1792349964480,
-   "signalPriceUsd": 0.000007559,
-   "score": 40.5,
-   "riskVerdict": "FAIL",
-   "liquidityUsd": 6680.72,
-   "volume24": 574379.56,
-   "qualifiedWallets": 3,
-   "pairAddress": "Fzyw7NiGfe7xsr5TSdhViBiQWraGhbQ8qCFxdq9nXg1p",
-   "dexId": "pumpswap",
-   "lastPrice": 0.000007559,
-   "lastPriceAt": 1792349965560,
-   "multiple": 1,
-   "milestonesHit": [],
-   "dumpHit": null,
-   "links": {
-    "dexscreener": "https://dexscreener.com/solana/Fzyw7NiGfe7xsr5TSdhViBiQWraGhbQ8qCFxdq9nXg1p",
-    "gmgn": "https://gmgn.ai/sol/token/3QMFFJfHBPscB3pCaP8tweu6TUfNEK3G1QEG2zFxpump",
-    "solscan": "https://solscan.io/token/3QMFFJfHBPscB3pCaP8tweu6TUfNEK3G1QEG2zFxpump"
-   },
-   "paperOnly": true
-  },
-  {
-   "id": "sig_mve6w3v2swegqs",
-   "mint": "HEiHY8kSj1rmfhgipSSKWFmvv58k2mDerKtrCC95Fass",
-   "symbol": "NORMIE",
-   "name": "NORMIE",
-   "createdAt": 1792349964685,
-   "signalPriceUsd": 0.000003323,
-   "score": 18.3,
-   "riskVerdict": "FAIL",
-   "liquidityUsd": null,
-   "volume24": 13413.58,
-   "qualifiedWallets": 2,
-   "pairAddress": "DLT2YubJSWd7aUbq55mU5pNdbH1HktqzgjoBbBdpHFac",
-   "dexId": "pumpfun",
-   "lastPrice": 0.000003323,
-   "lastPriceAt": 1792349965547,
-   "multiple": 1,
-   "milestonesHit": [],
-   "dumpHit": null,
-   "links": {
-    "dexscreener": "https://dexscreener.com/solana/DLT2YubJSWd7aUbq55mU5pNdbH1HktqzgjoBbBdpHFac",
-    "gmgn": "https://gmgn.ai/sol/token/HEiHY8kSj1rmfhgipSSKWFmvv58k2mDerKtrCC95Fass",
-    "solscan": "https://solscan.io/token/HEiHY8kSj1rmfhgipSSKWFmvv58k2mDerKtrCC95Fass"
-   },
-   "paperOnly": true
-  },
-  {
-   "id": "sig_mve6w40d5bmhi0",
-   "mint": "5sYu1tykLMMmdeLPJ7qDUFDgMjV4psiFomsYpFdJpump",
-   "symbol": "CC",
-   "name": "Capitaine Collectibles",
-   "createdAt": 1792349964877,
-   "signalPriceUsd": 0.000008293,
-   "score": 14.3,
-   "riskVerdict": "FAIL",
-   "liquidityUsd": null,
-   "volume24": 8590.05,
-   "qualifiedWallets": 1,
-   "pairAddress": "C1iKUPuaiuYY3wsquuQC8xdv1GvSZPuPCNMmzvBvLM3F",
-   "dexId": "pumpfun",
-   "lastPrice": 0.000008293,
-   "lastPriceAt": 1792349965535,
-   "multiple": 1,
-   "milestonesHit": [],
-   "dumpHit": null,
-   "links": {
-    "dexscreener": "https://dexscreener.com/solana/C1iKUPuaiuYY3wsquuQC8xdv1GvSZPuPCNMmzvBvLM3F",
-    "gmgn": "https://gmgn.ai/sol/token/5sYu1tykLMMmdeLPJ7qDUFDgMjV4psiFomsYpFdJpump",
-    "solscan": "https://solscan.io/token/5sYu1tykLMMmdeLPJ7qDUFDgMjV4psiFomsYpFdJpump"
-   },
-   "paperOnly": true
-  },
-  {
-   "id": "sig_mve6w45ovd0321",
-   "mint": "Wr8xawXWMMBD6eWXPrf2t9kZzVwaMHLCJDRYc8zSTNK",
-   "symbol": "ENERGY",
-   "name": "Energy Coin",
-   "createdAt": 1792349965068,
-   "signalPriceUsd": 0.00003265,
-   "score": 56.8,
-   "riskVerdict": "PASS",
-   "liquidityUsd": 15402.3,
-   "volume24": 28699.22,
-   "qualifiedWallets": 5,
-   "pairAddress": "5HkrLrXtERvPKoAjGUCt1WrjtNCkADFjgyN8wtLCqd13",
-   "dexId": "raydium",
-   "lastPrice": 0.00003265,
-   "lastPriceAt": 1792349965523,
-   "multiple": 1,
-   "milestonesHit": [],
-   "dumpHit": null,
-   "links": {
-    "dexscreener": "https://dexscreener.com/solana/5HkrLrXtERvPKoAjGUCt1WrjtNCkADFjgyN8wtLCqd13",
-    "gmgn": "https://gmgn.ai/sol/token/Wr8xawXWMMBD6eWXPrf2t9kZzVwaMHLCJDRYc8zSTNK",
-    "solscan": "https://solscan.io/token/Wr8xawXWMMBD6eWXPrf2t9kZzVwaMHLCJDRYc8zSTNK"
-   },
-   "paperOnly": true
-  },
-  {
-   "id": "sig_mve6w4b4g66cmb",
-   "mint": "JUWr8a7Fx9kYwA3fZJom9L9si4EmekTFkDbcrJipump",
-   "symbol": "JEFF",
-   "name": "Jeff",
-   "createdAt": 1792349965264,
-   "signalPriceUsd": 0.00002057,
-   "score": 20,
-   "riskVerdict": "FAIL",
-   "liquidityUsd": 9.5,
-   "volume24": 0.24,
-   "qualifiedWallets": 3,
-   "pairAddress": "cEUdBrse7yyk4N91UHwMnrmA5G6kE7iFmEFgV527SsE",
-   "dexId": "meteora",
-   "lastPrice": 0.00002057,
-   "lastPriceAt": 1792349965510,
-   "multiple": 1,
-   "milestonesHit": [],
-   "dumpHit": null,
-   "links": {
-    "dexscreener": "https://dexscreener.com/solana/cEUdBrse7yyk4N91UHwMnrmA5G6kE7iFmEFgV527SsE",
-    "gmgn": "https://gmgn.ai/sol/token/JUWr8a7Fx9kYwA3fZJom9L9si4EmekTFkDbcrJipump",
-    "solscan": "https://solscan.io/token/JUWr8a7Fx9kYwA3fZJom9L9si4EmekTFkDbcrJipump"
-   },
-   "paperOnly": true
-  },
-  {
-   "id": "sig_mve6w4g4x1963z",
-   "mint": "8zzJXXFwzoWRm8Wth2WsEwYVLJeRgdyCqWw16yNkpump",
-   "symbol": "potato",
-   "name": "peeled potato",
-   "createdAt": 1792349965444,
-   "signalPriceUsd": 0.000004345,
-   "score": 19.5,
-   "riskVerdict": "FAIL",
-   "liquidityUsd": null,
-   "volume24": 90339.92,
-   "qualifiedWallets": 1,
-   "pairAddress": "CqM9zPWg7MMSJEbJQ3hSm2zLcc7ec5dhXC4BumWsMVWH",
-   "dexId": "pumpfun",
-   "lastPrice": 0.000004247,
-   "lastPriceAt": 1792349965495,
-   "multiple": 0.98,
-   "milestonesHit": [],
-   "dumpHit": null,
-   "links": {
-    "dexscreener": "https://dexscreener.com/solana/CqM9zPWg7MMSJEbJQ3hSm2zLcc7ec5dhXC4BumWsMVWH",
-    "gmgn": "https://gmgn.ai/sol/token/8zzJXXFwzoWRm8Wth2WsEwYVLJeRgdyCqWw16yNkpump",
-    "solscan": "https://solscan.io/token/8zzJXXFwzoWRm8Wth2WsEwYVLJeRgdyCqWw16yNkpump"
-   },
-   "paperOnly": true
-  }
- ],
+ "analyzedThisCycle": 0,
+ "signalMarksTracked": 8,
+ "newSignalsThisCycle": [],
  "recentSignals": [
   {
    "id": "sig_mve6w4g4x1963z",
@@ -232,9 +78,9 @@
    "qualifiedWallets": 1,
    "pairAddress": "CqM9zPWg7MMSJEbJQ3hSm2zLcc7ec5dhXC4BumWsMVWH",
    "dexId": "pumpfun",
-   "lastPrice": 0.000004247,
-   "lastPriceAt": 1792349965495,
-   "multiple": 0.98,
+   "lastPrice": 0.000004103,
+   "lastPriceAt": 1792350037451,
+   "multiple": 0.94,
    "milestonesHit": [],
    "dumpHit": null,
    "links": {
@@ -259,7 +105,7 @@
    "pairAddress": "cEUdBrse7yyk4N91UHwMnrmA5G6kE7iFmEFgV527SsE",
    "dexId": "meteora",
    "lastPrice": 0.00002057,
-   "lastPriceAt": 1792349965510,
+   "lastPriceAt": 1792350037457,
    "multiple": 1,
    "milestonesHit": [],
    "dumpHit": null,
@@ -284,9 +130,9 @@
    "qualifiedWallets": 5,
    "pairAddress": "5HkrLrXtERvPKoAjGUCt1WrjtNCkADFjgyN8wtLCqd13",
    "dexId": "raydium",
-   "lastPrice": 0.00003265,
-   "lastPriceAt": 1792349965523,
-   "multiple": 1,
+   "lastPrice": 0.00002265,
+   "lastPriceAt": 1792350037467,
+   "multiple": 0.69,
    "milestonesHit": [],
    "dumpHit": null,
    "links": {
@@ -310,9 +156,9 @@
    "qualifiedWallets": 1,
    "pairAddress": "C1iKUPuaiuYY3wsquuQC8xdv1GvSZPuPCNMmzvBvLM3F",
    "dexId": "pumpfun",
-   "lastPrice": 0.000008293,
-   "lastPriceAt": 1792349965535,
-   "multiple": 1,
+   "lastPrice": 0.000008486,
+   "lastPriceAt": 1792350037475,
+   "multiple": 1.02,
    "milestonesHit": [],
    "dumpHit": null,
    "links": {
@@ -336,9 +182,9 @@
    "qualifiedWallets": 2,
    "pairAddress": "DLT2YubJSWd7aUbq55mU5pNdbH1HktqzgjoBbBdpHFac",
    "dexId": "pumpfun",
-   "lastPrice": 0.000003323,
-   "lastPriceAt": 1792349965547,
-   "multiple": 1,
+   "lastPrice": 0.000003962,
+   "lastPriceAt": 1792350037484,
+   "multiple": 1.19,
    "milestonesHit": [],
    "dumpHit": null,
    "links": {
@@ -362,9 +208,9 @@
    "qualifiedWallets": 3,
    "pairAddress": "Fzyw7NiGfe7xsr5TSdhViBiQWraGhbQ8qCFxdq9nXg1p",
    "dexId": "pumpswap",
-   "lastPrice": 0.000007559,
-   "lastPriceAt": 1792349965560,
-   "multiple": 1,
+   "lastPrice": 0.000006249,
+   "lastPriceAt": 1792350037492,
+   "multiple": 0.83,
    "milestonesHit": [],
    "dumpHit": null,
    "links": {
@@ -389,7 +235,7 @@
    "pairAddress": "5PdaH1NZ9ZJoJZ8Jb9QVnHj6m4nv9qGmij88WgdXQtn7",
    "dexId": "pumpfun",
    "lastPrice": 0.000003446,
-   "lastPriceAt": 1792349965574,
+   "lastPriceAt": 1792350037542,
    "multiple": 0.49,
    "milestonesHit": [],
    "dumpHit": {
@@ -418,9 +264,9 @@
    "qualifiedWallets": 4,
    "pairAddress": "2aXmkjNC4MZJg7Y8FQfHLchAPnLGxgSaFX7xhbpuTgkc",
    "dexId": "pumpswap",
-   "lastPrice": 0.00001232,
-   "lastPriceAt": 1792349965588,
-   "multiple": 0.25,
+   "lastPrice": 0.00001208,
+   "lastPriceAt": 1792350037549,
+   "multiple": 0.24,
    "milestonesHit": [
     {
      "x": 1.5,
@@ -823,11 +669,31 @@
    }
   }
  ],
- "errors": [],
+ "errors": [
+  "subrequest budget reached (16) — remaining analysis deferred (driver-level, protects heartbeat writes)"
+ ],
  "notes": [
   "PAPER ONLY — research signals, not financial advice, never executable trades.",
-  "Engine code is the in-tab scanner engine extracted verbatim from index.html at run time; rules unchanged.",
+  "Engine code is the in-tab scanner engine extracted verbatim from index.html into a static bundle (hash-checked every cycle against the live page; drift is labelled, never silent); rules unchanged.",
   "Signal price is frozen at signal time; lastPrice/multiple are observed Dexscreener marks, not executable fills.",
-  "Candidates idle >72h without an unconsumed signal are evicted (state hygiene); signals and wallets bounded."
- ]
+  "Candidates idle >72h without an unconsumed signal are evicted (state hygiene); signals and wallets bounded.",
+  "Driver enforces hard per-phase time budgets and always writes this heartbeat feed, even when a data source stalls; a stalled source is labelled in errors, never silent."
+ ],
+ "driver": "worker-budget-v2 2026-10-17",
+ "phaseMs": {
+  "t0": 1792350034963,
+  "readMs": 2185,
+  "discoveryMs": 297
+ },
+ "dexBackoffUntil": null,
+ "dexBackoffStrikes": 0,
+ "dex429Streak": 0,
+ "stateReadError": null,
+ "subrequests": 24,
+ "subPhases": {
+  "afterDiscovery": 16,
+  "afterAnalysis": 16,
+  "afterMarks": 24
+ },
+ "stateWritten": true
 }
