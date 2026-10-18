@@ -87,7 +87,7 @@ export function mergeStates(a, b) {
 // Keep repo state under the ~1MB contents-API cap: tighter caps in prod + drop stale
 // provisional (mintless) entities that never got a signal decision. Decided entities are kept.
 function pruneState(state) {
-  const caps = { raw_events: 1500, entity_evidence: 3000, mentions: 1200, security_results: 1000,
+  const caps = { raw_events: 1000, entity_evidence: 2000, mentions: 800, security_results: 1000,
     gate_results: 1000, launch_status_log: 300, signal_state_log: 600, source_health: 300,
     notifications: 200, pending_notifications: 100 };
   for (const [k, cap] of Object.entries(caps)) if (state[k] && state[k].length > cap) state[k] = state[k].slice(-cap);
