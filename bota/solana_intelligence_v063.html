@@ -164,11 +164,15 @@ nav#bnav button.on .ic{filter:drop-shadow(0 0 6px var(--acc))}
 .c-tok{display:contents}
 .tk{grid-column:2;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;min-width:0}
 .tk b{font-size:16px}
-.sgmeta{margin-left:auto;display:flex;align-items:center;gap:8px}
+.sgmeta{margin-left:auto;flex:none;display:flex;align-items:center;gap:8px}
 .sgscore{min-width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:var(--acc);background:conic-gradient(var(--acc) calc(var(--p)*1%),var(--line2) 0);position:relative}
+.sgscore b{position:relative;z-index:1;font-size:14px;color:var(--acc)}
+.details-fix{}
 .sgscore::before{content:"";position:absolute;inset:3px;border-radius:50%;background:var(--card2)}
 .sgscore{isolation:isolate}.sgscore{z-index:0}
-.sgsub{font-size:10.5px;color:var(--dim);line-height:1.25;text-align:right}
+details.sigd>summary{display:flex;align-items:center;gap:6px;flex-wrap:nowrap;min-height:48px}
+details.sigd>summary .star,details.sigd>summary .badge{flex:none}
+.sgsub{white-space:nowrap;font-size:10.5px;color:var(--dim);line-height:1.25;text-align:right}
 .rspark{display:block;margin-top:2px}.rspark svg{width:100%;height:16px;display:block}
 .mrow{grid-column:1/3;display:grid;grid-template-columns:.85fr 1fr 1.45fr .9fr;gap:6px}
 .c-m{background:var(--bg2);border-radius:12px;padding:6px 7px;font-size:11.5px;font-weight:700;min-width:0;overflow-wrap:anywhere}
@@ -936,9 +940,9 @@ function viewSignals(){
  const rows=scored.slice(0,25).map(x=>{
   const p=S.pools[x.m]||{};const s=S.seen[x.m]||{};
   const compBars=Object.entries(x.comps).map(([k,v])=>`<div class="comp"><div class="lbl"><span>${k}</span><span>${v.st==="OBSERVED"?Math.round(v.v*100)+" - "+esc(v.note):"NOT OBSERVED - "+esc(v.note)}</span></div><div class="bar"><i style="width:${v.st==="OBSERVED"?v.v*100:0}%;${v.st==="OBSERVED"?"":"background:var(--line2)"}"></i></div></div>`).join("");
-  return`<details><summary><span class="star ${S.watch[x.m]?"on":""}" onclick="event.preventDefault();star('${x.m}')">${S.watch[x.m]?"&#9733;":"&#9734;"}</span>
+  return`<details class="sigd"><summary><span class="star ${S.watch[x.m]?"on":""}" onclick="event.preventDefault();star('${x.m}')">${S.watch[x.m]?"&#9733;":"&#9734;"}</span>
    <b>${esc(p.symbol||s.sym||shortM(x.m))}</b> <span class="badge ${x.gated?"bad":(x.verdict==="CANDIDATE"?"ok":(x.verdict==="WATCH"?"warn":"dim"))}">${x.verdict}</span>
-   <span class="sgmeta"><span class="sgscore" style="--p:${Math.max(0,Math.min(100,x.score))}">${x.score}</span><span class="sgsub">conf ${Math.round(x.confidence*100)}%<br>${fmtAge(p.created)}</span></span></summary>
+   <span class="sgmeta"><span class="sgscore" style="--p:${Math.max(0,Math.min(100,x.score))}"><b>${x.score}</b></span><span class="sgsub">conf ${Math.round(x.confidence*100)}%<br>${fmtAge(p.created)}</span></span></summary>
    ${compBars}
    ${x.hard.length?`<div class="state error">Hard gate: ${esc(x.hard.join(", "))} - score is overridden, never a candidate.</div>`:""}
    <div class="pillrow">
@@ -1786,7 +1790,7 @@ window.runSelfTest=async function(){
   }catch(e){return false;}})(),"owner screenshot defects: header paragraph removed, bar cut off at Targ... fixed - 5 buttons, every other tab inside the More sheet");
  t("nav icons are inline SVG, none empty (v061)",(()=>{try{const b=[...document.querySelectorAll("nav#bnav .ic")];return b.length===5&&b.every(x=>x.querySelector("svg"));}catch(e){return false;}})()),
  t("radar sparkline needs 3+ real points, draws polyline, hides otherwise (v062)",(()=>{try{const a=svgSparkline([1,2,1.5]);return a.includes("<polyline")&&svgSparkline([1])==="";}catch(e){return false;}})()),
- t("signals rows use score ring + meta, no pipe-separated text (v063)",(()=>{try{go("Signals");const d=document.querySelector("#app details summary .sgscore, details summary .sgscore");const ok=!!d||!document.querySelector("details summary");go("Radar");return ok;}catch(e){return false;}})()),
+ t("signals rows use score ring + meta, no pipe-separated text (v063)",(()=>{try{const h=String(viewSignals());return !h.includes("<summary")||(h.includes("sgscore")&&!/score \d+ \| conf/.test(h));}catch(e){return false;}})()),
  t("overview stat cards have no badge-colored blocks (v060)",(()=>{try{
    const h=overviewCard();
    return /class="sn k-/.test(h)&&!/class="sn ok"|class="sn warn"/.test(h)&&/gaugering/.test(h)&&h.includes("fchip")&&h.includes("tracked");
