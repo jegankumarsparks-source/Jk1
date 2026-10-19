@@ -1670,7 +1670,7 @@ window.runSelfTest=async function(){
    S.seen[m]={risk:{mintAuth:false,freezeAuth:false,readAt:Date.now()}};
    const h=decisionCard(m);
    delete S.pools[m];delete S.dex[m];delete S.seen[m];
-   return h.includes("GeckoTerminal + DexScreener")&&h.includes("RPC")&&/ago|not read/.test(h);
+   return h.includes("GeckoTerminal")&&h.includes("DexScreener")&&h.includes("RPC")&&/ago|not read/.test(h);
   }catch(e){return false;}})(),"every evidence item traces to a named source with a real fetch time - nothing floats free");
  t("evidence time moves per source (BA-006 acceptance)",(()=>{try{
    const k="GeckoTerminal new_pools",k2="DexScreener batch";
