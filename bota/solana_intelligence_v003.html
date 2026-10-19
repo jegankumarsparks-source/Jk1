@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Solana Intelligence v003 - Radar + Base Rates + Quoted Exits</title>
+<style>
+:root{--bg:#0b0f14;--card:#131a22;--ok:#2ecc71;--warn:#f1c40f;--bad:#e74c3c;--txt:#dbe4ec;--dim:#7d8b99;--acc:#4da3ff;--gold:#ffd700}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font:14px/1.45 -apple-system,Segoe UI,Roboto,sans-serif}
+header{padding:12px 14px;border-bottom:1px solid #1f2a35;position:sticky;top:0;background:var(--bg);z-index:3}
+h1{font-size:16px;margin:0 0 2px}.sub{color:var(--dim);font-size:12px}
+nav{display:flex;gap:6px;padding:8px 12px 0}
+nav button{background:#1c242e;color:var(--txt)}
+nav button.on{background:var(--acc);color:#04121f}
+.wrap{padding:12px;display:grid;gap:10px}
+.card{background:var(--card);border:1px solid #1f2a35;border-radius:10px;padding:10px 12px;overflow:auto}
+.card h2{font-size:13px;margin:0 0 8px;color:var(--acc);text-transform:uppercase;letter-spacing:.5px}
+.badge{display:inline-block;padding:1px 8px;border-radius:99px;font-size:11px;font-weight:600}
+.ok{background:#0f2f1c;color:var(--ok)}.warn{background:#33290a;color:var(--warn)}.bad{background:#33110d;color:var(--bad)}.dim{background:#1c242e;color:var(--dim)}.gold{background:#332e0a;color:var(--gold)}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th,td{text-align:left;padding:6px;border-bottom:1px solid #1c2530;vertical-align:top;white-space:nowrap}
+th{color:var(--dim);font-weight:600}
+tr:hover td{background:#16202b}
+a{color:var(--acc);text-decoration:none}
+.mint{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--dim)}
+.note{color:var(--dim);font-size:11px;margin-top:6px}
+button{background:var(--acc);color:#04121f;border:0;border-radius:8px;padding:6px 12px;font-weight:700;cursor:pointer;font-size:12px}
+button.ghost{background:#1c242e;color:var(--txt)}
+input,select{background:#0e141b;color:var(--txt);border:1px solid #27313d;border-radius:8px;padding:6px 8px;font-size:12px}
+.controls{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;align-items:center}
+#status{font-size:12px;color:var(--dim);margin-top:4px}
+.inc{color:var(--warn);font-weight:700}
+.star{cursor:pointer;font-size:15px;background:none;border:0;color:var(--dim);padding:0 2px}
+.star.on{color:var(--gold)}
+.tgt{font-family:ui-monospace,monospace;font-size:11px}
+.hit{color:var(--gold);font-weight:700}
+ul{margin:6px 0 0 16px;padding:0}li{margin:3px 0}
+#log{white-space:pre-wrap;max-height:140px;overflow:auto}
+</style>
+</head>
+<body>
+<header>
+<h1>Solana Intelligence <span class="badge dim">v003</span> <span class="badge gold">EARLY-ENTRY RADAR</span></h1>
+<div class="sub">New-pool discovery + base-rate truth machine. Every multiple is a chart print, NOT a realized profit. Paper/research only. Nothing faked: missing data says so.</div>
+<div id="status">booting...</div>
+</header>
+<nav id="nav"></nav>
+<div class="wrap" id="view"></div>
+<div class="wrap"><div class="card"><h2>Diagnostics</h2><div id="log" class="mint"></div></div></div>
+<script>
+"use strict";
+const $=s=>document.querySelector(s);
+const GT="https://api.geckoterminal.com/api/v2/networks/solana/new_pools?page=1";
+const DEX="https://api.dexscreener.com/tokens/v1/solana/";
+const SOLMINT="So11111111111111111111111111111111111111112";
+const JUP="https://quote-api.jup.ag/v6/quote";
+const RPCS=["https://solana-rpc.publicnode.com","https://solana.publicnode.com","https://solana.api.onfinality.io/public"];
+const SEEN_TTL=6*3600e3; // 6h tracking window
+const PAPER_SIZE=20;      // $20 paper position per star
+const FEE=0.01;           // 1% round-trip fee estimate
+let tab="Radar";
+const S={pools:{},order:[],backoffUntil:0,health:{},seen:{},watch:{},ledger:[],dex:{}};
+for(const k of["seen","watch","ledger"]){try{S[k]=JSON.parse(localStorage.getItem("si2_"+k)||(k==="ledger"?"[]":"{}"));}catch(e){}}
+const save=()=>{for(const k of["seen","watch","ledger"])localStorage.setItem("si2_"+k,JSON.stringify(S[k]));};
+function log(m){$("#log").textContent=`[${new Date().toLocaleTimeString()}] ${m}\n`+$("#log").textContent;}
+function fmtAge(ms){if(!ms)return"?";const s=(Date.now()-ms)/1e3;if(s<0)return"future?";const m=s/60,h=m/60,d=h/24;if(d>=1)return d.toFixed(1)+"d";if(h>=1)return h.toFixed(1)+"h";return m.toFixed(1)+"m";}
+function fmtUsd(x){if(x==null||isNaN(x))return"?";const n=Number(x);if(n>=1e6)return"$"+(n/1e6).toFixed(2)+"M";if(n>=1e3)return"$"+(n/1e3).toFixed(1)+"k";if(n>=1)return"$"+n.toFixed(2);return"$"+Number(n).toPrecision(3);}
+async function jf(url,t=9000){const c=new AbortController();const tt=setTimeout(()=>c.abort(),t);try{const r=await fetch(url,{signal:c.signal,headers:{Accept:"application/json"}});if(r.status===429){S.backoffUntil=Date.now()+60000;throw new Error("429 backoff 60s");}if(!r.ok)throw new Error("HTTP "+r.status);return await r.json();}finally{clearTimeout(tt);}}
+function setH(k,ok,ms,ex){S.health[k]={ok,ms,ex,at:new Date().toLocaleTimeString()};}
+async function rpc(method,params){for(const u of RPCS){try{const r=await fetch(u,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({jsonrpc:"2.0",id:1,method,params})});if(r.ok){const j=await r.json();if(!j.error)return{node:u,result:j.result};}}catch(e){}}return null;}
+// --- exit-cost estimate: constant-product approx, own implementation ---
+// Selling `sellUsd` into a pool with $L quote-side liquidity moves price by ~sellUsd/(L+sellUsd).
+function exitNet(gross,liq0){if(!(gross>0))return null;if(!(liq0>0))return null;const sell=PAPER_SIZE*gross;const impact=sell/(liq0+sell);return gross*(1-FEE)*(1-impact);}
+// --- data refresh ---
+async function refresh(){if(Date.now()<S.backoffUntil){$("#status").textContent="backoff until "+new Date(S.backoffUntil).toLocaleTimeString();return;}
+$("#status").textContent="refreshing...";const t0=performance.now();
+// 1) GT new pools (discovery)
+try{const t1=performance.now();const d=await jf(GT);setH("GeckoTerminal new_pools",true,Math.round(performance.now()-t1),(d.data||[]).length+" pools");
+for(const p of(d.data||[])){const a=p.attributes||{};const rel=(p.relationships&&p.relationships.base_token&&p.relationships.base_token.data)||{};const mint=(rel.id||"").replace(/^solana_/,"");if(!mint)continue;
+const tx=a.transactions||{};const m5=tx.m5||{};
+S.pools[mint]={mint,symbol:(a.name||"?").split(" / ")[0],pool:(p.id||"").replace(/^solana_/,""),created:a.pool_created_at?Date.parse(a.pool_created_at):null,
+price:a.base_token_price_usd!=null?Number(a.base_token_price_usd):null,liq:a.reserve_in_usd!=null?Number(a.reserve_in_usd):null,
+b5:m5.buys??null,s5:m5.sells??null};
+if(!S.order.includes(mint))S.order.push(mint);}
+}catch(e){setH("GeckoTerminal new_pools",false,null,e.message);log("GT failed: "+e.message);}
+// 2) Dex batch enrichment: discovery mints + open watchlist mints (so starred tokens keep pricing after leaving the discovery page)
+const want=[...new Set([SOLMINT,...S.order.slice(-60),...Object.keys(S.watch)])];
+try{const t2=performance.now();let n=0;
+for(let i=0;i<want.length;i+=30){const chunk=want.slice(i,i+30);try{const j=await jf(DEX+chunk.join(","));for(const q of(j||[])){const a=q.baseToken&&q.baseToken.address;if(!a)continue;if(!S.dex[a]||(q.liquidity&&q.liquidity.usd||0)>(S.dex[a].liquidity&&S.dex[a].liquidity.usd||0))S.dex[a]=q;n++;}}catch(e){log("dex batch: "+e.message);}}
+setH("DexScreener batch",true,Math.round(performance.now()-t2),n+" pairs / "+want.length+" mints");
+}catch(e){setH("DexScreener batch",false,null,e.message);}
+{const sq=S.dex[SOLMINT];if(sq&&sq.priceUsd)S.solUsd=Number(sq.priceUsd);}
+// 3) outcome tracking for EVERY seen token (base rates, no survivorship)
+const now=Date.now();
+for(const m of Object.keys(S.pools)){if(!S.seen[m])S.seen[m]={first:now,sym:S.pools[m].symbol};}
+const recent=Object.keys(S.seen).filter(m=>now-S.seen[m].first<SEEN_TTL);
+for(const m of recent){const s=S.seen[m];const q=S.dex[m];const p=q?Number(q.priceUsd):0;const liq=q&&q.liquidity?Number(q.liquidity.usd):0;
+s.n=(s.n||0)+1;
+if(!(s.p0>0)&&p>0){s.p0=p;s.liq0=liq;} // p0 = first observed price only (look-ahead guard)
+if(p>0&&s.p0>0){const mult=p/s.p0;s.max=Math.max(s.max||1,mult);s.min=Math.min(s.min||1,mult);s.last=mult;s.lastT=now;
+const en=exitNet(mult,s.liq0);if(en!=null)s.maxNet=Math.max(s.maxNet||0,en);
+const age=(now-s.first)/60000;for(const[lab,mins]of[["m10",10],["m60",60],["h6",360]]){if(!s[lab]&&age>=mins)s[lab]=mult;}}
+else s.miss=(s.miss||0)+1;}
+// prune old seen entries beyond 6h
+for(const m of Object.keys(S.seen)){if(now-S.seen[m].first>=SEEN_TTL&&!S.watch[m])delete S.seen[m];}
+// 4) watchlist multiples (priced from dex even if off discovery page)
+for(const[m,w]of Object.entries(S.watch)){const q=S.dex[m];const p=q?Number(q.priceUsd):null;if(p==null||w.ref==null)continue;
+const mult=p/w.ref;for(const t of[2,3,4,5]){if(mult>=t&&!w.hits[t]){w.hits[t]=now;log("TARGET HIT "+t+"x "+w.sym+" (chart print only - not executable profit)");}}
+w.lastPrice=p;w.lastMult=mult;w.liq0=w.liq0||(q&&q.liquidity?Number(q.liquidity.usd):null);
+const L=S.ledger.find(l=>l.mint===m&&!l.closed);if(L){L.mark=p;L.net=(w.quote&&w.quote.status==="QUOTED")?(mult*(1+w.quote.rtPct/100)):exitNet(mult,L.liq0);}}
+save();$("#status").textContent="scan "+new Date().toLocaleTimeString()+" | "+S.order.length+" pools | "+recent.length+" tracked | "+Math.round(performance.now()-t0)+"ms | free sources, paper only";render();}
+// --- mint/freeze authority via keyless RPC (no rugcheck dependency) ---
+async function authCheck(mint){const out=await rpc("getAccountInfo",[mint,{encoding:"jsonParsed"}]);
+if(!out||!out.result||!out.result.value){setH("RPC authority check",false,null,"no account data");return null;}
+const info=out.result.value.data&&out.result.value.data.parsed&&out.result.value.data.parsed.info;
+if(!info){return null;}
+return{mintAuth:info.mintAuthority!=null,freezeAuth:info.freezeAuthority!=null,supply:info.supply,decimals:info.decimals,node:out.node.replace("https://","")};}
+window.chk=async m=>{$("#status").textContent="authority check (RPC)...";const a=await authCheck(m);
+if(a){const s=S.seen[m]||(S.seen[m]={first:Date.now(),sym:m.slice(0,6)});s.auth=a;save();setH("RPC authority check",true,null,a.node);
+log("authority "+m.slice(0,6)+"..: mintAuth="+(a.mintAuth?"ACTIVE (can print supply)":"renounced")+" freezeAuth="+(a.freezeAuth?"ACTIVE (can freeze)":"renounced"));}
+$("#status").textContent=a?"authority check done":"authority check failed - RPCs unreachable";render();};
+// --- jupiter quoted round-trip (actual quotes, never executed; NOT_QUOTED on any failure) ---
+async function jupQuote(inM,outM,amount){const u=JUP+"?inputMint="+inM+"&outputMint="+outM+"&amount="+amount+"&slippageBps=100";
+const c=new AbortController();const tt=setTimeout(()=>c.abort(),10000);try{const r=await fetch(u,{signal:c.signal});if(!r.ok)return null;const j=await r.json();return j&&j.outAmount?j:null;}catch(e){return null;}finally{clearTimeout(tt);}}
+async function quoteRT(mint){if(!(S.solUsd>0))return{status:"NOT_QUOTED",why:"no SOL price"};
+const lamports=Math.round(20/S.solUsd*1e9);if(lamports<1e6)return{status:"NOT_QUOTED",why:"amount too small"};
+const buy=await jupQuote(SOLMINT,mint,lamports);if(!buy)return{status:"NOT_QUOTED",why:"buy quote failed (429/unreachable/NO_ROUTE)"};
+const sell=await jupQuote(mint,SOLMINT,buy.outAmount);if(!sell)return{status:"NOT_QUOTED",why:"sell quote failed"};
+const rt=(Number(sell.outAmount)/lamports-1)*100;return{status:"QUOTED",rtPct:+rt.toFixed(2),at:Date.now()};}
+window.qrt=async m=>{const w=S.watch[m];if(!w)return;$("#status").textContent="Jupiter round-trip quote...";
+w.quote=await quoteRT(m);save();$("#status").textContent=w.quote.status==="QUOTED"?("quoted round trip "+w.quote.rtPct+"% (quote only, not executed)"):"NOT_QUOTED: "+w.quote.why;render();};
+// --- wallet snapshot from GT pool trades (free data cannot prove independence - always INSUFFICIENT SAMPLE) ---
+window.wsnap=async m=>{const p=S.pools[m];if(!p||!p.pool){$("#status").textContent="no pool address for this token";return;}
+$("#status").textContent="fetching pool trades...";
+try{const d=await jf("https://api.geckoterminal.com/api/v2/networks/solana/pools/"+p.pool+"/trades");const trs=d.data||[];
+const buyers=new Set();let bn=0;for(const t of trs){const a=t.attributes||{};if(a.kind==="buy"){bn++;const w=a.tx_from_address;if(w)buyers.add(w);}}
+const s=S.seen[m]||(S.seen[m]={first:Date.now(),sym:p.symbol});s.wallets={trades:trs.length,buys:bn,uniqBuyers:buyers.size,at:Date.now()};save();
+$("#status").textContent="wallet snapshot: "+buyers.size+" unique buy wallets in last "+trs.length+" trades (INSUFFICIENT SAMPLE - independence unprovable free)";}catch(e){$("#status").textContent="trades fetch failed: "+e.message;}
+render();};
+// --- watchlist + ledger ---
+window.star=m=>{if(S.watch[m]){delete S.watch[m];}else{const p=S.pools[m];const q=S.dex[m];const s=S.seen[m]||{};
+const ref=(q&&Number(q.priceUsd))||(s.p0>0?s.p0:null)||(p?p.price:null);
+S.watch[m]={sym:p?p.symbol:(s.sym||m.slice(0,6)),ref,addedAt:Date.now(),hits:{},liq0:q&&q.liquidity?Number(q.liquidity.usd):null};
+S.ledger.push({mint:m,sym:S.watch[m].sym,t:Date.now(),entry:ref,sizeUsd:PAPER_SIZE,liq0:S.watch[m].liq0,mark:ref,net:1,closed:false});
+log("starred "+S.watch[m].sym+" + paper $"+PAPER_SIZE+" at "+(ref!=null?"$"+Number(ref).toPrecision(4):"NOT-PRICED"));if(!S.watch[m].quote){quoteRT(m).then(q=>{if(S.watch[m]){S.watch[m].quote=q;save();render();}});}}
+save();refresh();};
+window.closeP=m=>{const L=S.ledger.find(l=>l.mint===m&&!l.closed);if(L){L.closed=true;L.out=L.sizeUsd*(L.net!=null?L.net:0);save();render();}};
+// --- render ---
+function pct(f,arr){return arr.length?Math.round(100*arr.filter(f).length/arr.length)+"%":"n/a";}
+function f2(x){return x==null?"n/a":x.toFixed(2)+"x";}
+function render(){$("#nav").innerHTML=["Radar","Stats","Watchlist","Ledger","Health","About"].map(t=>`<button class="${t===tab?"on":""}" onclick="tab='${t}';render()">${t}</button>`).join("");
+let h="";
+if(tab==="Radar"){h=`<div class="card"><h2>New pools - Solana (live)</h2><div class="controls" id="rctrl"></div>
+<table><thead><tr><th></th><th>Token</th><th>Pool age</th><th>Liquidity</th><th>Price USD</th><th>5m b/s</th><th>First seen</th><th>Authorities</th><th>Data</th></tr></thead><tbody id="rtbody"></tbody></table>
+<div class="note" id="rnote"></div></div>`;
+$("#view").innerHTML=h;
+if(!$("#rctrl").dataset.built){$("#rctrl").dataset.built="1";$("#rctrl").innerHTML=`<input id="q" placeholder="search symbol / mint" oninput="radarRows()">
+<select id="sort" onchange="radarRows()"><option value="age">sort: youngest first</option><option value="liq">sort: liquidity</option><option value="txn">sort: txns 5m</option></select>
+<input id="minliq" type="number" placeholder="min liq $" style="width:90px" oninput="radarRows()">
+<button class="ghost" onclick="refresh()">refresh now</button><button class="ghost" onclick="exp()">export JSON</button>`;}
+radarRows();h=null;}
+function radarRows(){const q=($("#q").value||"").toLowerCase();const ml=Number($("#minliq").value)||0;const so=$("#sort").value;
+let rows=[...S.order].reverse().map(m=>S.pools[m]).filter(Boolean).filter(x=>(!q||x.symbol.toLowerCase().includes(q)||x.mint.toLowerCase().includes(q))&&(!ml||(x.liq||0)>=ml));
+rows.sort((a,b)=>so==="liq"?(b.liq||0)-(a.liq||0):so==="txn"?((b.b5||0)+(b.s5||0))-((a.b5||0)+(a.s5||0)):(a.created||0)-(b.created||0));
+$("#rtbody").innerHTML=rows.map(x=>{const inc=x.price==null||x.liq==null;const on=!!S.watch[x.mint];const s=S.seen[x.mint];const a=s&&s.auth;
+const auth=a?`<span class="badge ${a.mintAuth||a.freezeAuth?"bad":"ok"}">${a.mintAuth?"mint+":""}${a.freezeAuth?"freeze+":""}${!a.mintAuth&&!a.freezeAuth?"renounced":""}</span>`:`<button class="ghost" style="padding:2px 8px" onclick="chk('${x.mint}')">check</button>`;
+return`<tr><td><button class="star ${on?"on":""}" onclick="star('${x.mint}')">${on?"★":"☆"}</button></td>
+<td><b>${x.symbol}</b> <span class="mint">${x.mint.slice(0,4)}..${x.mint.slice(-4)}</span><br><a href="https://dexscreener.com/solana/${x.mint}" target="_blank" rel="noopener">dex</a> · <a href="https://www.geckoterminal.com/solana/pools/${x.pool}" target="_blank" rel="noopener">gt</a> · <a href="https://solscan.io/token/${x.mint}" target="_blank" rel="noopener">solscan</a></td>
+<td>${fmtAge(x.created)}</td><td>${fmtUsd(x.liq)}</td><td>${x.price!=null?"$"+Number(x.price).toPrecision(4):"?"}</td><td>${x.b5!=null?x.b5+"/"+x.s5:"?"}</td>
+<td>${s?fmtAge(s.first):"-"}</td><td>${auth}<br><button class="ghost" style="padding:1px 6px;font-size:10px" onclick="wsnap('${x.mint}')">wallets</button>${s&&s.wallets?` <span class="mint">${s.wallets.uniqBuyers}u/${s.wallets.trades}t</span>`:""}</td><td>${inc?'<span class="inc">INCOMPLETE</span>':'<span class="badge ok">full</span>'}</td></tr>`;}).join("");
+$("#rnote").textContent=rows.length+" shown / "+S.order.length+" pools. Pool age = pool_created_at (NOT token creation). Authorities via keyless RPC getAccountInfo (parsed mint) - no rugcheck dependency. No invented history.";}
+if(tab==="Stats"){const A=Object.values(S.seen).filter(s=>s.p0>0&&(s.n||0)>=2);const med=a=>{a=a.filter(x=>x!=null).sort((x,y)=>x-y);return a.length?a[Math.floor(a.length/2)]:null;};
+h=`<div class="card warn" style="color:var(--warn)">Base rates over EVERY token this browser saw in the last 6h (not just starred ones). Sample = ${A.length} tokens with 2+ price polls. Needs the page open over time. Small samples prove nothing.</div>
+<div class="card"><h2>Outcomes since first-seen price</h2>
+<b>Gross (chart price only)</b><br>reached 2x: ${pct(s=>s.max>=2,A)} | 3x: ${pct(s=>s.max>=3,A)} | 5x: ${pct(s=>s.max>=5,A)}<br>
+<b>Net of $${PAPER_SIZE} exit cost (1% fee + pool impact at first-seen liquidity)</b><br>reached 2x net: ${pct(s=>s.maxNet>=2,A)} | 3x net: ${pct(s=>s.maxNet>=3,A)}<br>
+<b>Median multiple</b> at 10m ${f2(med(A.map(s=>s.m10)))} | at 1h ${f2(med(A.map(s=>s.m60)))} | at 6h ${f2(med(A.map(s=>s.h6)))}<br>
+below 0.5x now: ${pct(s=>s.last<0.5,A)} | unpriced polls: ${A.reduce((a,s)=>a+(s.miss||0),0)}</div>
+<div class="card"><h2>Starred vs base rate</h2>starred tokens: median max ${f2(med(Object.values(S.watch).map(w=>w.lastMult)))} | all tokens: median max ${f2(med(A.map(s=>s.max)))}<br><span class="note">If starred picks do not beat the base rate, selection has no edge. Compare only with large samples.</span></div>`;}
+if(tab==="Watchlist"){const ks=Object.keys(S.watch);h=`<div class="card"><h2>Watchlist - 2x/3x/4x/5x monitoring</h2>`+(ks.length?"<table><thead><tr><th>Token</th><th>Ref</th><th>Now</th><th>Multiple</th><th>Net est</th><th>Quoted RT</th><th class='tgt'>2x 3x 4x 5x</th><th>Auth</th><th></th></tr></thead><tbody>"+ks.map(m=>{const w=S.watch[m];const s=S.seen[m];const a=s&&s.auth;
+const tg=[2,3,4,5].map(t=>w.hits[t]?`<span class="hit">${t}x✓</span>`:`${t}x·`).join(" ");
+const mult=w.lastMult!=null?w.lastMult.toFixed(2)+"x":'<span class="inc">NOT-PRICED</span>';
+const net=(w.lastMult!=null)?f2(exitNet(w.lastMult,w.liq0)):"n/a";
+const q=w.quote;const qcell=q?(q.status==="QUOTED"?`<span class="${q.rtPct<=-5?"inc":""}">${q.rtPct}%</span> <span class="mint">${fmtAge(q.at)}</span>`:`<span class="inc">NOT_QUOTED</span> <span class="mint">${q.why||""}</span>`):`<button class="ghost" style="padding:2px 8px" onclick="qrt('${m}')">quote RT</button>`;
+const auth=a?`<span class="badge ${a.mintAuth||a.freezeAuth?"bad":"ok"}">${a.mintAuth?"mint+":""}${a.freezeAuth?"freeze+":""}${!a.mintAuth&&!a.freezeAuth?"renounced":""}</span>`:`<button class="ghost" style="padding:2px 8px" onclick="chk('${m}')">check</button>`;
+return`<tr><td><b>${w.sym}</b> <span class="mint">${m.slice(0,4)}..${m.slice(-4)}</span></td><td>${w.ref!=null?"$"+Number(w.ref).toPrecision(4):"?"}</td><td>${w.lastPrice!=null?"$"+Number(w.lastPrice).toPrecision(4):"?"}</td><td>${mult}</td><td>${net}</td><td>${qcell}</td><td class="tgt">${tg}</td><td>${auth}</td><td><button class="ghost" onclick="star('${m}')">remove</button></td></tr>`;}).join("")+"</tbody></table>":'<span class="note">Star any token on the Radar tab to start monitoring. Starred tokens keep pricing even after they leave the discovery page (Dex batch per-mint).</span>')+
+`<div class="note">Reference = price at star time (or first-seen price if earlier). HIT = chart print only. Net est = ${PAPER_SIZE}$ paper size, 1% fee, pool impact at star-time liquidity. NOT-PRICED = source gave no price; never guessed.</div></div>`;}
+if(tab==="Ledger"){const open=S.ledger.filter(l=>!l.closed);const inv=S.ledger.length*PAPER_SIZE;const val=S.ledger.reduce((a,l)=>a+(l.closed?l.out:l.sizeUsd*(l.net!=null?l.net:0)),0);
+h=`<div class="card"><h2>Paper ledger</h2>Invested $${inv} (${S.ledger.length} positions) | value now $${val.toFixed(2)} net of estimated exit cost <span class="badge warn">PAPER ONLY</span></div>`+
+(S.ledger.length?S.ledger.slice().reverse().map(l=>`<div class="card"><b>${l.sym}</b> <span class="mint">${l.mint.slice(0,4)}..${l.mint.slice(-4)}</span> entry $${l.entry!=null?Number(l.entry).toPrecision(4):"?"} | mark $${l.mark!=null?Number(l.mark).toPrecision(4):"?"} | net ${l.net!=null?l.net.toFixed(2)+"x":"n/a"} ${l.closed?"(closed, out $"+(l.out||0).toFixed(2)+")":`<button class="ghost" onclick="closeP('${l.mint}')">Close paper</button>`}</div>`).join(""):'<div class="card note">No paper positions. Star a token to open a $20 paper entry.</div>');}
+if(tab==="Health"){h=`<div class="card"><h2>API health</h2>`+Object.entries(S.health).map(([k,v])=>`<div>${k} <span class="badge ${v.ok?"ok":"bad"}">${v.ok?"OK":"DOWN"}</span> <span class="mint">${v.ms!=null?v.ms+"ms":""} ${v.ex||""} @ ${v.at}</span></div>`).join("")+
+`<div class="note">Budgets: GT 1 call/refresh, Dex 1 call per 30 mints (docs: up to 60-300/min keyless, not load-tested by me), RPC probe on demand. 429 → 60s backoff.</div></div>`;}
+if(tab==="About"){h=`<div class="card"><h2>Honest limits - v003</h2><ul>
+<li><b>New in v003:</b> Jupiter quoted round-trip per watchlist token (actual buy+sell quotes for a $20 size; QUOTED % or honest NOT_QUOTED with reason - quote only, never executed), wallet snapshot from GeckoTerminal pool trades (unique buy wallets, always INSUFFICIENT SAMPLE - free data cannot prove independence), ledger net prefers quoted RT over estimate, SOL/USD auto-priced via Dex batch.</li>
+<li><b>From v002:</b> Dex batch enrichment (30 mints/call), watchlist pricing after tokens leave discovery, mint/freeze authority via keyless RPC (no rugcheck), all-token 6h outcome tracking (base rates, no survivorship bias), net-of-exit-cost multiples, paper ledger with fees+impact.</li>
+<li><b>Look-ahead guard:</b> reference p0 = first price this browser actually observed; outcomes measured only forward from it.</li>
+<li><b>Still not possible free-in-browser:</b> wallet/smart-money intelligence, true entry fills (execution), smart-money independence. Labels say NOT OBSERVED where data is missing.</li>
+<li><b>Never:</b> keys, signing, real money. Multiples are chart prints; a 2x on thin liquidity is not $2-for-$1 profit.</li>
+<li>State persists in this browser's localStorage only. Closing the tab freezes tracking.</li>
+</ul></div>`;}
+if(h!=null)$("#view").innerHTML=h;}
+window.tab=tab;Object.defineProperty(window,"tab",{get:()=>tab,set:v=>{tab=v;}});
+window.exp=()=>{const blob=new Blob([JSON.stringify({exportedAt:new Date().toISOString(),seen:S.seen,watch:S.watch,ledger:S.ledger,health:S.health},null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="solana_intelligence_v003_export_"+Date.now()+".json";a.click();log("exported JSON");};
+refresh();setInterval(refresh,90000);
+</script>
+</body>
+</html>
