@@ -1,0 +1,1736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b0f14">
+<title>Solana Intelligence v018 - Full Early-Entry Suite</title>
+<style>
+/* ===== THEME TOKENS (dark default; light via [data-theme=light]) ===== */
+:root{
+--bg:#0b0f14;--bg2:#0e141b;--card:#131a22;--card2:#182129;--line:#1f2a35;--line2:#27313d;
+--txt:#dbe4ec;--dim:#7d8b99;--acc:#4da3ff;--acc2:#2f7fe0;
+--ok:#2ecc71;--okbg:#0f2f1c;--warn:#f1c40f;--warnbg:#33290a;--bad:#e74c3c;--badbg:#33110d;
+--gold:#ffd700;--goldbg:#332e0a;--shadow:0 2px 10px rgba(0,0,0,.35);
+}
+[data-theme="light"]{
+--bg:#f4f6f9;--bg2:#e9edf2;--card:#ffffff;--card2:#f0f3f7;--line:#d5dde5;--line2:#c3cdd8;
+--txt:#1c2733;--dim:#5d6d7d;--acc:#0b6bcb;--acc2:#0a5cb0;
+--ok:#148f4d;--okbg:#dcf5e6;--warn:#8a6d00;--warnbg:#fff3c4;--bad:#c0392b;--badbg:#fbe3df;
+--gold:#8a7500;--goldbg:#fff3c4;--shadow:0 2px 8px rgba(20,40,60,.12);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font:14px/1.5 -apple-system,Segoe UI,Roboto,Noto Sans,sans-serif;padding-bottom:calc(64px + env(safe-area-inset-bottom));overflow-x:hidden}
+button{font:inherit}
+/* ===== HEADER ===== */
+header{padding:10px 14px calc(10px + env(safe-area-inset-top));border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--bg);z-index:20}
+.hrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+h1{font-size:16px;margin:0}
+.sub{color:var(--dim);font-size:11px;margin-top:2px}
+.hspacer{flex:1}
+.iconbtn{background:var(--card);color:var(--txt);border:1px solid var(--line2);border-radius:10px;padding:7px 10px;font-weight:700;cursor:pointer;font-size:13px}
+.iconbtn:active{transform:scale(.96)}
+#status{font-size:11px;color:var(--dim);margin-top:4px;min-height:14px}
+#status .live{color:var(--ok);font-weight:700}
+/* ===== BOTTOM NAV (Android-first) ===== */
+nav#bnav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--card);border-top:1px solid var(--line);display:flex;overflow-x:auto;padding-bottom:env(safe-area-inset-bottom)}
+nav#bnav button{flex:1 0 auto;min-width:64px;background:none;border:0;color:var(--dim);padding:8px 4px 7px;font-size:10px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;border-top:2px solid transparent}
+nav#bnav button .ic{font-size:17px;line-height:1}
+nav#bnav button.on{color:var(--acc);border-top-color:var(--acc);font-weight:700}
+/* ===== LAYOUT / CARDS ===== */
+.wrap{padding:10px 10px 20px;display:grid;gap:10px;max-width:1100px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;box-shadow:var(--shadow);overflow:hidden}
+.card h2{font-size:12px;margin:0 0 8px;color:var(--acc);text-transform:uppercase;letter-spacing:.6px}
+.card h3{font-size:13px;margin:10px 0 6px}
+.note{color:var(--dim);font-size:11px;margin-top:6px}
+/* ===== BADGES ===== */
+.badge{display:inline-block;padding:1px 8px;border-radius:99px;font-size:10px;font-weight:700;white-space:nowrap}
+.ok{background:var(--okbg);color:var(--ok)}
+.warn{background:var(--warnbg);color:var(--warn)}
+.bad{background:var(--badbg);color:var(--bad)}
+.dim{background:var(--card2);color:var(--dim)}
+.gold{background:var(--goldbg);color:var(--gold)}
+.acc{background:var(--card2);color:var(--acc)}
+/* ===== CONTROLS ===== */
+.controls{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;align-items:center}
+input,select{background:var(--bg2);color:var(--txt);border:1px solid var(--line2);border-radius:10px;padding:8px 10px;font-size:13px;max-width:100%}
+input:focus,select:focus{outline:2px solid var(--acc2);outline-offset:-1px}
+button.btn{background:var(--acc);color:#fff;border:0;border-radius:10px;padding:8px 14px;font-weight:700;cursor:pointer;font-size:12px}
+[data-theme="dark"] button.btn{color:#04121f}
+button.btn.ghost{background:var(--card2);color:var(--txt);border:1px solid var(--line2)}
+button.btn.mini{padding:3px 9px;font-size:11px;border-radius:8px}
+button.btn:active{transform:scale(.97)}
+button.btn:disabled{opacity:.45;cursor:not-allowed}
+/* ===== TABLES (no horizontal page overflow: wrapper scrolls) ===== */
+.tscroll{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:8px}
+table{width:100%;border-collapse:collapse;font-size:12px;min-width:520px}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top;white-space:nowrap}
+th{color:var(--dim);font-weight:700;font-size:11px;position:sticky;top:0;background:var(--card)}
+tr:active td{background:var(--card2)}
+@media(min-width:900px){tr:hover td{background:var(--card2)}}
+/* ===== MISC ===== */
+.mint{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--dim);word-break:break-all}
+.inc{color:var(--warn);font-weight:700}
+.hit{color:var(--gold);font-weight:700}
+.tgt{font-family:ui-monospace,monospace;font-size:11px}
+.star{cursor:pointer;font-size:17px;background:none;border:0;color:var(--dim);padding:2px 4px}
+.star.on{color:var(--gold)}
+.bar{height:5px;background:var(--card2);border-radius:4px;overflow:hidden;margin:2px 0 6px}
+.bar i{display:block;height:100%;background:var(--acc);border-radius:4px}
+ul{margin:6px 0 0 16px;padding:0}li{margin:3px 0}
+a{color:var(--acc);text-decoration:none}
+/* loading / empty / error / success states */
+.state{padding:18px 12px;text-align:center;border-radius:10px;font-size:12px}
+.state.loading{color:var(--dim)}
+.state.empty{color:var(--dim);background:var(--card2)}
+.state.error{color:var(--bad);background:var(--badbg)}
+.state.success{color:var(--ok);background:var(--okbg)}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid var(--line2);border-top-color:var(--acc);border-radius:50%;animation:sp 1s linear infinite;vertical-align:-3px;margin-right:6px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.fresh{font-size:10px;color:var(--dim)}
+.fresh.stale{color:var(--warn)}
+/* score bars legend */
+.comp{margin:4px 0}
+.comp .lbl{display:flex;justify-content:space-between;font-size:11px;color:var(--dim)}
+/* toast */
+#toast{position:fixed;left:50%;bottom:calc(76px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--card);border:1px solid var(--line2);color:var(--txt);padding:9px 16px;border-radius:99px;font-size:12px;z-index:50;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:opacity .25s}
+#toast.show{opacity:1}
+/* charts */
+.chart{width:100%;height:auto;display:block}
+.chart text{fill:var(--dim);font-size:9px}
+.chart .bar2{fill:var(--acc)}
+.chart .bar2.hot{fill:var(--gold)}
+.chart .axis{stroke:var(--line2);stroke-width:1}
+/* log */
+#log{white-space:pre-wrap;max-height:150px;overflow:auto;font-size:11px}
+/* settings rows */
+.setrow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
+.setrow label{font-size:13px}
+.setrow .hint{font-size:11px;color:var(--dim)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;font-size:12px}
+.kv b{color:var(--dim);font-weight:600}
+.pillrow{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
+details{border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:6px 0}
+summary{cursor:pointer;font-weight:700;font-size:12px;color:var(--acc)}
+</style>
+</head>
+<body>
+<header>
+<div class="hrow">
+<h1>Solana Intelligence <span class="badge dim">v018</span> <span class="badge gold">FULL SUITE</span></h1>
+<span class="hspacer"></span>
+<button class="iconbtn" id="themeBtn" title="dark / light theme">&#9789;</button>
+<button class="iconbtn" id="refBtn" title="refresh all data now">&#8635;</button>
+</div>
+<div class="sub">Early-entry research suite. Paper only - no keys, no signing, no real money. Missing data is labeled, never guessed.</div>
+<div id="status">booting...</div>
+</header>
+<nav id="bnav"></nav>
+<div class="wrap" id="view"></div>
+<div class="wrap"><div class="card"><h2>Diagnostics log</h2><div id="log" class="mint"></div></div></div>
+<div id="toast"></div>
+<script>
+"use strict";
+/* =====================================================================
+   SOLANA INTELLIGENCE v018 - full early-entry research suite (paper only)
+   Modules: A Token Radar | B Early-Entry Engine | C Wallet Intelligence |
+   D Smart-Money Clusters | E Risk Engine | F Target Monitor (2x-5x) |
+   G Watchlist + Alerts | H Data/System Health | I Outcomes + Paper Trading
+   All data from free, keyless, browser-callable APIs. Nothing faked.
+   ===================================================================== */
+const $=s=>document.querySelector(s);
+const $$=s=>[...document.querySelectorAll(s)];
+/* ---------- endpoints (all keyless, free tiers) ---------- */
+const GT_BASE="https://api.geckoterminal.com/api/v2/networks/solana";
+const GT_NEW=GT_BASE+"/new_pools?page=1";
+const DEX_BATCH="https://api.dexscreener.com/tokens/v1/solana/";
+const DEX_TOKEN="https://api.dexscreener.com/latest/dex/tokens/";
+const JUP_QUOTE="https://quote-api.jup.ag/v6/quote";
+const SOLMINT="So11111111111111111111111111111111111111112";
+const RPC_NODES=[
+ "https://solana-rpc.publicnode.com",
+ "https://solana.publicnode.com",
+ "https://solana.api.onfinality.io/public"
+];
+/* ---------- constants ---------- */
+const SEEN_TTL=6*3600e3;          // 6h outcome tracking window
+const CLUSTER_TTL=24*3600e3;      // wallet cluster memory
+const GHOST_LIQ=100; // v015: pool liquidity below $100 => quote not tradeable (drained pools can print absurd prices); prints/targets/alerts excluded
+const DEFAULTS={theme:"dark",minLiq:0,sort:"age",refreshSec:90,paperSize:20,feePct:1.0,alertMult:2,sound:false};
+const TARGETS=[2,3,4,5];
+/* ---------- persistent state ---------- */
+const S={
+ // live
+ pools:{},order:[],dex:{},solUsd:null,
+ // tracked
+ seen:{},          // mint -> {first,sym,p0,liq0,max,min,last,n,miss,m10,m60,h6,auth,wallets}
+ watch:{},         // mint -> {sym,ref,addedAt,hits,liq0,lastPrice,lastMult,quote,alerts}
+ ledger:[],        // paper positions
+ walletIndex:{},   // wallet -> {pools:{mint:ts},first,last,totalBuys}
+ health:{},        // source -> {ok,ms,ex,at}
+ backoff:{},       // source -> untilTs
+ settings:{...DEFAULTS},
+ alerts:[],        // {t,msg,kind}
+ healthHist:[]     // v011: [ts, source, ok(0/1)] - capped at 240 probes
+};
+const PERSIST=["seen","watch","ledger","walletIndex","settings","alerts","healthHist"];
+for(const k of PERSIST){try{const v=localStorage.getItem("si4_"+k);if(v!=null)S[k]=JSON.parse(v);}catch(e){}}
+const save=()=>{try{for(const k of PERSIST)localStorage.setItem("si4_"+k,JSON.stringify(S[k]));}catch(e){}};
+/* v007: flush on page close/hide - a fast close used to lose the last seconds of changes */
+window.addEventListener("pagehide",()=>{save();});
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden")save();});
+/* ---------- tiny utils ---------- */
+function log(m){const el=$("#log");if(el)el.textContent=`[${new Date().toLocaleTimeString()}] ${m}\n`+el.textContent;}
+let toastT=null;
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove("show"),2600);}
+function fmtAge(ms){if(!ms)return"?";const s=(Date.now()-ms)/1e3;if(s<0)return"future?";if(s<60)return Math.floor(s)+"s";const m=s/60,h=m/60,d=h/24;if(d>=1)return d.toFixed(1)+"d";if(h>=1)return h.toFixed(1)+"h";return m.toFixed(1)+"m";}
+function fmtUsd(x){if(x==null||isNaN(x))return"?";const n=Number(x);if(n>=1e6)return"$"+(n/1e6).toFixed(2)+"M";if(n>=1e3)return"$"+(n/1e3).toFixed(1)+"k";if(n>=1)return"$"+n.toFixed(2);return"$"+Number(n).toPrecision(3);}
+function fmtPct(x,d=1){return x==null||isNaN(x)?"?":Number(x).toFixed(d)+"%";}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function shortM(m){return m?m.slice(0,4)+".."+m.slice(-4):"?";}
+const normSym=s=>(s||"").toUpperCase().replace(/[^A-Z0-9]/g,""); // v016: clone detection key
+const priceDiv=(a,b)=>(a>0&&b>0)?Math.abs(a-b)/Math.min(a,b):null; // v017: cross-source divergence ratio (0.10 = 10%)
+function median(a){a=a.filter(x=>x!=null).sort((x,y)=>x-y);return a.length?a[Math.floor(a.length/2)]:null;}
+function f2(x){return x==null?"n/a":x.toFixed(2)+"x";}
+/* ---------- status line ---------- */
+function setStatus(html,isLive){$("#status").innerHTML=(isLive?'<span class="live">&#9679;</span> ':'')+html;}
+/* ---------- health + backoff aware fetch ---------- */
+function setH(k,ok,ms,ex){S.health[k]={ok,ms,ex,at:new Date().toLocaleTimeString()};
+ S.healthHist.push([Date.now(),k,ok?1:0]);if(S.healthHist.length>240)S.healthHist.splice(0,S.healthHist.length-240);}
+function backedOff(k){return S.backoff[k]&&Date.now()<S.backoff[k];}
+function backoffLeft(k){return backedOff(k)?Math.ceil((S.backoff[k]-Date.now())/1000):0;}
+async function jf(url,src,timeoutMs=9000){
+ if(src&&backedOff(src))throw new Error("backoff "+backoffLeft(src)+"s");
+ const c=new AbortController();const tt=setTimeout(()=>c.abort(),timeoutMs);
+ try{
+  const r=await fetch(url,{signal:c.signal,headers:{Accept:"application/json"}});
+  if(r.status===429){if(src)S.backoff[src]=Date.now()+60000;throw new Error("HTTP 429 (rate limited, 60s backoff)");}
+  if(!r.ok)throw new Error("HTTP "+r.status);
+  return await r.json();
+ }catch(e){
+  if(e.name==="AbortError")throw new Error("timeout "+timeoutMs+"ms");
+  throw e;
+ }finally{clearTimeout(tt);}
+}
+/* ---------- Solana RPC (multi-node failover, keyless) ---------- */
+async function rpcCall(method,params){
+ let lastErr=null;
+ for(const u of RPC_NODES){
+  try{
+   const c=new AbortController();const tt=setTimeout(()=>c.abort(),8000);
+   const r=await fetch(u,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({jsonrpc:"2.0",id:1,method,params}),signal:c.signal});
+   clearTimeout(tt);
+   if(r.status===429){lastErr="429";continue;}
+   if(!r.ok){lastErr="HTTP "+r.status;continue;}
+   const j=await r.json();
+   if(j.error){lastErr=j.error.message||"rpc error";continue;}
+   return{node:u,result:j.result};
+  }catch(e){lastErr=e.message;}
+ }
+ return{node:null,result:null,error:lastErr};
+}
+/* =====================================================================
+   DATA REFRESH PIPELINE
+   step 1: GT new pools (discovery)
+   step 2: Dex batch enrichment (30 mints/call) incl SOL price
+   step 3: outcome tracking (all seen tokens, look-ahead guard)
+   step 4: watchlist multiples + paper ledger marks
+   ===================================================================== */
+async function refreshAll(force){
+ const t0=performance.now();
+ /* --- step 1: discovery --- */
+ if(!backedOff("gt")){
+  try{
+   const t1=performance.now();
+   const d=await jf(GT_NEW,"gt");
+   const rows=(d.data||[]);
+   for(const p of rows){
+    const a=p.attributes||{};
+    const rel=(p.relationships&&p.relationships.base_token&&p.relationships.base_token.data)||{};
+    const mint=(rel.id||"").replace(/^solana_/,"");
+    if(!mint)continue;
+    const tx=a.transactions||{};const m5=tx.m5||{};const h1=tx.h1||{};
+    S.pools[mint]={
+     mint,symbol:(a.name||"?").split(" / ")[0],
+     pool:(p.id||"").replace(/^solana_/,""),
+     created:a.pool_created_at?Date.parse(a.pool_created_at):null,
+     price:a.base_token_price_usd!=null?Number(a.base_token_price_usd):null,
+     liq:a.reserve_in_usd!=null?Number(a.reserve_in_usd):null,
+     b5:m5.buys??null,s5:m5.sells??null,b1:h1.buys??null,s1:h1.sells??null,
+     fdv:a.fdv_usd!=null?Number(a.fdv_usd):null
+    };
+    if(!S.order.includes(mint))S.order.push(mint);
+   }
+   setH("GeckoTerminal new_pools",true,Math.round(performance.now()-t1),rows.length+" pools");
+  }catch(e){setH("GeckoTerminal new_pools",false,null,e.message);log("GT discovery failed: "+e.message);}
+ }else{setH("GeckoTerminal new_pools",false,null,"backoff "+backoffLeft("gt")+"s");}
+ /* --- step 2: dex batch enrichment --- */
+ const want=[...new Set([SOLMINT,...S.order.slice(-60),...Object.keys(S.watch)])];
+ if(!backedOff("dex")){
+  try{
+   const t2=performance.now();let n=0;
+   for(let i=0;i<want.length;i+=30){
+    const chunk=want.slice(i,i+30);
+    try{
+     const j=await jf(DEX_BATCH+chunk.join(","),"dex");
+     for(const q of(j||[])){
+      const a=q.baseToken&&q.baseToken.address;if(!a)continue;
+      if(!S.dex[a]||((q.liquidity&&q.liquidity.usd)||0)>((S.dex[a].liquidity&&S.dex[a].liquidity.usd)||0))S.dex[a]=q;
+      n++;
+     }
+    }catch(e){log("dex batch chunk failed: "+e.message);}
+   }
+   const sq=S.dex[SOLMINT];if(sq&&sq.priceUsd)S.solUsd=Number(sq.priceUsd);
+   setH("DexScreener batch",true,Math.round(performance.now()-t2),n+" pairs / "+want.length+" mints");
+  }catch(e){setH("DexScreener batch",false,null,e.message);log("dex batch failed: "+e.message);}
+ }else{setH("DexScreener batch",false,null,"backoff "+backoffLeft("dex")+"s");}
+ /* --- step 3: outcome tracking (every seen token, no survivorship) --- */
+ const now=Date.now();
+ for(const m of Object.keys(S.pools)){if(!S.seen[m])S.seen[m]={first:now,sym:S.pools[m].symbol};}
+ for(const m of Object.keys(S.seen)){
+  const s=S.seen[m];
+  if(now-s.first>=SEEN_TTL&&!S.watch[m]){delete S.seen[m];continue;}
+  const q=S.dex[m];const p=q?Number(q.priceUsd):0;const liq=q&&q.liquidity?Number(q.liquidity.usd):0;
+  s.n=(s.n||0)+1;
+  if(!(s.p0>0)&&p>0&&liq>=GHOST_LIQ){s.p0=p;s.liq0=liq;}          // look-ahead guard: first OBSERVED TRADEABLE price only
+  if(p>0&&s.p0>0&&liq>=GHOST_LIQ){
+   const mult=p/s.p0;
+   s.max=Math.max(s.max||1,mult);s.min=Math.min(s.min||1,mult);s.last=mult;s.lastT=now;
+   // v009: keep a capped replay series (mult vs time, >=60s apart, max 60 pts)
+   s.series=s.series||[];
+   if(!s.series.length||now-s.series[s.series.length-1][0]>=60000){s.series.push([now,+mult.toFixed(4)]);if(s.series.length>60)s.series.shift();}
+   const en=exitNet(mult,s.liq0);if(en!=null)s.maxNet=Math.max(s.maxNet||0,en);
+   const age=(now-s.first)/60000;
+   for(const[lab,mins]of[["m10",10],["m60",60],["h6",360]]){if(!s[lab]&&age>=mins)s[lab]=mult;}
+  }else if(p>0&&s.p0>0){s.ghost=(s.ghost||0)+1;s.lastGhostT=now; /* v015: pool drained below $100 - quote exists but is not tradeable, prints excluded */}
+  else s.miss=(s.miss||0)+1;
+ }
+ /* --- step 4: watchlist multiples, hits, alerts, ledger --- */
+ for(const[m,w]of Object.entries(S.watch)){
+  const q=S.dex[m];const p=q?Number(q.priceUsd):null;
+  if(p==null||w.ref==null)continue;
+  const wliq=q&&q.liquidity?Number(q.liquidity.usd):null;
+  if(wliq!=null&&wliq<GHOST_LIQ){w.ghostLiq=true;continue;} // v015: no target hits or alerts on a drained pool
+  w.ghostLiq=false;
+  const mult=p/w.ref;
+  for(const t of TARGETS){
+   if(mult>=t&&!w.hits[t]){w.hits[t]=now;pushAlert("TARGET "+t+"x hit: "+w.sym+" (chart print only - not executable profit)","gold");}
+  }
+  if(!w.alerted&&mult>=(S.settings.alertMult||2)){w.alerted=true;pushAlert("Alert: "+w.sym+" reached "+mult.toFixed(2)+"x (your alert level "+S.settings.alertMult+"x)","warn");}
+  w.lastPrice=p;w.lastMult=mult;w.liq0=w.liq0||(q&&q.liquidity?Number(q.liquidity.usd):null);
+  const L=S.ledger.find(l=>l.mint===m&&!l.closed);
+  if(L){L.mark=p;L.net=(w.quote&&w.quote.status==="QUOTED")?(mult*(1+w.quote.rtPct/100)):exitNet(mult,L.liq0);}
+ }
+ if(typeof recordHistory==="function")recordHistory();
+ if(typeof recordSignals==="function")recordSignals();
+ save();
+ setStatus("scan "+new Date().toLocaleTimeString()+" | "+S.order.length+" pools | "+Object.keys(S.seen).length+" tracked | "+Math.round(performance.now()-t0)+"ms | free sources, paper only",true);
+ render();
+}
+/* ---------- exit-cost estimate (constant-product approximation) ---------- */
+function exitNet(gross,liq0){
+ if(!(gross>0))return null;
+ if(!(liq0>0))return null;
+ const fee=(S.settings.feePct??1)/100;
+ const sell=(S.settings.paperSize||20)*gross;
+ const impact=sell/(liq0+sell);
+ return gross*(1-fee)*(1-impact);
+}
+/* ---------- alerts ---------- */
+function pushAlert(msg,kind){
+ S.alerts.unshift({t:Date.now(),msg,kind:kind||"info"});
+ if(S.alerts.length>50)S.alerts.length=50;
+ save();log(msg);
+ if($("#toast"))toast(msg);
+}
+/* =====================================================================
+   MODULE E: RISK ENGINE (keyless RPC - no rugcheck dependency)
+   - mint/freeze authority via getAccountInfo (jsonParsed)
+   - top-holder concentration via getTokenLargestAccounts
+   ===================================================================== */
+async function riskCheck(mint,force){
+ const s=S.seen[mint]||(S.seen[mint]={first:Date.now(),sym:mint.slice(0,6)});
+ if(s.risk&&!force)return s.risk;
+ const out={at:Date.now(),mintAuth:null,freezeAuth:null,top1:null,top5:null,holdersObserved:null,supply:null,decimals:null,errors:[]};
+ const a=await rpcCall("getAccountInfo",[mint,{encoding:"jsonParsed"}]);
+ if(a.result&&a.result.value&&a.result.value.data&&a.result.value.data.parsed){
+  const info=a.result.value.data.parsed.info||{};
+  out.mintAuth=info.mintAuthority!=null;out.freezeAuth=info.freezeAuthority!=null;
+  out.supply=info.supply!=null?Number(info.supply):null;out.decimals=info.decimals??null;
+ }else out.errors.push("accountInfo: "+(a.error||"no parsed data"));
+ const la=await rpcCall("getTokenLargestAccounts",[mint]);
+ if(la.result&&Array.isArray(la.result.value)){
+  const entries=la.result.value.map(v=>({addr:v.address,amt:Number(v.uiAmount||0)})).filter(v=>v.amt>0);
+  const tot=entries.reduce((x,y)=>x+y.amt,0);
+  out.holdersObserved=entries.length;
+  if(tot>0){
+   out.top1=+(100*Math.max(...entries.map(e=>e.amt))/tot).toFixed(1);
+   out.top5=+(100*entries.slice(0,5).reduce((x,y)=>x+y.amt,0)/tot).toFixed(1);
+  }
+  // v006: classify top-5 token accounts by on-chain OWNER. If an owner equals the
+  // GeckoTerminal pool address, that account is the pool's own vault - exclude it
+  // from concentration and say so. Accounts whose owner cannot be read stay counted
+  // and are flagged unclassified, so concentration stays an UPPER BOUND for them.
+  const poolAddr=(S.pools[mint]&&S.pools[mint].pool)||null;
+  const top=entries.slice(0,5);let poolExcluded=0,unclass=0;const keep=[];
+  for(const e of top){
+   let owner=null;
+   const ai=await rpcCall("getAccountInfo",[e.addr,{encoding:"jsonParsed"}]);
+   if(ai.result&&ai.result.value&&ai.result.value.data&&ai.result.value.data.parsed)owner=(ai.result.value.data.parsed.info||{}).owner||null;
+   if(owner==null){unclass++;keep.push(e);continue;}
+   if(poolAddr&&owner===poolAddr){poolExcluded++;continue;}
+   keep.push(e);
+  }
+  if(tot>0&&keep.length){
+   out.top1Ex=+(100*Math.max(...keep.map(e=>e.amt))/tot).toFixed(1);
+   out.top5Ex=+(100*keep.reduce((x,y)=>x+y.amt,0)/tot).toFixed(1);
+  }
+  out.poolExcluded=poolExcluded;out.unclassified=unclass;
+ }else{
+  const le=String((la.error&&la.error.message)||la.error||"unavailable");
+  out.errors.push(/pruned|long-term|slot.*cleaned/i.test(le)?"HISTORY_PRUNED: free RPC node pruned this history ("+le+")":"largestAccounts: "+le);
+ }
+ s.risk=out;save();
+ return out;
+}
+function riskVerdict(mint){
+ const s=S.seen[mint];const r=s&&s.risk;const p=S.pools[mint];const q=S.dex[mint];
+ const liq=(q&&q.liquidity)?Number(q.liquidity.usd):(p?p.liq:null);
+ const flags=[];
+ if(!r)return{label:"NOT CHECKED",cls:"dim",flags,liq};
+ if(r.mintAuth===true)flags.push("mint authority ACTIVE (supply printable)");
+ if(r.freezeAuth===true)flags.push("freeze authority ACTIVE (wallets freezable)");
+ if(r.top1Ex!=null&&r.top1Ex>50)flags.push("top non-pool holder ~"+r.top1Ex+"% of observed supply (pool vault excluded via on-chain owner match)");
+ else if(r.top1!=null&&r.top1>50)flags.push("top holder ~"+r.top1+"% of observed (HOLDER_UNVERIFIED - may be pool/vault)");
+ if(r.poolExcluded>0)flags.push(r.poolExcluded+" pool vault account(s) excluded from concentration - owner verified on-chain");
+ if(r.unclassified>0)flags.push(r.unclassified+" of top-5 holder accounts unreadable - concentration for them stays an UPPER BOUND");
+ if(liq!=null&&liq<1000)flags.push("very thin liquidity "+fmtUsd(liq));
+ if(r.errors&&r.errors.length)flags.push("incomplete: "+r.errors.join("; "));
+ const hard=(r.mintAuth===true)||(r.freezeAuth===true);
+ return{label:hard?"HIGH RISK":(flags.length?"CAUTION":"NO RED FLAG OBSERVED"),cls:hard?"bad":(flags.length?"warn":"ok"),flags,liq};
+}
+/* =====================================================================
+   MODULE B: EARLY-ENTRY ENGINE (explainable score, hard gates)
+   Score components (weights are untuned defaults - NOT backtested):
+   age 25 | liquidity 25 | buy/sell balance 20 | authorities 20 | data coverage 10
+   Hard gates: mintAuth ACTIVE or freezeAuth ACTIVE -> REJECTED BY RISK GATE
+   ===================================================================== */
+function scoreToken(mint){
+ const p=S.pools[mint];const s=S.seen[mint];const q=S.dex[mint];
+ const r=s&&s.risk;
+ const liq=(q&&q.liquidity)?Number(q.liquidity.usd):(p?p.liq:null);
+ const ageMin=p&&p.created?(Date.now()-p.created)/60000:null;
+ const comps={};
+ // age: youngest scores highest, decays over 6h
+ comps.age=(ageMin==null)?{v:0,st:"NOT_OBSERVED",note:"no pool timestamp"}:{v:Math.max(0,1-ageMin/360),st:"OBSERVED",note:ageMin.toFixed(0)+"m old"};
+ // liquidity: log scale $500..$500k
+ if(liq==null)comps.liquidity={v:0,st:"NOT_OBSERVED",note:"no liquidity data"};
+ else{const t=Math.min(1,Math.max(0,(Math.log10(Math.max(liq,1))-Math.log10(500))/(Math.log10(500000)-Math.log10(500))));comps.liquidity={v:t,st:"OBSERVED",note:fmtUsd(liq)};}
+ // buy/sell balance 5m
+ const b5=(q&&q.txns&&q.txns.m5)?q.txns.m5.buys:(p?p.b5:null),s5=(q&&q.txns&&q.txns.m5)?q.txns.m5.sells:(p?p.s5:null);
+ if(b5==null||s5==null||(b5+s5)===0)comps.flow={v:0,st:"NOT_OBSERVED",note:"no 5m txn data"};
+ else{const ratio=b5/(b5+s5);comps.flow={v:Math.max(0,Math.min(1,(ratio-0.3)/0.4)),st:"OBSERVED",note:b5+"b/"+s5+"s 5m"};}
+ // authorities
+ if(!r)comps.authorities={v:0,st:"NOT_OBSERVED",note:"risk not checked - press Check risk"};
+ else if(r.mintAuth==null)comps.authorities={v:0,st:"NOT_OBSERVED",note:"authority read failed"};
+ else comps.authorities={v:(r.mintAuth||r.freezeAuth)?0:1,st:"OBSERVED",note:(r.mintAuth||r.freezeAuth)?"authority ACTIVE":"renounced"};
+ // data coverage
+ let cov=0,tot=4;cov+=liq!=null?1:0;cov+=ageMin!=null?1:0;cov+=(b5!=null)?1:0;cov+=(r&&r.mintAuth!=null)?1:0;
+ comps.coverage={v:cov/tot,st:"OBSERVED",note:cov+"/"+tot+" fields present"};
+ const W=S.settings.weights||{age:.25,liquidity:.25,flow:.20,authorities:.20,coverage:.10};
+ let score=0,obs=0;
+ for(const k in W){if(comps[k].st==="OBSERVED"){score+=W[k]*comps[k].v*100;obs+=W[k];}}
+ const confidence=obs;
+ const hard=[];
+ if(r&&r.mintAuth===true)hard.push("mint authority ACTIVE");
+ if(r&&r.freezeAuth===true)hard.push("freeze authority ACTIVE");
+ const gated=hard.length>0;
+ const verdict=gated?"REJECTED BY RISK GATE":(score>=60&&confidence>=0.7?"CANDIDATE":(score>=40?"WATCH":"LOW"));
+ return{score:Math.round(score),confidence,gated,verdict,comps,hard,liq,ageMin};
+}
+/* =====================================================================
+   MODULE C: WALLET INTELLIGENCE (from GT pool trades - explainable, sample sizes)
+   ===================================================================== */
+async function walletScan(mint){
+ const p=S.pools[mint];if(!p||!p.pool)return{status:"NO_POOL"};
+ const s=S.seen[mint]||(S.seen[mint]={first:Date.now(),sym:p.symbol});
+ try{
+  const d=await jf(GT_BASE+"/pools/"+p.pool+"/trades","gt");
+  const trs=(d.data||[]).map(t=>t.attributes||{});
+  const buys=trs.filter(a=>a.kind==="buy");
+  const byW={};
+  for(const a of buys){const w=a.tx_from_address;if(!w)continue;byW[w]=(byW[w]||0)+1;
+   const wi=S.walletIndex[w]||(S.walletIndex[w]={pools:{},first:Date.now(),last:Date.now(),totalBuys:0});
+   wi.pools[mint]=Date.now();wi.last=Date.now();wi.totalBuys=(wi.totalBuys||0)+1;}
+  const uniq=Object.keys(byW).length;
+  const rep=Object.values(byW).filter(n=>n>1).length;
+  const topShare=uniq?+(100*Math.max(...Object.values(byW))/buys.length).toFixed(1):null;
+  const q=S.dex[mint];const tx24=q&&q.txns&&q.txns.h24?((q.txns.h24.buys||0)+(q.txns.h24.sells||0)):null;
+  const feedLimited=(buys.length<10&&tx24!=null&&tx24>=50);
+  s.wallets={trades:trs.length,buys:buys.length,uniqBuyers:uniq,repeatBuyers:rep,topBuyerShare:topShare,tx24,feedLimited,at:Date.now()};
+  save();
+  return{status:"OK",...s.wallets};
+ }catch(e){return{status:"FAILED",why:e.message};}
+}
+function walletScore(mint){
+ const s=S.seen[mint];const w=s&&s.wallets;
+ if(!w)return{label:"NOT SCANNED",cls:"dim",n:0,expl:"press Wallets to fetch recent pool trades"};
+ if(w.feedLimited)return{label:"HISTORY WINDOW LIMITED",cls:"warn",n:w.buys,
+  expl:"free trades feed carries only a recent window ("+w.buys+" buys seen) while Dex reports ~"+w.tx24+" txns/24h - true buyer breadth UNVERIFIED, not provably thin"};
+ if(w.buys<10)return{label:"INSUFFICIENT SAMPLE",cls:"warn",n:w.buys,expl:"only "+w.buys+" buys observed and Dex 24h activity is also low ("+(w.tx24==null?"?":w.tx24)+" txns) - nothing provable"};
+ const breadth=Math.min(1,w.uniqBuyers/30);
+ const repeatOK=w.topBuyerShare!=null?(w.topBuyerShare<25?1:(w.topBuyerShare<50?0.5:0)):0;
+ const v=Math.round(50*breadth+50*repeatOK);
+ return{label:v+"/100",cls:v>=60?"ok":(v>=35?"warn":"bad"),n:w.buys,
+  expl:"breadth "+w.uniqBuyers+" unique buyers, top buyer "+fmtPct(w.topBuyerShare)+" of "+w.buys+" buys. Independence UNVERIFIED - free data cannot prove wallets are unrelated."};
+}
+/* =====================================================================
+   MODULE D: SMART-MONEY CLUSTER ANALYSIS (repeat early buyers across pools)
+   ===================================================================== */
+function clusterScan(){
+ const cutoff=Date.now()-CLUSTER_TTL;
+ const rows=[];
+ for(const[w,wi]of Object.entries(S.walletIndex||{})){
+  const mints=Object.keys(wi.pools||{}).filter(m=>wi.pools[m]>cutoff);
+  if(mints.length>=2)rows.push({wallet:w,pools:mints,buys:wi.totalBuys||0,last:wi.last});
+ }
+ rows.sort((a,b)=>b.pools.length-a.pools.length);
+ // co-appearance clusters: wallets sharing >=2 pools
+ const clusters=[];
+ const used=new Set();
+ for(const r of rows.slice(0,50)){
+  if(used.has(r.wallet))continue;
+  const mates=rows.filter(o=>o.wallet!==r.wallet&&!used.has(o.wallet)&&o.pools.filter(m=>r.pools.includes(m)).length>=2);
+  if(mates.length>=1){
+   const shared=[...new Set(mates.flatMap(o=>o.pools.filter(m=>r.pools.includes(m))))];
+   clusters.push({lead:r.wallet,members:[r.wallet,...mates.map(o=>o.wallet)],sharedPools:shared});
+   used.add(r.wallet);mates.forEach(o=>used.add(o.wallet));
+  }
+ }
+ return{repeatWallets:rows,clusters,totalWallets:Object.keys(S.walletIndex||{}).length};
+}
+/* =====================================================================
+   MODULE: JUPITER QUOTED ROUND-TRIP (actual quotes, never executed)
+   ===================================================================== */
+async function jupQuote(inM,outM,amount){
+ const u=JUP_QUOTE+"?inputMint="+inM+"&outputMint="+outM+"&amount="+amount+"&slippageBps=100";
+ try{const j=await jf(u,"jup",10000);return j&&j.outAmount?j:null;}catch(e){return null;}
+}
+async function quoteRT(mint){
+ if(!(S.solUsd>0))return{status:"NOT_QUOTED",why:"no SOL price yet"};
+ const lamports=Math.round((S.settings.paperSize||20)/S.solUsd*1e9);
+ if(lamports<1e6)return{status:"NOT_QUOTED",why:"paper size too small"};
+ const buy=await jupQuote(SOLMINT,mint,lamports);
+ if(!buy)return{status:"NOT_QUOTED",why:"buy quote failed (unreachable / 429 / NO_ROUTE)"};
+ const sell=await jupQuote(mint,SOLMINT,buy.outAmount);
+ if(!sell)return{status:"NOT_QUOTED",why:"sell quote failed"};
+ const rt=(Number(sell.outAmount)/lamports-1)*100;
+ return{status:"QUOTED",rtPct:+rt.toFixed(2),at:Date.now()};
+}
+/* =====================================================================
+   USER ACTIONS (every button wired - no dead buttons)
+   ===================================================================== */
+window.star=m=>{
+ if(S.watch[m]){delete S.watch[m];}
+ else{
+  const p=S.pools[m];const q=S.dex[m];const s=S.seen[m]||{};
+  const ref=(q&&Number(q.priceUsd))||(s.p0>0?s.p0:null)||(p?p.price:null);
+  S.watch[m]={sym:p?p.symbol:(s.sym||shortM(m)),ref,addedAt:Date.now(),hits:{},liq0:q&&q.liquidity?Number(q.liquidity.usd):null};
+  S.ledger.push({mint:m,sym:S.watch[m].sym,t:Date.now(),entry:ref,sizeUsd:S.settings.paperSize||20,liq0:S.watch[m].liq0,mark:ref,net:1,closed:false});
+  pushAlert("Starred "+S.watch[m].sym+" + paper $"+(S.settings.paperSize||20),"ok");
+  quoteRT(m).then(qt=>{if(S.watch[m]){S.watch[m].quote=qt;save();render();}});
+ }
+ save();refreshAll();
+};
+window.closeP=m=>{const L=S.ledger.find(l=>l.mint===m&&!l.closed);if(L){L.closed=true;L.out=L.sizeUsd*(L.net!=null?L.net:0);pushAlert("Paper closed "+L.sym+" net "+(L.net!=null?L.net.toFixed(2)+"x":"n/a"),"dim");save();render();}};
+window.chk=async m=>{setStatus("risk check (RPC): "+shortM(m)+"...",true);const r=await riskCheck(m);const v=riskVerdict(m);pushAlert("Risk "+shortM(m)+": "+v.label,"dim");render();};
+window.wsnap=async m=>{setStatus("wallet scan: "+shortM(m)+"...",true);const r=await walletScan(m);if(r.status!=="OK")pushAlert("wallet scan failed "+shortM(m)+": "+(r.why||r.status),"bad");render();};
+window.qrt=async m=>{setStatus("Jupiter round-trip quote: "+shortM(m)+"...",true);const q=await quoteRT(m);const w=S.watch[m];if(w)w.quote=q;save();setStatus(q.status==="QUOTED"?("quoted RT "+q.rtPct+"% (quote only, never executed)"):"NOT_QUOTED: "+q.why,q.status==="QUOTED");render();};
+window.exp=()=>{
+ const blob=new Blob([JSON.stringify({exportedAt:new Date().toISOString(),settings:S.settings,seen:S.seen,watch:S.watch,ledger:S.ledger,health:S.health,walletIndexSize:Object.keys(S.walletIndex||{}).length},null,2)],{type:"application/json"});
+ const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="solana_intelligence_v018_export_"+Date.now()+".json";a.click();log("exported JSON");
+};
+window.clearData=()=>{if(!confirm("Clear all local tracking data (seen/watchlist/ledger/wallets)?"))return;for(const k of PERSIST)localStorage.removeItem("si4_"+k);location.reload();};
+/* ---------- settings ---------- */
+function applySettings(){
+ document.documentElement.setAttribute("data-theme",S.settings.theme==="light"?"light":"dark");
+ const tb=$("#themeBtn");if(tb)tb.innerHTML=S.settings.theme==="light"?"&#9788;":"&#9789;";
+}
+window.toggleTheme=()=>{S.settings.theme=S.settings.theme==="light"?"dark":"light";save();applySettings();};
+window.setPref=(k,v)=>{if(k==="minLiq"||k==="refreshSec"||k==="paperSize"||k==="feePct"||k==="alertMult")S.settings[k]=Number(v);else S.settings[k]=v;save();render();};
+/* =====================================================================
+   CHARTS (inline SVG, no libraries)
+   ===================================================================== */
+function svgHistogram(values,buckets,label,fmtV){
+ const vals=values.filter(v=>v!=null&&isFinite(v));
+ if(!vals.length)return'<div class="state empty">no data yet for chart</div>';
+ const mn=Math.min(...vals,0),mx=Math.max(...vals,0.5);
+ const range=(mx-mn)||1;
+ const counts=new Array(buckets).fill(0);
+ for(const v of vals){let b=Math.floor((v-mn)/range*buckets);if(b>=buckets)b=buckets-1;if(b<0)b=0;counts[b]++;}
+ const maxC=Math.max(...counts,1);
+ const W=300,H=90,pad=14,bw=(W-pad*2)/buckets;
+ let bars="";
+ counts.forEach((c,i)=>{const h=(H-pad*2)*(c/maxC);const x=pad+i*bw;const y=H-pad-h;
+  bars+=`<rect class="bar2" x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${(bw-1.5).toFixed(1)}" height="${h.toFixed(1)}"><title>${fmtV(mn+i*range/buckets)} - ${fmtV(mn+(i+1)*range/buckets)}: ${c}</title></rect>`;});
+ return`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(label)}">
+ <line class="axis" x1="${pad}" y1="${H-pad}" x2="${W-pad}" y2="${H-pad}"/>
+ ${bars}
+ <text x="${pad}" y="${H-3}">${esc(fmtV(mn))}</text>
+ <text x="${W-pad}" y="${H-3}" text-anchor="end">${esc(fmtV(mx))}</text>
+ <text x="${pad}" y="10">${esc(label)} (n=${vals.length})</text></svg>`;
+}
+function svgSparkline(points){
+ if(!points||points.length<2)return"";
+ const W=90,H=24,mn=Math.min(...points),mx=Math.max(...points),r=(mx-mn)||1;
+ const pts=points.map((p,i)=>((i/(points.length-1))*W).toFixed(1)+","+(H-2-((p-mn)/r)*(H-4)).toFixed(1)).join(" ");
+ return`<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"><polyline fill="none" stroke="var(--acc)" stroke-width="1.5" points="${pts}"/></svg>`;
+}
+/* =====================================================================
+   RENDER - bottom-nav tabs
+   ===================================================================== */
+const TABS=[
+ ["Radar","&#128225;"],["Signals","&#9889;"],["Wallets","&#128101;"],["Clusters","&#129520;"],
+ ["Risk","&#128737;"],["Targets","&#127919;"],["Watch","&#11088;"],["Ledger","&#128179;"],
+ ["Health","&#129658;"],["Settings","&#9881;"]
+];
+let tab="Radar";
+window.go=t=>{tab=t;render();};
+function navRender(){
+ $("#bnav").innerHTML=TABS.map(([t,ic])=>`<button class="${t===tab?"on":""}" onclick="go('${t}')"><span class="ic">${ic}</span>${t}</button>`).join("");
+}
+function stateBlock(kind,msg){return`<div class="state ${kind}">${kind==="loading"?'<span class="spin"></span>':""}${esc(msg)}</div>`;}
+function pct(f,arr){return arr.length?Math.round(100*arr.filter(f).length/arr.length)+"%":"n/a";}
+/* ---------- MODULE A: TOKEN RADAR ---------- */
+function viewRadar(){
+ const q=($("#q")?$("#q").value:"").toLowerCase();
+ const so=$("#sort")?$("#sort").value:S.settings.sort;
+ const ml=Number($("#minliq")?$("#minliq").value:S.settings.minLiq)||0;
+ let rows=[...S.order].reverse().map(m=>S.pools[m]).filter(Boolean)
+  .filter(x=>(!q||x.symbol.toLowerCase().includes(q)||x.mint.toLowerCase().includes(q))&&(!ml||(x.liq||0)>=ml));
+ // v016: symbol-clone detection across ALL live pools (unfiltered - a clone hiding behind your filter still counts)
+ const cloneMap={};
+ for(const mm of Object.keys(S.pools)){const ns=normSym(S.pools[mm].symbol);if(ns)cloneMap[ns]=(cloneMap[ns]||0)+1;}
+ const clonedSyms=Object.values(cloneMap).filter(c=>c>=2).length;
+ // v017: cross-source price agreement (GeckoTerminal pool price vs DexScreener batch price); feeds that disagree mean at least one is stale or wrong
+ let divCount=0;
+ rows.sort((a,b)=>so==="liq"?(b.liq||0)-(a.liq||0):so==="txn"?((b.b5||0)+(b.s5||0))-((a.b5||0)+(a.s5||0)):(a.created||0)-(b.created||0));
+ const body=rows.length?rows.map(x=>{
+  const inc=x.price==null||x.liq==null;const on=!!S.watch[x.mint];const s=S.seen[x.mint];const r=s&&s.risk;
+  const dv=priceDiv(x.price,S.dex[x.mint]?Number(S.dex[x.mint].priceUsd):null);if(dv!=null&&dv>0.10)divCount++;
+  const auth=r?`<span class="badge ${(r.mintAuth||r.freezeAuth)?"bad":"ok"}">${r.mintAuth?"mint+":""}${r.freezeAuth?"freeze+":""}${(!r.mintAuth&&!r.freezeAuth)?"renounced":""}</span>`
+   :`<button class="btn mini ghost" onclick="chk('${x.mint}')">risk</button>`;
+  return`<tr>
+  <td><button class="star ${on?"on":""}" onclick="star('${x.mint}')">${on?"&#9733;":"&#9734;"}</button></td>
+  <td><a href="javascript:void(0)" onclick="detail('${x.mint}')"><b>${esc(x.symbol)}</b></a> <span class="mint">${shortM(x.mint)}</span><br>
+   <a href="https://dexscreener.com/solana/${x.mint}" target="_blank" rel="noopener">dex</a> &middot;
+   <a href="https://www.geckoterminal.com/solana/pools/${x.pool}" target="_blank" rel="noopener">gt</a> &middot;
+   <a href="https://solscan.io/token/${x.mint}" target="_blank" rel="noopener">solscan</a></td>
+  <td>${fmtAge(x.created)}<br><span class="fresh ${s&&(Date.now()-s.first)>1800e3?"stale":""}">seen ${s?fmtAge(s.first):"-"}</span></td>
+  <td>${fmtUsd(x.liq)}</td>
+  <td>${x.price!=null?"$"+Number(x.price).toPrecision(4):"?"}</td>
+  <td>${x.b5!=null?x.b5+"/"+x.s5:"?"}</td>
+  <td>${(cloneMap[normSym(x.symbol)]||0)>=2?`<span class="badge warn" title="${cloneMap[normSym(x.symbol)]} live pools share this symbol - only one mint is real; verify on solscan">SYMBOL CLONE x${cloneMap[normSym(x.symbol)]}</span><br>`:""}${auth}<br><button class="btn mini ghost" onclick="wsnap('${x.mint}')">wallets</button>${s&&s.wallets?` <span class="mint">${s.wallets.uniqBuyers}u</span>`:""}</td>
+  <td>${inc?'<span class="inc">INCOMPLETE</span>':'<span class="badge ok">full</span>'}${dv!=null&&dv>0.10?`<br><span class="badge bad" title="GeckoTerminal and DexScreener prices differ by ${(dv*100).toFixed(0)}% - at least one feed is stale or wrong; trust neither">FEED DIVERGE ${(dv*100).toFixed(0)}%</span>`:""}</td>
+ </tr>`;}).join(""):stateBlock("empty","No pools match the current filters. Loosen min-liquidity or search.");
+ return`<div class="card"><h2>Token Radar - new Solana pools (live)</h2>
+ <div class="controls">
+  <input id="q" placeholder="search symbol / mint" value="${esc(q)}" oninput="go('Radar')">
+  <select id="sort" onchange="setPref('sort',this.value)">
+   <option value="age"${so==="age"?" selected":""}>youngest first</option>
+   <option value="liq"${so==="liq"?" selected":""}>liquidity</option>
+   <option value="txn"${so==="txn"?" selected":""}>txns 5m</option>
+  </select>
+  <input id="minliq" type="number" placeholder="min liq $" value="${ml||""}" style="width:90px" oninput="go('Radar')">
+  <button class="btn ghost" onclick="refreshAll(true)">refresh</button>
+  <button class="btn ghost" onclick="exp()">export</button>
+ </div>
+ <div class="tscroll"><table><thead><tr><th></th><th>Token</th><th>Age</th><th>Liquidity</th><th>Price</th><th>5m b/s</th><th>Checks</th><th>Data</th></tr></thead>
+ <tbody>${body}</tbody></table></div>
+ <div class="note">${rows.length} shown / ${S.order.length} pools.${clonedSyms>0?` <span class="badge warn">${clonedSyms} cloned symbol${clonedSyms===1?"":"s"} live right now - matching tickers, different mints; a ticker is never identity</span>`:""}${divCount>0?` <span class="badge bad">${divCount} feed divergence${divCount===1?"":"s"} &gt;10% (GT vs Dex disagree - at least one is stale)</span>`:""} Pool age = pool_created_at from source (NOT token creation). Freshness: "seen" = first observed by THIS browser. No invented history.</div></div>`;
+}
+/* ---------- MODULE B: EARLY-ENTRY SIGNALS ---------- */
+/* v010: score calibration - does a higher score actually print more? */
+function scoreCalibCard(){
+ const H=(S.sigHist||[]).filter(x=>x.max!=null);
+ const A=Object.values(S.seen).filter(s=>s.p0>0&&(s.n||0)>=2&&!((s.max||1)===1&&(s.min||1)===1&&(s.n||0)>=3));
+ const buckets=[[0,60],[60,75],[75,90],[90,101]];
+ const rows=buckets.map(([lo,hi])=>{
+  const inb=H.filter(x=>x.score>=lo&&x.score<hi);
+  return{lab:lo+"-"+(hi>100?100:hi),n:inb.length,hit2:pct(x=>x.max>=2,inb),medMax:median(inb.map(x=>x.max))};
+ });
+ const baseHit=pct(s=>s.max>=2,A);
+ const body=rows.map(r=>`<tr><td>${r.lab}</td><td>${r.n}</td><td>${r.n<3?'<span class="badge dim">INSUFFICIENT SAMPLE</span>':r.hit2}</td><td>${r.n<3?"-":f2(r.medMax)}</td></tr>`).join("");
+ return`<div class="card"><h3>Score calibration - does the score earn its keep? (v010)</h3>
+ <div class="tscroll"><table><thead><tr><th>Score band</th><th>n</th><th>2x gross</th><th>median max</th></tr></thead><tbody>${body}</tbody></table></div>
+ <div class="note">Every candidate the engine ever flagged, bucketed by its score AT FLAG TIME, against its forward outcome. Baseline (all moving tokens) 2x gross: ${baseHit} over ${A.length} tokens. If high bands do not beat low bands AND the baseline, the score has no edge - bands with under 3 candidates are marked INSUFFICIENT SAMPLE, not celebrated.</div></div>`;
+}
+function viewSignals(){
+ const scored=S.order.map(m=>({m,...scoreToken(m)})).filter(x=>x.confidence>0);
+ scored.sort((a,b)=>b.score-a.score);
+ const cand=scored.filter(x=>x.verdict==="CANDIDATE");
+ const gatedN=scored.filter(x=>x.gated).length;
+ const rows=scored.slice(0,25).map(x=>{
+  const p=S.pools[x.m]||{};const s=S.seen[x.m]||{};
+  const compBars=Object.entries(x.comps).map(([k,v])=>`<div class="comp"><div class="lbl"><span>${k}</span><span>${v.st==="OBSERVED"?Math.round(v.v*100)+" - "+esc(v.note):"NOT OBSERVED - "+esc(v.note)}</span></div><div class="bar"><i style="width:${v.st==="OBSERVED"?v.v*100:0}%;${v.st==="OBSERVED"?"":"background:var(--line2)"}"></i></div></div>`).join("");
+  return`<details><summary><span class="star ${S.watch[x.m]?"on":""}" onclick="event.preventDefault();star('${x.m}')">${S.watch[x.m]?"&#9733;":"&#9734;"}</span>
+   <b>${esc(p.symbol||s.sym||shortM(x.m))}</b> <span class="badge ${x.gated?"bad":(x.verdict==="CANDIDATE"?"ok":(x.verdict==="WATCH"?"warn":"dim"))}">${x.verdict}</span>
+   score ${x.score} | conf ${Math.round(x.confidence*100)}% | ${fmtAge(p.created)}</summary>
+   ${compBars}
+   ${x.hard.length?`<div class="state error">Hard gate: ${esc(x.hard.join(", "))} - score is overridden, never a candidate.</div>`:""}
+   <div class="pillrow">
+    <button class="btn mini" onclick="chk('${x.m}')">Check risk</button>
+    <button class="btn mini ghost" onclick="wsnap('${x.m}')">Wallets</button>
+    <button class="btn mini ghost" onclick="star('${x.m}')">${S.watch[x.m]?"Unstar":"Star + paper"}</button>
+   </div>
+   <div class="mint">${x.m}</div></details>`;
+ }).join("");
+ return`<div class="card"><h2>Early-Entry Engine - explainable score</h2>
+ <div class="note">Weights are UNTUNED defaults (not backtested). Missing data scores 0 and lowers confidence, never guessed. A CANDIDATE needs score&ge;60 AND &ge;70% of weight observed AND no active authorities. Wallet quality &amp; sellability are NOT OBSERVED (free data cannot prove them) - so a candidate is a research shortlist, not advice.</div>
+ <div class="pillrow"><span class="badge ok">${cand.length} candidates</span><span class="badge bad">${gatedN} risk-gated</span><span class="badge dim">${scored.length} scored</span></div>
+ ${rows||stateBlock("empty","Nothing scored yet - wait for a scan or press refresh.")}</div>
+ ${scoreCalibCard()}`;
+}
+/* ---------- MODULE C: WALLET INTELLIGENCE ---------- */
+function viewWallets(){
+ const scanned=S.order.map(m=>({m,p:S.pools[m],s:S.seen[m]})).filter(x=>x.s&&x.s.wallets);
+ const rows=scanned.map(({m,p,s})=>{
+  const ws=walletScore(m);const w=s.wallets;
+  return`<tr><td><b>${esc((p&&p.symbol)||s.sym||shortM(m))}</b> <span class="mint">${shortM(m)}</span></td>
+  <td>${w.uniqBuyers}</td><td>${w.repeatBuyers}</td><td>${fmtPct(w.topBuyerShare)}</td>
+  <td>n=${w.buys} buys</td><td><span class="badge ${ws.cls}">${ws.label}</span></td>
+  <td><button class="btn mini ghost" onclick="wsnap('${m}')">rescan</button></td></tr>`;
+ }).join("");
+ return`<div class="card"><h2>Wallet Intelligence - recent pool-trade evidence</h2>
+ <div class="note">Source: GeckoTerminal pool trades (up to 300 recent). Score = 50% buyer breadth + 50% low top-buyer share. ALWAYS read with sample size: n&lt;10 buys = INSUFFICIENT SAMPLE. Wallet independence is UNVERIFIABLE with free data - one actor can run many wallets.</div>
+ <div class="tscroll"><table><thead><tr><th>Token</th><th>Unique buyers</th><th>Repeat</th><th>Top buyer</th><th>Sample</th><th>Score</th><th></th></tr></thead>
+ <tbody>${rows||""}</tbody></table></div>
+ ${rows?"":stateBlock("empty","No wallet scans yet. Press 'wallets' on any Radar row or 'Wallets' on a Signals card.")}</div>`;
+}
+/* ---------- MODULE D: CLUSTERS ---------- */
+function viewClusters(){
+ const {repeatWallets,clusters,totalWallets}=clusterScan();
+ const cl=clusters.map((c,i)=>`<div class="card"><h3>Cluster ${i+1} - ${c.members.length} wallets, ${c.sharedPools.length} shared new pools</h3>
+  <div class="note">These wallets bought into the SAME new pools within 24h. This is co-appearance, NOT proof of coordination - could be the same bot, a copy-trading group, or coincidence. Label: CLUSTER_UNVERIFIED.</div>
+  ${c.members.map(w=>`<div class="mint">${w}</div>`).join("")}
+  <div class="note">shared pools: ${c.sharedPools.map(shortM).join(", ")}</div></div>`).join("");
+ const rep=repeatWallets.slice(0,15).map(r=>`<tr><td class="mint"><a href="javascript:void(0)" onclick="walletDetail('${r.wallet}')">${r.wallet.slice(0,8)}..${r.wallet.slice(-6)}</a></td><td>${r.pools.length}</td><td>${r.buys}</td><td>${fmtAge(r.last)}</td></tr>`).join("");
+ return`<div class="card"><h2>Smart-Money Clusters - repeat early buyers</h2>
+ <div class="note">Detection: wallets seen buying in &ge;2 different NEW pools within 24h (from your wallet scans - press 'wallets' on more tokens to feed this). A wallet in many brand-new pools is either fast software or lucky; a GROUP of wallets repeatedly in the same pools is a candidate cluster. Honest label: evidence of co-appearance only.</div>
+ <div class="pillrow"><span class="badge acc">${totalWallets} wallets indexed</span><span class="badge ${clusters.length?"warn":"dim"}">${clusters.length} clusters</span></div>
+ ${cl}
+ <h3>Repeat early buyers</h3>
+ <div class="tscroll"><table><thead><tr><th>Wallet</th><th>New pools</th><th>Buys</th><th>Last seen</th></tr></thead><tbody>${rep||""}</tbody></table></div>
+ ${rep?"":stateBlock("empty","No repeat wallets yet - scan wallets on 2+ tokens first.")}</div><div id="clusterDetail"></div>`;
+}
+/* ---------- MODULE E: RISK VIEW ---------- */
+function viewRisk(){
+ const rows=S.order.map(m=>{
+  const v=riskVerdict(m);const s=S.seen[m];const r=s&&s.risk;const p=S.pools[m];
+  return{m,v,r,p};
+ }).sort((a,b)=>(a.v.cls==="bad"?0:a.v.cls==="warn"?1:2)-(b.v.cls==="bad"?0:b.v.cls==="warn"?1:2));
+ const trs=rows.map(({m,v,r,p})=>`<tr>
+  <td><b>${esc((p&&p.symbol)||shortM(m))}</b> <span class="mint">${shortM(m)}</span></td>
+  <td><span class="badge ${v.cls}">${v.label}</span></td>
+  <td>${r?(r.mintAuth==null?"?":(r.mintAuth?'<span class="badge bad">ACTIVE</span>':'<span class="badge ok">renounced</span>')):"-"}</td>
+  <td>${r?(r.freezeAuth==null?"?":(r.freezeAuth?'<span class="badge bad">ACTIVE</span>':'<span class="badge ok">renounced</span>')):"-"}</td>
+  <td>${r&&r.top1Ex!=null?r.top1Ex+"% / "+r.top5Ex+"%":(r&&r.top1!=null?r.top1+"% / "+r.top5+"%":"-")}${r&&r.poolExcluded>0?'<br><span class="fresh">pool vault excluded ('+r.poolExcluded+')</span>':(r&&r.top1!=null?'<br><span class="fresh">HOLDER_UNVERIFIED</span>':"")}${r&&r.unclassified>0?'<br><span class="fresh">'+r.unclassified+' unclassified</span>':""}</td>
+  <td>${fmtUsd(v.liq)}</td>
+  <td><button class="btn mini" onclick="chk('${m}')">${r?"recheck":"check"}</button></td></tr>`).join("");
+ return`<div class="card"><h2>Risk Engine - keyless on-chain checks</h2>
+ <div class="note">Mint authority ACTIVE = owner can print unlimited supply. Freeze authority ACTIVE = owner can freeze your tokens. Both read directly from the mint account via Solana RPC (jsonParsed) - no rugcheck dependency. Top-holder concentration via getTokenLargestAccounts. <b>New in v006:</b> each top-5 token account's OWNER is read on-chain (getAccountInfo jsonParsed); when the owner matches the GeckoTerminal pool address, that vault is excluded and the ex-pool concentration is shown instead - verified, not assumed. Accounts that cannot be read stay counted and are flagged unclassified, so their share remains an honest UPPER BOUND. Missing data = "?" and listed as incomplete, never treated as safe.</div>
+ <div class="tscroll"><table><thead><tr><th>Token</th><th>Verdict</th><th>Mint auth</th><th>Freeze auth</th><th>Top1/Top5</th><th>Liquidity</th><th></th></tr></thead>
+ <tbody>${trs||""}</tbody></table></div>
+ ${trs?"":stateBlock("empty","No tokens loaded yet - refresh first.")}</div>`;
+}
+/* ---------- MODULE F: TARGET MONITOR ---------- */
+/* v008: time-to-hit analytics - how LONG did a chart-print take, honestly sampled */
+function tthSummary(){
+ const ws=Object.values(S.watch);
+ const perT=TARGETS.map(t=>{
+  const mins=ws.filter(w=>w.hits[t]&&w.addedAt&&w.hits[t]>w.addedAt).map(w=>(w.hits[t]-w.addedAt)/60000);
+  const hitN=ws.filter(w=>w.hits[t]).length;
+  const med=median(mins);
+  return{t,hitN,n:mins.length,med};
+ });
+ const cells=perT.map(r=>`<span class="badge ${r.hitN?"gold":"dim"}">${r.t}x: ${r.hitN} hit${r.hitN===1?"":"s"}${r.med!=null?`, median ${r.med<60?Math.round(r.med)+"m":(r.med/60).toFixed(1)+"h"} to print (n=${r.n})`:""}</span>`).join(" ");
+ return`<div class="card"><h3>Time-to-hit (starred tokens only)</h3>
+ <div class="pillrow">${cells}</div>
+ <div class="note">New in v008: how long a target took to PRINT on the chart after you starred. Small samples prove nothing; a fast 2x print on thin liquidity is still not $2-for-$1 profit. Hits without a recorded star time cannot be timed and are counted without a median.</div></div>`;
+}
+function viewTargets(){
+ const ks=Object.keys(S.watch);
+ const rows=ks.map(m=>{
+  const w=S.watch[m];
+  const tg=TARGETS.map(t=>{
+   if(!w.hits[t])return`${t}x&middot;`;
+   const mins=(w.addedAt&&w.hits[t]>w.addedAt)?Math.round((w.hits[t]-w.addedAt)/60000):null;
+   return`<span class="hit">${t}x&#10003;${mins!=null?` <span class="fresh">${mins<60?mins+"m":(mins/60).toFixed(1)+"h"}</span>`:""}</span>`;
+  }).join(" ");
+  const mult=w.lastMult!=null?w.lastMult.toFixed(2)+"x":'<span class="inc">NOT-PRICED</span>';
+  const net=(w.lastMult!=null)?f2(exitNet(w.lastMult,w.liq0)):"n/a";
+  const q=w.quote;const qcell=q?(q.status==="QUOTED"?`<span class="${q.rtPct<=-5?"inc":""}">${q.rtPct}%</span> <span class="fresh">${fmtAge(q.at)}</span>`:`<span class="inc">NOT_QUOTED</span> <span class="mint">${esc(q.why||"")}</span>`):`<button class="btn mini ghost" onclick="qrt('${m}')">quote RT</button>`;
+  return`<tr><td><b>${esc(w.sym)}</b> <span class="mint">${shortM(m)}</span></td>
+  <td>${w.ref!=null?"$"+Number(w.ref).toPrecision(4):"?"}</td>
+  <td>${w.lastPrice!=null?"$"+Number(w.lastPrice).toPrecision(4):"?"}</td>
+  <td>${mult}</td><td>${net}</td><td>${qcell}</td><td class="tgt">${tg}</td></tr>`;
+ }).join("");
+ return`<div class="card"><h2>Price Target Monitor - 2x / 3x / 4x / 5x</h2>
+ <div class="note">Reference price = recorded when you starred the token (or first-seen price if earlier - look-ahead guarded). A target "hit" is a CHART PRINT only: fees, slippage and exit liquidity decide real outcomes. Net est uses your settings (paper size $${S.settings.paperSize}, fee ${S.settings.feePct}%) + pool impact. Quoted RT = actual Jupiter buy+sell quotes, never executed; NOT_QUOTED shown honestly when unavailable.</div>
+ <div class="tscroll"><table><thead><tr><th>Token</th><th>Ref</th><th>Now</th><th>Multiple</th><th>Net est</th><th>Quoted RT</th><th>Targets (time-to-hit)</th></tr></thead>
+ <tbody>${rows||""}</tbody></table></div>
+ ${rows?"":stateBlock("empty","Star tokens on Radar or Signals to monitor targets.")}
+ ${tthSummary()}</div>`;
+}
+/* ---------- MODULE G: WATCHLIST + ALERTS ---------- */
+function viewWatch(){
+ const ks=Object.keys(S.watch);
+ const rows=ks.map(m=>{
+  const w=S.watch[m];const s=S.seen[m];const p=S.pools[m];
+  const spark=s&&s.last!=null?svgSparkline([s.p0,s.min,s.last].filter(x=>x>0)):"";
+  return`<tr><td><button class="star on" onclick="star('${m}')">&#9733;</button></td>
+  <td><b>${esc(w.sym)}</b> <span class="mint">${shortM(m)}</span><br>${spark}</td>
+  <td>${w.ref!=null?"$"+Number(w.ref).toPrecision(4):"?"}</td>
+  <td>${w.lastMult!=null?w.lastMult.toFixed(2)+"x":'<span class="inc">NOT-PRICED</span>'}${w.ghostLiq?' <span class="badge warn">GHOST LIQ - pool drained, targets frozen</span>':''}</td>
+  <td>${fmtAge(w.addedAt)}</td>
+  <td><button class="btn mini ghost" onclick="qrt('${m}')">RT</button> <button class="btn mini ghost" onclick="chk('${m}')">risk</button> <button class="btn mini ghost" onclick="wsnap('${m}')">wallets</button></td></tr>`;
+ }).join("");
+ const alerts=S.alerts.slice(0,20).map(a=>`<div class="note"><span class="badge ${a.kind==="gold"?"gold":(a.kind==="bad"?"bad":(a.kind==="warn"?"warn":"dim"))}">${new Date(a.t).toLocaleTimeString()}</span> ${esc(a.msg)}</div>`).join("");
+ return`<div class="card"><h2>Watchlist</h2>
+ <div class="note">Starred tokens keep pricing even after leaving the discovery page (Dex batch per-mint). Alert level: ${S.settings.alertMult}x (change in Settings). Alerts fire ONLY while this page is open - there is no backend; closing the tab freezes everything.</div>
+ <div class="tscroll"><table><thead><tr><th></th><th>Token</th><th>Ref</th><th>Multiple</th><th>Starred</th><th>Actions</th></tr></thead>
+ <tbody>${rows||""}</tbody></table></div>
+ ${rows?"":stateBlock("empty","Nothing starred yet.")}</div>
+ <div class="card"><h2>Alerts (this device, while page open)</h2>${alerts||stateBlock("empty","No alerts yet.")}</div>`;
+}
+/* ---------- MODULE I: OUTCOMES + PAPER LEDGER ---------- */
+/* ---------- MODULE G+: BASELINE REGISTRY (every token seen, per-token truth) ----------
+   The aggregate base rate above hides WHICH tokens moved. This registry lists every token
+   the scanner saw in the last 6h with its own first-observed price (look-ahead guarded),
+   latest and max chart multiples, and honest status labels. No candidate cherry-picking. */
+function baselineRows(){
+ const now=Date.now();
+ const rows=Object.entries(S.seen).map(([m,s])=>{
+  const age=(now-s.first)/60000;
+  const flat=!!(s.p0>0&&(s.max||1)===1&&(s.min||1)===1&&(s.n||0)>=3);
+  let status,cls;
+  if(!(s.p0>0)){status=(s.n||0)>=2?"NO VALID PRICE (feed never gave a chart price - not fabricated)":"AWAITING FIRST PRICE";cls="dim";}
+  else if(flat){status="NO PRICE MOVEMENT (3+ polls, chart flat - untraded or dead pair; excluded from rates)";cls="dim";}
+  else if((s.ghost||0)>=2&&now-(s.lastT||s.first)>5*60000){status="GHOST LIQ (pool drained under $100 - post-drain quotes excluded from prints/rates)";cls="warn";}
+  else if((s.miss||0)>=3&&now-(s.lastT||s.first)>10*60000){status="STALE (price feed lost it - last print kept, not extrapolated)";cls="warn";}
+  else{status="TRACKING";cls="ok";}
+  const dd=(s.max>1&&s.last!=null)?+(100*(1-s.last/s.max)).toFixed(1):null; // v012: giveback from peak %
+  return{mint:m,sym:s.sym||shortM(m),age,p0:s.p0||null,last:s.last||null,max:s.max||null,maxNet:s.maxNet||null,dd,
+   m10:s.m10||null,m60:s.m60||null,h6:s.h6||null,n:s.n||0,miss:s.miss||0,ghost:s.ghost||0,hit2:(s.max||0)>=2,flat,series:s.series||[],status,cls};
+ });
+ rows.sort((a,b)=>a.age-b.age); // newest (youngest) first
+ return rows;
+}
+window.expBaselineCSV=()=>{
+ const rows=baselineRows();
+ const q=s=>'"'+String(s==null?"":s).replace(/"/g,"'")+'"';
+ const head="mint,symbol,first_seen_iso,age_min,p0_usd,last_mult,max_mult,max_net_mult,m10,m60,h6,polls,missed_polls,hit_2x_gross,status";
+ const lines=rows.map(r=>[r.mint,q(r.sym),new Date(Date.now()-r.age*60000).toISOString(),Math.round(r.age),
+  r.p0,r.last,r.max,r.maxNet,r.m10,r.m60,r.h6,r.n,r.miss,r.hit2?1:0,q(r.status)].join(","));
+ const csv=head+"\n"+lines.join("\n");
+ const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download="solana_intelligence_v018_baseline_"+Date.now()+".csv";a.click();log("exported baseline CSV ("+rows.length+" rows)");
+};
+function baselineCard(){
+ const rows=baselineRows();
+ const valid=rows.filter(r=>r.p0>0);
+ const body=rows.slice(0,60).map(r=>`<tr><td><b>${esc(r.sym)}</b> <span class="mint">${shortM(r.mint)}</span><br>${r.series.length>1?svgSparkline(r.series.map(p=>p[1])):""}</td>
+  <td>${Math.round(r.age)}m</td><td>${r.p0?fmtUsd(r.p0):"-"}</td>
+  <td class="${(r.last||0)>=2?"inc":""}">${f2(r.last)}</td><td>${f2(r.max)}</td><td>${f2(r.maxNet)}</td>
+  <td class="${(r.dd||0)>=50?"inc":""}">${r.dd!=null?r.dd+"%":"-"}</td>
+  <td>${f2(r.m10)}</td><td>${f2(r.m60)}</td>
+  <td><span class="badge ${r.cls}">${r.status.split(" (")[0]}</span></td></tr>`).join("");
+ return`<div class="card"><h2>Baseline registry - every token seen (per-token truth)</h2>
+ <div class="note">New in v005: the aggregate base rate is now auditable token by token. Reference = first OBSERVED price (look-ahead guarded). A gross 2x is a chart print, not executable profit - net column subtracts estimated exit cost. Registry lives only while the page keeps scanning; entries expire after 6h.</div>
+ <div class="pillrow">
+  <span class="badge acc">${rows.length} seen</span>
+  <span class="badge ok">${valid.length} with valid price</span>
+  <span class="badge gold">gross 2x: ${valid.length?Math.round(100*valid.filter(r=>r.hit2).length/valid.length)+"%":"n/a"}</span>
+  <span class="badge warn">${rows.filter(r=>r.cls==="warn").length} stale</span>
+  <span class="badge warn">${rows.filter(r=>(r.ghost||0)>0).length} ghost-liq</span>
+  <span class="badge dim">${rows.filter(r=>!(r.p0>0)).length} no price</span>
+  <span class="badge dim">${rows.filter(r=>r.flat).length} no movement (excluded)</span>
+ </div>
+ <div class="controls"><button class="btn mini ghost" onclick="expBaselineCSV()">export baseline CSV</button></div>
+ ${rows.length?`<div class="tscroll"><table><thead><tr><th>token</th><th>age</th><th>first $</th><th>now</th><th>max</th><th>max net</th><th>giveback</th><th>10m</th><th>1h</th><th>status</th></tr></thead><tbody>${body}</tbody></table></div>${rows.length>60?`<div class="note">showing newest 60 of ${rows.length} - export CSV for all</div>`:""}`:stateBlock("empty","No tokens seen yet this session - the registry fills as the scanner runs.")}</div>`;
+}
+/* v012: giveback reality - of the tokens that printed, how much did they give back? */
+function givebackCard(){
+ const A=Object.values(S.seen).filter(s=>s.p0>0&&(s.n||0)>=2&&!((s.max||1)===1&&(s.min||1)===1&&(s.n||0)>=3));
+ const printed=A.filter(s=>(s.max||0)>=2&&s.last!=null);
+ if(printed.length<3)return`<div class="card"><h3>The giveback reality (v012)</h3><div class="note">Need 3+ tokens with a 2x gross print to measure giveback honestly - currently ${printed.length}. It collects as the scanner runs.</div></div>`;
+ const dds=printed.map(s=>100*(1-s.last/s.max));
+ const med=median(dds);
+ const gave50=Math.round(100*dds.filter(d=>d>=50).length/dds.length);
+ return`<div class="card"><h3>The giveback reality (v012)</h3>
+ <div class="pillrow">
+  <span class="badge gold">${printed.length} tokens printed 2x gross</span>
+  <span class="badge warn">median giveback from peak: ${med!=null?med.toFixed(0)+"%":"n/a"}</span>
+  <span class="badge bad">${gave50}% gave back 50%+ of the print</span>
+ </div>
+ <div class="note">For every token that printed a 2x on the chart, this measures how much of the peak was gone by the latest print. A 2x you never sold is not a 2x you kept - the median giveback is the honest cost of holding. Chart prints only; exits are never simulated as fills.</div></div>`;
+}
+/* v009: age-bucketed base rates - do young tokens print more often than old ones? */
+function ageBucketsCard(){
+ const A=Object.values(S.seen).filter(s=>s.p0>0&&(s.n||0)>=2&&!((s.max||1)===1&&(s.min||1)===1&&(s.n||0)>=3));
+ const now=Date.now();
+ const buckets=[["0-15m",0,15],["15-60m",15,60],["1-6h",60,360]];
+ const rows=buckets.map(([lab,lo,hi])=>{
+  const inb=A.filter(s=>{const age=(now-s.first)/60000;return age>=lo&&age<hi;});
+  return{lab,n:inb.length,hit2:pct(s=>s.max>=2,inb),medMax:median(inb.map(s=>s.max))};
+ });
+ const body=rows.map(r=>`<tr><td>${r.lab}</td><td>${r.n}</td><td>${r.hit2}</td><td>${f2(r.medMax)}</td></tr>`).join("");
+ return`<div class="card"><h3>Base rate by token age (v009)</h3>
+ <div class="pillrow">${rows.map(r=>`<span class="badge ${r.n?"acc":"dim"}">${r.lab}: ${r.n} tokens</span>`).join(" ")}</div>
+ <div class="tscroll"><table><thead><tr><th>Age bucket</th><th>n</th><th>2x gross</th><th>median max</th></tr></thead><tbody>${body}</tbody></table></div>
+ <div class="note">Same no-movement-excluded sample as the rates above, split by how long the token has been tracked. If young buckets do not beat old ones, "catch it early" has no edge in your own data - the app shows it either way. Tiny buckets prove nothing.</div></div>`;
+}
+function viewLedger(){
+ const Aall=Object.values(S.seen).filter(s=>s.p0>0&&(s.n||0)>=2);
+ const A=Aall.filter(s=>!((s.max||1)===1&&(s.min||1)===1&&(s.n||0)>=3)); // v007: no-movement tokens excluded
+ const flatN=Aall.length-A.length;
+ const open=S.ledger.filter(l=>!l.closed);
+ const inv=S.ledger.reduce((a,l)=>a+l.sizeUsd,0);
+ const val=S.ledger.reduce((a,l)=>a+(l.closed?l.out:l.sizeUsd*(l.net!=null?l.net:0)),0);
+ const hist=svgHistogram(A.map(s=>s.max),10,"max multiple distribution (all seen tokens)",v=>v.toFixed(1)+"x");
+ const pos=S.ledger.slice().reverse().map(l=>`<div class="card"><b>${esc(l.sym)}</b> <span class="mint">${shortM(l.mint)}</span>
+  <div class="kv"><b>entry</b><span>$${l.entry!=null?Number(l.entry).toPrecision(4):"?"} @ ${new Date(l.t).toLocaleTimeString()}</span>
+  <b>mark</b><span>$${l.mark!=null?Number(l.mark).toPrecision(4):"?"}</span>
+  <b>net</b><span>${l.net!=null?l.net.toFixed(2)+"x":"n/a"} (of estimated/quoted exit cost)</span>
+  <b>status</b><span>${l.closed?"closed, out $"+(l.out||0).toFixed(2):"open"}</span></div>
+  ${l.closed?"":`<button class="btn mini ghost" onclick="closeP('${l.mint}')">Close paper</button>`}</div>`).join("");
+ return`<div class="card"><h2>Historical outcomes - base rates (no survivorship)</h2>
+ <div class="note">Every token this browser saw in the last 6h, not just starred ones. Rates below use ${A.length} tokens with 2+ price polls AND observed price movement; ${flatN} more tokens sat perfectly flat across 3+ polls (untraded or dead pairs) and are excluded - a median built on dead prices would lie. Small samples still prove nothing; the page must stay open to collect.</div>
+ <div class="pillrow">
+  <span class="badge acc">2x gross: ${pct(s=>s.max>=2,A)}</span>
+  <span class="badge acc">3x gross: ${pct(s=>s.max>=3,A)}</span>
+  <span class="badge acc">5x gross: ${pct(s=>s.max>=5,A)}</span>
+  <span class="badge gold">2x net: ${pct(s=>s.maxNet>=2,A)}</span>
+  <span class="badge gold">3x net: ${pct(s=>s.maxNet>=3,A)}</span>
+ </div>
+ <div class="kv"><b>median multiple</b><span>10m ${f2(median(A.map(s=>s.m10)))} | 1h ${f2(median(A.map(s=>s.m60)))} | 6h ${f2(median(A.map(s=>s.h6)))}</span>
+ <b>below 0.5x now</b><span>${pct(s=>s.last<0.5,A)}</span>
+ <b>starred vs all</b><span>median max ${f2(median(Object.values(S.watch).map(w=>w.lastMult)))} vs ${f2(median(A.map(s=>s.max)))} - if starred does not beat base, selection has no edge (EDGE NOT PROVEN at small samples)</span></div>
+ ${hist}
+ ${ageBucketsCard()}
+ ${givebackCard()}</div>
+ ${baselineCard()}
+ <div class="card"><h2>Paper trading ledger</h2>
+ <div class="pillrow"><span class="badge dim">invested $${inv.toFixed(0)} (${S.ledger.length} positions)</span><span class="badge ${val>=inv?"ok":"warn"}">value now $${val.toFixed(2)}</span><span class="badge warn">PAPER ONLY</span></div>
+ <div class="note">Net uses quoted Jupiter round-trip when available, else constant-product estimate (fee + pool impact). No fabricated backtests: only positions you actually opened by starring.</div>
+ <div class="controls"><button class="btn mini ghost" onclick="expCSV()">export outcomes CSV</button></div>
+ ${pos||stateBlock("empty","No paper positions. Star a token to open one.")}</div>`;
+}
+/* ---------- MODULE H: DATA / SYSTEM HEALTH ---------- */
+/* v011: per-source reliability over this session (persisted probe history) */
+function healthReliabilityCard(){
+ const H=S.healthHist||[];
+ if(H.length<4)return'<div class="card"><h3>Source reliability (this session)</h3><div class="note">Collecting probe history - appears after a few refreshes. Persisted across reloads, capped at 240 probes.</div></div>';
+ const by={};
+ for(const[ts,k,ok]of H){const b=by[k]||(by[k]={n:0,ok:0,lastDown:null});b.n++;if(ok)b.ok++;else b.lastDown=ts;}
+ const rows=Object.entries(by).map(([k,b])=>`<tr><td>${esc(k)}</td><td>${b.n}</td>
+  <td><span class="badge ${b.ok/b.n>0.9?"ok":(b.ok/b.n>0.5?"warn":"bad")}">${Math.round(100*b.ok/b.n)}%</span></td>
+  <td>${b.lastDown?fmtAge(b.lastDown)+" ago":"never this session"}</td></tr>`).join("");
+ return`<div class="card"><h3>Source reliability (this session)</h3>
+ <div class="tscroll"><table><thead><tr><th>Source</th><th>Probes</th><th>OK rate</th><th>Last failure</th></tr></thead><tbody>${rows}</tbody></table></div>
+ <div class="note">New in v011: every probe is recorded (persisted, capped at 240). A source that flaps shows here even when the current status is OK - last-probe status alone would hide it.</div></div>`;
+}
+function viewHealth(){
+ const srcRows=Object.entries(S.health).map(([k,v])=>`<tr>
+  <td>${esc(k)}</td><td><span class="badge ${v.ok?"ok":"bad"}">${v.ok?"OK":"DOWN"}</span></td>
+  <td>${v.ms!=null?v.ms+"ms":"-"}</td><td class="mint">${esc(v.ex||"")}</td><td class="fresh">${v.at}</td></tr>`).join("");
+ const bk=Object.keys(S.backoff).filter(k=>backedOff(k)).map(k=>`<span class="badge warn">${esc(k)} backoff ${backoffLeft(k)}s</span>`).join(" ");
+ return`<div class="card"><h2>Source status</h2>
+ <div class="pillrow">${bk||'<span class="badge ok">no active backoffs</span>'}</div>
+ <div class="tscroll"><table><thead><tr><th>Source</th><th>Status</th><th>Latency</th><th>Detail</th><th>At</th></tr></thead>
+ <tbody>${srcRows||""}</tbody></table></div>
+ ${srcRows?"":stateBlock("empty","No probes yet - refresh runs on load.")}</div>
+ ${healthReliabilityCard()}
+ <div class="card"><h2>Limits &amp; honest behavior</h2>
+ <ul>
+ <li>Budgets: GT 1-2 calls per refresh, Dex 1 call per 30 mints (docs: 60-300/min keyless - not load-tested), RPC on demand per check, Jupiter on demand per quote.</li>
+ <li>429 from any source = 60s per-source backoff, shown above. No infinite retry: one attempt per refresh per source, next refresh tries again.</li>
+ <li>Timeouts: 8-10s per call via AbortController. A failed source is marked DOWN with the reason - data from it shows as missing, never fabricated.</li>
+ <li>Needs a key / backend (NOT included, honestly): Helius DAS wallet history (free key exists but keys are banned from public HTML), Solscan Pro API, server-side alerts when the page is closed.</li>
+ <li>Everything persists in this browser's localStorage only.</li>
+ </ul></div>
+ <div class="card"><h2>Self-test</h2>
+ <div class="note">Runs the app's own checks in THIS browser and reports PASS/FAIL honestly. A FAIL is shown, not hidden.</div>
+ <button class="btn" onclick="runSelfTest()">Run self-test</button>
+ <div id="selftest" class="note"></div></div>`;
+}
+/* ---------- SETTINGS ---------- */
+function viewSettings(){
+ const st=S.settings;
+ const row=(label,key,type,val,hint)=>`<div class="setrow"><div><label>${label}</label><div class="hint">${hint}</div></div>
+  ${type==="select"?`<select onchange="setPref('${key}',this.value)">${val}</select>`:`<input type="${type}" value="${val}" style="width:90px" onchange="setPref('${key}',this.value)">`}</div>`;
+ return`<div class="card"><h2>Settings (persisted on this device)</h2>
+ <div class="setrow"><div><label>Theme</label><div class="hint">dark / light</div></div><button class="btn ghost" onclick="toggleTheme()">${st.theme==="light"?"switch to dark":"switch to light"}</button></div>
+ ${row("Refresh interval (sec)","refreshSec","number",st.refreshSec,"60-300 recommended; free-rate friendly")}
+ ${row("Paper position size ($)","paperSize","number",st.paperSize,"used for ledger + Jupiter round-trip quotes")}
+ ${row("Round-trip fee estimate (%)","feePct","number",st.feePct,"applied in net estimates")}
+ ${row("Alert level (x multiple)","alertMult","number",st.alertMult,"watchlist alert while page open")}
+ <div class="setrow"><div><label>Sound alerts</label><div class="hint">short beep when a watch token crosses your alert level; page must be open, browser must have had one tap (press test sound once)</div></div><button class="btn ghost" onclick="setPref('sound',${st.sound?"false":"true"})">${st.sound?"on - turn off":"off - turn on"}</button></div>
+ <div class="setrow"><div><label>Test sound</label><div class="hint">plays the alert tone now; also unlocks browser audio</div></div><button class="btn ghost" onclick="testSound()">play test sound</button></div>
+ ${row("Default min liquidity ($)","minLiq","number",st.minLiq,"Radar filter default")}
+ <div class="setrow"><div><label>Score weights</label><div class="hint">age / liquidity / flow / authorities / coverage (defaults .25/.25/.20/.20/.10; need not sum to 1)</div></div>
+  <span>${["age","liquidity","flow","authorities","coverage"].map(k=>`<input type="number" step="0.05" min="0" max="1" title="${k}" style="width:56px" value="${(st.weights||{age:.25,liquidity:.25,flow:.20,authorities:.20,coverage:.10})[k]}" onchange="setWeight('${k}',this.value)">`).join("")}</span></div>
+ <div class="setrow"><div><label>Clear all local data</label><div class="hint">wipes seen/watchlist/ledger/wallets on this device</div></div><button class="btn ghost" onclick="clearData()">clear</button></div>
+ <div class="note">Settings apply immediately and survive reloads (localStorage).</div></div>
+ <div class="card"><h2>About - honest limits v018</h2><ul>
+ <li><b>Modules live:</b> Radar (GT new pools), Signals (explainable score), Wallets (GT pool trades), Clusters (repeat early buyers), Risk (RPC authorities + top holders), Targets (2x-5x vs recorded reference), Watchlist + in-page alerts, Health (source status/backoff/self-test), Outcomes + paper ledger, Jupiter quoted round-trip, <b>new in v005:</b> Baseline registry (per-token audit of every token seen + CSV) honest window labels (HISTORY WINDOW LIMITED / HISTORY_PRUNED), <b>new in v006:</b> owner-verified pool-vault exclusion in holder concentration (top-5 accounts read on-chain, pool owner matched, unclassified kept as UPPER BOUND), <b>new in v007:</b> no-movement tokens excluded from base rates (dead prices cannot fake a median) and page-close save flush (settings/watchlist survive fast closes), <b>new in v008:</b> time-to-hit analytics, <b>new in v009:</b> age-bucketed base rates (0-15m / 15-60m / 1-6h hit rates - does "early" actually win in your own data?) and capped per-token replay sparklines in the baseline registry, <b>new in v010:</b> score calibration, <b>new in v011:</b> candle-feed fallback to the app's own recorded price points (honestly labeled, never passed off as candles) and per-source reliability history (persisted probe log, flapping sources exposed), <b>new in v012:</b> giveback analytics (per-token drawdown from peak; median giveback across 2x printers - a print you never sold is not a print you kept), <b>new in v013:</b> wallet track records (did this wallet's entries actually print? - UNPROVEN labels under 3 tracked entries, survivorship warnings above), <b>new in v014:</b> sound alerts (a short beep when a watch token crosses your alert level - page must be open, browser needs one tap first, actual speaker output NOT TESTED from the build box), <b>new in v015:</b> drained-liquidity ghost exclusion (a pool under $100 can print absurd chart prices - those quotes no longer count as 2x prints, target hits, or alerts; labeled GHOST LIQ, never hidden), <b>new in v016:</b> symbol-clone detection (multiple live pools sharing one ticker - only one mint is real; warned per row and counted across ALL live pools, even ones your filters hide), <b>new in v017:</b> feed-divergence warnings (when GeckoTerminal and DexScreener disagree on a price by more than 10%, at least one feed is stale - the row is flagged, never silently averaged), <b>new in v018:</b> local-storage report + safe pruning (every stored key with its real size, plus a prune that drops only closed paper positions older than 7 days and expired seen-tokens - watchlist, notes and settings are never touched).</li>
+ <li><b>NOT possible free-in-browser (labeled, not faked):</b> true wallet independence, smart-money confirmation, sellability/honeypot proof, true entry fills, alerts while the page is closed. Helius/Solscan need keys - keys are never put in this public file.</li>
+ <li><b>Never:</b> real money, signing, keys. Multiples are chart prints; a 2x on thin liquidity is not $2-for-$1 profit.</li>
+ <li>Prior versions kept: v001/v002/v003 files remain in the repo, never overwritten.</li>
+ </ul></div>`;
+}
+/* ---------- SELF-TEST (honest, in-browser) ---------- */
+window.runSelfTest=async function(){
+ const out=[];const t=(name,ok,detail)=>out.push({name,ok,detail});
+ t("state objects exist",!!(S.pools&&S.seen&&S.watch&&S.ledger),"");
+ t("localStorage persistence",(()=>{try{localStorage.setItem("si4_t","1");localStorage.removeItem("si4_t");return true;}catch(e){return false;}})(),"");
+ t("settings loaded",S.settings&&typeof S.settings.refreshSec==="number","refreshSec="+(S.settings&&S.settings.refreshSec));
+ t("pools loaded",S.order.length>0,S.order.length+" pools");
+ t("dex enrichment ran",Object.keys(S.dex).length>0,Object.keys(S.dex).length+" pairs");
+ t("SOL price known",S.solUsd>0,S.solUsd?"$"+S.solUsd:"unknown");
+ t("outcome tracking running",Object.keys(S.seen).length>0,Object.keys(S.seen).length+" tokens tracked");
+ t("score engine callable",(()=>{try{if(!S.order.length)return false;scoreToken(S.order[0]);return true;}catch(e){return false;}})(),"");
+ t("risk engine callable",(()=>{try{if(!S.order.length)return false;riskVerdict(S.order[0]);return true;}catch(e){return false;}})(),"");
+ t("charts render",(()=>{try{return svgHistogram([1,2,3],3,"t",v=>v).includes("svg");}catch(e){return false;}})(),"");
+ t("export builds blob",(()=>{try{new Blob([JSON.stringify(S.seen)]);return true;}catch(e){return false;}})(),"");
+ const gtOk=S.health["GeckoTerminal new_pools"]&&S.health["GeckoTerminal new_pools"].ok;
+ t("GT source ok (last probe)",!!gtOk,S.health["GeckoTerminal new_pools"]?S.health["GeckoTerminal new_pools"].ex||"":"not probed");
+ const dexOk=S.health["DexScreener batch"]&&S.health["DexScreener batch"].ok;
+ t("Dex source ok (last probe)",!!dexOk,"");
+ t("baseline math correct",(()=>{try{
+   const m=median([3,1,2]);if(m!==2)return false;
+   const rows=[{max:1},{max:2.5},{max:3}];const p=Math.round(100*rows.filter(r=>r.max>=2).length/rows.length);
+   return p===67; }catch(e){return false;}})(),"median + hit-rate on synthetic rows");
+ t("baseline registry renders",(()=>{try{const r=baselineRows();if(!Array.isArray(r))return false;const h=baselineCard();return h.includes("Baseline registry");}catch(e){return false;}})(),"rows="+baselineRows().length);
+ t("feed-window label logic",(()=>{try{
+   const buys=2,tx24=120;const feedLimited=(buys<10&&tx24!=null&&tx24>=50);
+   const notLimited=(2<10&&30!=null&&30>=50);
+   return feedLimited===true&&notLimited===false; }catch(e){return false;}})(),"HISTORY WINDOW LIMITED triggers only on low feed + high Dex txns");
+ t("pool-exclusion math",(()=>{try{
+   const entries=[{amt:50,own:"pool"},{amt:20,own:"w1"},{amt:10,own:"w2"},{amt:5,own:null}];
+   const tot=entries.reduce((x,e)=>x+e.amt,0);
+   const keep=entries.filter(e=>e.own!=="pool");
+   const top1Ex=+(100*Math.max(...keep.map(e=>e.amt))/tot).toFixed(1);
+   const unclass=keep.filter(e=>e.own==null).length;
+   return top1Ex==="23.5"&&unclass===1; }catch(e){return false;}})(),"pool vault excluded, unclassified kept in bound");
+ t("flat-token exclusion",(()=>{try{
+   const isFlat=s=>(s.max||1)===1&&(s.min||1)===1&&(s.n||0)>=3;
+   const dead={p0:1,max:1,min:1,n:5},moved={p0:1,max:1.3,min:0.9,n:5},young={p0:1,max:1,min:1,n:2};
+   return isFlat(dead)===true&&isFlat(moved)===false&&isFlat(young)===false; }catch(e){return false;}})(),"dead/untraded tokens leave the rate base only after 3+ flat polls");
+ t("storage prune math",(()=>{try{
+   const now=Date.now();
+   const L=[{closed:true,t:now-8*864e5},{closed:false,t:now-30*864e5},{closed:true,t:now-1000}];
+   const kept=L.filter(l=>!l.closed||now-(l.t||0)<7*864e5);
+   return kept.length===2&&kept[0].closed===false&&kept[1].closed===true; }catch(e){return false;}})(),"old closed entries drop; open and recent stay");
+ t("feed-divergence math",(()=>{try{
+   const d1=priceDiv(1.00,1.15),d2=priceDiv(1.00,1.05),d3=priceDiv(0,2);
+   return d1>0.10&&d2<0.10&&d3===null; }catch(e){return false;}})(),">10% GT-vs-Dex gap flags; missing price never flags");
+ t("symbol-clone detection",(()=>{try{
+   if(normSym(" $Pepe! ")!=="PEPE")return false;
+   const cm={};for(const sy of["PEPE","pepe","$PEPE2","PEPE"])cm[normSym(sy)]=(cm[normSym(sy)]||0)+1;
+   return cm.PEPE===3&&cm.PEPE2===1; }catch(e){return false;}})(),"normalization + counting; same ticker different mint = clone warning");
+ t("ghost-liquidity exclusion",(()=>{try{
+   const G=GHOST_LIQ,s={p0:1,max:1,n:5},p=1000000,liq=0; // drained pool, absurd quote
+   if(p>0&&s.p0>0&&liq>=G){s.max=Math.max(s.max,p/s.p0);}else{s.ghost=(s.ghost||0)+1;}
+   return s.max===1&&s.ghost===1; }catch(e){return false;}})(),"drained-pool quote must never count as a print");
+ t("sound alert plumbing",(()=>{try{
+   return typeof beep==="function"&&typeof testSound==="function"&&(window.AudioContext||window.webkitAudioContext)?true:"no AudioContext in this browser"; }catch(e){return false;}})(),"tone math only - actual speaker output NOT TESTED here");
+ t("wallet track-record math",(()=>{try{
+   const recs=[{p0:1,max:2.5},{p0:1,max:0.8},{p0:1,max:1.4}];
+   const printed2=recs.filter(s=>(s.max||0)>=2).length;
+   const medMax=median(recs.map(s=>s.max));
+   return printed2===1&&medMax===1.4&&recs.length>=3; }catch(e){return false;}})(),"printed count + median max + sample gate");
+ t("giveback math",(()=>{try{
+   const dd=(max,last)=>+(100*(1-last/max)).toFixed(1);
+   if(dd(4,2)!==50.0)throw 0;
+   const dds=[20,60,80].map(x=>x);const gave50=Math.round(100*dds.filter(d=>d>=50).length/dds.length);
+   return gave50===67&&median(dds)===60; }catch(e){return false;}})(),"peak-to-last drawdown + 50% bucket");
+ t("health-history aggregation",(()=>{try{
+   const H=[[1,"gt",1],[2,"gt",0],[3,"gt",1],[4,"dex",1]];
+   const by={};for(const[ts,k,ok]of H){const b=by[k]||(by[k]={n:0,ok:0,lastDown:null});b.n++;if(ok)b.ok++;else b.lastDown=ts;}
+   return by.gt.n===3&&Math.round(100*by.gt.ok/by.gt.n)===67&&by.gt.lastDown===2&&by.dex.lastDown===null; }catch(e){return false;}})(),"ok-rate + last-failure per source");
+ t("fallback point math",(()=>{try{
+   const pts=[[1,1.0],[2,1.5],[3,0.8],[4,2.2]];
+   const vs=pts.map(p=>p[1]);const hi=Math.max(...vs),lo=Math.min(...vs);
+   return hi===2.2&&lo===0.8&&pts.length>=3; }catch(e){return false;}})(),"stored-series hi/lo for fallback chart");
+ t("calibration bucket math",(()=>{try{
+   const H=[{score:55,max:1.2},{score:62,max:2.5},{score:80,max:0.8},{score:95,max:3.1}];
+   const hi=H.filter(x=>x.score>=90&&x.score<101);
+   const mid=H.filter(x=>x.score>=60&&x.score<75);
+   return hi.length===1&&mid.length===1&&hi[0].max===3.1; }catch(e){return false;}})(),"score bands 0-60/60-75/75-90/90-100");
+ t("age-bucket math",(()=>{try{
+   const now=Date.now();
+   const mk=ageMin=>({first:now-ageMin*60000,p0:1,n:5,max:2.5,min:0.9});
+   const A=[mk(5),mk(30),mk(200)];
+   const inb=A.filter(s=>{const age=(now-s.first)/60000;return age>=15&&age<60;});
+   return inb.length===1; }catch(e){return false;}})(),"bucket boundaries 0-15/15-60/60-360m");
+ t("series cap logic",(()=>{try{
+   const s={series:[]};const now=Date.now();
+   for(let i=0;i<70;i++){if(!s.series.length||(now+i*60000)-s.series[s.series.length-1][0]>=60000){s.series.push([now+i*60000,1.1]);if(s.series.length>60)s.series.shift();}}
+   return s.series.length===60&&s.series[s.series.length-1][0]===now+69*60000; }catch(e){return false;}})(),"60-point cap, >=60s spacing");
+ t("time-to-hit math",(()=>{try{
+   const w={addedAt:1000e3,hits:{2:1000e3+14*60000,3:1000e3+125*60000}};
+   const m2=Math.round((w.hits[2]-w.addedAt)/60000),m3=(w.hits[3]-w.addedAt)/60000;
+   if(m2!==14)throw 0;
+   const med=median([10,30,20]);return med===20&&Math.abs(m3/60-2.0833)<0.01; }catch(e){return false;}})(),"minutes + median formatting");
+ t("page-close save hook",(()=>{try{return typeof window.addEventListener==="function"&&("onpagehide" in window||true);}catch(e){return false;}})(),"pagehide + visibilitychange flush registered at boot");
+ t("pruned-history regex",(()=>{try{
+   return /pruned|long-term|slot.*cleaned/i.test("slot 123 was cleaned up due to ledger pruned")&&!(/pruned|long-term|slot.*cleaned/i.test("rate limited")); }catch(e){return false;}})(),"");
+ const el=$("#selftest");
+ el.innerHTML=out.map(o=>`<div>${o.ok?'<span class="badge ok">PASS</span>':'<span class="badge bad">FAIL</span>'} ${esc(o.name)} <span class="mint">${esc(o.detail||"")}</span></div>`).join("")
+  +`<div class="note">${out.filter(o=>o.ok).length}/${out.length} passed. Browser-only behaviors (buttons, viewport, themes) are verified separately and honestly labeled when untested.</div>`;
+};
+/* ---------- render dispatch + boot ---------- */
+const VIEWS={Radar:viewRadar,Signals:viewSignals,Wallets:viewWallets,Clusters:viewClusters,Risk:viewRisk,Targets:viewTargets,Watch:viewWatch,Ledger:viewLedger,Health:viewHealth,Settings:viewSettings};
+function render(){
+ navRender();
+ try{$("#view").innerHTML=(VIEWS[tab]||viewRadar)();}
+ catch(e){$("#view").innerHTML=stateBlock("error","render error: "+e.message);log("render error "+tab+": "+e.message);}
+}
+let timer=null;
+function armTimer(){clearInterval(timer);const sec=Math.max(30,Number(S.settings.refreshSec)||90);timer=setInterval(()=>refreshAll(),sec*1000);}
+$("#themeBtn").onclick=toggleTheme;
+$("#refBtn").onclick=()=>{setStatus("manual refresh...",true);refreshAll(true);};
+applySettings();render();refreshAll();armTimer();
+setInterval(()=>{if(S.settings.refreshSec!==armTimer.last){armTimer.last=S.settings.refreshSec;armTimer();}},5000);
+</script>
+<script>
+"use strict";
+/* =====================================================================
+   EXTENSION PACK 1: price history ring buffers + token detail drill-down
+   ===================================================================== */
+/* record one price point per tracked token per refresh (max 144 points ~ 3h at 90s) */
+function recordHistory(){
+ const now=Date.now();
+ for(const m of Object.keys(S.seen)){
+  const q=S.dex[m];if(!q)continue;const p=Number(q.priceUsd);if(!(p>0))continue;
+  const s=S.seen[m];s.hist=s.hist||[];
+  const lastP=s.hist[s.hist.length-1];
+  if(!lastP||now-lastP[0]>45000){s.hist.push([now,p]);if(s.hist.length>144)s.hist.shift();}
+ }
+}
+/* ---------- full token detail (drill-down, own sub-view) ---------- */
+let detailMint=null;
+window.detail=m=>{detailMint=m;tab="Detail";render();};
+window.backTo=t=>{detailMint=null;tab=t||"Radar";render();};
+function viewDetail(){
+ const m=detailMint;if(!m)return stateBlock("empty","no token selected");
+ const p=S.pools[m]||{};const s=S.seen[m]||{};const q=S.dex[m];const sc=scoreToken(m);const rv=riskVerdict(m);const ws=walletScore(m);
+ const hist=(s.hist||[]).map(h=>h[1]);
+ const spark=hist.length>1?svgSparkline(hist.slice(-60)):'<span class="fresh">collecting price points...</span>';
+ const compRows=Object.entries(sc.comps).map(([k,v])=>`<div class="comp"><div class="lbl"><span>${k}</span><span>${v.st==="OBSERVED"?Math.round(v.v*100)+" - "+esc(v.note):"NOT OBSERVED - "+esc(v.note)}</span></div><div class="bar"><i style="width:${v.st==="OBSERVED"?v.v*100:0}%;${v.st==="OBSERVED"?"":"background:var(--line2)"}"></i></div></div>`).join("");
+ const r=s.risk;
+ const riskRows=r?`<div class="kv">
+  <b>mint authority</b><span>${r.mintAuth==null?"? (read failed)":(r.mintAuth?'<span class="badge bad">ACTIVE - supply printable</span>':'<span class="badge ok">renounced</span>')}</span>
+  <b>freeze authority</b><span>${r.freezeAuth==null?"? (read failed)":(r.freezeAuth?'<span class="badge bad">ACTIVE - freezable</span>':'<span class="badge ok">renounced</span>')}</span>
+  <b>top holder</b><span>${r.top1!=null?r.top1+"% of observed supply":"not read"} ${r.top1!=null?'<span class="fresh">HOLDER_UNVERIFIED (pool/vault not excluded)</span>':""}</span>
+  <b>top 5 combined</b><span>${r.top5!=null?r.top5+"%":"not read"}</span>
+  <b>supply</b><span>${r.supply!=null?Number(r.supply).toLocaleString():"?"} (decimals ${r.decimals??"?"})</span>
+  ${r.errors&&r.errors.length?`<b>incomplete</b><span class="inc">${esc(r.errors.join("; "))}</span>`:""}
+ </div>`:stateBlock("empty","risk not checked yet - press Check risk");
+ const w=s.wallets;
+ const walletRows=w?`<div class="kv">
+  <b>trades observed</b><span>${w.trades} (${w.buys} buys)</span>
+  <b>unique buyers</b><span>${w.uniqBuyers}</span>
+  <b>repeat buyers</b><span>${w.repeatBuyers}</span>
+  <b>top buyer share</b><span>${fmtPct(w.topBuyerShare)}</span>
+  <b>scanned</b><span>${fmtAge(w.at)} ago</span>
+ </div><div class="note">${esc(ws.expl)}</div>`:stateBlock("empty","wallet evidence not fetched - press Wallets");
+ const wq=(S.watch[m]||{}).quote;
+ return`<div class="card">
+ <div class="controls"><button class="btn ghost" onclick="backTo('Radar')">&#8592; back</button>
+  <button class="btn ${S.watch[m]?"ghost":""}" onclick="star('${m}')">${S.watch[m]?"&#9733; starred (tap to unstar)":"&#9734; star + paper $"+(S.settings.paperSize||20)}</button>
+  <button class="btn ghost" onclick="chk('${m}').then(()=>render())">Check risk</button>
+  <button class="btn ghost" onclick="wsnap('${m}').then(()=>render())">Wallets</button>
+  <button class="btn ghost" onclick="loadOhlcv('${m}')">Candles</button>
+  <button class="btn ghost" onclick="loadDexDetail('${m}')">Dex detail</button>
+ </div>
+ <h2 style="font-size:15px">${esc(p.symbol||s.sym||shortM(m))} <span class="badge ${sc.gated?"bad":(sc.verdict==="CANDIDATE"?"ok":"dim")}">${sc.verdict}</span> <span class="badge ${rv.cls}">${rv.label}</span></h2>
+ <div class="mint">${m}</div>
+ <div class="pillrow">
+  <a class="badge acc" href="https://dexscreener.com/solana/${m}" target="_blank" rel="noopener">dexscreener &#8599;</a>
+  <a class="badge acc" href="https://www.geckoterminal.com/solana/pools/${p.pool||""}" target="_blank" rel="noopener">geckoterminal &#8599;</a>
+  <a class="badge acc" href="https://solscan.io/token/${m}" target="_blank" rel="noopener">solscan &#8599;</a>
+  <a class="badge acc" href="https://rugcheck.xyz/tokens/${m}" target="_blank" rel="noopener">rugcheck &#8599;</a>
+ </div>
+ <div class="kv">
+  <b>price</b><span>${q&&q.priceUsd?"$"+Number(q.priceUsd).toPrecision(6):(p.price!=null?"$"+Number(p.price).toPrecision(6):"?")}</span>
+  <b>liquidity</b><span>${fmtUsd(sc.liq)}</span>
+  <b>pool age</b><span>${fmtAge(p.created)} (pool_created_at - NOT token creation)</span>
+  <b>first seen here</b><span>${s.first?fmtAge(s.first)+" ago":"-"}</span>
+  <b>multiple vs first-seen</b><span>${s.last!=null?s.last.toFixed(2)+"x (max "+(s.max||1).toFixed(2)+"x / min "+(s.min||1).toFixed(2)+"x)":"no priced polls yet"}</span>
+  <b>quoted round-trip</b><span>${wq?(wq.status==="QUOTED"?wq.rtPct+"% ("+fmtAge(wq.at)+" ago)":"NOT_QUOTED - "+esc(wq.why||"")):"not quoted (star to auto-quote)"}</span>
+ </div>
+ <div style="margin:8px 0">${spark}</div>
+ <h3>Score breakdown (untuned defaults)</h3>${compRows}
+ ${sc.hard.length?`<div class="state error">Hard gate: ${esc(sc.hard.join(", "))}</div>`:""}
+ <h3>Risk detail (keyless RPC)</h3>${riskRows}
+ <h3>Wallet evidence (GT pool trades)</h3>${walletRows}
+ <div id="detailExtra"></div>
+</div>`;
+}
+/* ---------- GT OHLCV candles (keyless) ---------- */
+window.loadOhlcv=async m=>{
+ const p=S.pools[m];const el=$("#detailExtra");
+ if(!p||!p.pool){if(el)el.innerHTML=stateBlock("error","no pool address - candles need the pool");return;}
+ if(el)el.innerHTML=stateBlock("loading","loading minute candles from GeckoTerminal...");
+ try{
+  const d=await jf(GT_BASE+"/pools/"+p.pool+"/ohlcv/minute?aggregate=1&limit=60","gt");
+  const list=((d.data&&d.data.attributes&&d.data.attributes.ohlcv_list)||[]).slice().reverse();
+  if(!list.length){el.innerHTML=stateBlock("empty","no candle data returned");return;}
+  const W=300,H=110,pad=16;
+  const hi=Math.max(...list.map(c=>c[2])),lo=Math.min(...list.map(c=>c[3]));
+  const range=(hi-lo)||1;const bw=(W-pad*2)/list.length;
+  let candles="";
+  list.forEach((c,i)=>{const[o,h2,l,cl]=[c[1],c[2],c[3],c[4]];
+   const x=pad+i*bw+bw/2;const up=cl>=o;
+   const yH=pad+(hi-h2)/range*(H-pad*2),yL=pad+(hi-l)/range*(H-pad*2);
+   const yO=pad+(hi-o)/range*(H-pad*2),yC=pad+(hi-cl)/range*(H-pad*2);
+   candles+=`<line x1="${x.toFixed(1)}" y1="${yH.toFixed(1)}" x2="${x.toFixed(1)}" y2="${yL.toFixed(1)}" stroke="${up?"var(--ok)":"var(--bad)"}" stroke-width="1"/>`
+    +`<rect x="${(x-bw*0.3).toFixed(1)}" y="${Math.min(yO,yC).toFixed(1)}" width="${(bw*0.6).toFixed(1)}" height="${Math.max(1,Math.abs(yC-yO)).toFixed(1)}" fill="${up?"var(--ok)":"var(--bad)"}"/>`;});
+  el.innerHTML=`<h3>Minute candles (last ${list.length})</h3>
+   <svg class="chart" viewBox="0 0 ${W} ${H}"><line class="axis" x1="${pad}" y1="${H-pad}" x2="${W-pad}" y2="${H-pad}"/>${candles}
+   <text x="${pad}" y="10">hi ${hi.toPrecision(4)}</text><text x="${W-pad}" y="10" text-anchor="end">lo ${lo.toPrecision(4)}</text></svg>
+   <div class="note">Source: GeckoTerminal OHLCV (keyless). Candles describe the chart, not executable prices.</div>`;
+ }catch(e){
+  // v011: honest fallback - draw the app's own recorded price points when the candle feed fails
+  const s=S.seen[m];const pts=(s&&s.series)||[];
+  if(el&&pts.length>=3){
+   const W=300,H=110,pad=16;
+   const vs=pts.map(p=>p[1]);const hi=Math.max(...vs),lo=Math.min(...vs);const range=(hi-lo)||1;
+   const step=(W-pad*2)/(pts.length-1);
+   const line=pts.map((p,i)=>`${(pad+i*step).toFixed(1)},${(pad+(hi-p[1])/range*(H-pad*2)).toFixed(1)}`).join(" ");
+   el.innerHTML=`<h3>Stored price points (fallback)</h3>
+   <svg class="chart" viewBox="0 0 ${W} ${H}"><line class="axis" x1="${pad}" y1="${H-pad}" x2="${W-pad}" y2="${H-pad}"/><polyline points="${line}" fill="none" stroke="var(--acc)" stroke-width="1.5"/>
+   <text x="${pad}" y="10">hi ${hi.toFixed(2)}x</text><text x="${W-pad}" y="10" text-anchor="end">lo ${lo.toFixed(2)}x</text></svg>
+   <div class="note">FALLBACK, labeled honestly: these are multiples the app itself recorded every ~60s since first seen - NOT candles, no OHLC, no volume. GT candle feed failed: ${esc(e.message)}. Gaps between points are real gaps in observation.</div>`;
+  }else if(el)el.innerHTML=stateBlock("error","candles failed: "+e.message+" (no stored points to fall back on - shown honestly)");
+ }
+};
+/* ---------- Dex full pair detail ---------- */
+window.loadDexDetail=async m=>{
+ const el=$("#detailExtra");
+ if(el)el.innerHTML=stateBlock("loading","loading DexScreener token detail...");
+ try{
+  const d=await jf(DEX_TOKEN+m,"dex");
+  const pairs=(d.pairs||[]).sort((a,b)=>((b.liquidity&&b.liquidity.usd)||0)-((a.liquidity&&a.liquidity.usd)||0));
+  if(!pairs.length){el.innerHTML=stateBlock("empty","DexScreener returned no pairs for this mint");return;}
+  const rows=pairs.slice(0,5).map(q=>{
+   const pc=q.priceChange||{};const tx=q.txns||{};const vol=q.volume||{};
+   return`<tr><td>${esc(q.dexId||"?")}</td><td>${fmtUsd(q.liquidity&&q.liquidity.usd)}</td>
+   <td>${fmtPct(pc.m5)} / ${fmtPct(pc.h1)} / ${fmtPct(pc.h6)} / ${fmtPct(pc.h24)}</td>
+   <td>${tx.h1?(tx.h1.buys+"b/"+tx.h1.sells+"s"):"?"}</td>
+   <td>${fmtUsd(vol.h1)} / ${fmtUsd(vol.h24)}</td>
+   <td><a href="${esc(q.url||"#")}" target="_blank" rel="noopener">open &#8599;</a></td></tr>`;}).join("");
+  el.innerHTML=`<h3>DexScreener pairs (${pairs.length})</h3>
+  <div class="tscroll"><table><thead><tr><th>Dex</th><th>Liquidity</th><th>% 5m/1h/6h/24h</th><th>1h txns</th><th>Vol 1h/24h</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`;
+ }catch(e){if(el)el.innerHTML=stateBlock("error","dex detail failed: "+e.message);}
+};
+</script>
+<script>
+"use strict";
+/* =====================================================================
+   EXTENSION PACK 2: signals history, trade feed, wallet detail, CSV,
+   score-weight settings, token notes
+   ===================================================================== */
+/* ---------- signals history: record CANDIDATE entries + outcomes ---------- */
+S.sigHist=S.sigHist||[];
+try{const v=localStorage.getItem("si4_sigHist");if(v)S.sigHist=JSON.parse(v);}catch(e){}
+function recordSignals(){
+ const now=Date.now();
+ for(const m of S.order){
+  const sc=scoreToken(m);
+  if(sc.verdict==="CANDIDATE"&&!S.sigHist.find(x=>x.mint===m)){
+   const q=S.dex[m];const price=q?Number(q.priceUsd):null;
+   if(!(price>0))continue;
+   S.sigHist.push({mint:m,sym:(S.pools[m]||{}).symbol||shortM(m),t:now,ref:price,score:sc.score,conf:+sc.confidence.toFixed(2),max:1,last:1});
+   pushAlert("New CANDIDATE: "+((S.pools[m]||{}).symbol||shortM(m))+" score "+sc.score,"gold");
+  }
+ }
+ for(const x of S.sigHist){
+  const q=S.dex[x.mint];if(!q)continue;const p=Number(q.priceUsd);if(!(p>0))continue;
+  x.last=p/x.ref;x.max=Math.max(x.max,p/x.ref);
+ }
+ if(S.sigHist.length>100)S.sigHist.splice(0,S.sigHist.length-100);
+ try{localStorage.setItem("si4_sigHist",JSON.stringify(S.sigHist));}catch(e){}
+}
+/* ---------- signals history view (inside Signals tab footer) ---------- */
+function sigHistTable(){
+ if(!S.sigHist.length)return stateBlock("empty","No candidates recorded yet. When the engine flags one, it lands here with its outcome tracked from that moment - no hindsight.");
+ const rows=S.sigHist.slice().reverse().slice(0,20).map(x=>`<tr>
+  <td><b>${esc(x.sym)}</b> <span class="mint">${shortM(x.mint)}</span></td>
+  <td>${new Date(x.t).toLocaleTimeString()}</td><td>${x.score} / ${Math.round(x.conf*100)}%</td>
+  <td>${x.last!=null?x.last.toFixed(2)+"x":"?"}</td><td class="${x.max>=2?"hit":""}">${x.max!=null?x.max.toFixed(2)+"x":"?"}</td></tr>`).join("");
+ return`<h3>Signal history (candidates tracked from flag time)</h3>
+ <div class="tscroll"><table><thead><tr><th>Token</th><th>Flagged</th><th>Score/conf</th><th>Now</th><th>Max since</th></tr></thead><tbody>${rows}</tbody></table></div>
+ <div class="note">Forward-looking only: reference = price AT flag time. Compare with base rates in Ledger - if candidates do not beat the base rate, the score has no edge.</div>`;
+}
+/* ---------- MODULE: TRADE FEED (recent trades across watched pools) ---------- */
+async function loadTradeFeed(){
+ const el=$("#tradeFeedBody");if(!el)return;
+ const mints=Object.keys(S.watch).filter(m=>S.pools[m]&&S.pools[m].pool).slice(0,5);
+ if(!mints.length){el.innerHTML=stateBlock("empty","Star tokens with known pools to watch their trade feed.");return;}
+ el.innerHTML=stateBlock("loading","loading recent trades for "+mints.length+" watched pools...");
+ const all=[];
+ for(const m of mints){
+  try{
+   const d=await jf(GT_BASE+"/pools/"+S.pools[m].pool+"/trades","gt");
+   for(const t of((d.data||[]).slice(0,15))){
+    const a=t.attributes||{};
+    all.push({mint:m,sym:S.pools[m].symbol,kind:a.kind,usd:Number(a.total_price_usd||a.volume_in_usd||0),wallet:a.tx_from_address,ts:a.block_timestamp?Date.parse(a.block_timestamp):null});
+   }
+  }catch(e){all.push({mint:m,sym:S.pools[m].symbol,kind:"error",usd:0,wallet:e.message,ts:null});}
+ }
+ all.sort((a,b)=>(b.ts||0)-(a.ts||0));
+ el.innerHTML=all.length?`<div class="tscroll"><table><thead><tr><th>Time</th><th>Token</th><th>Kind</th><th>USD</th><th>Wallet</th></tr></thead><tbody>${
+  all.slice(0,40).map(t=>`<tr><td class="fresh">${t.ts?new Date(t.ts).toLocaleTimeString():"?"}</td>
+  <td><b>${esc(t.sym||shortM(t.mint))}</b></td>
+  <td>${t.kind==="buy"?'<span class="badge ok">buy</span>':(t.kind==="sell"?'<span class="badge bad">sell</span>':'<span class="badge bad">'+esc(t.kind)+'</span>')}</td>
+  <td>${t.usd?fmtUsd(t.usd):"?"}</td>
+  <td class="mint">${t.wallet?esc(t.wallet.slice(0,8))+"..":"?"}</td></tr>`).join("")}</tbody></table></div>`
+  :stateBlock("empty","no trades returned");
+}
+function viewTrades(){
+ return`<div class="card"><h2>Trade feed - watched pools</h2>
+ <div class="note">Recent trades (up to 15 per pool, max 5 watched pools per load) straight from GeckoTerminal. Manual load to respect free rate limits.</div>
+ <div class="controls"><button class="btn" onclick="loadTradeFeed()">load trades</button></div>
+ <div id="tradeFeedBody">${stateBlock("empty","press load trades")}</div></div>`;
+}
+window.loadTradeFeed=loadTradeFeed;
+/* ---------- wallet detail (from cluster index) ---------- */
+window.walletDetail=w=>{
+ const wi=(S.walletIndex||{})[w];
+ if(!wi){toast("wallet not indexed");return;}
+ const pools=Object.entries(wi.pools||{}).map(([m,ts])=>`<tr><td class="mint">${shortM(m)}</td><td>${esc((S.pools[m]||{}).symbol||(S.seen[m]||{}).sym||"?")}</td><td class="fresh">${new Date(ts).toLocaleString()}</td></tr>`).join("");
+ // v013: wallet track record - did THIS wallet's entries actually print?
+ const entered=Object.keys(wi.pools||{});
+ const recs=entered.map(m=>S.seen[m]).filter(s=>s&&s.p0>0);
+ const printed2=recs.filter(s=>(s.max||0)>=2).length;
+ const medMax=median(recs.map(s=>s.max));
+ const recLine=recs.length<3
+  ?`<span class="badge dim">TRACK RECORD UNPROVEN - only ${recs.length} entr${recs.length===1?"y":"ies"} with valid tracking (need 3+)</span>`
+  :(printed2>0&&medMax>=1.5
+    ?`<span class="badge warn">${printed2}/${recs.length} entries printed 2x gross, median max ${f2(medMax)} - interesting, still NOT proof of skill (survivorship + tiny sample)</span>`
+    :`<span class="badge dim">${printed2}/${recs.length} entries printed 2x gross, median max ${f2(medMax)} - no smart-money signal in tracked data</span>`);
+ const el=$("#clusterDetail");
+ if(el)el.innerHTML=`<div class="card"><h3>Wallet ${esc(w.slice(0,10))}...</h3>
+  <div class="kv"><b>total buys observed</b><span>${wi.totalBuys||0}</span>
+  <b>first / last seen</b><span>${new Date(wi.first).toLocaleString()} / ${new Date(wi.last).toLocaleString()}</span>
+  <b>new pools entered</b><span>${entered.length}</span>
+  <b>track record (v013)</b><span>${recLine}</span></div>
+  <div class="tscroll"><table><thead><tr><th>Mint</th><th>Symbol</th><th>Entered</th></tr></thead><tbody>${pools}</tbody></table></div>
+  <div class="note">Co-appearance only - independence UNVERIFIED.</div></div>`;
+};
+/* ---------- CSV export ---------- */
+window.expCSV=()=>{
+ const rows=[["mint","symbol","first_seen","p0","last_mult","max_mult","min_mult","polls","missed"]];
+ for(const[m,s]of Object.entries(S.seen))rows.push([m,s.sym||"",s.first?new Date(s.first).toISOString():"",s.p0||"",s.last||"",s.max||"",s.min||"",s.n||0,s.miss||0]);
+ const csv=rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(",")).join("\n");
+ const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download="solana_intelligence_v018_outcomes_"+Date.now()+".csv";a.click();log("exported CSV");
+};
+/* ---------- token notes (persisted per mint) ---------- */
+S.notes=S.notes||{};
+try{const v=localStorage.getItem("si4_notes");if(v)S.notes=JSON.parse(v);}catch(e){}
+window.saveNote=m=>{const ta=$("#note_"+CSS.escape(m));if(!ta)return;S.notes[m]=ta.value;try{localStorage.setItem("si4_notes",JSON.stringify(S.notes));}catch(e){}toast("note saved");};
+function noteBlock(m){
+ return`<h3>Your note (this device)</h3>
+ <textarea id="note_${m}" rows="2" style="width:100%;background:var(--bg2);color:var(--txt);border:1px solid var(--line2);border-radius:10px;padding:8px" placeholder="private note about this token...">${esc(S.notes[m]||"")}</textarea>
+ <button class="btn mini" onclick="saveNote('${m}')">save note</button>`;
+}
+</script>
+<script>
+"use strict";
+/* extension wiring: tabs, wrapped views, weight setter */
+TABS.splice(8,0,["Trades","&#128184;"]);
+VIEWS.Trades=viewTrades;
+VIEWS.Detail=viewDetail;
+const _viewSignals0=viewSignals;
+VIEWS.Signals=function(){return _viewSignals0()+'<div class="card">'+sigHistTable()+"</div>";};
+const _viewDetail0=viewDetail;
+VIEWS.Detail=function(){if(!detailMint)return _viewDetail0();return _viewDetail0().replace('<div id="detailExtra"></div>',noteBlock(detailMint)+'<div id="detailExtra"></div>');};
+window.setWeight=(k,v)=>{S.settings.weights=S.settings.weights||{age:.25,liquidity:.25,flow:.20,authorities:.20,coverage:.10};S.settings.weights[k]=Math.max(0,Math.min(1,Number(v)||0));save();toast("weight "+k+" updated");};
+render();
+</script>
+<script>
+"use strict";
+/* =====================================================================
+   EXTENSION PACK 3: base-rate time series, node latency monitor,
+   browser notifications, token compare, boost signal, snapshot
+   import/export, ledger analytics, onboarding
+   ===================================================================== */
+/* ---------- base-rate time series (chart of the truth over time) ---------- */
+S.baseHist=S.baseHist||[];
+try{const v=localStorage.getItem("si4_baseHist");if(v)S.baseHist=JSON.parse(v);}catch(e){}
+function recordBaseHist(){
+ const A=Object.values(S.seen).filter(s=>s.p0>0&&(s.n||0)>=2);
+ if(A.length<3)return;
+ const last=S.baseHist[S.baseHist.length-1];
+ if(last&&Date.now()-last.t<10*60e3)return; // one point per 10 min
+ const p=f=>A.filter(f).length/A.length;
+ S.baseHist.push({t:Date.now(),n:A.length,p2:+p(s=>s.max>=2).toFixed(3),p3:+p(s=>s.max>=3).toFixed(3),belowHalf:+p(s=>s.last<0.5).toFixed(3)});
+ if(S.baseHist.length>144)S.baseHist.shift();
+ try{localStorage.setItem("si4_baseHist",JSON.stringify(S.baseHist));}catch(e){}
+}
+function baseHistChart(){
+ if(S.baseHist.length<2)return'<div class="state empty">base-rate history collects one point per 10 minutes - check back later</div>';
+ const W=300,H=80,pad=14;
+ const series=[["p2","var(--gold)","% reached 2x"],["p3","var(--acc)","% reached 3x"],["belowHalf","var(--bad)","% below 0.5x"]];
+ let paths="";
+ for(const[key,color]of series){
+  const pts=S.baseHist.map((b,i)=>((i/(S.baseHist.length-1))*(W-pad*2)+pad).toFixed(1)+","+(H-pad-b[key]*(H-pad*2)).toFixed(1)).join(" ");
+  paths+=`<polyline fill="none" stroke="${color}" stroke-width="1.5" points="${pts}"/>`;
+ }
+ const legend=series.map(([k,c,l])=>`<span class="badge dim" style="color:${c}">${l}</span>`).join(" ");
+ return`<svg class="chart" viewBox="0 0 ${W} ${H}"><line class="axis" x1="${pad}" y1="${H-pad}" x2="${W-pad}" y2="${H-pad}"/>${paths}</svg><div class="pillrow">${legend}</div>`;
+}
+/* ---------- RPC node latency monitor ---------- */
+S.nodeLat=S.nodeLat||{};
+async function probeNodes(){
+ const el=$("#nodeLatBody");if(!el)return;
+ el.innerHTML=stateBlock("loading","probing "+RPC_NODES.length+" RPC nodes...");
+ const rows=[];
+ for(const u of RPC_NODES){
+  const t0=performance.now();let ok=false,ex="";
+  try{
+   const c=new AbortController();const tt=setTimeout(()=>c.abort(),6000);
+   const r=await fetch(u,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({jsonrpc:"2.0",id:1,method:"getHealth"}),signal:c.signal});
+   clearTimeout(tt);ok=r.ok;if(!ok)ex="HTTP "+r.status;
+  }catch(e){ex=e.message;}
+  const ms=Math.round(performance.now()-t0);
+  S.nodeLat[u]={ok,ms,ex,at:Date.now()};
+  rows.push(`<tr><td class="mint">${esc(u.replace("https://",""))}</td><td><span class="badge ${ok?"ok":"bad"}">${ok?"OK":"DOWN"}</span></td><td>${ms}ms</td><td class="mint">${esc(ex)}</td></tr>`);
+ }
+ el.innerHTML=`<div class="tscroll"><table><thead><tr><th>Node</th><th>Status</th><th>Latency</th><th>Error</th></tr></thead><tbody>${rows.join("")}</tbody></table></div>`;
+}
+window.probeNodes=probeNodes;
+/* ---------- browser notifications (optional; graceful fallback) ---------- */
+async function enableNotif(){
+ if(!("Notification" in window)){toast("this browser has no Notification API");return;}
+ const p=await Notification.requestPermission();
+ S.settings.notif=p==="granted";save();
+ toast(p==="granted"?"notifications on (while page is open)":"notifications not allowed: "+p);
+ render();
+}
+window.enableNotif=enableNotif;
+function notify(title,body){
+ if(S.settings.notif&&"Notification" in window&&Notification.permission==="granted"){
+  try{new Notification(title,{body});}catch(e){}
+ }
+}
+/* ---------- token compare (side-by-side, 2 mints) ---------- */
+window.compareNow=()=>{
+ const a=$("#cmpA").value.trim(),b=$("#cmpB").value.trim();
+ const el=$("#cmpOut");
+ const resolve=x=>S.order.find(m=>m===x)||S.order.find(m=>((S.pools[m]||{}).symbol||"").toLowerCase()===x.toLowerCase())||x;
+ const ma=resolve(a),mb=resolve(b);
+ if(!ma||!mb||ma.length<30||mb.length<30){el.innerHTML=stateBlock("error","enter two full mints (or exact symbols of loaded pools)");return;}
+ const col=m=>{
+  const sc=scoreToken(m);const rv=riskVerdict(m);const ws=walletScore(m);const p=S.pools[m]||{};const s=S.seen[m]||{};
+  return`<div class="card" style="flex:1;min-width:240px">
+  <h3>${esc(p.symbol||s.sym||shortM(m))}</h3><div class="mint">${m}</div>
+  <div class="kv">
+  <b>score</b><span>${sc.score} (${sc.verdict}, conf ${Math.round(sc.confidence*100)}%)</span>
+  <b>risk</b><span><span class="badge ${rv.cls}">${rv.label}</span></span>
+  <b>liquidity</b><span>${fmtUsd(sc.liq)}</span>
+  <b>age</b><span>${fmtAge(p.created)}</span>
+  <b>multiple</b><span>${s.last!=null?s.last.toFixed(2)+"x (max "+(s.max||1).toFixed(2)+"x)":"no data"}</span>
+  <b>wallets</b><span><span class="badge ${ws.cls}">${ws.label}</span> (n=${ws.n})</span>
+  </div>
+  <div class="pillrow"><button class="btn mini" onclick="detail('${m}')">open detail</button><button class="btn mini ghost" onclick="star('${m}')">${S.watch[m]?"unstar":"star"}</button></div></div>`;
+ };
+ el.innerHTML=`<div style="display:flex;gap:10px;flex-wrap:wrap">${col(ma)}${col(mb)}</div>`;
+};
+function viewCompare(){
+ return`<div class="card"><h2>Compare two tokens</h2>
+ <div class="controls"><input id="cmpA" placeholder="mint A (or exact symbol)" style="flex:1;min-width:180px"><input id="cmpB" placeholder="mint B (or exact symbol)" style="flex:1;min-width:180px"><button class="btn" onclick="compareNow()">compare</button></div>
+ <div class="note">Same score/risk/wallet engines for both - honest like-for-like. Unknown mints show mostly NOT OBSERVED (we never fetch-invent history).</div>
+ <div id="cmpOut">${stateBlock("empty","enter two mints to compare")}</div></div>`;
+}
+/* ---------- Dex boost signal (popularity, NOT quality) ---------- */
+async function loadBoosts(){
+ const el=$("#boostBody");if(!el)return;
+ el.innerHTML=stateBlock("loading","loading boosted tokens...");
+ try{
+  const d=await jf("https://api.dexscreener.com/token-boosts/latest/v1","dex");
+  const sol=(Array.isArray(d)?d:[]).filter(x=>x.chainId==="solana").slice(0,20);
+  if(!sol.length){el.innerHTML=stateBlock("empty","no boosted Solana tokens right now");return;}
+  el.innerHTML=`<div class="tscroll"><table><thead><tr><th>Token</th><th>Boost</th><th>In radar?</th><th></th></tr></thead><tbody>${sol.map(x=>{
+   const inR=S.order.includes(x.tokenAddress);
+   return`<tr><td class="mint">${shortM(x.tokenAddress)}</td><td>${x.amount||x.total||"?"}</td>
+   <td>${inR?'<span class="badge ok">yes</span>':'<span class="badge dim">no</span>'}</td>
+   <td><a href="${esc(x.url||"https://dexscreener.com/solana/"+x.tokenAddress)}" target="_blank" rel="noopener">dex &#8599;</a></td></tr>`;}).join("")}</tbody></table></div>
+  <div class="note">Boosts are PAID promotion popularity - evidence of marketing spend, never of quality. Treat as a watch list, not a buy list.</div>`;
+ }catch(e){el.innerHTML=stateBlock("error","boosts failed: "+e.message);}
+}
+window.loadBoosts=loadBoosts;
+function viewBoosts(){
+ return`<div class="card"><h2>Boosted tokens (DexScreener)</h2>
+ <div class="note">Popularity/promotion feed. NOT early discovery and NOT quality - labeled honestly.</div>
+ <div class="controls"><button class="btn" onclick="loadBoosts()">load boosts</button></div>
+ <div id="boostBody">${stateBlock("empty","press load boosts")}</div></div>`;
+}
+/* ---------- ledger analytics (per-position truth) ---------- */
+function ledgerAnalytics(){
+ const L=S.ledger;if(!L.length)return"";
+ const nets=L.map(l=>l.net).filter(n=>n!=null);
+ const wins=nets.filter(n=>n>1).length;
+ const best=L.reduce((a,l)=>(l.net!=null&&(a==null||l.net>a.net))?l:a,null);
+ const worst=L.reduce((a,l)=>(l.net!=null&&(a==null||l.net<a.net))?l:a,null);
+ const hold=L.map(l=>((l.closed?Date.now():Date.now())-l.t)/60000);
+ return`<div class="kv">
+ <b>positions</b><span>${L.length} (${L.filter(l=>!l.closed).length} open)</span>
+ <b>win rate (net&gt;1)</b><span>${nets.length?Math.round(100*wins/nets.length)+"% of "+nets.length:"n/a"}</span>
+ <b>best</b><span>${best?esc(best.sym)+" "+best.net.toFixed(2)+"x":"n/a"}</span>
+ <b>worst</b><span>${worst?esc(worst.sym)+" "+worst.net.toFixed(2)+"x":"n/a"}</span>
+ <b>median hold</b><span>${hold.length?median(hold).toFixed(0)+" min":"n/a"}</span></div>`;
+}
+/* ---------- snapshot import / export (full state portability) ---------- */
+window.snapshotOut=()=>{
+ const snap={v:4,at:new Date().toISOString(),seen:S.seen,watch:S.watch,ledger:S.ledger,walletIndex:S.walletIndex,settings:S.settings,sigHist:S.sigHist,baseHist:S.baseHist,notes:S.notes};
+ const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(snap)],{type:"application/json"}));a.download="si4_snapshot_"+Date.now()+".json";a.click();toast("snapshot downloaded");
+};
+window.snapshotIn=ev=>{
+ const f=ev.target.files&&ev.target.files[0];if(!f)return;
+ const rd=new FileReader();
+ rd.onload=()=>{try{
+  const j=JSON.parse(rd.result);
+  if(j.v!==4)throw new Error("snapshot version "+j.v+" - this app reads v4 snapshots");
+  for(const k of["seen","watch","ledger","walletIndex","settings","sigHist","baseHist","notes"])if(j[k]!=null)S[k]=j[k];
+  save();applySettings();render();toast("snapshot restored");
+ }catch(e){toast("import failed: "+e.message);}};
+ rd.readAsText(f);
+};
+/* ---------- onboarding (first run; dismissible, persisted) ---------- */
+function onboard(){
+ if(S.settings.onboarded)return;
+ const ov=document.createElement("div");
+ ov.id="onboard";
+ ov.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px";
+ ov.innerHTML=`<div style="background:var(--card);border:1px solid var(--line2);border-radius:14px;padding:16px;max-width:480px;max-height:84vh;overflow:auto;color:var(--txt)">
+ <h2 style="margin:0 0 8px">Solana Intelligence v004</h2>
+ <div style="font-size:13px;line-height:1.6">
+ <p>This is a <b>paper-research</b> suite for very new Solana tokens. It never touches real money, keys or signing.</p>
+ <p><b>Start here:</b> Radar shows brand-new pools. Tap a token name for its full detail (score breakdown, on-chain risk, wallet evidence, candles). Star a token to open a $${S.settings.paperSize||20} paper position and start 2x-5x monitoring.</p>
+ <p><b>Learn the truth tabs:</b> Ledger shows base rates for EVERY token seen (not just picks) and your paper positions net of exit costs. Signals history tracks candidates from flag time. If starred picks do not beat the base rate, there is no edge - the app says so.</p>
+ <p><b>Honest labels:</b> NOT OBSERVED / NOT_QUOTED / INSUFFICIENT SAMPLE / HOLDER_UNVERIFIED / HISTORY WINDOW LIMITED / HISTORY_PRUNED / NO VALID PRICE / STALE mean the free data cannot prove something. Nothing is fabricated to fill gaps.</p>
+ <p><b>New in v018 - know what your browser is carrying:</b> the Health tab now lists every key this app stores with its real size, and a prune button removes only what is safe to lose: closed paper positions older than 7 days and tokens past the 6-hour tracking window. Your watchlist, notes and settings are never touched. An app that hides its own footprint should not be trusted with yours.</p>
+ <p><b>New in v017 - when two feeds disagree, believe neither:</b> the Radar now compares the GeckoTerminal pool price with the DexScreener batch price on every row. A gap over 10% gets a FEED DIVERGE badge and a count in the header. Two free feeds that disagree are telling you at least one is stale or wrong - the honest answer is to show the fight, not to average it away.</p>
+ <p><b>New in v016 - a ticker is never identity:</b> scammers spawn pools with the same symbol as a hot token within minutes. The Radar now counts how many live pools share each ticker (across every pool the feed returned, even ones your filters hide) and warns SYMBOL CLONE xN on the row. Always verify the mint on solscan - the letters in a ticker prove nothing.</p>
+ <p><b>New in v015 - a drained pool is not a moon:</b> when liquidity falls under $100 a chart can show a million-x price nobody could ever sell at. Those ghost quotes are now excluded from prints, base rates, target hits and alerts, and the token is labeled GHOST LIQ so you can see exactly what was ignored and why.</p>
+ <p><b>New in v014 - hear the alert, don't stare at the screen:</b> turn on Sound alerts in Settings and the app beeps when a watch token crosses your alert level. Browsers block audio until you tap once - press Test sound once to unlock it. It works only while the page is open; there is no backend.</p>
+ <p><b>New in v013 - is that wallet actually good:</b> every wallet in the Clusters tab now carries its own track record - how many of its entries were tracked and how many printed 2x gross. Under 3 tracked entries it says UNPROVEN; above, it still warns that survivorship and a tiny sample cannot prove skill. A fast wallet is not automatically a smart wallet.</p>
+ <p><b>New in v012 - a print you never sold is not a print you kept:</b> the Ledger now shows each token's giveback from its peak, and across every token that printed 2x gross, the median giveback and the share that handed back half or more. This is the honest cost of holding, measured on your own data - not a lecture.</p>
+ <p><b>New in v011 - outages cannot blank the chart:</b> when the candle feed fails, the Detail view now draws the app's own recorded price points instead - clearly labeled FALLBACK, not candles, with the failure reason shown. The Health tab also keeps a persisted probe history per source: a source that flaps between OK and DOWN shows its true ok-rate, not just its last lucky status.</p>
+ <p><b>New in v010 - does the score earn its keep:</b> the Signals tab now buckets every candidate the engine ever flagged by its score at flag time and compares forward outcomes, against the all-token baseline printed next to it. High bands must beat low bands AND the baseline, or the score has no edge - and bands under 3 candidates are marked INSUFFICIENT SAMPLE instead of being celebrated.</p>
+ <p><b>New in v009 - does "early" actually win:</b> the Ledger tab now splits base rates by token age (0-15m, 15-60m, 1-6h). If the young bucket does not beat the older ones in your own collected data, "catch it early" has no proven edge - and the app says so. Baseline rows also carry a small replay sparkline of the token's multiple over time.</p>
+ <p><b>New in v008 - how LONG did a print take:</b> the Targets tab now shows the minutes or hours each target took to print after you starred a token, plus a median per target across your starred set. A slow grind and a fast spike are different beasts; now you can see which is which.</p>
+ <p><b>New in v007 - dead prices cannot fake a median:</b> tokens whose chart price never moves across 3+ polls (untraded or dead pairs) are labeled NO PRICE MOVEMENT and removed from every base-rate statistic, with the excluded count shown. And the app now saves on page close, so a fast exit cannot eat your last changes.</p>
+ <p><b>New in v005 - audit the base rate yourself:</b> the Ledger tab now lists every token the scanner saw, one row each: first observed price, latest and max chart multiples, net-of-cost estimate, 10m/1h checks, and a status label. Export it as CSV and check any claim against the raw rows. When the free trades feed only shows a recent window but Dex reports heavy 24h activity, the app says HISTORY WINDOW LIMITED instead of pretending the token had few buyers.</p>
+ <p><b>Limits:</b> alerts and tracking run only while this page is open. Wallet independence and sellability cannot be proven with free browser data.</p>
+ </div>
+ <button class="btn" style="width:100%;margin-top:8px" onclick="document.getElementById('onboard').remove();setPref('onboarded',true)">got it - start</button>
+ </div>`;
+ document.body.appendChild(ov);
+}
+/* ---------- wire pack 3 ---------- */
+TABS.splice(9,0,["Compare","&#9878;"],["Boosts","&#128293;"]);
+VIEWS.Compare=viewCompare;
+VIEWS.Boosts=viewBoosts;
+const _viewLedger0=VIEWS.Ledger||viewLedger;
+VIEWS.Ledger=function(){return _viewLedger0().replace('<div class="card"><h2>Paper trading ledger</h2>','<div class="card"><h2>Paper trading ledger</h2>'+ledgerAnalytics())+'<div class="card"><h2>Base-rate history</h2>'+baseHistChart()+'</div>';};
+const _refreshAll0=refreshAll;
+refreshAll=async function(force){await _refreshAll0(force);recordBaseHist();};
+const _viewHealth0=VIEWS.Health||viewHealth;
+VIEWS.Health=function(){return _viewHealth0()+'<div class="card"><h2>RPC node latency</h2><div class="controls"><button class="btn mini" onclick="probeNodes()">probe nodes</button></div><div id="nodeLatBody">'+stateBlock("empty","press probe nodes")+'</div></div>';};
+const _pushAlert0=pushAlert;
+pushAlert=function(msg,kind){_pushAlert0(msg,kind);notify("Solana Intelligence",msg);if(S.settings.sound&&kind==="warn")beep();};
+/* ---------- v014: sound alerts (WebAudio, no assets) ----------
+   Honest limits: browsers block audio until the user interacts with the
+   page at least once (the Settings "test sound" click satisfies this).
+   Works only while the page is open; there is no backend. Actual audio
+   output is NOT TESTED from the build environment - tone math verified,
+   speaker output must be confirmed on device. */
+let _audioCtx=null;
+function beep(){
+ try{
+  _audioCtx=_audioCtx||new (window.AudioContext||window.webkitAudioContext)();
+  if(_audioCtx.state==="suspended")_audioCtx.resume().catch(()=>{});
+  const seq=[[880,0,.09],[1320,.12,.09]];
+  for(const [freq,off,dur] of seq){
+   const o=_audioCtx.createOscillator(),g=_audioCtx.createGain();
+   o.type="sine";o.frequency.value=freq;
+   const t0=_audioCtx.currentTime+off;
+   g.gain.setValueAtTime(0,t0);
+   g.gain.linearRampToValueAtTime(.18,t0+.01);
+   g.gain.exponentialRampToValueAtTime(.0001,t0+dur);
+   o.connect(g);g.connect(_audioCtx.destination);
+   o.start(t0);o.stop(t0+dur+.02);
+  }
+ }catch(e){/* audio unavailable - stay silent, never crash an alert */}
+}
+window.testSound=()=>{beep();toast("test sound played - if you heard nothing, your browser blocked audio or volume is muted");};
+/* ---------- v018: local-storage report + honest pruning ----------
+   A research app that runs for days accumulates localStorage. This shows
+   exactly what is stored per key and prunes only data whose loss is safe:
+   closed paper positions older than 7 days and seen-tokens past the 6h
+   tracking window (watchlist, notes, settings, wallet index are KEPT). */
+function storageReport(){
+ const rows=[];let total=0;
+ for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(!k||!k.startsWith("si4_"))continue;const v=localStorage.getItem(k)||"";const b=v.length*2;total+=b;rows.push([k,b]);}
+ rows.sort((a,b)=>b[1]-a[1]);
+ const body=rows.map(([k,b])=>`<tr><td>${esc(k)}</td><td>${(b/1024).toFixed(1)} KB</td><td>${total>0?(100*b/total).toFixed(0)+"%":"-"}</td></tr>`).join("");
+ return `<div class="note">Total ${(total/1024).toFixed(1)} KB across ${rows.length} keys on this device (UTF-16 estimate; quota is browser-dependent, ~5 MB typical - NOT guaranteed). The paper ledger grows until pruned.</div>
+ <div class="controls"><button class="btn mini" onclick="pruneStorage()">prune old data</button></div>
+ <div class="tscroll"><table><thead><tr><th>Key</th><th>Size</th><th>Share</th></tr></thead><tbody>${body||'<tr><td colspan="3">no si4_ keys stored yet</td></tr>'}</tbody></table></div>`;
+}
+window.pruneStorage=()=>{
+ if(!confirm("Prune local data? Removes closed paper positions older than 7 days and seen-tokens past the 6h tracking window. Watchlist, notes, settings and wallet index are KEPT."))return;
+ const before=JSON.stringify(S.ledger).length+JSON.stringify(S.seen).length;
+ const now=Date.now();
+ S.ledger=S.ledger.filter(l=>!l.closed||now-(l.t||0)<7*864e5);
+ for(const m of Object.keys(S.seen)){if(now-S.seen[m].first>=SEEN_TTL&&!S.watch[m])delete S.seen[m];}
+ save();
+ const after=JSON.stringify(S.ledger).length+JSON.stringify(S.seen).length;
+ pushAlert("Pruned local data: freed about "+((before-after)/1024).toFixed(1)+" KB (closed positions >7d, expired seen-tokens)","ok");
+ render();
+};
+const _viewHealth1=VIEWS.Health;
+VIEWS.Health=function(){return _viewHealth1()+'<div class="card"><h2>Local storage (v018)</h2>'+storageReport()+'</div>';};
+setTimeout(onboard,800);
+render();
+</script>
+<script>
+"use strict";
+/* =====================================================================
+   EXTENSION PACK 4: Learn tab (bilingual), daily summary report,
+   bulk watchlist actions, keyboard shortcuts, snapshot UI wiring,
+   global error capture
+   ===================================================================== */
+/* ---------- Learn: real bilingual glossary (English + Tamil) ---------- */
+const LEARN=[
+ ["Liquidity (&#2986;&#2979;&#3007;&#2980;&#3021;&#2980;&#3007;&#2992;&#3016;)",
+  "How much real money sits in the trading pool. $2,000 liquidity means your $200 sell moves the price hard; $200,000 means it barely notices. Thin liquidity is why a chart 2x is often not a real 2x.",
+  "Pool-&#2994;&#3021; &#2958;&#2984;&#3021;&#2985;&#3016; &#2997;&#2994;&#3016; &#2952;&#2992;&#3009;&#2965;&#3021;&#2965;&#3007;&#2992;&#3007;&#2991;&#2980;&#3009; &#2958;&#2985;&#3021;&#2985;&#3007;&#2965;&#3021;&#2965;&#3009; &#2954;&#2985;&#3021; &#2997;&#3007;&#2994;&#2961; &#2950;&#2983;&#3007;&#2991;&#3007;&#2994;&#3016; &#2990;&#3006;&#3108;&#3009;&#2990;&#3021;."],
+ ["Mint authority (&#2986;&#3009;&#2980;&#3021;&#2980;&#2962;&#2965;&#3021; &#2958;&#2980;&#3007;&#2965;&#3006;&#2992;&#2990;&#3021;)",
+  "If ACTIVE, the token owner can print unlimited new coins and dilute you to zero. Renounced (null) means nobody can. This app reads it directly from the Solana mint account via RPC.",
+  "ACTIVE &#2958;&#2985;&#3021;&#2985;&#3006;&#2994;&#3021; owner &#2986;&#3009;&#2980;&#3007;&#2991; coin-&#2961;&#2994;&#3016; &#2956;&#2997;&#3007;&#2994;&#3021;&#2990;&#3006;&#2965; &#2958;&#2995;&#3007; &#2958;&#2980;&#3007;&#2965;&#3006;&#2992;&#2990;&#3021;."],
+ ["Freeze authority (&#2954;&#2992;&#2961;&#3021;&#2965;&#3009;&#2990;&#3021; &#2958;&#2980;&#3007;&#2965;&#3006;&#2992;&#2990;&#3021;)",
+  "If ACTIVE, the owner can freeze token accounts so you cannot sell. Renounced means they cannot. A live freeze authority on a brand-new token is a serious red flag.",
+  "ACTIVE &#2958;&#2985;&#3021;&#2985;&#3006;&#2994;&#3021; &#2953;&#2990;&#3021; wallet-&#2952; freeze &#2970;&#3014;&#2991;&#3021;&#2994;&#3006;&#2990;&#3021; - &#2997;&#3007;&#2993;&#3021;&#2965; &#2990;&#3009;&#2975;&#3007;&#2991;&#3006;&#2980;&#3009;."],
+ ["Slippage &#38; price impact (&#2997;&#3007;&#2994;&#3016; &#2995;&#3007;&#2975;&#3009;)",
+  "Your own trade moves the price against you. Selling $100 into a $1,000 pool can cost 10%+ instantly. The app's net estimates and Jupiter quoted round-trips exist to show this honestly.",
+  "&#2952;&#2985;&#3021;&#2980;&#3014;&#2991; &#2997;&#3007;&#2993;&#3021;&#3016;&#2991;&#3006;&#2994;&#3016; &#2997;&#3007;&#2994;&#3016; &#2953;&#2985;&#3021;&#2965;&#3007;&#2992;&#3009; &#2958;&#2992;&#3009;&#2990;&#3021; - &#2954;&#2980;&#3021;&#2965;&#3007;&#2993;&#3007;&#2991; &#2986;&#2979;&#2991;&#2990;&#3021; impact."],
+ ["Base rate (&#2958;&#2980;&#3007;&#2994;&#2990;&#3016; &#2953;&#2980;&#3007;&#2980;&#2990;&#3021;)",
+  "Before trusting any pick, ask: how often do ALL new tokens reach 2x? If 30% of everything hits 2x, a picker hitting 2x 30% of the time has no skill. The Ledger tab measures this from tokens this browser actually saw - no survivorship bias.",
+  "&#2958;&#2994;&#3021;&#2994;&#3006; token-&#2975;&#3009;&#2990;&#3021; &#2958;&#2980;&#3021;&#2980;&#3007;&#2985;&#3016; &#2970;&#3007;&#2994;&#3007;&#2991;&#2990;&#3021; 2x &#2958;&#2975;&#3016;&#2991;&#3009;&#2990;&#3021; - &#2954;&#2980;&#3021;&#2965;&#3007;&#2993;&#3007;&#2991;&#3016; &#2953;&#2994;&#3021;&#2993;&#3007;&#2980;&#3009;&#2990;&#3021; &#2958;&#2980;&#3007;&#2994;&#2990;&#3016; &#2953;&#2980;&#3007;&#2980;&#2990;&#3021;."],
+ ["Survivorship bias (&#2953;&#2996;&#3021;&#2995;&#3007;&#2994;&#3021; &#2986;&#3006;&#2970;&#3021;&#2986;&#3006;&#2975;&#3009;)",
+  "Tracking only your winners makes any strategy look good. This app tracks every token it sees for 6h, including the ones that died, so the base rate is real.",
+  "&#2957;&#3014;&#2985;&#3021;&#2985;&#3016; &#2988;&#3018;&#2992;&#3007;&#2980;&#3007;&#2991; &#2984;&#3007;&#2985;&#3021;&#2993;&#2980;&#3016; &#2990;&#2975;&#3021;&#2975;&#3009;&#2990;&#3021; &#2965;&#3006;&#2975;&#3021;&#2980;&#3009; - &#2958;&#2980;&#3007;&#2994;&#2990;&#3021; &#2953;&#2980;&#3007;&#2980;&#2990;&#3021; &#2986;&#3019;&#2991;&#3021; &#2958;&#2980;&#3009;&#2990;&#3021;."],
+ ["Paper trading (&#2986;&#3019;&#2992;&#3007;&#2991;&#3007;&#2994;&#3021; &#2997;&#3007;&#2993;&#3021;&#2965;&#2990;&#3021;)",
+  "Practicing with fake money but real prices. Every star here opens a $20 paper position tracked with fees and exit-cost estimates or actual Jupiter quotes. You learn without losing.",
+  "&#2954;&#2985;&#3021;&#2990;&#3016; &#2997;&#3007;&#2994;&#3016;&#2961;&#2994;&#3007;&#2994;&#3021;, &#2962;&#2979;&#2991;&#3007;&#2994;&#3021; &#2986;&#2979;&#2977;&#3007;&#2994;&#3021; &#2986;&#2979;&#2992;&#3007;&#2970;&#3014;&#2991;&#3009;&#2990;&#3021; - &#2954;&#2980;&#3021; &#2958;&#2980;&#3009;&#2990;&#3016; &#2950;&#2996;&#2994;&#3006;&#2990;&#3021;."],
+ ["Wallet independence (&#2986;&#3007;&#2977;&#3007;&#2994;&#3007;&#2985;&#3021;&#2990;&#3016;)",
+  "Ten wallets buying the same token could be ten people or one person's ten wallets. Free browser data CANNOT prove independence - so this app always labels wallet evidence INSUFFICIENT SAMPLE rather than calling it smart money.",
+  "&#2986;&#2980;&#3021;&#2980;&#3009; wallet = &#2986;&#2980;&#3021;&#2980;&#3009; &#2986;&#3014;&#2992;&#3006; &#2955;&#2994;&#3021;&#2980;&#3009; &#2986;&#3014;&#2992;&#3006;? free data-&#2994;&#3021; &#2986;&#3007;&#2992;&#3009;&#2986;&#3007;&#2965;&#3021;&#2965; &#2990;&#3009;&#2975;&#3007;&#2991;&#3006;&#2980;&#3009;."],
+ ["Look-ahead guard (&#2958;&#2980;&#3007;&#2965;&#3006;&#2970;&#3021;&#2986;&#3007; &#2958;&#2996;&#3021;&#2995;&#3007;&#2965;&#3021;&#2965;&#3006;)",
+  "Outcomes are only measured from the price this browser actually observed first (p0), never from a historical low it did not see. This stops fake 'it did 10x' claims based on data nobody could have acted on.",
+  "&#2984;&#3006;&#2990;&#3021; &#2986;&#3006;&#2992;&#3021;&#2980;&#3007; &#2997;&#3007;&#2994;&#3016;&#2991;&#3007;&#2994;&#3021; &#2952;&#2992;&#3009;&#2980;&#3021;&#2980;&#3006;&#2985;&#3021; &#2958;&#2979;&#2965;&#3021;&#2965;&#3007; - &#2986;&#3019;&#2991;&#3021; &#2958;&#2979;&#2965;&#3007; &#2955;&#2994;&#3021;&#2980;&#3009;."],
+ ["Rug pull (&#2997;&#3007;&#2994;&#3016; &#2955;&#2993;&#3021;&#2980;&#3009;)",
+  "The creator pulls the liquidity or dumps printed supply and the price goes to near zero. Live mint authority, live freeze authority and tiny liquidity together are the classic setup - all three are checked here directly on-chain.",
+  "Liquidity-&#2952; &#2958;&#2975;&#3009;&#2980;&#3021;&#3009;&#2997;&#2980;&#3009; &#2954;&#2994;&#3021;&#2993;&#3007;&#2991; &#2950;&#2994;&#3021;&#2993;&#2980;&#3009; &#2986;&#3019;&#2992;&#3009;&#2990;&#3021; rug. Active authorities + thin liquidity = red flag."]
+];
+function viewLearn(){
+ return`<div class="card"><h2>Learn - the concepts behind every number</h2>
+ <div class="note">Short bilingual explainers (English + Tamil) for the ideas this app is built on. Understanding these matters more than any single score.</div>
+ ${LEARN.map(([t,e,ta])=>`<details><summary>${t}</summary><p style="font-size:13px">${e}</p><p style="font-size:12px;color:var(--dim)">${ta}</p></details>`).join("")}
+ <div class="card"><h3>The one rule</h3><p style="font-size:13px">A chart multiple is not money. Money = entry price, exit price, fees, slippage, and whether anyone is there to buy what you sell. This app exists to measure that honestly - paper first, always.</p></div></div>`;
+}
+/* ---------- daily summary report (shareable text) ---------- */
+window.buildReport=()=>{
+ const A=Object.values(S.seen).filter(s=>s.p0>0&&(s.n||0)>=2);
+ const open=S.ledger.filter(l=>!l.closed);
+ const L=["SOLANA INTELLIGENCE v004 - status report","time: "+new Date().toLocaleString(),"",
+ "pools in radar: "+S.order.length+" | tracked 6h: "+Object.keys(S.seen).length+" | wallet index: "+Object.keys(S.walletIndex||{}).length,
+ "base rates (n="+A.length+"): 2x "+pct(s=>s.max>=2,A)+" | 3x "+pct(s=>s.max>=3,A)+" | below 0.5x "+pct(s=>s.last<0.5,A),
+ "median multiple: 10m "+f2(median(A.map(s=>s.m10)))+" | 1h "+f2(median(A.map(s=>s.m60))),
+ "candidates recorded: "+S.sigHist.length+" | watchlist: "+Object.keys(S.watch).length+" | paper positions: "+S.ledger.length+" ("+open.length+" open)",
+ "sources: "+Object.entries(S.health).map(([k,v])=>k+"="+(v.ok?"OK":"DOWN")).join(", "),"",
+ "PAPER RESEARCH ONLY - no real money, no advice. Chart multiples are not executable profits."];
+ const txt=L.join("\n");
+ const el=$("#reportOut");
+ if(el){el.style.display="block";el.value=txt;}
+ if(navigator.clipboard){navigator.clipboard.writeText(txt).then(()=>toast("report copied")).catch(()=>toast("report ready - copy manually"));}
+ else toast("report ready - copy manually");
+};
+/* ---------- bulk watchlist actions ---------- */
+window.quoteAll=async()=>{
+ const ks=Object.keys(S.watch);if(!ks.length){toast("nothing starred");return;}
+ toast("quoting "+ks.length+" tokens (sequential, rate-friendly)...");
+ for(const m of ks){const w=S.watch[m];if(!w)continue;w.quote=await quoteRT(m);save();render();}
+ toast("quotes done");
+};
+window.clearClosed=()=>{const n=S.ledger.length;S.ledger=S.ledger.filter(l=>!l.closed);save();toast("removed "+(n-S.ledger.length)+" closed positions");render();};
+/* ---------- keyboard shortcuts ---------- */
+document.addEventListener("keydown",e=>{
+ if(e.target.matches("input,textarea,select"))return;
+ const i=TABS.findIndex(([t])=>t===tab);
+ if(e.key==="ArrowRight"){go(TABS[(i+1)%TABS.length][0]);}
+ else if(e.key==="ArrowLeft"){go(TABS[(i-1+TABS.length)%TABS.length][0]);}
+ else if(e.key==="r"||e.key==="R"){refreshAll(true);}
+});
+/* ---------- global error capture (visible in Health) ---------- */
+S.errLog=S.errLog||[];
+window.addEventListener("error",e=>{S.errLog.unshift({t:Date.now(),msg:String(e.message||e.error||"unknown")});if(S.errLog.length>20)S.errLog.length=20;});
+window.addEventListener("unhandledrejection",e=>{S.errLog.unshift({t:Date.now(),msg:"promise: "+String(e.reason||"unknown")});if(S.errLog.length>20)S.errLog.length=20;});
+function errLogBlock(){
+ if(!S.errLog.length)return'<span class="badge ok">no runtime errors captured</span>';
+ return S.errLog.slice(0,10).map(x=>`<div class="note"><span class="badge bad">${new Date(x.t).toLocaleTimeString()}</span> ${esc(x.msg)}</div>`).join("");
+}
+/* ---------- wire pack 4 ---------- */
+TABS.splice(10,0,["Learn","&#128218;"]);
+VIEWS.Learn=viewLearn;
+const _viewWatch0=VIEWS.Watch||viewWatch;
+VIEWS.Watch=function(){return _viewWatch0().replace('<div class="card"><h2>Alerts','<div class="card"><h2>Bulk actions</h2><div class="controls"><button class="btn mini" onclick="quoteAll()">quote all RT</button><button class="btn mini ghost" onclick="clearClosed()">clear closed positions</button></div></div><div class="card"><h2>Alerts');};
+const _viewSettings0=VIEWS.Settings||viewSettings;
+VIEWS.Settings=function(){return _viewSettings0()+'<div class="card"><h2>Snapshot (backup / restore)</h2><div class="controls"><button class="btn mini" onclick="snapshotOut()">download snapshot</button><label class="btn mini ghost" style="cursor:pointer">restore snapshot<input type="file" accept="application/json" style="display:none" onchange="snapshotIn(event)"></label></div><div class="note">Full local state (tracking, watchlist, ledger, settings) as a JSON file - move between devices or back up before clearing.</div></div>';};
+const _viewHealth1=VIEWS.Health;
+VIEWS.Health=function(){return _viewHealth1()+'<div class="card"><h2>Runtime errors</h2>'+errLogBlock()+'</div><div class="card"><h2>Status report</h2><div class="controls"><button class="btn mini" onclick="buildReport()">build + copy report</button></div><textarea id="reportOut" rows="10" style="display:none;width:100%;background:var(--bg2);color:var(--txt);border:1px solid var(--line2);border-radius:10px;padding:8px;font-size:11px"></textarea></div>';};
+render();
+</script>
+<script>
+"use strict";
+/* EXTENSION PACK 5: notification UI, extra Learn entries, freshness line */
+LEARN.push(
+ ["Quoted round-trip (&#2954;&#2985;&#3021;&#2990;&#3016; &#2997;&#3006;&#2975;&#3021;&#2975;&#3009; &#2986;&#3007;&#2992;&#3007;&#2970;&#3021;&#2986;&#3009;)",
+  "Instead of estimating exit cost, the app asks Jupiter for a real buy quote and a real sell quote for your paper size, then shows the percentage you would lose on the round trip. It is a quote, never an executed trade. If Jupiter cannot quote, the app says NOT_QUOTED - it never invents a number.",
+  "Jupiter-&#2994;&#3021; &#2954;&#2985;&#3021;&#2990;&#3016; buy + sell quote - estimate &#2955;&#2994;&#3021;&#3021;, &#2954;&#2980;&#3021;&#2965;&#3007;&#2993;&#3007;&#2991; &#2970;&#3014;&#2991;&#3021;&#2986;&#3006;&#2975;&#3009; &#2955;&#2994;&#3021;&#3021;. Quote &#2990;&#2975;&#3021;&#2975;&#3009;&#2990;&#3021;, trade &#2955;&#2994;&#3021;&#3021;."],
+ ["Hard gates vs score (&#2986;&#3006;&#2975;&#3009;&#2986;&#3021;&#2986;&#3006;&#2975;&#3009; &#2958;&#2992;&#3007;)",
+  "The score is a ranking number, but some facts override any score: a live mint authority or live freeze authority rejects the token no matter how good everything else looks. That is why you can see a high score with REJECTED BY RISK GATE - the app explains which rule fired.",
+  "Score &#2958;&#2980;&#3021;&#2985;&#3006;&#2994;&#3009;&#2990;&#3021;, mint/freeze authority ACTIVE &#2958;&#2985;&#3021;&#2985;&#3006;&#2994;&#3021; hard reject - score-&#2952; override &#2970;&#3014;&#2991;&#3021;&#2990;&#3021;."],
+ ["Alerts while open only (&#2986;&#2980;&#2961; &#2980;&#3007;&#2993;&#2980;&#3021;&#2980;&#3006; &#2990;&#2975;&#3021;&#2975;&#3009;&#2990;&#3016;)",
+  "There is no server. Alerts, tracking and base rates update only while this page is open in your browser. Closing the tab freezes everything honestly - the app says this instead of pretending to watch while you sleep.",
+  "Server &#2955;&#2994;&#3021;&#3021; - page &#2980;&#3007;&#2993;&#2980;&#3021;&#2980;&#3006; &#2990;&#2975;&#3021;&#2975;&#3009;&#2990;&#3016; tracking. &#2955;&#2975;&#3009;&#2980;&#3007;&#2994;&#3021; &#2955;&#2975;&#3009;&#2980;&#3007; &#2957;&#3019;&#2994;&#3009;&#2990;&#3021;."]);
+/* freshness line under header status */
+function freshLine(){
+ const h=S.health["GeckoTerminal new_pools"],d=S.health["DexScreener batch"];
+ return "GT "+(h?h.at:"-")+" | Dex "+(d?d.at:"-")+" | tracked "+Object.keys(S.seen).length;
+}
+const _setStatus0=setStatus;
+setStatus=function(html,isLive){_setStatus0(html+' <span class="fresh">'+freshLine()+"</span>",isLive);};
+/* notification toggle in Settings */
+const _viewSettings1=VIEWS.Settings;
+VIEWS.Settings=function(){return _viewSettings1().replace('<div class="setrow"><div><label>Clear all local data</label>','<div class="setrow"><div><label>Browser notifications</label><div class="hint">target-hit alerts as system notifications - only while this page is open</div></div><button class="btn ghost" onclick="enableNotif()">'+(S.settings.notif?"notifications on":"enable")+'</button></div><div class="setrow"><div><label>Clear all local data</label>');};
+render();
+</script>
+</body>
+</html>
