@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Solana Intelligence v001 - Early-Entry Radar</title>
+<style>
+:root{--bg:#0b0f14;--card:#131a22;--ok:#2ecc71;--warn:#f1c40f;--bad:#e74c3c;--txt:#dbe4ec;--dim:#7d8b99;--acc:#4da3ff;--gold:#ffd700}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font:14px/1.45 -apple-system,Segoe UI,Roboto,sans-serif}
+header{padding:12px 14px;border-bottom:1px solid #1f2a35;position:sticky;top:0;background:var(--bg);z-index:3}
+h1{font-size:16px;margin:0 0 2px}.sub{color:var(--dim);font-size:12px}
+.grid{display:grid;gap:10px;padding:12px;grid-template-columns:1fr}
+@media(min-width:820px){.grid{grid-template-columns:1fr 1fr}}
+.card{background:var(--card);border:1px solid #1f2a35;border-radius:10px;padding:10px 12px;overflow:auto}
+.card h2{font-size:13px;margin:0 0 8px;color:var(--acc);text-transform:uppercase;letter-spacing:.5px}
+.badge{display:inline-block;padding:1px 8px;border-radius:99px;font-size:11px;font-weight:600}
+.ok{background:#0f2f1c;color:var(--ok)}.warn{background:#33290a;color:var(--warn)}.bad{background:#33110d;color:var(--bad)}.dim{background:#1c242e;color:var(--dim)}.gold{background:#332e0a;color:var(--gold)}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th,td{text-align:left;padding:6px;border-bottom:1px solid #1c2530;vertical-align:top;white-space:nowrap}
+th{color:var(--dim);font-weight:600}
+tr:hover td{background:#16202b}
+a{color:var(--acc);text-decoration:none}
+.mint{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--dim)}
+.note{color:var(--dim);font-size:11px;margin-top:6px}
+button{background:var(--acc);color:#04121f;border:0;border-radius:8px;padding:6px 12px;font-weight:700;cursor:pointer;font-size:12px}
+button.ghost{background:#1c242e;color:var(--txt)}
+button:disabled{opacity:.5}
+input,select{background:#0e141b;color:var(--txt);border:1px solid #27313d;border-radius:8px;padding:6px 8px;font-size:12px}
+.controls{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;align-items:center}
+#status{font-size:12px;color:var(--dim);margin-top:4px}
+.full{grid-column:1/-1}
+.inc{color:var(--warn);font-weight:700}
+.star{cursor:pointer;font-size:15px;background:none;border:0;color:var(--dim);padding:0 2px}
+.star.on{color:var(--gold)}
+.tgt{font-family:ui-monospace,monospace;font-size:11px}
+.hit{color:var(--gold);font-weight:700}
+ul{margin:6px 0 0 16px;padding:0}li{margin:3px 0}
+#log{white-space:pre-wrap;max-height:160px;overflow:auto}
+</style>
+</head>
+<body>
+<header>
+<h1>Solana Intelligence <span class="badge dim">v001</span> <span class="badge gold">EARLY-ENTRY RADAR</span></h1>
+<div class="sub">New-pool discovery (GeckoTerminal) + honest data states. 2x/3x/4x/5x are monitoring targets, NOT profit promises. Paper/research only.</div>
+<div id="status">booting...</div>
+</header>
+<div class="grid">
+<div class="card">
+<h2>API health</h2>
+<div id="health"></div>
+<div class="note">Budgets: GeckoTerminal 1 call/refresh (docs: 30/min free, not load-tested by me). RPC probe per refresh. 429 &rarr; 60s backoff.</div>
+</div>
+<div class="card">
+<h2>Honest limits</h2>
+<ul>
+<li><b>Works in-browser:</b> new-pool discovery, price/liquidity/txn evidence, watchlist + 2x-5x monitoring, export. All keyless.</li>
+<li><b>Not in v001:</b> wallet intelligence, smart-money clusters (need free key/backend - Helius DAS), executable quote round-trips, paper-trading ledger. Planned later versions.</li>
+<li><b>Never:</b> keys, signing, real-money trades.</li>
+<li>Pool age &ne; token creation. First observed = this device only. A 2x print on thin liquidity is NOT a realizable profit.</li>
+</ul>
+</div>
+<div class="card full">
+<h2>New pools - Solana (live)</h2>
+<div class="controls">
+<input id="q" placeholder="search symbol / mint" oninput="render()">
+<select id="sort" onchange="render()">
+<option value="age">sort: youngest first</option>
+<option value="liq">sort: liquidity</option>
+<option value="txn">sort: txns 5m</option>
+</select>
+<input id="minliq" type="number" placeholder="min liq $" style="width:90px" oninput="render()">
+<button class="ghost" onclick="refresh()">refresh now</button>
+<button class="ghost" onclick="exportJSON()">export JSON</button>
+</div>
+<table><thead><tr>
+<th></th><th>Token</th><th>Pool age</th><th>Liquidity</th><th>Price USD</th><th>5m b/s</th><th>First observed</th><th>Data</th>
+</tr></thead><tbody id="rows"></tbody></table>
+<div class="note" id="tnote"></div>
+</div>
+<div class="card full">
+<h2>Watchlist - 2x / 3x / 4x / 5x monitoring</h2>
+<div id="watch"></div>
+<div class="note">Reference price = price when you starred the token. A target "HIT" is a chart-price print only - fees, slippage and exit liquidity decide real outcomes (verified by challenge tests). NOT-PRICED = source gave no price, we never guess.</div>
+</div>
+<div class="card full">
+<h2>Diagnostics</h2>
+<div id="log" class="mint"></div>
+</div>
+</div>
+<script>
+"use strict";
+const $=s=>document.querySelector(s);
+const GT="https://api.geckoterminal.com/api/v2/networks/solana/new_pools?page=1";
+const RPCS=["https://solana-rpc.publicnode.com","https://solana.publicnode.com","https://beta.rpcpool.com","https://solana.api.onfinality.io/public","https://api.mainnet-beta.solana.com"];
+const S={pools:[],backoffUntil:0,health:{},firstSeen:{},watch:{}};
+try{S.firstSeen=JSON.parse(localStorage.getItem("si_firstSeen")||"{}");}catch(e){}
+try{S.watch=JSON.parse(localStorage.getItem("si_watch")||"{}");}catch(e){}
+const save=()=>{localStorage.setItem("si_firstSeen",JSON.stringify(S.firstSeen));localStorage.setItem("si_watch",JSON.stringify(S.watch));};
+function log(m){$("#log").textContent=`[${new Date().toLocaleTimeString()}] ${m}\n`+$("#log").textContent;}
+function fmtAge(ms){if(!ms)return"?";const s=(Date.now()-ms)/1e3;if(s<0)return"future?";const m=s/60,h=m/60,d=h/24;if(d>=1)return d.toFixed(1)+"d";if(h>=1)return h.toFixed(1)+"h";return m.toFixed(1)+"m";}
+function fmtUsd(x){if(x==null||isNaN(x))return"?";const n=Number(x);if(n>=1e6)return"$"+(n/1e6).toFixed(2)+"M";if(n>=1e3)return"$"+(n/1e3).toFixed(1)+"k";if(n>=1)return"$"+n.toFixed(2);return"$"+Number(n).toPrecision(3);}
+async function jf(url,t=9000){const c=new AbortController();const tt=setTimeout(()=>c.abort(),t);try{const r=await fetch(url,{signal:c.signal,headers:{Accept:"application/json"}});if(r.status===429){S.backoffUntil=Date.now()+60000;throw new Error("429 backoff 60s");}if(!r.ok)throw new Error("HTTP "+r.status);return await r.json();}finally{clearTimeout(tt);}}
+function setH(k,ok,ms,ex){S.health[k]={ok,ms,ex,at:new Date().toLocaleTimeString()};
+$("#health").innerHTML=Object.entries(S.health).map(([k,v])=>`<div>${k} <span class="badge ${v.ok?"ok":"bad"}">${v.ok?"OK":"DOWN"}</span> <span class="mint">${v.ms!=null?v.ms+"ms":""} ${v.ex||""} @ ${v.at}</span></div>`).join("");}
+async function probeRPC(){for(const u of RPCS){const t0=performance.now();try{const r=await fetch(u,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({jsonrpc:"2.0",id:1,method:"getHealth"})});const ms=Math.round(performance.now()-t0);if(r.ok){setH("Solana RPC",true,ms,u.replace("https://","").slice(0,32));return;}}catch(e){}}setH("Solana RPC",false,null,"all 5 failed");}
+async function refresh(){if(Date.now()<S.backoffUntil){$("#status").textContent="backoff until "+new Date(S.backoffUntil).toLocaleTimeString();return;}
+$("#status").textContent="refreshing...";probeRPC();
+try{const t0=performance.now();const d=await jf(GT);setH("GeckoTerminal new_pools",true,Math.round(performance.now()-t0),(d.data||[]).length+" pools");
+S.pools=(d.data||[]).map(p=>{
+const a=p.attributes||{};
+const rel=(p.relationships&&p.relationships.base_token&&p.relationships.base_token.data)||{};
+const mint=(rel.id||"").replace(/^solana_/,"");
+const tx=a.transactions||{};
+const m5=tx.m5||{}; const h1=tx.h1||{};
+const vu=a.volume_usd||{};
+return{
+mint:mint,
+symbol:(a.name||"?").split(" / ")[0],
+pool:(p.id||"").replace(/^solana_/,""),
+created:a.pool_created_at?Date.parse(a.pool_created_at):null,
+price:a.base_token_price_usd!=null?Number(a.base_token_price_usd):null,
+liq:a.reserve_in_usd!=null?Number(a.reserve_in_usd):null,
+b5:m5.buys!=null?m5.buys:null,
+s5:m5.sells!=null?m5.sells:null,
+b1:h1.buys!=null?h1.buys:null,
+s1:h1.sells!=null?h1.sells:null,
+vol:vu.h24!=null?Number(vu.h24):null
+};
+}).filter(x=>x.mint);
+for(const x of S.pools){if(!S.firstSeen[x.mint])S.firstSeen[x.mint]={at:Date.now(),price:x.price};}
+save();updateWatch();render();renderWatch();
+$("#status").textContent="last refresh "+new Date().toLocaleTimeString()+" | "+S.pools.length+" pools | auto 90s";
+}catch(e){setH("GeckoTerminal new_pools",false,null,e.message);$("#status").textContent="failed: "+e.message;log("refresh failed: "+e.message);}}
+function star(mint){if(S.watch[mint]){delete S.watch[mint];}else{const p=S.pools.find(x=>x.mint===mint);const fs=S.firstSeen[mint]||{};
+S.watch[mint]={symbol:p?p.symbol:mint.slice(0,6),ref:(fs.price!=null?fs.price:(p?p.price:null)),addedAt:Date.now(),hits:{}};}
+save();render();renderWatch();}
+function updateWatch(){for(const[mint,w]of Object.entries(S.watch)){const p=S.pools.find(x=>x.mint===mint);if(!p||p.price==null||w.ref==null)continue;const mult=p.price/w.ref;for(const t of[2,3,4,5]){if(mult>=t&&!w.hits[t]){w.hits[t]=Date.now();log("TARGET HIT "+t+"x "+w.symbol+" (chart print, not executable profit)");}}w.lastPrice=p.price;w.lastMult=mult;}save();}
+function renderWatch(){const ks=Object.keys(S.watch);if(!ks.length){$("#watch").innerHTML='<span class="note">Star any token above to start monitoring.</span>';return;}
+$("#watch").innerHTML="<table><thead><tr><th>Token</th><th>Ref price</th><th>Now</th><th>Multiple</th><th class='tgt'>2x 3x 4x 5x</th><th></th></tr></thead><tbody>"+ks.map(m=>{const w=S.watch[m];
+const tg=[2,3,4,5].map(t=>w.hits[t]?`<span class="hit">${t}x✓</span>`:`${t}x·`).join(" ");
+const mult=w.lastMult!=null?w.lastMult.toFixed(2)+"x":'<span class="inc">NOT-PRICED</span>';
+return`<tr><td><b>${w.symbol}</b> <span class="mint">${m.slice(0,4)}..${m.slice(-4)}</span></td><td>${w.ref!=null?"$"+Number(w.ref).toPrecision(4):"?"}</td><td>${w.lastPrice!=null?"$"+Number(w.lastPrice).toPrecision(4):"?"}</td><td>${mult}</td><td class="tgt">${tg}</td><td><button class="ghost" onclick="star('${m}')">remove</button></td></tr>`;}).join("")+"</tbody></table>";}
+function render(){const q=($("#q").value||"").toLowerCase();const ml=Number($("#minliq").value)||0;const so=$("#sort").value;
+let rows=S.pools.filter(x=>(!q||x.symbol.toLowerCase().includes(q)||x.mint.toLowerCase().includes(q))&&(!ml||(x.liq||0)>=ml));
+rows.sort((a,b)=>so==="liq"?(b.liq||0)-(a.liq||0):so==="txn"?((b.b5||0)+(b.s5||0))-((a.b5||0)+(a.s5||0)):(a.created||0)-(b.created||0));
+$("#rows").innerHTML=rows.map((x,i)=>{const inc=x.price==null||x.liq==null;const on=!!S.watch[x.mint];
+return`<tr><td><button class="star ${on?"on":""}" onclick="star('${x.mint}')">${on?"★":"☆"}</button></td>
+<td><b>${x.symbol}</b> <span class="mint">${x.mint.slice(0,4)}..${x.mint.slice(-4)}</span><br><a href="https://dexscreener.com/solana/${x.mint}" target="_blank" rel="noopener">dexscreener</a> · <a href="https://www.geckoterminal.com/solana/pools/${x.pool}" target="_blank" rel="noopener">geckoterminal</a></td>
+<td>${fmtAge(x.created)}<br><span class="mint">${x.created?new Date(x.created).toLocaleTimeString():"no ts"}</span></td>
+<td>${fmtUsd(x.liq)}</td><td>${x.price!=null?"$"+Number(x.price).toPrecision(4):"?"}</td>
+<td>${x.b5!=null?x.b5+"/"+x.s5:"?"}</td>
+<td>${S.firstSeen[x.mint]?fmtAge(S.firstSeen[x.mint].at):"-"}</td>
+<td>${inc?'<span class="inc">INCOMPLETE</span>':'<span class="badge ok">full</span>'}</td></tr>`;}).join("");
+$("#tnote").textContent=rows.length+" shown / "+S.pools.length+" pools. Pool age = pool_created_at from source (NOT token creation). No invented history.";}
+function exportJSON(){const blob=new Blob([JSON.stringify({exportedAt:new Date().toISOString(),pools:S.pools,watchlist:S.watch,firstSeen:S.firstSeen,health:S.health},null,2)],{type:"application/json"});
+const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="solana_intelligence_v001_export_"+Date.now()+".json";a.click();log("exported JSON");}
+refresh();setInterval(refresh,90000);renderWatch();
+</script>
+</body>
+</html>
