@@ -133,7 +133,7 @@ $("#status").textContent="last refresh "+new Date().toLocaleTimeString()+" | "+S
 }catch(e){setH("GeckoTerminal new_pools",false,null,e.message);$("#status").textContent="failed: "+e.message;log("refresh failed: "+e.message);}}
 function star(mint){if(S.watch[mint]){delete S.watch[mint];}else{const p=S.pools.find(x=>x.mint===mint);const fs=S.firstSeen[mint]||{};
 S.watch[mint]={symbol:p?p.symbol:mint.slice(0,6),ref:(fs.price!=null?fs.price:(p?p.price:null)),addedAt:Date.now(),hits:{}};}
-save();render();renderWatch();}
+save();updateWatch();render();renderWatch();}
 function updateWatch(){for(const[mint,w]of Object.entries(S.watch)){const p=S.pools.find(x=>x.mint===mint);if(!p||p.price==null||w.ref==null)continue;const mult=p.price/w.ref;for(const t of[2,3,4,5]){if(mult>=t&&!w.hits[t]){w.hits[t]=Date.now();log("TARGET HIT "+t+"x "+w.symbol+" (chart print, not executable profit)");}}w.lastPrice=p.price;w.lastMult=mult;}save();}
 function renderWatch(){const ks=Object.keys(S.watch);if(!ks.length){$("#watch").innerHTML='<span class="note">Star any token above to start monitoring.</span>';return;}
 $("#watch").innerHTML="<table><thead><tr><th>Token</th><th>Ref price</th><th>Now</th><th>Multiple</th><th class='tgt'>2x 3x 4x 5x</th><th></th></tr></thead><tbody>"+ks.map(m=>{const w=S.watch[m];
