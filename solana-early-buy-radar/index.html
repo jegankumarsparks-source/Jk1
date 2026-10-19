@@ -147,11 +147,12 @@ async function fetchJSON(url,opt={}){const {timeout=9000,retries=2,src,signal,bo
    if(i<retries)await sleep((e.rl?2500:700)*Math.pow(2,i)+Math.random()*300,signal)}
   finally{clearTimeout(to);signal&&signal.removeEventListener('abort',onAb)}}
  throw last}
-const RPCS={publicnode:['https://solana-rpc.publicnode.com','https://api.mainnet-beta.solana.com'],mainnet:['https://api.mainnet-beta.solana.com','https://solana-rpc.publicnode.com']};
-async function rpc(method,params,signal){const eps=RPCS[S.rpcFirst]||RPCS.publicnode;let last;
+const RPCS={publicnode:['https://solana-rpc.publicnode.com','https://solana.publicnode.com','https://beta.rpcpool.com','https://solana.api.onfinality.io/public','https://api.mainnet-beta.solana.com'],mainnet:['https://api.mainnet-beta.solana.com','https://solana-rpc.publicnode.com','https://solana.publicnode.com','https://beta.rpcpool.com','https://solana.api.onfinality.io/public']};
+async function rpc(method,params,signal){const eps=RPCS[S.rpcFirst]||RPCS.publicnode;let last;const fails=[];
  for(const ep of eps){try{const j=await fetchJSON(ep,{src:SRC.rpc,signal,retries:1,timeout:12000,body:{jsonrpc:'2.0',id:1,method,params}});
-   if(j.error)throw new Error('RPC '+(j.error.code||'')+' '+(j.error.message||'error'));SRC.rpc.ep=ep;return j.result}
-  catch(e){last=e;if(e.name==='AbortError')throw e}}
+   if(j.error)throw new Error('RPC '+(j.error.code||'')+' '+(j.error.message||'error'));SRC.rpc.ep=ep;SRC.rpc.err=null;return j.result}
+  catch(e){last=e;try{fails.push(new URL(ep).hostname+' ('+((e&&e.message)||'failed')+')')}catch(_){fails.push(ep+' ('+((e&&e.message)||'failed')+')')}if(e.name==='AbortError')throw e}}
+ if(fails.length)SRC.rpc.err='all '+fails.length+' endpoints failed: '+fails.join(', ');
  throw last}
 async function dexTokens(addrs,signal){const out=[];for(let i=0;i<addrs.length;i+=30){const j=await fetchJSON('https://api.dexscreener.com/tokens/v1/solana/'+addrs.slice(i,i+30).join(','),{src:SRC.dex,signal});if(Array.isArray(j))out.push(...j)}return out}
 async function getSolUsd(signal){if(sys.solUsd&&Date.now()-sys.solUsdAt<120000)return sys.solUsd;
@@ -375,7 +376,7 @@ function renderSet(){$('#setBox').replaceChildren(
  h('div',{class:'card'},h('b',null,'Scanning'),h('br'),
   field('Scan interval (seconds)','scanSec','n',{min:30,max:600},'Default 60. Public endpoints are rate limited; lower is not always better.'),
   field('On-chain checks per scan','maxVerify','n',{min:1,max:8},'Each check reads transactions from the public RPC.'),
-  field('RPC preference','rpcFirst','select',[['publicnode','PublicNode first, Solana Foundation fallback'],['mainnet','Solana Foundation first, PublicNode fallback']])),
+  field('RPC preference','rpcFirst','select',[['publicnode','PublicNode chain first (5 keyless endpoints)'],['mainnet','Solana Foundation first (same 5-endpoint chain)']])),
  h('div',{class:'card'},h('b',null,'Purchase thresholds'),h('br'),
   field('Minimum confirmed buy (SOL)','minBuySol','n',{min:0.1,max:1000,step:0.1},'Live SOL price: '+(sys.solUsd?'$'+sys.solUsd.toFixed(2):'n/a')),
   h('div',{class:'row',style:'margin-bottom:10px'},[2,5,10,20].map(v=>h('button',{class:'sec',onclick:()=>{S.minBuySol=v;saveS();renderSet()}},v+' SOL')),sys.solUsd&&h('button',{class:'sec',onclick:()=>{S.minBuySol=Math.round(500/sys.solUsd*100)/100;saveS();renderSet()}},'about $500')),
