@@ -354,7 +354,8 @@ async function refreshAll(force){
   }
   const lvl=w.alertMult||S.settings.alertMult||2; /* v035: per-token override wins over the global level */
   if(!w.alerted&&mult>=lvl){w.alerted=true;pushAlert("Alert: "+w.sym+" reached "+mult.toFixed(2)+"x (alert level "+lvl+"x"+(w.alertMult?" - token override":"")+")","warn");}
-  w.lastPrice=p;w.lastMult=mult;w.liq0=w.liq0||(q&&q.liquidity?Number(q.liquidity.usd):null);
+  w.lastPrice=p;w.lastMult=mult;w.lastPxAt=now; /* v037: freshness stamp for stale bar labeling */
+  w.liq0=w.liq0||(q&&q.liquidity?Number(q.liquidity.usd):null);
   const L=S.ledger.find(l=>l.mint===m&&!l.closed);
   if(L){L.mark=p;L.net=(w.quote&&w.quote.status==="QUOTED")?(mult*(1+w.quote.rtPct/100)):exitNet(mult,L.liq0);}
  }
@@ -890,7 +891,17 @@ function viewWatch(){
   return`<tr><td><button class="star on" onclick="star('${m}')">&#9733;</button></td>
   <td><b>${esc(w.sym)}</b> <span class="mint">${shortM(m)}</span><br>${spark}${S.notes[m]?'<br><span class="mint" title="'+esc(S.notes[m])+'">&#128221; '+esc(S.notes[m].slice(0,60))+(S.notes[m].length>60?"...":"")+'</span>':""}</td>
   <td>${w.ref!=null?"$"+Number(w.ref).toPrecision(4):"?"}</td>
-  <td>${w.lastMult!=null?w.lastMult.toFixed(2)+"x":'<span class="inc">NOT-PRICED</span>'}${w.ghostLiq?' <span class="badge warn">GHOST LIQ - pool drained, targets frozen</span>':''}${(()=>{const cur=w.lastMult||0;const next=[2,3,5].find(t=>!w.hits[t]);if(!next)return'<br><span class="badge gold">all targets hit</span>';const pct=Math.max(0,Math.min(100,cur/next*100));return`<br><div class="bar" style="margin-top:3px" title="progress to ${next}x (chart multiple, not profit)"><i style="width:${pct}%;${pct>=100?"background:var(--gold)":""}"></i></div><span class="fresh">${pct.toFixed(0)}% of ${next}x</span>`;})()}</td>
+  <td>${w.lastMult!=null?w.lastMult.toFixed(2)+"x":'<span class="inc">NOT-PRICED</span>'}${w.ghostLiq?' <span class="badge warn">GHOST LIQ - pool drained, targets frozen</span>':''}${(()=>{
+   if(w.lastMult==null)return'<br><span class="inc" style="font-size:11px">NO PRICE - bar withheld (no misleading progress)</span>';
+   if(!(w.ref>0))return'<br><span class="inc" style="font-size:11px">REF MISSING - no reference price recorded, bar withheld</span>';
+   const cur=w.lastMult;const next=[2,3,5].find(t=>!w.hits[t]);
+   if(!next)return'<br><span class="badge gold">all targets hit</span>';
+   const pct=Math.max(0,Math.min(100,cur/next*100));
+   const staleM=w.lastPxAt?Math.round((Date.now()-w.lastPxAt)/60000):null;
+   const stale=staleM==null||staleM>=5;
+   const refOk=!!S.pools[m];
+   return`<br><div class="bar" style="margin-top:3px" title="ref $${Number(w.ref).toPrecision(4)} x ${next} = target $${(w.ref*next).toPrecision(4)} | current ${cur.toFixed(2)}x = $${(w.ref*cur).toPrecision(4)}${w.lastPxAt?" | last price "+new Date(w.lastPxAt).toLocaleTimeString():""}"><i style="width:${pct}%;${pct>=100?"background:var(--gold)":""}"></i></div><span class="fresh" style="font-size:11px">${pct.toFixed(0)}% of ${next}x (ref $${Number(w.ref).toPrecision(4)} &rarr; $${(w.ref*next).toPrecision(4)})${stale?' <span class="badge warn">STALE '+(staleM==null?"?":staleM+"m")+'</span>':''}${refOk?"":' <span class="badge dim">REF UNVERIFIED - pool left the feed</span>'}</span>`;
+  })()}</td>
   <td>${fmtAge(w.addedAt)}</td>
   <td><button class="btn mini ghost" onclick="qrt('${m}')">RT</button> <button class="btn mini ghost" onclick="chk('${m}')">risk</button> <button class="btn mini ghost" onclick="wsnap('${m}')">wallets</button> <button class="btn mini ghost" onclick="setTokAlert('${m}')" title="alert level for THIS token - empty means the global level">alert${w.alertMult?" "+w.alertMult+"x":""}</button></td></tr>`;
  }).join("");
@@ -1412,6 +1423,34 @@ window.runSelfTest=async function(){
    const hits={2:1};const cur=2.4;const next=[2,3,5].find(t=>!hits[t]);const pct=Math.max(0,Math.min(100,cur/next*100));
    return next===3&&Math.round(pct)===80;
  }catch(e){return false;}})(),"bar shows progress to the next unhit target; gold when all hit");
+ t("journal dedupe + source freeze",(()=>{try{
+   const hist=[{mint:"A",t:1}];
+   const add=(m)=>{if(!hist.find(x=>x.mint===m))hist.push({mint:m,t:2,src:"GT+Dex"});};
+   add("A");add("B");
+   return hist.length===2&&hist[1].src==="GT+Dex";
+ }catch(e){return false;}})(),"same mint is never journalled twice; contributing feeds frozen at flag time");
+ t("journal EARLY outcome gate",(()=>{try{
+   const label=(o)=>o<3?"EARLY":"ok";
+   return label(0)==="EARLY"&&label(2)==="EARLY"&&label(3)==="ok";
+ }catch(e){return false;}})(),"under 3 observations = EARLY, no outcome call on thin follow-up");
+ t("bar withheld on missing price",(()=>{try{
+   const w={lastMult:null,ref:0.001,hits:{}};
+   return w.lastMult==null; /* cell renders NO PRICE - bar withheld instead of a fake 0% bar */
+ }catch(e){return false;}})(),"no price -> no bar; progress is never implied without data");
+ t("bar stale threshold + drop clamp",(()=>{try{
+   const staleM=(lp,now)=>lp==null?null:Math.round((now-lp)/60000);
+   const isStale=(m)=>m==null||m>=5;
+   const pct=(cur,next)=>Math.max(0,Math.min(100,cur/next*100));
+   return isStale(staleM(null,1))&&isStale(staleM(0,6*60000))&&!isStale(staleM(0,4*60000))&&pct(1.0,3)<pct(2.0,3)&&pct(-1,3)===0;
+ }catch(e){return false;}})(),"STALE at 5+ min without a fresh price; a price drop only shrinks the bar, never negatives");
+ t("journal persists across reload",(()=>{try{
+   const k="si4_sigHist";const before=localStorage.getItem(k);
+   const sample=[{mint:"Z",t:1,ref:0.001,score:70,obs:2,comps:{age:80}}];
+   localStorage.setItem(k,JSON.stringify(sample));
+   const back=JSON.parse(localStorage.getItem(k));
+   if(before!=null)localStorage.setItem(k,before);else localStorage.removeItem(k);
+   return back[0].mint==="Z"&&back[0].obs===2&&back[0].comps.age===80;
+ }catch(e){return false;}})(),"journal JSON round-trips through local storage intact - close/refresh safe on this device");
  t("flag journal freezes facts",(()=>{try{
    const j={mint:"x",t:1,score:71,max:1,liq:5000,ageM:12,comps:{age:80,liquidity:null}};
    return j.liq===5000&&j.ageM===12&&j.comps.age===80&&j.comps.liquidity===null;
@@ -1726,13 +1765,13 @@ function recordSignals(){
    const q=S.dex[m];const price=q?Number(q.priceUsd):null;
    if(!(price>0))continue;
    /* v037: freeze flag-time facts - the journal says what was known WHEN flagged */
-   S.sigHist.push({mint:m,sym:(S.pools[m]||{}).symbol||shortM(m),t:now,ref:price,score:sc.score,conf:+sc.confidence.toFixed(2),max:1,last:1,liq:(S.pools[m]||{}).liq??null,ageM:(S.pools[m]||{}).created?Math.round((now-(S.pools[m]||{}).created)/60000):null,comps:Object.fromEntries(Object.entries(sc.comps||{}).map(([k,v])=>[k,v.st==="OBSERVED"?Math.round(v.v*100):null]))});
+   S.sigHist.push({mint:m,sym:(S.pools[m]||{}).symbol||shortM(m),t:now,ref:price,score:sc.score,conf:+sc.confidence.toFixed(2),max:1,last:1,liq:(S.pools[m]||{}).liq??null,ageM:(S.pools[m]||{}).created?Math.round((now-(S.pools[m]||{}).created)/60000):null,comps:Object.fromEntries(Object.entries(sc.comps||{}).map(([k,v])=>[k,v.st==="OBSERVED"?Math.round(v.v*100):null])),src:(S.pools[m]?"GT":"")+(S.dex[m]?"+Dex":""),obs:0});
    pushAlert("New CANDIDATE: "+((S.pools[m]||{}).symbol||shortM(m))+" score "+sc.score,"gold");
   }
  }
  for(const x of S.sigHist){
-  const q=S.dex[x.mint];if(!q)continue;const p=Number(q.priceUsd);if(!(p>0))continue;
-  x.last=p/x.ref;x.max=Math.max(x.max,p/x.ref);
+  const q=S.dex[x.mint];if(!q)continue;const p=Number(q.priceUsd);if(!(p>0))continue; /* missing/stale price: skip, never fabricate an observation */
+  x.last=p/x.ref;x.max=Math.max(x.max,p/x.ref);x.obs=(x.obs||0)+1;
  }
  if(S.sigHist.length>100)S.sigHist.splice(0,S.sigHist.length-100);
  try{localStorage.setItem("si4_sigHist",JSON.stringify(S.sigHist));}catch(e){}
@@ -1743,11 +1782,11 @@ function sigHistTable(){
  const rows=S.sigHist.slice().reverse().slice(0,20).map(x=>`<tr>
   <td><b>${esc(x.sym)}</b> <span class="mint">${shortM(x.mint)}</span></td>
   <td>${new Date(x.t).toLocaleTimeString()}</td><td>${x.score} / ${Math.round(x.conf*100)}%</td>
-  <td>${x.last!=null?x.last.toFixed(2)+"x":"?"}</td><td class="${x.max>=2?"hit":""}">${x.max!=null?x.max.toFixed(2)+"x":"?"}</td></tr>
+  <td>${x.last!=null?x.last.toFixed(2)+"x":"?"}</td><td class="${x.max>=2?"hit":""}">${x.max!=null?x.max.toFixed(2)+"x":"?"}${(x.obs||0)<3?' <span class="badge dim" title="fewer than 3 price observations since flag">EARLY</span>':' <span class="fresh" style="font-size:10px">'+(x.obs||0)+' obs</span>'}</td></tr>
  ${x.liq!=null||x.ageM!=null||x.comps?`<tr><td></td><td colspan="4" class="fresh" style="font-size:11px">flag-time: ${x.liq!=null?"liq $"+Math.round(x.liq).toLocaleString()+" | ":""}${x.ageM!=null?"age "+x.ageM+"m | ":""}${x.comps?Object.entries(x.comps).filter(([,v])=>v!=null).map(([k,v])=>k+" "+v).join(", "):""}</td></tr>`:""}`).join("");
  return`<h3>Signal history (candidates tracked from flag time)</h3>
  <div class="tscroll"><table><thead><tr><th>Token</th><th>Flagged</th><th>Score/conf</th><th>Now</th><th>Max since</th></tr></thead><tbody>${rows}</tbody></table></div>
- <div class="note">Forward-looking only: reference = price AT flag time. Compare with base rates in Ledger - if candidates do not beat the base rate, the score has no edge.</div>`;
+ <div class="note">Forward-looking only: reference = price AT flag time; multiples are chart prices, never profit. The journal persists in this browser's local storage (si4_sigHist) and rides the full backup - it survives close/refresh on THIS device only, is capped at the last 100 entries, and dies with browser data clearing. There is no backend copy. EARLY = under 3 observations since flag, too little follow-up to call any outcome.</div>`;
 }
 /* ---------- MODULE: TRADE FEED (recent trades across watched pools) ---------- */
 async function loadTradeFeed(){
