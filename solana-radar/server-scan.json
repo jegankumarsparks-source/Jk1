@@ -1,6 +1,6 @@
 {
- "generatedAt": 1792407045864,
- "generatedAtIso": "2026-10-19T10:50:45.864Z",
+ "generatedAt": 1792407347781,
+ "generatedAtIso": "2026-10-19T10:55:47.781Z",
  "scanner": "solana-radar-server",
  "runner": "cloudflare-worker-cron",
  "engineSource": "index.html embedded engine, extracted verbatim at run time",
@@ -10,8 +10,8 @@
  "riskPolicyVersion": "risk-v1.0",
  "thresholdsVersion": "thresh-v1.0",
  "cycle": 776,
- "cycleStartedAt": 1792407035237,
- "cycleDurationMs": 10627,
+ "cycleStartedAt": 1792407335230,
+ "cycleDurationMs": 12551,
  "schedule": "every 5 min via Cloudflare Workers cron (free tier, keyless data) — runs whether or not any tab is open. Backstop: GitHub Actions cron (requested every 5 min; GitHub delays it in practice — observed every 2-3 h). When it runs it skips while this worker is healthy with dexscreener LIVE, and covers discovery from separate egress IPs during dexscreener 429 cooldowns or worker outages.",
  "engineDrift": null,
  "stateRestored": true,
@@ -29,9 +29,9 @@
    "id": "rugcheck",
    "label": "RugCheck (public, keyless)",
    "status": "LIVE",
-   "lastSuccess": 1792407041861,
+   "lastSuccess": 1792407343772,
    "lastError": null,
-   "requestCount": 2,
+   "requestCount": 3,
    "rateLimitCount": 0
   },
   {
@@ -700,18 +700,18 @@
  ],
  "driver": "worker-budget-v2 2026-10-17",
  "phaseMs": {
-  "t0": 1792407034558,
-  "readMs": 679
+  "t0": 1792407334546,
+  "readMs": 684
  },
  "dexBackoffUntil": null,
  "dexBackoffStrikes": 0,
  "dex429Streak": 0,
  "stateReadError": null,
- "subrequests": 8,
+ "subrequests": 9,
  "subPhases": {
   "afterDiscovery": 2,
-  "afterAnalysis": 6,
-  "afterMarks": 8
+  "afterAnalysis": 7,
+  "afterMarks": 9
  },
- "stateWritten": false
+ "stateWritten": true
 }
