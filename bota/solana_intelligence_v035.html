@@ -13,15 +13,19 @@
 --ok:#2ecc71;--okbg:#0f2f1c;--warn:#f1c40f;--warnbg:#33290a;--bad:#e74c3c;--badbg:#33110d;
 --gold:#ffd700;--goldbg:#332e0a;--shadow:0 2px 10px rgba(0,0,0,.35);
 }
-[data-accent="green"]{--acc:#2ecc71;--acc2:#25a35a}
-[data-accent="amber"]{--acc:#f5a623;--acc2:#d18a10}
-[data-accent="purple"]{--acc:#a06bff;--acc2:#7f4fe0}
 [data-theme="light"]{
 --bg:#f4f6f9;--bg2:#e9edf2;--card:#ffffff;--card2:#f0f3f7;--line:#d5dde5;--line2:#c3cdd8;
 --txt:#16222e;--dim:#4d5f70;--acc:#0b6bcb;--acc2:#0a5cb0;
 --ok:#148f4d;--okbg:#dcf5e6;--warn:#8a6d00;--warnbg:#fff3c4;--bad:#c0392b;--badbg:#fbe3df;
 --gold:#7a6700;--goldbg:#fff0bb;--shadow:0 2px 8px rgba(20,40,60,.14);
 }
+/* accents come AFTER both themes so the user's explicit choice always wins (v035 bug caught in verification) */
+[data-accent="green"]{--acc:#2ecc71;--acc2:#25a35a}
+[data-accent="amber"]{--acc:#f5a623;--acc2:#d18a10}
+[data-accent="purple"]{--acc:#a06bff;--acc2:#7f4fe0}
+[data-theme="light"][data-accent="green"]{--acc:#1e9e54;--acc2:#177a40}
+[data-theme="light"][data-accent="amber"]{--acc:#c47f0e;--acc2:#9c6509}
+[data-theme="light"][data-accent="purple"]{--acc:#7f4fe0;--acc2:#6538c0}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0}
 body{background:var(--bg);color:var(--txt);font:14px/1.5 -apple-system,Segoe UI,Roboto,Noto Sans,sans-serif;padding-bottom:calc(64px + env(safe-area-inset-bottom));overflow-x:hidden}
