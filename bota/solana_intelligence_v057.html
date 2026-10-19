@@ -8,10 +8,10 @@
 <style>
 /* ===== THEME TOKENS (dark default; light via [data-theme=light]) ===== */
 :root{
---bg:#0b0f14;--bg2:#0e141b;--card:#131a22;--card2:#182129;--line:#1f2a35;--line2:#27313d;
+--bg:#0a0c10;--bg2:#0f141a;--card:#141a23;--card2:#1b2430;--line:#232e3b;--line2:#2c3947;
 --txt:#dbe4ec;--dim:#7d8b99;--acc:#f5a623;--acc2:#d18a10;
 --ok:#2ecc71;--okbg:#0f2f1c;--warn:#f1c40f;--warnbg:#33290a;--bad:#e74c3c;--badbg:#33110d;
---gold:#ffd700;--goldbg:#332e0a;--shadow:0 2px 10px rgba(0,0,0,.35);
+--gold:#ffd700;--goldbg:#332e0a;--shadow:0 6px 18px rgba(0,0,0,.5);
 }
 [data-theme="light"]{
 --bg:#f4f6f9;--bg2:#e9edf2;--card:#ffffff;--card2:#f0f3f7;--line:#d5dde5;--line2:#c3cdd8;
@@ -38,9 +38,10 @@ header{padding:10px 14px calc(10px + env(safe-area-inset-top));border-bottom:1px
 h1{font-size:16px;margin:0}
 .sub{color:var(--dim);font-size:11px;margin-top:2px}
 .hspacer{flex:1}
-.iconbtn{background:var(--card);color:var(--txt);border:1px solid var(--line2);border-radius:10px;padding:7px 10px;font-weight:700;cursor:pointer;font-size:13px}
+.iconbtn{background:var(--card);color:var(--txt);border:1px solid var(--line2);border-radius:12px;padding:7px 10px;font-weight:700;cursor:pointer;font-size:13px}
 .iconbtn:active{transform:scale(.96)}
 #status{font-size:11px;color:var(--dim);margin-top:4px;min-height:14px}
+#rcd{background:var(--card2);border-radius:99px;padding:1px 8px}
 #status .live{color:var(--ok);font-weight:700}
 /* ===== BOTTOM NAV (Android-first) ===== */
 .skel{height:14px;border-radius:7px;background:linear-gradient(90deg,var(--line2) 25%,var(--card) 50%,var(--line2) 75%);background-size:200% 100%;animation:sk 1.2s linear infinite;margin:6px 0}
@@ -57,15 +58,15 @@ nav#bnav button{min-height:48px}
 nav#bnav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--card);border-top:1px solid var(--line);display:flex;overflow-x:auto;padding-bottom:env(safe-area-inset-bottom)}
 nav#bnav button{flex:1 0 auto;min-width:64px;background:none;border:0;color:var(--dim);padding:8px 4px 7px;font-size:10px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;border-top:2px solid transparent}
 nav#bnav button .ic{font-size:17px;line-height:1}
-nav#bnav button.on{color:var(--acc);border-top-color:var(--acc);font-weight:700}
+nav#bnav button.on{color:var(--acc);border-top-color:var(--acc);font-weight:700;background:linear-gradient(180deg,rgba(245,166,35,.13),transparent 75%)}
 /* ===== LAYOUT / CARDS ===== */
 .wrap{padding:10px 10px 20px;display:grid;gap:10px;max-width:1100px;margin:0 auto}
-.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;box-shadow:var(--shadow);overflow:hidden;animation:cardIn .28s ease-out}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;box-shadow:var(--shadow);overflow:hidden;animation:cardIn .28s ease-out}
 .cc{background:linear-gradient(165deg,var(--card2),var(--card) 60%);border-color:var(--acc2)}
 .gaugering{transform:rotate(-90deg)}
 @keyframes cardIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.card{animation:none}.skel{animation:none}.spin{animation-duration:2s}}
-.card h2{font-size:12px;margin:0 0 8px;color:var(--acc);text-transform:uppercase;letter-spacing:.6px}
+.card h2{font-size:12px;margin:0 0 8px;color:var(--acc);text-transform:uppercase;letter-spacing:.8px}
 .card h3{font-size:13px;margin:10px 0 6px}
 .note{color:var(--dim);font-size:11px;margin-top:6px}
 /* ===== BADGES ===== */
@@ -78,12 +79,11 @@ nav#bnav button.on{color:var(--acc);border-top-color:var(--acc);font-weight:700}
 .acc{background:var(--card2);color:var(--acc)}
 /* ===== CONTROLS ===== */
 .controls{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;align-items:center}
-input,select{background:var(--bg2);color:var(--txt);border:1px solid var(--line2);border-radius:10px;padding:8px 10px;font-size:13px;max-width:100%}
+input,select{background:var(--bg2);color:var(--txt);border:1px solid var(--line2);border-radius:12px;padding:8px 10px;font-size:13px;max-width:100%}
 input:focus,select:focus{outline:2px solid var(--acc2);outline-offset:-1px}
-button.btn{background:var(--acc);color:#fff;border:0;border-radius:10px;padding:8px 14px;font-weight:700;cursor:pointer;font-size:12px}
-[data-theme="dark"] button.btn{color:#04121f}
-button.btn.ghost{background:var(--card2);color:var(--txt);border:1px solid var(--line2)}
-button.btn.mini{padding:3px 9px;font-size:11px;border-radius:8px}
+button.btn{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#0d0f13;border:0;border-radius:99px;padding:8px 16px;font-weight:700;cursor:pointer;font-size:12px}
+button.btn.ghost{background:var(--card2);color:var(--txt);border:1px solid var(--line2);border-radius:99px}
+button.btn.mini{padding:3px 10px;font-size:11px;border-radius:99px}
 /* v044: measured mobile pass - mini buttons rendered 23-25px tall at 360px (thumb-hostile).
    On touch/coarse or narrow layouts, controls get reachable minimums; desktop density unchanged. */
 @media (max-width:700px),(pointer:coarse){
@@ -99,7 +99,7 @@ td a{display:inline-block;padding:9px 4px;margin:-9px -4px}
 button.btn:active{transform:scale(.97)}
 button.btn:disabled{opacity:.45;cursor:not-allowed}
 /* ===== TABLES (no horizontal page overflow: wrapper scrolls) ===== */
-.tscroll{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:8px}
+.tscroll{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:12px}
 table{width:100%;border-collapse:collapse;font-size:12px;min-width:520px}
 th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top;white-space:nowrap}
 th{color:var(--dim);font-weight:700;font-size:11px;position:sticky;top:0;background:var(--card)}
@@ -1632,6 +1632,14 @@ window.runSelfTest=async function(){
    const h=overviewCard();
    return /class="gaugering"/.test(h)&&/stroke-dasharray/.test(h)&&(h.includes("ago")||h.includes("no live data"));
   }catch(e){return false;}})(),"the ring is drawn from lastOk with an honest empty state - never a decorative gauge");
+ t("redesign tokens computed in-browser",(()=>{try{
+   const c=document.createElement("div");c.className="card";document.body.appendChild(c);
+   const b=document.createElement("button");b.className="btn";document.body.appendChild(b);
+   const cr=parseFloat(getComputedStyle(c).borderRadius),br=parseFloat(getComputedStyle(b).borderRadius);
+   const accCol=getComputedStyle(document.documentElement).getPropertyValue("--acc").trim();
+   document.body.removeChild(c);document.body.removeChild(b);
+   return cr>=16&&br>=40&&accCol.length>0;
+  }catch(e){return false;}})(),"16px rounded cards and pill buttons are not just written in CSS - they compute live; the active accent var resolves");
  t("amber is the default accent and blue remains explicit",(()=>{try{
    return DEFAULTS.accent==="amber"&&/\[data-accent="blue"\]/.test(document.querySelector("style")?document.querySelector("style").textContent:"");
   }catch(e){return false;}})(),"fresh installs get the command-center amber; an explicit blue choice still wins");
@@ -2109,7 +2117,7 @@ const UPGRADES=[
  {ver:"v054",d:"2026-10-19",what:"canonical decision card per token (WATCH / QUALIFIED / REJECTED / DATA INCOMPLETE)"},
  {ver:"v055",d:"2026-10-19",what:"this panel: data sources & research log + structured upgrade log"},
  {ver:"v056",d:"2026-10-20",what:"command-center overview strip on Radar (redesign stage 1)"},
- {ver:"v057",d:"2026-10-20",what:"redesign stage 2: amber command-center default accent, circular data-freshness gauge, self-checking version badge, headless-test honesty label"}
+ {ver:"v057",d:"2026-10-20",what:"FULL visual redesign: deep command-center palette, amber default accent, pill gradient buttons, rounded cards, nav glow, circular freshness gauge, self-checking version badge, headless-test honesty label"}
 ];
 function upgradeLogCard(){
  const rows=UPGRADES.map(u=>`<tr><td><b>${u.ver}</b></td><td class="mint">${u.d}</td><td>${esc(u.what)}</td></tr>`).join("");
@@ -2139,12 +2147,12 @@ function gaugeRing(frac,centerTxt,sub){
 }
 function overviewCard(){
  const o=overviewStats();
- const cell=(n,l,cls)=>`<div style="flex:1;min-width:86px;background:var(--bg2);border:1px solid var(--line2);border-radius:12px;padding:10px 8px;text-align:center"><div style="font-size:22px;font-weight:700" class="${cls}">${n}</div><div style="font-size:11px" class="fresh">${l}</div></div>`;
+ const cell=(n,l,cls)=>`<div style="flex:1;min-width:86px;background:var(--bg2);border:1px solid var(--line2);border-radius:16px;padding:12px 8px;text-align:center"><div style="font-size:22px;font-weight:700" class="${cls}">${n}</div><div style="font-size:11px" class="fresh">${l}</div></div>`;
  const age=o.lastOk?(Date.now()-o.lastOk)/1000:null;
  const window2=2*(Number(S.settings.refreshSec)||90);
  const frac=age==null?0:1-Math.min(age/window2,1);
  const gauge=gaugeRing(frac,age==null?"--":fmtAge(o.lastOk),age==null?"no data":"ago");
- return`<div class="card cc"><h2 style="margin:0 0 8px">Command center <span class="fresh" style="font-size:11px;font-weight:400">stage 2 - every number live from state, zero is a real zero</span></h2>
+ return`<div class="card cc"><h2 style="margin:0 0 8px">Command center <span class="fresh" style="font-size:11px;font-weight:400">full visual pass - every number live from state, zero is a real zero</span></h2>
  <div style="display:flex;gap:8px;flex-wrap:wrap">
   ${cell(o.discovered,"discovered","acc")}
   ${cell(o.qualified,"qualified","ok")}
@@ -2640,7 +2648,7 @@ function onboard(){
  <p><b>Learn the truth tabs:</b> Ledger shows base rates for EVERY token seen (not just picks) and your paper positions net of exit costs. Signals history tracks candidates from flag time. If starred picks do not beat the base rate, there is no edge - the app says so.</p>
  <p><b>Honest labels:</b> NOT OBSERVED / NOT_QUOTED / INSUFFICIENT SAMPLE / HOLDER_UNVERIFIED / HISTORY WINDOW LIMITED / HISTORY_PRUNED / NO VALID PRICE / STALE mean the free data cannot prove something. Nothing is fabricated to fill gaps.</p>
  <p><b>New in v036 - overlap you can drill into:</b> open any token and see exactly which multi-pool wallets entered it and when; open any wallet and see which other wallets share 2+ pools with it. Two clicks from "something feels coordinated" to the actual evidence table - with the honest label intact: overlap is observable, its reason is not.</p>
-<p><b>New in v057 - command center, stage 2 (visual language):</b> amber is now the default accent (blue, green and purple stay one tap away in Settings - your saved choice always wins), and the command center grows a circular data-freshness gauge: the ring drains over two refresh intervals from green to amber to red, so a stale feed looks stale at a glance. The header version badge is now covered by a self-test so it can never lag the build again. Honest label added: release-time 360px mobile checks run in headless Chromium emulation, physical devices NOT TESTED.</p>
+<p><b>New in v057 - the full visual redesign:</b> the whole dashboard moves to the premium command-center look: deeper dark palette, amber as the default accent (blue, green and purple stay one tap away - your saved choice always wins), pill-shaped gradient buttons, 16px rounded cards, a glowing active tab in the bottom bar, and a circular data-freshness gauge on the Radar that drains from green to amber to red over two refresh intervals - a stale feed looks stale at a glance. The header version badge is now covered by a self-test so it can never lag the build again. Every feature, data feed and honest label is unchanged - this pass is visual only. Honest note added: release-time 360px mobile checks run in headless Chromium emulation, physical devices NOT TESTED.</p>
 <p><b>New in v056 - command center, stage 1:</b> the Radar now opens with a live overview strip - discovered / qualified / rejected / monitoring / critical alerts (last hour) / feed status - every number computed from real state, zero shown as zero, and a freshness line stating exactly when live data last arrived.</p>
 <p><b>New in v055 - receipts on the wall:</b> Settings now carries a Data sources &amp; research log (every external dependency with why-it-is-used, cost/license and last-checked date - all free tiers, none called unlimited) and a structured Upgrade log (each recent release with date and what changed, every old version still in the repository for rollback).</p>
 <p><b>New in v054 - every token gets a decision card:</b> open any token and the first card now carries Bot A's canonical status - WATCH, QUALIFIED, REJECTED or DATA INCOMPLETE - with the reasons, what would change the decision, and the next trigger. Score components are tagged VERIFIED or MISSING, the score itself stays labeled ESTIMATE (untuned weights), and nothing is ever promised. This is the dual-AI challenge format, built in.</p>
