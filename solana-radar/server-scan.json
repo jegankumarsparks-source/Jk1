@@ -1,6 +1,6 @@
 {
- "generatedAt": 1792379449455,
- "generatedAtIso": "2026-10-19T03:10:49.455Z",
+ "generatedAt": 1792379739083,
+ "generatedAtIso": "2026-10-19T03:15:39.083Z",
  "scanner": "solana-radar-server",
  "runner": "cloudflare-worker-cron",
  "engineSource": "index.html embedded engine, extracted verbatim at run time",
@@ -9,9 +9,9 @@
  "scoreVersion": "score-v1.0",
  "riskPolicyVersion": "risk-v1.0",
  "thresholdsVersion": "thresh-v1.0",
- "cycle": 688,
- "cycleStartedAt": 1792379434890,
- "cycleDurationMs": 14565,
+ "cycle": 689,
+ "cycleStartedAt": 1792379735068,
+ "cycleDurationMs": 4015,
  "schedule": "every 5 min via Cloudflare Workers cron (free tier, keyless data) — runs whether or not any tab is open. Backstop: GitHub Actions cron (requested every 5 min; GitHub delays it in practice — observed every 2-3 h). When it runs it skips while this worker is healthy with dexscreener LIVE, and covers discovery from separate egress IPs during dexscreener 429 cooldowns or worker outages.",
  "engineDrift": null,
  "stateRestored": true,
@@ -28,11 +28,12 @@
   {
    "id": "rugcheck",
    "label": "RugCheck (public, keyless)",
-   "status": "ERROR",
+   "status": "NOT_OBSERVED",
    "lastSuccess": null,
-   "lastError": "HTTP 530",
-   "requestCount": 6,
-   "rateLimitCount": 0
+   "lastError": null,
+   "requestCount": 0,
+   "rateLimitCount": 0,
+   "note": "not exercised this cycle (no refreshed candidates needed them)"
   },
   {
    "id": "solanarpc",
@@ -59,7 +60,7 @@
   "dataIncomplete": 3,
   "watchlist": 0
  },
- "analyzedThisCycle": 3,
+ "analyzedThisCycle": 0,
  "signalMarksTracked": 0,
  "newSignalsThisCycle": [],
  "recentSignals": [
@@ -647,7 +648,9 @@
   }
  ],
  "errors": [
-  "discovery paused this cycle (driver-level phase alternation: odd cycles discover, even cycles analyze, so both fit the free-tier subrequest budget; each runs every 10 min)"
+  "discovery: profiles: HTTP 429",
+  "discovery: boosts: source in rate-limit backoff",
+  "dexscreener 429 this cycle — retrying next cycle (cooldown arms after 2 consecutive 429 cycles)"
  ],
  "notes": [
   "PAPER ONLY — research signals, not financial advice, never executable trades.",
@@ -658,18 +661,19 @@
  ],
  "driver": "worker-budget-v2 2026-10-17",
  "phaseMs": {
-  "t0": 1792379434441,
-  "readMs": 449
+  "t0": 1792379734476,
+  "readMs": 592,
+  "discoveryMs": 4015
  },
  "dexBackoffUntil": null,
  "dexBackoffStrikes": 0,
- "dex429Streak": 0,
+ "dex429Streak": 1,
  "stateReadError": null,
- "subrequests": 10,
+ "subrequests": 4,
  "subPhases": {
-  "afterDiscovery": 2,
-  "afterAnalysis": 8,
-  "afterMarks": 10
+  "afterDiscovery": 4,
+  "afterAnalysis": 4,
+  "afterMarks": 4
  },
  "stateWritten": true
 }
