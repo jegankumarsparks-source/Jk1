@@ -2115,7 +2115,7 @@ function decisionStatus(m){
   next:"next scan poll re-scores"};
 }
 function decisionCard(m){
- const d=decisionStatus(m);const sc=scoreToken(m);
+ const d=decisionStatus(m);const sc=scoreToken(m);const r=(S.seen[m]||{}).risk;
  const compTags=Object.entries(sc.comps).map(([k,v])=>`<span class="badge ${v.st==="OBSERVED"?"ok":"dim"}" title="${esc(v.note)}">${k}: ${v.st==="OBSERVED"?"VERIFIED":"MISSING"}</span>`).join(" ");
  return`<div class="card"><h3>Bot A decision <span class="badge ${d.cls}">${d.label}</span></h3>
  <div class="note">score ${sc.score}/100 <span class="badge warn">ESTIMATE - untuned weights, not backtested</span> ${compTags}</div>
