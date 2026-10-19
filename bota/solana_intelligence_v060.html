@@ -146,13 +146,16 @@ nav#bnav button.on .ic{filter:drop-shadow(0 0 6px var(--acc))}
 .fl{font-size:10px;color:var(--dim)}
 .statgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}
 .stat{background:var(--bg2);border:1px solid var(--line2);border-radius:18px;padding:10px 10px 9px;position:relative;overflow:hidden}
-.stat .sic{width:26px;height:26px;border-radius:50%;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:13px;margin-bottom:6px;border:1px solid var(--line2)}
+.stat .sic{color:var(--acc);width:26px;height:26px;border-radius:50%;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:13px;margin-bottom:6px;border:1px solid var(--line2)}
 .stat .sn{font-size:24px;font-weight:800;line-height:1.05}
 .stat .sl{font-size:10px;color:var(--dim);margin-top:2px;text-transform:uppercase;letter-spacing:.4px}
 .sn.k-acc{color:var(--acc)}.sn.k-ok{color:var(--ok)}.sn.k-bad{color:var(--bad)}.sn.k-gold{color:var(--gold)}.sn.k-warn{color:var(--warn)}.sn.k-dim{color:var(--txt)}
 .qin{flex:1 1 100%;width:100%;border-radius:99px;padding:10px 16px}
-.chiprow{display:flex;gap:8px;overflow-x:auto;width:100%;padding-bottom:2px;-webkit-overflow-scrolling:touch}
+.chiprow{scrollbar-width:none;display:flex;gap:8px;overflow-x:auto;width:100%;padding-bottom:2px;-webkit-overflow-scrolling:touch}
+.chiprow::-webkit-scrollbar{display:none}
 .chiprow>*{flex:0 0 auto}
+.chiprow select,.chiprow input{height:40px}
+.chiprow input{width:96px!important}
 .pillcount{background:var(--card2);color:var(--dim);border-radius:99px;padding:1px 9px;font-size:10px;font-weight:700;text-transform:none;letter-spacing:0;margin-left:6px}
 .tlist{display:grid;gap:10px}
 .trow{display:grid;grid-template-columns:36px minmax(0,1fr);gap:6px 8px;background:linear-gradient(165deg,var(--card2),var(--card));border:1px solid var(--line2);border-radius:18px;padding:10px}
@@ -161,14 +164,14 @@ nav#bnav button.on .ic{filter:drop-shadow(0 0 6px var(--acc))}
 .c-tok{display:contents}
 .tk{grid-column:2;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;min-width:0}
 .tk b{font-size:16px}
-.mrow{grid-column:1/3;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
-.c-m{background:var(--bg2);border-radius:12px;padding:6px 8px;font-size:12px;font-weight:700;min-width:0;overflow:hidden}
+.mrow{grid-column:1/3;display:grid;grid-template-columns:.85fr 1fr 1.45fr .9fr;gap:6px}
+.c-m{background:var(--bg2);border-radius:12px;padding:6px 7px;font-size:11.5px;font-weight:700;min-width:0;overflow-wrap:anywhere}
 .c-m::before{content:attr(data-l);display:block;font-size:9px;font-weight:400;color:var(--dim);text-transform:uppercase;letter-spacing:.4px}
 .c-m .fresh{display:block;font-weight:400}
 .c-chk,.c-sc{grid-column:1/3;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 .c-chk br,.c-sc br{display:none}
-.lk{grid-column:1/3;display:flex;flex-wrap:wrap;gap:2px 4px;font-size:12px}
-.lk a{display:inline-block;padding:9px 8px;border-radius:99px;background:var(--card2)}
+.lk{grid-column:1/3;display:flex;flex-wrap:wrap;gap:4px;font-size:0}
+.lk a{font-size:12px;display:inline-block;padding:9px 10px;border-radius:99px;background:var(--card2)}
 .trow .star{width:36px;height:36px;font-size:19px}
 .card{border-radius:20px}
 .card h2{letter-spacing:.9px}
@@ -2300,6 +2303,15 @@ function gaugeArc(frac,centerTxt,sub){
  const d="M 12 76 A 60 60 0 0 1 132 76";
  return`<svg viewBox="0 0 144 92" role="img" aria-label="data freshness gauge"><path d="${d}" fill="none" stroke="var(--line2)" stroke-width="10" stroke-linecap="round"/><path class="gaugering" d="${d}" fill="none" stroke="${col}" stroke-width="10" stroke-linecap="round" stroke-dasharray="${(L*f).toFixed(1)} ${L.toFixed(1)}"/><text x="72" y="62" text-anchor="middle" fill="var(--txt)" font-size="24" font-weight="800">${centerTxt}</text><text x="72" y="78" text-anchor="middle" fill="var(--dim)" font-size="10">${sub}</text></svg>`;
 }
+const SVGI={
+ radar:'<circle cx="12" cy="12" r="2"/><path d="M7 7a7 7 0 0 0 0 10M17 7a7 7 0 0 1 0 10M4 4a11 11 0 0 0 0 16M20 4a11 11 0 0 1 0 16"/>',
+ check:'<path d="M5 12.5l4.5 4.5L19 7"/>',
+ ban:'<circle cx="12" cy="12" r="8"/><path d="M6.5 6.5l11 11"/>',
+ eye:'<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+ warn:'<path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.5"/>',
+ list:'<path d="M4 6h16M4 12h16M4 18h10"/>'
+};
+const svgIcon=k=>`<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${SVGI[k]}</svg>`;
 function overviewCard(){
  const o=overviewStats();
  const stat=(ic,n,l,k)=>`<div class="stat"><div class="sic" aria-hidden="true">${ic}</div><div class="sn k-${k}">${n}</div><div class="sl">${l}</div></div>`;
@@ -2313,12 +2325,12 @@ function overviewCard(){
  <div class="hinfo"><div class="hl">data freshness</div><div class="hv">${o.lastOk?("last live data "+fmtAge(o.lastOk)+" ago"):"no live data yet this session"}</div>
  <div class="feeds">${chip("GT",o.gtOk)}${chip("DEX",o.dexOk)}<span class="fl">feeds</span></div></div></div>
  <div class="statgrid">
-  ${stat("&#128225;",o.discovered,"discovered","acc")}
-  ${stat("&#10004;",o.qualified,"qualified","ok")}
-  ${stat("&#9940;",o.rejected,"rejected",o.rejected?"bad":"dim")}
-  ${stat("&#11088;",o.monitoring,"monitoring","gold")}
-  ${stat("&#9888;",o.criticalAlerts,"critical 1h",o.criticalAlerts?"warn":"dim")}
-  ${stat("&#128451;",o.tracked,"tracked","dim")}
+  ${stat(svgIcon("radar"),o.discovered,"discovered","acc")}
+  ${stat(svgIcon("check"),o.qualified,"qualified","ok")}
+  ${stat(svgIcon("ban"),o.rejected,"rejected",o.rejected?"bad":"dim")}
+  ${stat(svgIcon("eye"),o.monitoring,"monitoring","gold")}
+  ${stat(svgIcon("warn"),o.criticalAlerts,"critical 1h",o.criticalAlerts?"warn":"dim")}
+  ${stat(svgIcon("list"),o.tracked,"tracked","dim")}
  </div>
  <div class="note">The ring drains over two refresh intervals: green fresh, amber aging, red stale. Freshness shown, never assumed.</div></div>`;
 }
