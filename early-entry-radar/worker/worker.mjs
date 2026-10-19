@@ -141,20 +141,28 @@ async function runCycle(env) {
   // 3. per-entity pipeline for entities with fresh evidence this cycle
   const config = await ghGet(env, `${BASE}/config.json`).then(c => JSON.parse(c.text)).catch(() => ({}));
   const touched = new Set(state.entity_evidence.slice(-400).map(x => x.entity_id));
+  // Pre-index (CPU 1102 fix 2026-10-19: per-entity .filter scans were quadratic at 3000+ entities)
+  const evByEntity = new Map(), rawById = new Map(), mentByEntity = new Map(), secByEntity = new Map();
+  for (const r of state.raw_events) rawById.set(r.id, r);
+  for (const x of state.entity_evidence) { const a = evByEntity.get(x.entity_id); if (a) a.push(x); else evByEntity.set(x.entity_id, [x]); }
+  for (const m of state.mentions) { const a = mentByEntity.get(m.entity_id); if (a) a.push(m); else mentByEntity.set(m.entity_id, [m]); }
+  for (const r of state.security_results) { const a = secByEntity.get(r.entity_id); if (a) a.push(r); else secByEntity.set(r.entity_id, [r]); }
+  globalThis.__eer_idx = { evByEntity, rawById, mentByEntity, secByEntity };
   let secChecked = 0;
   const transitions = [];
   for (const entityId of touched) {
     const ent = state.entities[entityId];
     if (!ent) continue;
-    const evRows = state.entity_evidence.filter(x => x.entity_id === entityId)
-      .map(x => state.raw_events.find(r => r.id === x.raw_event_id)).filter(Boolean);
-    const mentions = state.mentions.filter(m => m.entity_id === entityId);
+    const evRows = (evByEntity.get(entityId) || [])
+      .map(x => rawById.get(x.raw_event_id)).filter(Boolean);
+    const mentions = mentByEntity.get(entityId) || [];
     // launch status
     const ls = computeLaunchStatus({ evidence: evRows.map(r => ({ source: r.source, observed_at: r.observed_at, payload: r.payload })), mentions });
     applyLaunchStatus(store, entityId, ls);
     // security + market gates only for mint entities with launch evidence, throttled
     if (ent.kind === 'mint' && (ls.status === 'LAUNCH DETECTED' || ls.status === 'LIVE MARKET VERIFIED')) {
-      const lastSec = state.security_results.filter(r => r.entity_id === entityId).slice(-1)[0];
+      const secRows = secByEntity.get(entityId) || [];
+      const lastSec = secRows[secRows.length - 1];
       const stale = !lastSec || (Date.now() - new Date(lastSec.at).getTime()) > SECURITY_RECHECK_MIN * 60000;
       if (stale && secChecked < SECURITY_BUDGET_PER_CYCLE && subrequests < SUBREQUEST_BUDGET - 10) {
         secChecked++;
@@ -165,7 +173,7 @@ async function runCycle(env) {
         var secVerdict = sec.verdict, mktVerdict = gates.verdict;
       } else if (lastSec) {
         // correct cache path: stored _verdict row wins; else recompute from all check rows (never last-row inference)
-        const rows = state.security_results.filter(r => r.entity_id === entityId).reverse();
+        const rows = (secByEntity.get(entityId) || []).slice().reverse();
         const vrow = rows.find(r => r.check_name === '_verdict');
         var secVerdict = vrow ? vrow.result : verdictFromRows(rows);
       }
@@ -230,14 +238,18 @@ async function runCycle(env) {
   const latestSec = {}, latestGate = {};
   for (const r of state.security_results) latestSec[r.entity_id + ':' + r.check_name] = r;
   for (const r of state.gate_results) latestGate[r.entity_id + ':' + r.gate] = r;
+  // CPU 1102 fix: group once instead of filtering all rows per entity (quadratic at 4000+ entities)
+  const secByE = new Map(), gateByE = new Map();
+  for (const r of Object.values(latestSec)) { const a = secByE.get(r.entity_id); if (a) a.push(r); else secByE.set(r.entity_id, [r]); }
+  for (const r of Object.values(latestGate)) { const a = gateByE.get(r.entity_id); if (a) a.push(r); else gateByE.set(r.entity_id, [r]); }
   const latestSig = {};
   for (const r of state.signal_state_log) latestSig[r.entity_id] = r;
   const coins = Object.values(state.entities).map(e => ({
     id: e.entity_id, kind: e.kind, name: e.name, ticker: e.ticker, mint: e.mint || null,
     launch_status: e.launch_status, first_evidence_at: e.first_evidence_at,
     signal: latestSig[e.entity_id] ? { state: latestSig[e.entity_id].to_state, score: latestSig[e.entity_id].score, at: latestSig[e.entity_id].at } : null,
-    security: Object.values(latestSec).filter(r => r.entity_id === e.entity_id).map(r => ({ check: r.check_name, result: r.result })),
-    gates: Object.values(latestGate).filter(r => r.entity_id === e.entity_id).map(r => ({ gate: r.gate, result: r.result })),
+    security: (secByE.get(e.entity_id) || []).map(r => ({ check: r.check_name, result: r.result })),
+    gates: (gateByE.get(e.entity_id) || []).map(r => ({ gate: r.gate, result: r.result })),
   })).sort((a, b) => (b.first_evidence_at || '').localeCompare(a.first_evidence_at || ''));
   const health = {};
   for (const h of state.source_health) health[h.source] = h;
@@ -268,10 +280,11 @@ async function runCycle(env) {
 }
 
 function buildFacts(state, entityId, ent, config) {
+  const idx = globalThis.__eer_idx;
   const firstAt = ent.first_evidence_at ? new Date(ent.first_evidence_at).getTime() : Date.now();
-  const ment = state.mentions.filter(m => m.entity_id === entityId);
-  const sources = new Set(state.entity_evidence.filter(x => x.entity_id === entityId)
-    .map(x => (state.raw_events.find(r => r.id === x.raw_event_id) || {}).source).filter(Boolean));
+  const ment = idx ? (idx.mentByEntity.get(entityId) || []) : state.mentions.filter(m => m.entity_id === entityId);
+  const sources = new Set((idx ? (idx.evByEntity.get(entityId) || []) : state.entity_evidence.filter(x => x.entity_id === entityId))
+    .map(x => ((idx ? idx.rawById.get(x.raw_event_id) : state.raw_events.find(r => r.id === x.raw_event_id)) || {}).source).filter(Boolean));
   return {
     age_hours: (Date.now() - firstAt) / 3600000,
     mean_source_reliability: 0.7, // static until source reliability tiers are tuned in STEP 8/9
