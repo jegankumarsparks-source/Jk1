@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BOT A - Solana Early-Entry Intelligence (R1)</title>
+<style>
+:root{--bg:#0b0f14;--card:#131a22;--ok:#2ecc71;--warn:#f1c40f;--bad:#e74c3c;--txt:#dbe4ec;--dim:#7d8b99;--acc:#4da3ff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font:14px/1.45 -apple-system,Segoe UI,Roboto,sans-serif}
+header{padding:12px 14px;border-bottom:1px solid #1f2a35;position:sticky;top:0;background:var(--bg);z-index:2}
+h1{font-size:16px;margin:0 0 2px}.sub{color:var(--dim);font-size:12px}
+.grid{display:grid;gap:10px;padding:12px;grid-template-columns:1fr}
+@media(min-width:760px){.grid{grid-template-columns:1fr 1fr}}
+.card{background:var(--card);border:1px solid #1f2a35;border-radius:10px;padding:10px 12px}
+.card h2{font-size:13px;margin:0 0 8px;color:var(--acc);text-transform:uppercase;letter-spacing:.5px}
+.badge{display:inline-block;padding:1px 8px;border-radius:99px;font-size:11px;font-weight:600}
+.ok{background:#0f2f1c;color:var(--ok)}.warn{background:#33290a;color:var(--warn)}.bad{background:#33110d;color:var(--bad)}.dim{background:#1c242e;color:var(--dim)}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th,td{text-align:left;padding:6px 6px;border-bottom:1px solid #1c2530;vertical-align:top}
+th{color:var(--dim);font-weight:600;position:sticky;top:0}
+tr:hover td{background:#16202b}
+a{color:var(--acc);text-decoration:none}
+.mint{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--dim)}
+.bar{height:6px;border-radius:3px;background:#1c2530;overflow:hidden}.bar>i{display:block;height:100%;background:var(--acc)}
+.note{color:var(--dim);font-size:11px;margin-top:6px}
+ul{margin:6px 0 0 16px;padding:0}li{margin:3px 0}
+button{background:var(--acc);color:#04121f;border:0;border-radius:8px;padding:8px 14px;font-weight:700;cursor:pointer}
+button:disabled{opacity:.5}
+#status{font-size:12px;color:var(--dim);margin-top:4px}
+.full{grid-column:1/-1}
+.inc{color:var(--warn);font-weight:700}
+</style>
+</head>
+<body>
+<header>
+<h1>BOT A - Solana Early-Entry Intelligence <span class="badge dim">ROUND 1</span></h1>
+<div class="sub">Evidence-first discovery. Keyless free sources only. Monitoring targets 2x/3x/4x/5x are NOT predictions.</div>
+<div id="status">booting...</div>
+</header>
+<div class="grid">
+<div class="card">
+<h2>Source health</h2>
+<div id="health"></div>
+<div class="note">Budget: max 1 DexScreener call / 2s, token-pair calls capped per refresh. 429 &rarr; 60s backoff.</div>
+</div>
+<div class="card">
+<h2>What this app can / cannot do (honest limits)</h2>
+<ul>
+<li><b>In-browser now:</b> keyless discovery (DexScreener), pair/liquidity/price evidence, keyless RPC health, first-observed tracking (this device).</li>
+<li><b>Needs free backend/key (later rounds):</b> Helius DAS wallet intelligence, Solscan enrichment, 24/7 monitoring.</li>
+<li><b>Never:</b> private keys, signing, real-money execution. Paper/research only.</li>
+</ul>
+</div>
+<div class="card full">
+<h2>Live discovery - newest Solana pairs (evidence table)</h2>
+<table id="tbl"><thead><tr>
+<th>#</th><th>Token</th><th>Pool age</th><th>Liquidity</th><th>Price</th><th>Txns 1h (b/s)</th><th>First observed</th><th>Data</th>
+</tr></thead><tbody></tbody></table>
+<div class="note">Pool age = DexScreener <span class="mint">pairCreatedAt</span> (pool creation, NOT token creation). First observed = first time THIS app saw the mint (localStorage). No historical data is invented.</div>
+</div>
+<div class="card full">
+<h2>Diagnostic log</h2>
+<div id="log" class="mint" style="white-space:pre-wrap;max-height:180px;overflow:auto"></div>
+</div>
+</div>
+<script>
+"use strict";
+const $=s=>document.querySelector(s);
+const RPCS=["https://solana-rpc.publicnode.com","https://solana.publicnode.com","https://beta.rpcpool.com","https://solana.api.onfinality.io/public","https://api.mainnet-beta.solana.com"];
+const DEX_PROFILES="https://api.dexscreener.com/token-profiles/latest/v1";
+const DEX_TOKEN=a=>"https://api.dexscreener.com/latest/dex/tokens/"+a;
+const state={backoffUntil:0,pairs:0,budget:10,firstSeen:{},health:{}};
+try{state.firstSeen=JSON.parse(localStorage.getItem("bota_firstSeen")||"{}");}catch(e){}
+function log(m){const t=new Date().toLocaleTimeString();$("#log").textContent=`[${t}] ${m}\n`+$("#log").textContent;}
+function fmtAge(ms){if(ms==null)return"unknown";const s=(Date.now()-ms)/1e3;if(s<0)return"future?";const m=s/60,h=m/60,d=h/24;if(d>=1)return d.toFixed(1)+"d";if(h>=1)return h.toFixed(1)+"h";if(m>=1)return m.toFixed(0)+"m";return s.toFixed(0)+"s";}
+function fmtUsd(x){if(x==null)return"?";const n=Number(x);if(n>=1e6)return"$"+(n/1e6).toFixed(2)+"M";if(n>=1e3)return"$"+(n/1e3).toFixed(1)+"k";return"$"+n.toFixed(2);}
+async function jfetch(url,timeoutMs=9000){const c=new AbortController();const t=setTimeout(()=>c.abort(),timeoutMs);try{const r=await fetch(url,{signal:c.signal});if(r.status===429){state.backoffUntil=Date.now()+60000;throw new Error("429 rate-limited (backoff 60s)");}if(!r.ok)throw new Error("HTTP "+r.status);return await r.json();}finally{clearTimeout(t);}}
+function setHealth(k,ok,ms,extra){state.health[k]={ok,ms,extra,at:new Date().toLocaleTimeString()};renderHealth();}
+function renderHealth(){$("#health").innerHTML=Object.entries(state.health).map(([k,v])=>`<div>${k} <span class="badge ${v.ok?"ok":"bad"}">${v.ok?"OK":"DOWN"}</span> <span class="mint">${v.ms!=null?v.ms+"ms":""} ${v.extra||""} @ ${v.at}</span></div>`).join("");}
+async function probeRPC(){for(const url of RPCS){const t0=performance.now();try{const r=await fetch(url,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({jsonrpc:"2.0",id:1,method:"getHealth"})});const ms=Math.round(performance.now()-t0);if(r.ok){setHealth("RPC",true,ms,url.replace("https://",""));return url;}log("RPC "+url+" HTTP "+r.status);}catch(e){log("RPC "+url+" "+e.message);}}setHealth("RPC",false,null,"all 5 endpoints failed");return null;}
+async function refresh(){const now=Date.now();if(now<state.backoffUntil){$("#status").textContent="backoff until "+new Date(state.backoffUntil).toLocaleTimeString();return;}
+$("#status").textContent="refreshing...";
+probeRPC();
+try{
+const t0=performance.now();
+const profs=await jfetch(DEX_PROFILES);
+setHealth("DexScreener profiles",true,Math.round(performance.now()-t0),profs.length+" profiles");
+const sol=(profs||[]).filter(p=>p.chainId==="solana").map(p=>p.tokenAddress).filter(Boolean);
+const uniq=[...new Set(sol)];
+log("profiles: "+profs.length+" total, "+uniq.length+" solana");
+const rows=[];let calls=0;const MAX_PAIR_CALLS=Math.min(state.budget,10);
+for(const a of uniq.slice(0,MAX_PAIR_CALLS)){calls++;
+try{const d=await jfetch(DEX_TOKEN(a));const pairs=(d.pairs||[]).filter(p=>p.chainId==="solana");if(!pairs.length)continue;
+pairs.sort((x,y)=>(y.liquidity?.usd||0)-(x.liquidity?.usd||0));
+const p=pairs[0];
+if(!state.firstSeen[a]){state.firstSeen[a]=Date.now();}
+rows.push({a,p});}catch(e){log("pairs "+a.slice(0,6)+": "+e.message);}
+await new Promise(r=>setTimeout(r,2000));}
+localStorage.setItem("bota_firstSeen",JSON.stringify(state.firstSeen));
+setHealth("DexScreener pairs",true,null,calls+" calls (cap "+MAX_PAIR_CALLS+")");
+rows.sort((x,y)=>(x.p.pairCreatedAt||0)-(y.p.pairCreatedAt||0));
+const tb=$("#tbl tbody");tb.innerHTML="";
+rows.forEach((r,i)=>{const p=r.p;const inc=p.liquidity?.usd==null||p.priceUsd==null;const tr=document.createElement("tr");
+tr.innerHTML=`<td>${i+1}</td>
+<td><b>${p.baseToken?.symbol||"?"}</b> <span class="mint">${r.a.slice(0,4)}..${r.a.slice(-4)}</span><br><a href="https://dexscreener.com/solana/${r.a}" target="_blank" rel="noopener">dexscreener</a></td>
+<td>${fmtAge(p.pairCreatedAt)}<br><span class="mint">${p.pairCreatedAt?new Date(p.pairCreatedAt).toLocaleString():"no ts"}</span></td>
+<td>${fmtUsd(p.liquidity?.usd)}</td>
+<td>${p.priceUsd?"$"+Number(p.priceUsd).toPrecision(4):"?"}</td>
+<td>${p.txns?.h1?p.txns.h1.buys+"/"+p.txns.h1.sells:"?"}</td>
+<td>${fmtAge(state.firstSeen[r.a])}</td>
+<td>${inc?'<span class="inc">INCOMPLETE</span>':'<span class="badge ok">full</span>'}</td>`;
+tb.appendChild(tr);});
+$("#status").textContent="last refresh "+new Date().toLocaleTimeString()+" | "+rows.length+" tokens | auto-refresh 90s";
+}catch(e){setHealth("DexScreener profiles",false,null,e.message);$("#status").textContent="refresh failed: "+e.message;log("refresh failed: "+e.message);}}
+refresh();setInterval(refresh,90000);
+</script>
+</body>
+</html>
