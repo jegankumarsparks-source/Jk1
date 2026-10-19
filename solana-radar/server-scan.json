@@ -1,6 +1,6 @@
 {
- "generatedAt": 1792422939817,
- "generatedAtIso": "2026-10-19T15:15:39.817Z",
+ "generatedAt": 1792423238364,
+ "generatedAtIso": "2026-10-19T15:20:38.364Z",
  "scanner": "solana-radar-server",
  "runner": "cloudflare-worker-cron",
  "engineSource": "index.html embedded engine, extracted verbatim at run time",
@@ -9,9 +9,9 @@
  "scoreVersion": "score-v1.0",
  "riskPolicyVersion": "risk-v1.0",
  "thresholdsVersion": "thresh-v1.0",
- "cycle": 828,
- "cycleStartedAt": 1792422937827,
- "cycleDurationMs": 1990,
+ "cycle": 829,
+ "cycleStartedAt": 1792423236831,
+ "cycleDurationMs": 1533,
  "schedule": "every 5 min via Cloudflare Workers cron (free tier, keyless data) — runs whether or not any tab is open. Backstop: GitHub Actions cron (requested every 5 min; GitHub delays it in practice — observed every 2-3 h). When it runs it skips while this worker is healthy with dexscreener LIVE, and covers discovery from separate egress IPs during dexscreener 429 cooldowns or worker outages.",
  "engineDrift": null,
  "stateRestored": true,
@@ -20,9 +20,9 @@
    "id": "dexscreener",
    "label": "Dexscreener (public, keyless)",
    "status": "LIVE",
-   "lastSuccess": 1792422939817,
+   "lastSuccess": 1792423238364,
    "lastError": null,
-   "requestCount": 8,
+   "requestCount": 22,
    "rateLimitCount": 0
   },
   {
@@ -38,15 +38,16 @@
   {
    "id": "solanarpc",
    "label": "Solana JSON-RPC (PublicNode)",
-   "status": "LIVE",
-   "lastSuccess": 1792422938454,
+   "status": "NOT_OBSERVED",
+   "lastSuccess": null,
    "lastError": null,
-   "requestCount": 9,
-   "rateLimitCount": 0
+   "requestCount": 0,
+   "rateLimitCount": 0,
+   "note": "not exercised this cycle (no refreshed candidates needed them)"
   }
  ],
  "counters": {
-  "discovered": 1173,
+  "discovered": 1185,
   "validated": 0,
   "rejected": 0,
   "incomplete": 1015,
@@ -56,10 +57,10 @@
   "total": 703,
   "validated": 164,
   "paperSignals": 164,
-  "dataIncomplete": 3,
+  "dataIncomplete": 0,
   "watchlist": 0
  },
- "analyzedThisCycle": 3,
+ "analyzedThisCycle": 0,
  "signalMarksTracked": 8,
  "newSignalsThisCycle": [],
  "recentSignals": [
@@ -343,9 +344,9 @@
    "qualifiedWallets": 0,
    "pairAddress": "HGWysMkUDzjJF6wdbHQUuzW5PDNQvBgQbmGcFMg3DK9R",
    "dexId": "pumpfun",
-   "lastPrice": 0.00004163,
-   "lastPriceAt": 1792417837376,
-   "multiple": 3.1,
+   "lastPrice": 0.00004156,
+   "lastPriceAt": 1792423237128,
+   "multiple": 3.09,
    "milestonesHit": [
     {
      "x": 1.5,
@@ -385,9 +386,9 @@
    "qualifiedWallets": 0,
    "pairAddress": "CoqK9vamPsaoZNfaEZbmZP4G3bAHNkhuarHP4TKFDC9v",
    "dexId": "pumpfun",
-   "lastPrice": 0.00001881,
-   "lastPriceAt": 1792417837397,
-   "multiple": 2.54,
+   "lastPrice": 0.00002033,
+   "lastPriceAt": 1792423237151,
+   "multiple": 2.74,
    "milestonesHit": [
     {
      "x": 1.5,
@@ -427,9 +428,9 @@
    "qualifiedWallets": 0,
    "pairAddress": "8jQuQw7axKnErR1xSWethS3JawiBpGLwuCy4MgHaao2w",
    "dexId": "pumpfun",
-   "lastPrice": 0.00001043,
-   "lastPriceAt": 1792417837616,
-   "multiple": 0.44,
+   "lastPrice": 0.000007829,
+   "lastPriceAt": 1792423237376,
+   "multiple": 0.33,
    "milestonesHit": [],
    "dumpHit": {
     "at": 1792380335502,
@@ -458,7 +459,7 @@
    "pairAddress": "6mfF9UrwaNnYXcVy8TXRJVKv4FuZkPyrDY4Y5Zp7y6wn",
    "dexId": "pumpswap",
    "lastPrice": 0.000003362,
-   "lastPriceAt": 1792417837835,
+   "lastPriceAt": 1792423237601,
    "multiple": 0.58,
    "milestonesHit": [],
    "dumpHit": null,
@@ -484,7 +485,7 @@
    "pairAddress": "CqM9zPWg7MMSJEbJQ3hSm2zLcc7ec5dhXC4BumWsMVWH",
    "dexId": "pumpfun",
    "lastPrice": 0.000003204,
-   "lastPriceAt": 1792417838058,
+   "lastPriceAt": 1792423237828,
    "multiple": 0.74,
    "milestonesHit": [],
    "dumpHit": null,
@@ -509,9 +510,9 @@
    "qualifiedWallets": 3,
    "pairAddress": "cEUdBrse7yyk4N91UHwMnrmA5G6kE7iFmEFgV527SsE",
    "dexId": "meteora",
-   "lastPrice": 0.00000869,
-   "lastPriceAt": 1792417838277,
-   "multiple": 0.42,
+   "lastPrice": 0.000007536,
+   "lastPriceAt": 1792423237849,
+   "multiple": 0.37,
    "milestonesHit": [],
    "dumpHit": {
     "at": 1792392349966,
@@ -539,9 +540,9 @@
    "qualifiedWallets": 5,
    "pairAddress": "5HkrLrXtERvPKoAjGUCt1WrjtNCkADFjgyN8wtLCqd13",
    "dexId": "raydium",
-   "lastPrice": 0.000005752,
-   "lastPriceAt": 1792417838531,
-   "multiple": 0.18,
+   "lastPrice": 0.000006406,
+   "lastPriceAt": 1792423238077,
+   "multiple": 0.2,
    "milestonesHit": [],
    "dumpHit": {
     "at": 1792353936580,
@@ -709,7 +710,7 @@
   }
  ],
  "errors": [
-  "discovery paused this cycle (driver-level phase alternation: odd cycles discover, even cycles analyze, so both fit the free-tier subrequest budget; each runs every 10 min)"
+  "subrequest budget reached (16) — remaining analysis deferred (driver-level, protects heartbeat writes)"
  ],
  "notes": [
   "PAPER ONLY — research signals, not financial advice, never executable trades.",
@@ -720,18 +721,19 @@
  ],
  "driver": "worker-budget-v2 2026-10-17",
  "phaseMs": {
-  "t0": 1792422935678,
-  "readMs": 2149
+  "t0": 1792423235383,
+  "readMs": 1448,
+  "discoveryMs": 69
  },
  "dexBackoffUntil": null,
  "dexBackoffStrikes": 0,
  "dex429Streak": 0,
  "stateReadError": null,
- "subrequests": 19,
+ "subrequests": 24,
  "subPhases": {
-  "afterDiscovery": 2,
-  "afterAnalysis": 11,
-  "afterMarks": 19
+  "afterDiscovery": 16,
+  "afterAnalysis": 16,
+  "afterMarks": 24
  },
  "stateWritten": true
 }
