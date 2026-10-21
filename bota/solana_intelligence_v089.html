@@ -1287,9 +1287,10 @@ function viewLedger(){
  const closedPos=S.ledger.filter(l=>l.closed);
  const realized=closedPos.reduce((a,l)=>closeVal(l)!=null?a+(closeVal(l)-(Number.isFinite(+l.sizeUsd)?+l.sizeUsd:0)):a,0); /* v079: unknown payouts excluded, never booked as losses */
  const unreal=open.reduce((a,l)=>(Number.isFinite(+l.sizeUsd)&&Number.isFinite(+l.net))?a+l.sizeUsd*(l.net-1):a,0); /* v089: non-finite open marks are skipped, never NaN the unrealised total */
+ /* v089: a NaN mark used to render $NaN - caught by the totals selftest; entry/mark/timestamp are now finite-guarded */
  const pos=S.ledger.slice().reverse().map(l=>`<div class="card"><b>${esc(l.sym)}</b> <span class="mint">${shortM(l.mint)}</span>
   <div class="kv"><b>entry</b><span>${Number.isFinite(+l.entry)?"$"+Number(l.entry).toPrecision(4):"?"} @ ${Number.isFinite(+l.t)?new Date(+l.t).toLocaleTimeString():"?"}</span>
-  <b>mark</b><span>${Number.isFinite(+l.mark)?"$"+Number(l.mark).toPrecision(4):"?"}</span> /* v089: a NaN mark used to render $NaN - caught by the totals selftest */
+  <b>mark</b><span>${Number.isFinite(+l.mark)?"$"+Number(l.mark).toPrecision(4):"?"}</span>
   <b>net</b><span>${Number.isFinite(+l.net)?(+l.net).toFixed(2)+"x":"n/a"} (of estimated/quoted exit cost)</span>
   <b>status</b><span>${l.closed?(Number.isFinite(+l.out)?"closed, out $"+(+l.out).toFixed(2):"closed - payout UNKNOWN (no exit estimate at close)"):"open"}</span></div>
   ${l.closed?"":`<button class="btn mini ghost" onclick="closeP('${l.mint}')">Close paper</button>`}</div>`).join("");
