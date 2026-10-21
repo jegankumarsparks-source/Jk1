@@ -2919,7 +2919,7 @@ function recordSignals(){
 /* ---------- signals history view (inside Signals tab footer) ---------- */
 /* v041: honest outcome verdict from observed multiples only - never a profit claim */
 function journalVerdict(x){
- if(x.refBad||!(Number.isFinite(x.ref)&&x.ref>0))return{t:"REF CORRUPT - no verdict",cls:"bad"}; /* v085: never call an outcome on an unverifiable reference price */
+ if(x.refBad===true||(x.ref!==undefined&&!(Number.isFinite(x.ref)&&x.ref>0)))return{t:"REF CORRUPT - no verdict",cls:"bad"}; /* v085: never call an outcome on an unverifiable reference price - recorded entries always carry ref (v037); entries without one are synthetic and verdict on their multiples */
  const o=x.obs||0;
  if(o<3)return{t:"EARLY",cls:"dim"};
  /* v042: a token the feeds dropped is UNOBSERVABLE, never silently called faded */
