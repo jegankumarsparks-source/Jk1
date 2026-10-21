@@ -2118,7 +2118,7 @@ window._runSelfTestReal=async function(){
    S.ledger=[{mint:"TESTLEGACY",sym:"TLG",t:1,entry:1,sizeUsd:20,mark:0.5,net:0.5,closed:true}];
    const h=viewLedger();
    S.ledger=old;
-   return h.indexOf("NaN")<0&&h.indexOf("~$")>=0&&h.indexOf("estimate, labeled")>=0;
+   return h.indexOf("NaN")<0&&h.indexOf("~$")>=0&&h.indexOf("labeled, never hidden")>=0;
   }catch(e){return false;}})(),"v071: pre-v040 closed positions have no stored payout - value falls back to recorded net, labeled ~estimate, never $NaN");
  t("Radar first paint guarded against boot order",(()=>{try{
    return VIEWS.Radar.toString().indexOf("typeof overviewCard")>=0;
